@@ -6,29 +6,27 @@ import io.circe.{Json, Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
 
-enum Face:
-  case Player, Up, Down
-
-object Face:
-  given Encoder[Face] = Encoder[String].contramap(_.toString)
-  given Decoder[Face] = Decoder[String].map(Face.valueOf)
-
 object Event:
-  case class  PlayerJoined(player: Player, room: Room) extends Event
-  case class  PlayerLeft(player: Player, room: Room) extends Event
-  case class  GameStarted(gameType: GameType) extends Event
-  case class  DeckShuffled(seed: Int) extends Event
-  case class  CardDealt(playerId: PlayerId, card: Card, face: Face) extends Event
-  case class  TrumpRevealed(card: Card) extends Event
-  case class  CardPlayed(playerId: PlayerId, card: Card) extends Event
-  case class  TrickCompleted(winnerId: PlayerId) extends Event
-  case class  PointsCount(playerIds: List[PlayerId], points: Int) extends Event
-  case class  TotalPointsCount(playerIds: List[PlayerId], points: Int) extends Event
-  case class  MatchCompleted(winnerIds: List[PlayerId]) extends Event
-  case object MatchDraw extends Event
-  case object MatchAborted extends Event
-  case class  GameCompleted(winnerIds: List[PlayerId]) extends Event
-  case object GameAborted extends Event
+  sealed trait RoomEvent extends Event:
+    def player: Player
+    def room: Room
+  case class   PlayerJoined(player: Player, room: Room) extends RoomEvent
+  case class   PlayerLeft(player: Player, room: Room) extends RoomEvent
+
+  sealed trait GameEvent extends Event
+  case class   GameStarted(gameType: GameType) extends GameEvent
+  case class   DeckShuffled(cards: List[Card]) extends GameEvent
+  case class   CardDealt(playerId: PlayerId, card: Card, face: Face) extends GameEvent
+  case class   TrumpRevealed(card: Card) extends GameEvent
+  case class   CardPlayed(playerId: PlayerId, card: Card) extends GameEvent
+  case class   TrickCompleted(winnerId: PlayerId) extends GameEvent
+  case class   MatchPointsCount(playerIds: List[PlayerId], points: Int) extends GameEvent
+  case class   GamePointsCount(playerIds: List[PlayerId], points: Int) extends GameEvent
+  case class   MatchCompleted(winnerIds: List[PlayerId]) extends GameEvent
+  case class   GameCompleted(winnerIds: List[PlayerId]) extends GameEvent
+  case object  MatchDraw extends GameEvent
+  case object  MatchAborted extends GameEvent
+  case object  GameAborted extends GameEvent
 
   given Encoder[Event] = Encoder.instance {
     case obj: PlayerJoined     => deriveEncoder[PlayerJoined].mapJsonObject(_.add("type", "PlayerJoined".asJson))(obj)
@@ -39,8 +37,8 @@ object Event:
     case obj: TrumpRevealed    => deriveEncoder[TrumpRevealed].mapJsonObject(_.add("type", "TrumpRevealed".asJson))(obj)
     case obj: CardPlayed       => deriveEncoder[CardPlayed].mapJsonObject(_.add("type", "CardPlayed".asJson))(obj)
     case obj: TrickCompleted   => deriveEncoder[TrickCompleted].mapJsonObject(_.add("type", "TrickCompleted".asJson))(obj)
-    case obj: PointsCount      => deriveEncoder[PointsCount].mapJsonObject(_.add("type", "PointsCount".asJson))(obj)
-    case obj: TotalPointsCount => deriveEncoder[TotalPointsCount].mapJsonObject(_.add("type", "TotalPointsCount".asJson))(obj)
+    case obj: MatchPointsCount => deriveEncoder[MatchPointsCount].mapJsonObject(_.add("type", "MatchPointsCount".asJson))(obj)
+    case obj: GamePointsCount  => deriveEncoder[GamePointsCount].mapJsonObject(_.add("type", "GamePointsCount".asJson))(obj)
     case obj: MatchCompleted   => deriveEncoder[MatchCompleted].mapJsonObject(_.add("type", "MatchCompleted".asJson))(obj)
     case obj: GameCompleted    => deriveEncoder[GameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson))(obj)
     case MatchDraw             => Json.obj("type" -> "MatchDraw".asJson)
@@ -57,8 +55,8 @@ object Event:
     case "TrumpRevealed"    => deriveDecoder[TrumpRevealed](obj)
     case "CardPlayed"       => deriveDecoder[CardPlayed](obj)
     case "TrickCompleted"   => deriveDecoder[TrickCompleted](obj)
-    case "PointsCount"      => deriveDecoder[PointsCount](obj)
-    case "TotalPointsCount" => deriveDecoder[TotalPointsCount](obj)
+    case "MatchPointsCount" => deriveDecoder[MatchPointsCount](obj)
+    case "GamePointsCount"  => deriveDecoder[GamePointsCount](obj)
     case "MatchCompleted"   => deriveDecoder[MatchCompleted](obj)
     case "GameCompleted"    => deriveDecoder[GameCompleted](obj)
     case "MatchDraw"        => Right(MatchDraw)

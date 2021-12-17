@@ -1,6 +1,7 @@
 package bastoni.domain.model
 
-import io.circe.{Encoder, Decoder}
+import io.circe.generic.semiauto.deriveCodec
+import io.circe.{Codec, Decoder, Encoder}
 
 enum Suit:
   case Denari, Coppe, Spade, Bastoni
@@ -30,6 +31,18 @@ case class Card(rank: Rank, suit: Suit)
 object Card:
   given Encoder[Card] = Encoder[(Rank, Suit)].contramap(card => card.rank -> card.suit)
   given Decoder[Card] = Decoder[(Rank, Suit)].map { case (rank, suit) => Card(rank, suit) }
+
+enum Face:
+  case Player, Up, Down
+
+object Face:
+  given Encoder[Face] = Encoder[String].contramap(_.toString)
+  given Decoder[Face] = Decoder[String].map(Face.valueOf)
+
+case class CardState(card: Card, face: Face)
+
+object CardState:
+  given Codec[CardState] = deriveCodec
 
 object Deck:
   val instance: List[Card] = (for {

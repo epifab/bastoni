@@ -46,6 +46,6 @@ class JsonMessageRepo[F[_]: Concurrent](messages: Ref[F, Map[MessageId, Json]]) 
 
 
 object JsonRepos:
-  val gameRepo: IO[GameRepo[IO]] = Ref.of[IO, Map[RoomId, Json]](Map.empty).map(new JsonKeyValueRepo[IO, RoomId, GameStateMachine](_))
+  val gameRepo: IO[GameRepo[IO]] = Ref.of[IO, Map[RoomId, Json]](Map.empty).map(new JsonKeyValueRepo[IO, RoomId, GameRoom](_))
   val roomRepo: IO[RoomRepo[IO]] = Ref.of[IO, Map[RoomId, Json]](Map.empty).map(new JsonKeyValueRepo[IO, RoomId, Room](_))
   val messageRepo: IO[MessageRepo[IO]] = Ref.of[IO, Map[MessageId, Json]](Map.empty).map(new JsonMessageRepo[IO](_))

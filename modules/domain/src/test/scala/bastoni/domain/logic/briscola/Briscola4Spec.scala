@@ -30,7 +30,7 @@ object Briscola4Spec:
 
   def input(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
     fs2.Stream(
-      ShuffleDeck(10),
+      ShuffleDeck(shuffleSeed),
 
       drawCard,
       drawCard,
@@ -140,7 +140,7 @@ object Briscola4Spec:
 
   def output(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
     List[Event | Command | Delayed[Command]](
-      DeckShuffled(10),
+      DeckShuffled(shuffledDeck),
       mediumDelay,
 
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
@@ -340,7 +340,7 @@ object Briscola4Spec:
       TrickCompleted(player2.id),  // 33 + 27 = 60
 
       longDelay,
-      PointsCount(List(player2.id, player4.id), 60),
-      PointsCount(List(player3.id, player1.id), 60),
+      MatchPointsCount(List(player2.id, player4.id), 60),
+      MatchPointsCount(List(player3.id, player1.id), 60),
       MatchDraw
     ).map(_.toMessage(roomId))

@@ -23,7 +23,7 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
   "A game can be played" in {
     val input =
       (
-        fs2.Stream(ShuffleDeck(10)) ++
+        fs2.Stream(ShuffleDeck(shuffleSeed)) ++
         fs2.Stream(drawCard).repeatN(40) ++
         fs2.Stream(
           PlayCard(player1.id, Card(Sei, Denari)),
@@ -91,7 +91,7 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
       ).map(Message(messageId, roomId, _))
 
     Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
-      DeckShuffled(10),
+      DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
       shortDelay,
@@ -347,8 +347,8 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player3.id),
 
       longDelay,
-      PointsCount(List(player3.id, player1.id), 11),
-      PointsCount(List(player4.id, player2.id), 0),
+      MatchPointsCount(List(player3.id, player1.id), 11),
+      MatchPointsCount(List(player4.id, player2.id), 0),
       MatchCompleted(List(player3.id, player1.id))
     ).map(_.toMessage(roomId))
   }

@@ -23,8 +23,8 @@ class GameBus[F[_]](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int], messag
         case TrumpRevealed(trump)                           => ToPlayer.TrumpRevealed(trump)
         case CardPlayed(player, card)                       => ToPlayer.CardPlayed(player, card)
         case TrickCompleted(player)                         => ToPlayer.TrickCompleted(player)
-        case PointsCount(playerIds, points)                 => ToPlayer.PointsCount(playerIds, points)
-        case TotalPointsCount(playerIds, points)            => ToPlayer.TotalPointsCount(playerIds, points)
+        case MatchPointsCount(playerIds, points)            => ToPlayer.MatchPointsCount(playerIds, points)
+        case GamePointsCount(playerIds, points)             => ToPlayer.GamePointsCount(playerIds, points)
         case MatchCompleted(winners)                        => ToPlayer.MatchCompleted(winners)
         case MatchDraw                                      => ToPlayer.MatchDraw
         case MatchAborted                                   => ToPlayer.MatchAborted

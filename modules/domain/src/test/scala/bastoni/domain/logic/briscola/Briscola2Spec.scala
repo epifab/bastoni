@@ -26,7 +26,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
   "A game can be played" in {
     val input =
       fs2.Stream(
-        ShuffleDeck(10),
+        ShuffleDeck(shuffleSeed),
 
         drawCard,
         drawCard,
@@ -154,7 +154,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       ).map(_.toMessage(roomId))
 
     Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
-      DeckShuffled(10),
+      DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
       shortDelay,
@@ -379,15 +379,15 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 68
 
       longDelay,
-      PointsCount(List(player1.id), 68),
-      PointsCount(List(player2.id), 52),
+      MatchPointsCount(List(player1.id), 68),
+      MatchPointsCount(List(player2.id), 52),
       MatchCompleted(List(player1.id))
     ).map(_.toMessage(roomId))
   }
 
   "Irrelevant messages are ignored" in {
     val input = fs2.Stream(
-      ShuffleDeck(10).toMessage(room.id),
+      ShuffleDeck(shuffleSeed).toMessage(room.id),
       ShuffleDeck(1).toMessage(room.id),     // ignored (already shuffled)
       drawCard.toMessage(room.id),
       drawCard.toMessage(room.id),
@@ -403,7 +403,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
     )
 
     Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
-      DeckShuffled(10),
+      DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
       shortDelay,
@@ -424,14 +424,14 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
   "Game is aborted if one of the players leave" in {
     val input = fs2.Stream[cats.Id, Command | Event](
-      ShuffleDeck(10),
+      ShuffleDeck(shuffleSeed),
       drawCard,
       PlayerLeft(player1, Room(room.id, List(None, Some(player2), None))),
       drawCard, // too late, game was aborted
     ).map(_.toMessage(room.id))
 
     Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
-      DeckShuffled(10),
+      DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
       shortDelay,
@@ -441,14 +441,14 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
   "Game continues if another player joins and leaves" in {
     val input = fs2.Stream[fs2.Pure, Command | Event](
-      ShuffleDeck(10),
+      ShuffleDeck(shuffleSeed),
       PlayerJoined(player3, Room(room.id, List(Some(player1), Some(player3), Some(player2)))),
       PlayerLeft(player3, Room(room.id, List(Some(player1), None, Some(player2)))),
       drawCard,
     ).map(_.toMessage(room.id))
 
     Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
-      DeckShuffled(10),
+      DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
       shortDelay

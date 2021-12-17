@@ -13,8 +13,8 @@ object ToPlayer:
   case class  TrumpRevealed(card: Card) extends ToPlayer
   case class  CardPlayed(playerId: PlayerId, card: Card) extends ToPlayer
   case class  TrickCompleted(winner: PlayerId) extends ToPlayer
-  case class  PointsCount(playerIds: List[PlayerId], points: Int) extends ToPlayer
-  case class  TotalPointsCount(playerIds: List[PlayerId], points: Int) extends ToPlayer
+  case class  MatchPointsCount(playerIds: List[PlayerId], points: Int) extends ToPlayer
+  case class  GamePointsCount(playerIds: List[PlayerId], points: Int) extends ToPlayer
   case class  MatchCompleted(winnerIds: List[PlayerId]) extends ToPlayer
   case object MatchDraw extends ToPlayer
   case object MatchAborted extends ToPlayer

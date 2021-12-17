@@ -28,17 +28,22 @@ object GameService:
     messages
       .evalMap { case Message(id, roomId, data) =>
         for {
-          stateMachine <- gameRepo.get(roomId)
-          (newStateMachine, messagesData) = (stateMachine, data) match {
-            case (None, StartGame(room, gameType)) => Some(GameStateMachineFactory(gameType)(room)) -> List(GameStarted(gameType))
-            case (Some(state), event) => state(event)
-            case (state, _) => state -> Nil
+          existingRoom <- gameRepo.get(roomId)
+          (newGameRoom, messagesData) = existingRoom.map(_.update(data)).orElse(GameRoom.build(data)) match {
+            case None => None -> Nil
+            case Some(room) =>
+              val (stateMachine, messagesData) = (room.stateMachine, data) match {
+                case (None, StartGame(room, gameType)) => Some(GameStateMachineFactory(gameType)(room)) -> List(GameStarted(gameType))
+                case (Some(state), event) => state(event)
+                case (None, _) => None -> Nil
+              }
+              Some(room.withStateMachine(stateMachine)) -> messagesData
           }
           messages <- messagesData.toMessages(roomId, newId)
           // the remaining operations should be done atomically to guarantee consistency
           _ <- messageRepo.landed(id)
           _ <- messages.traverse(messageRepo.flying)
-          _ <- newStateMachine.fold(gameRepo.remove(roomId))(gameRepo.set(roomId, _))
+          _ <- newGameRoom.fold(gameRepo.remove(roomId))(gameRepo.set(roomId, _))
         } yield messages
       }
       .flatMap(fs2.Stream.iterable)

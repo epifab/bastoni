@@ -1,7 +1,9 @@
 package bastoni.domain.logic
 
-import bastoni.domain.model.Command.Continue
 import bastoni.domain.model.*
+import bastoni.domain.model.Command.Continue
+import bastoni.domain.model.Rank.*
+import bastoni.domain.model.Suit.*
 
 extension (message: Event | Command)
   def toMessage(roomId: RoomId): Message =
@@ -25,3 +27,47 @@ object Fixtures:
   val shortDelay: Delayed[Command] = Delayed(Continue, Delay.Short)
   val mediumDelay: Delayed[Command] = Delayed(Continue, Delay.Medium)
   val longDelay: Delayed[Command] = Delayed(Continue, Delay.Long)
+
+  val shuffleSeed = 10
+  val shuffledDeck = List(
+    Card(Due, Bastoni),
+    Card(Asso, Spade),
+    Card(Sette, Denari),
+    Card(Quattro, Spade),
+    Card(Sei, Denari),
+    Card(Re, Denari),
+    Card(Cinque, Coppe),
+    Card(Asso, Bastoni),
+    Card(Cinque, Spade),
+    Card(Sei, Bastoni),
+    Card(Tre, Spade),
+    Card(Tre, Denari),
+    Card(Asso, Coppe),
+    Card(Fante, Bastoni),
+    Card(Due, Denari),
+    Card(Fante, Spade),
+    Card(Re, Bastoni),
+    Card(Sette, Bastoni),
+    Card(Tre, Coppe),
+    Card(Fante, Coppe),
+    Card(Cinque, Bastoni),
+    Card(Sei, Coppe),
+    Card(Cavallo, Denari),
+    Card(Cavallo, Bastoni),
+    Card(Due, Coppe),
+    Card(Fante, Denari),
+    Card(Cavallo, Spade),
+    Card(Quattro, Bastoni),
+    Card(Re, Coppe),
+    Card(Quattro, Coppe),
+    Card(Asso, Denari),
+    Card(Sette, Spade),
+    Card(Cinque, Denari),
+    Card(Sette, Coppe),
+    Card(Re, Spade),
+    Card(Sei, Spade),
+    Card(Quattro, Denari),
+    Card(Tre, Bastoni),
+    Card(Due, Spade),
+    Card(Cavallo, Coppe)
+  )

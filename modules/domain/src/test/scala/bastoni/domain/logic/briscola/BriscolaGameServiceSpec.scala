@@ -26,9 +26,9 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     val input = fs2.Stream(
       StartGame(room1, GameType.Briscola).toMessage(room1.id),
       StartGame(room2, GameType.Briscola).toMessage(room2.id),
-      ShuffleDeck(10).toMessage(room1.id),
+      ShuffleDeck(shuffleSeed).toMessage(room1.id),
       Continue.toMessage(room1.id),
-      ShuffleDeck(10).toMessage(room2.id),
+      ShuffleDeck(shuffleSeed).toMessage(room2.id),
       Continue.toMessage(room1.id),
       Continue.toMessage(room2.id),
       PlayerLeft(player1, Room(room1.id, List(None, Some(player2)))).toMessage(room1.id),
@@ -43,11 +43,11 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     resultIO.unsafeRunSync() shouldBe List(
       GameStarted(GameType.Briscola).toMessage(room1.id),
       GameStarted(GameType.Briscola).toMessage(room2.id),
-      DeckShuffled(10).toMessage(room1.id),
+      DeckShuffled(shuffledDeck).toMessage(room1.id),
       Delayed(Continue.toMessage(room1.id), Delay.Medium),
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player).toMessage(room1.id),
       Delayed(Continue.toMessage(room1.id), Delay.Short),
-      DeckShuffled(10).toMessage(room2.id),
+      DeckShuffled(shuffledDeck).toMessage(room2.id),
       Delayed(Continue.toMessage(room2.id), Delay.Medium),
       CardDealt(player2.id, Card(Asso,Spade), Face.Player).toMessage(room1.id),
       Delayed(Continue.toMessage(room1.id), Delay.Short),
@@ -76,13 +76,29 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       GameStarted(GameType.Briscola).toMessage(room.id) ::
       (ActionRequest(player3.id, Action.ShuffleDeck).toMessage(room.id) ::
       Briscola3Spec.output(room.id, player1, player2, player3)) ++
-      (ActionRequest(player1.id, Action.ShuffleDeck).toMessage(room.id) ::
-      Briscola3Spec.output(room.id, player2, player3, player1)) ++
-      (ActionRequest(player2.id, Action.ShuffleDeck).toMessage(room.id) ::
-      Briscola3Spec.output(room.id, player3, player1, player2)) ++
-      (ActionRequest(player3.id, Action.ShuffleDeck).toMessage(room.id) ::
-      Briscola3Spec.output(room.id, player1, player2, player3)) ++
-      List(GameCompleted(List(player1.id)).toMessage(room.id))
+      (
+        GamePointsCount(List(player2.id, player3.id), 0).toMessage(room.id) ::
+        GamePointsCount(List(player1.id), 1).toMessage(room.id) ::
+        ActionRequest(player1.id, Action.ShuffleDeck).toMessage(room.id) ::
+        Briscola3Spec.output(room.id, player2, player3, player1)
+      ) ++
+      (
+        GamePointsCount(List(player3.id), 0).toMessage(room.id) ::
+        GamePointsCount(List(player2.id, player1.id), 1).toMessage(room.id) ::
+        ActionRequest(player2.id, Action.ShuffleDeck).toMessage(room.id) ::
+        Briscola3Spec.output(room.id, player3, player1, player2)
+      ) ++
+      (
+        GamePointsCount(List(player3.id, player1.id, player2.id), 1).toMessage(room.id) ::
+        ActionRequest(player3.id, Action.ShuffleDeck).toMessage(room.id) ::
+        Briscola3Spec.output(room.id, player1, player2, player3)
+      ) ++
+      (
+        GamePointsCount(List(player2.id, player3.id), 1).toMessage(room.id) ::
+        GamePointsCount(List(player1.id), 2).toMessage(room.id) ::
+        GameCompleted(List(player1.id)).toMessage(room.id) ::
+        Nil
+      )
 
     val resultIO = for {
       gameRepo <- GameRepo.inMemory[IO]
@@ -100,11 +116,13 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     val player1Card = Card(Rank.Tre, Suit.Denari)
     val player2Card = Card(Rank.Asso, Suit.Denari)
 
+    val player1Collected = Deck.instance.filter(card => card != player1Card && card != player2Card)
+
     val stateMachine = new briscola.StateMachine(
       briscola.GameState.InProgress(
         List(gamePlayer1, gamePlayer2),
         briscola.MatchState.PlayRound(
-          List(MatchPlayer(gamePlayer1, Set(player1Card), Deck.instance.filter(card => card != player1Card && card != player2Card).toSet)),
+          List(MatchPlayer(gamePlayer1, Set(player1Card), player1Collected.toSet)),
           List(MatchPlayer(gamePlayer2, Set.empty, Set.empty) -> player2Card),
           Nil,
           player1Card
@@ -113,12 +131,23 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       )
     )
 
+    val gameRoom = new GameRoom(
+      List(
+        Seat(None, Nil, Nil, Nil),
+        Seat(Some(ActingPlayer(gamePlayer1)), List(CardState(player1Card, Face.Player)), player1Collected.map(card => CardState(card, Face.Down)), Nil),
+        Seat(None, Nil, Nil, Nil),
+        Seat(Some(ActivePlayer(gamePlayer2)), Nil, Nil, List(CardState(player2Card, Face.Up)))
+      ),
+      deck = Nil,
+      stateMachine = Some(stateMachine)
+    )
+
     val oldMessage = CardPlayed(player2.id, player2Card).toMessage(room1.id)
 
-    val (events, gameRooms, messages) = (for {
+    val (events, finalGameRoom, messages) = (for {
       gameRepo <- JsonRepos.gameRepo
       messageRepo <- JsonRepos.messageRepo
-      _ <- gameRepo.set(room1.id, stateMachine)
+      _ <- gameRepo.set(room1.id, gameRoom)
       _ <- messageRepo.flying(oldMessage)
       bus <- MessageBus.inMemory[IO]
       events <- (for {
@@ -127,8 +156,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
           .concurrently(GameService.run[IO](bus, gameRepo, messageRepo, _ => 2.millis))
           .concurrently(GameBus(bus).publish(player1, room1.id, fs2.Stream(FromPlayer.PlayCard(player1Card)).delayBy(100.millis)))
           .collect { case Message(_, _, event: Event) => event }
-          .takeThrough(!_.isInstanceOf[Event.GameCompleted])
-          .interruptAfter(1.second)
+          .interruptAfter(300.millis)
       } yield event).compile.toList
       gameRoom <- gameRepo.get(room1.id)
       messages <- messageRepo.inFlight.compile.toList
@@ -138,14 +166,25 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       oldMessage.data,
       CardPlayed(player1.id, player1Card),
       TrickCompleted(player2.id),
-      PointsCount(List(player2.id), 21),
-      PointsCount(List(player1.id), 99),
+      MatchPointsCount(List(player2.id), 21),
+      MatchPointsCount(List(player1.id), 99),
       MatchCompleted(List(player1.id)),
+      GamePointsCount(List(player2.id), 1),
+      GamePointsCount(List(player1.id), 3),
       GameCompleted(List(player1.id))
     )
 
-    gameRooms shouldBe None  // when a game completes, the state machine goes away
-    messages shouldBe Nil    // all outstanding events are expected to have been fully processed
+    finalGameRoom shouldBe Some(new GameRoom(
+      seats = List(
+        Seat(None, Nil, Nil, Nil),
+        Seat(Some(EndOfGamePlayer(gamePlayer1.win, winner = true)), Nil, Nil, Nil),
+        Seat(None, Nil, Nil, Nil),
+        Seat(Some(EndOfGamePlayer(gamePlayer2, winner = false)), Nil, Nil, Nil)
+      ),
+      deck = Nil,
+      stateMachine = None
+    ))
+    messages shouldBe Nil
   }
 
   "Future undelivered events will still be sent" in {

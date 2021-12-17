@@ -41,12 +41,13 @@ object Game:
       MatchState.Ready(players) -> List(ActionRequest(players.last.id, Action.ShuffleDeck))
 
     case (MatchState.Ready(players), ShuffleDeck(seed)) =>
+      val deck = new Random(seed).shuffle(Deck.instance)
       MatchState.DealRound(
         players.map(MatchPlayer(_, Set.empty, Set.empty)),
         Nil,
         9,
-        new Random(seed).shuffle(Deck.instance)
-      ) -> List(DeckShuffled(seed), Continue.later)
+        deck
+      ) -> List(DeckShuffled(deck), Continue.later)
 
     case (MatchState.DealRound(player :: Nil, done, 0, deck), Continue) =>
       deck.dealOrDie { (card, tail) =>
@@ -111,8 +112,8 @@ object Game:
       // The last trick is called "rete" (net) which will add a point to the final score
       val rete = players.head.id
 
-      val pointsCount: List[PointsCount] = teams.map(players =>
-        PointsCount(
+      val pointsCount: List[MatchPointsCount] = teams.map(players =>
+        MatchPointsCount(
           playerIds = players.map(_.id),
           points = (players.foldRight(0)(_.points + _) / 3) + (if (players.exists(_.id == rete)) 1 else 0)
         )
@@ -132,7 +133,7 @@ object Game:
       playMatchStep(matchState, message) match
         case (MatchState.Completed(pointsCount), events) =>
           val newPlayers: List[GamePlayer] = players.map(player => player.win(pointsCount.find(_.playerIds.exists(player.is)).fold(0)(_.points)))
-          val allEvents = events ++ newPlayers.groupBy(_.points).map { case (points, players) => TotalPointsCount(players.map(_.id), points) }
+          val allEvents = events ++ newPlayers.groupBy(_.points).map { case (points, players) => GamePointsCount(players.map(_.id), points) }
 
           def ready(shiftedRound: List[GamePlayer], pointsToWin: Int) =
             GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), pointsToWin) -> (allEvents :+ ActionRequest(shiftedRound.last.id, Action.ShuffleDeck))

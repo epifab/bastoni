@@ -20,7 +20,9 @@ case class Room(id: RoomId, seats: List[Option[Player]]):
   lazy val players: List[Player] = seats.collect { case Some(player) => player }
   lazy val indexedSeats = seats.zipWithIndex
 
-  def isEmpty: Boolean = seats.forall(_.isEmpty)
+  val size: Int = seats.size
+  val isFull: Boolean = seats.forall(_.isDefined)
+  val isEmpty: Boolean = seats.forall(_.isEmpty)
 
   def contains(p: Player): Boolean = seatFor(p).isDefined
 

@@ -79,7 +79,6 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
         .concurrently(Lobby.run(bus, roomRepo))
         .concurrently(activateStream)
         .concurrently(playStreams)
-        .concurrently(bus.subscribe.evalTap(e => IO(println(e))))
         .take(1)
         .interruptAfter(1.minute)
         .compile
