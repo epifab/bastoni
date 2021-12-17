@@ -13,6 +13,7 @@ import scala.util.Random
 
 object Game extends GameLogic[MatchState]:
 
+  override val gameType: GameType = GameType.Briscola
   override def initialState(users: List[User]): MatchState = MatchState(users)
   override def isFinal(state: MatchState): Boolean = state == MatchState.Terminated
 

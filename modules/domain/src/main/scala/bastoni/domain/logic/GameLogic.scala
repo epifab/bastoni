@@ -7,9 +7,11 @@ trait GameLogic[State]:
 
   protected val uneventful: List[StateMachineOutput] = Nil
 
-  val playStep: (State, StateMachineInput) => (State, List[StateMachineOutput])
+  val gameType: GameType
   def initialState(users: List[User]): State
   def isFinal(state: State): Boolean
+
+  val playStep: (State, StateMachineInput) => (State, List[StateMachineOutput])
 
   def playStream[F[_]](users: List[User])(input: fs2.Stream[F, StateMachineInput]): fs2.Stream[F, StateMachineOutput] =
     input

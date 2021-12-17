@@ -237,7 +237,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   ),
                   taken = Nil,
                   played = List(
-                    CardServerView(Card(Due, Bastoni), Direction.Player)
+                    CardServerView(Card(Due, Bastoni), Direction.Up)
                   )
                 ),
                 Seat(
@@ -290,7 +290,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         board = Nil,
         active = true
       ),
-      stateMachine = Some(new briscola.StateMachine(
+      stateMachine = Some(generic.StateMachine(
+        briscola.Game,
         briscola.MatchState.InProgress(
           List(player1, player2),
           briscola.GameState.PlayRound(

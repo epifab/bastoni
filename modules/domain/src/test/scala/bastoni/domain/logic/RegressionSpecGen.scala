@@ -107,7 +107,7 @@ object RegressionSpecGen extends IOApp:
 
         done <- outputPublisher
           .concurrently(inputPublisher)
-          .concurrently(shufflingDeck.delayBy(1.second))
+          .concurrently(shufflingDeck)
           .concurrently(inputBus.run)
           .concurrently(outputBus.run)
       } yield ()).compile.drain
