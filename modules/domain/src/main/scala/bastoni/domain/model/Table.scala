@@ -26,7 +26,7 @@ trait Table[C <: CardView]:
   def board: List[C]
   def active: Boolean
 
-  lazy val indexedSeats = seats.zipWithIndex
+  lazy val indexedSeats: List[(Seat[C], Int)] = seats.zipWithIndex
 
   protected def buildCard(card: Card, direction: Direction): C
   protected def removeCard(cards: List[C], card: Card): List[C]
@@ -195,7 +195,6 @@ trait Table[C <: CardView]:
           }
         )
 
-
   protected def cardsDealtUpdate(event: Event.CardsDealt[C]): TableView =
     updateWith(
       seats = seats.map {
@@ -204,6 +203,16 @@ trait Table[C <: CardView]:
         case whatever => whatever
       },
       deck = deck.drop(event.cards.size)
+    )
+
+  protected def deckShuffledUpdate(newDeck: List[C]): TableView =
+    updateWith(
+      seats = seats.map {
+        case seat@ Seat(Some(acting@ ActingPlayer(targetPlayer, Action.ShuffleDeck, _)), _, _, _) =>
+          seat.copy(player = Some(acting.done))
+        case whatever => whatever
+      },
+      deck = newDeck
     )
 
   def seatFor(userId: UserId): Option[PlayerSeat[C]] =

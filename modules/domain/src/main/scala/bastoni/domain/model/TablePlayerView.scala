@@ -34,15 +34,7 @@ case class TablePlayerView(
     else cards.removeFirst(_.card.isEmpty)
 
   def update(event: PlayerEvent): TablePlayerView = event match {
-    case Event.DeckShuffledPlayerView(numberOfCards) =>
-      updateWith(
-        seats = seats.map {
-          case seat@Seat(Some(acting@ActingPlayer(targetPlayer, Action.ShuffleDeck, _)), _, _, _) =>
-            seat.copy(player = Some(acting.done))
-          case whatever => whatever
-        },
-        deck = List.fill(numberOfCards)(CardPlayerView(None))
-      )
+    case Event.DeckShuffledPlayerView(numberOfCards) => deckShuffledUpdate(List.fill(numberOfCards)(CardPlayerView(None)))
 
     case event: Event.CardsDealtPlayerView => cardsDealtUpdate(event)
 

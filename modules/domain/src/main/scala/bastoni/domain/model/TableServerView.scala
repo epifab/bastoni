@@ -25,15 +25,7 @@ case class TableServerView(
   override protected def removeCard(cards: List[CardServerView], card: Card): List[CardServerView] = cards.filterNot(_.card == card)
 
   def update(event: ServerEvent): TableServerView = event match {
-    case Event.DeckShuffledServerView(deck) =>
-      updateWith(
-        seats = seats.map {
-          case seat@ Seat(Some(acting@ ActingPlayer(targetPlayer, Action.ShuffleDeck, _)), _, _, _) =>
-            seat.copy(player = Some(acting.done))
-          case whatever => whatever
-        },
-        deck = deck.map(card => CardServerView(card, Direction.Down))
-      )
+    case Event.DeckShuffledServerView(deck) => deckShuffledUpdate(deck.map(card => CardServerView(card, Direction.Down)))
 
     case event: Event.CardsDealtServerView => cardsDealtUpdate(event)
 
