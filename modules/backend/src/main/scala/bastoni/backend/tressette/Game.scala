@@ -101,13 +101,10 @@ object Game:
         )
       )
 
-      val winners: Option[List[PlayerId]] = pointsCount.sortBy(-_.points) match
-        case PointsCount(winners, wp) :: PointsCount(losers, lp) :: _ if wp > lp => Some(winners)
-        case _ => None
+      // it's not possible to draw so maxBy is good enough
+      val winners: List[PlayerId] = pointsCount.maxBy(_.points).playerIds
 
-      val events = pointsCount :+ winners.fold(MatchDraw)(MatchCompleted(_))
-
-      MatchState.Completed(winners.getOrElse(Nil)) -> events
+      MatchState.Completed(winners) -> (pointsCount :+ MatchCompleted(winners))
 
     case (m, _) => m -> Nil
   }
