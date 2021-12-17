@@ -13,15 +13,30 @@ object Lobby:
     def leave(p: Player): Room =
       room.copy(players = room.players.filterNot(_ == p))
 
-    def withEvent(f: Room => Event): (Room, Option[Event]) =
-      room -> Some(f(room))
-
-  def apply[F[_]](roomId: RoomId, roomSize: Int, messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
+  def apply[F[_]](roomMaxSize: Int)(messages: fs2.Stream[F, Message]): fs2.Stream[F, MessageOut] =
     messages
-      .collect { case MessageIn(`roomId`, command: Command) => command }
-      .scan[(Room, Option[Event])](Room(roomId, Nil) -> None) {
-        case ((room, _), JoinRoom(player)) if room.players.size < roomSize => room.join(player).withEvent(PlayerJoined(player, _))
-        case ((room, _), LeaveRoom(player)) if room.contains(player) => room.leave(player).withEvent(PlayerLeft(player, _))
-        case ((room, _), _) => room -> None
+      .scan[(Map[RoomId, Room], Option[(RoomId, Event)])](Map.empty -> None) {
+        case ((lobby, _), Message(roomId, JoinRoom(player))) =>
+          lobby.getOrElse(roomId, Room(roomId, Nil)) match
+            case room if room.players.size < roomMaxSize =>
+              val newRoom = room.join(player)
+              (lobby + (roomId -> newRoom)) -> Some(roomId -> PlayerJoined(player, newRoom))
+            case _ => lobby -> None
+
+        case ((lobby, _), Message(roomId, LeaveRoom(player))) =>
+          lobby.getOrElse(roomId, Room(roomId, Nil)) match
+            case room if room.contains(player) =>
+              val newRoom = room.leave(player)
+              val newLobby = if (newRoom.players.isEmpty) lobby - roomId else lobby + (roomId -> newRoom)
+              newLobby -> Some(roomId -> PlayerLeft(player, newRoom))
+            case _ => lobby -> None
+
+        case ((lobby, _), Message(roomId, ActivateRoom(player, gameType))) =>
+          lobby.getOrElse(roomId, Room(roomId, Nil)) match
+            case room if room.contains(player) && room.players.size > 1 =>
+              lobby -> Some(roomId -> StartGame(room, gameType))
+            case _ => lobby -> None
+
+        case ((lobby, _), _) => lobby -> None
       }
-      .collect { case (room, Some(e)) => Message(roomId, e) }
+      .collect { case (room, Some((roomId, event))) => MessageOut(roomId, event) }

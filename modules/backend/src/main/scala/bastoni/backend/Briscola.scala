@@ -68,80 +68,83 @@ object Briscola extends Game:
   def playMatch[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
     messages
       .collect { case Message(roomId, message) if roomId == room.id => message }
-
       .scan[(MatchState, List[Event])](Ready(room.players.map(p => GamePlayer(p, 0))) -> Nil) {
-
-        case (_, _: PlayerLeft) =>
-          Terminated -> List(MatchAborted)
-
-        case ((Ready(players), _), ShuffleDeck(seed)) =>
-          val shuffledDeck = new Random(seed).shuffle(Deck.instance)
-
-          val deck =
-            if (room.players.size == 3) Some(shuffledDeck.filterNot(_ == Card(Rank.Due, Suit.Coppe)))
-            else if (room.players.size == 2 || room.players.size == 4) Some(shuffledDeck)
-            else None // 1 or 5+ players not supported
-
-          deck.fold(Terminated -> List(MatchAborted)) { deck =>
-            DealRound(
-              players.map(MatchPlayer(_, Set.empty, Set.empty)),
-              Nil,
-              2,
-              deck
-            ) -> List(DeckShuffled(seed))
-          }
-
-        case ((DealRound(player :: Nil, done, 0, deck), _), Continue) =>
-          deck.deal { (card, tail) => WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card)) }
-
-        case ((DealRound(player :: Nil, done, remaining, deck), _), Continue) =>
-          deck.deal { (card, tail) => DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card)) }
-
-        case ((DealRound(player :: todo, done, remaining, deck), _), Continue) =>
-          deck.deal { (card, tail) => DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card)) }
-
-        case ((WillDealTrump(players, deck), _), Continue) =>
-          deck.deal { (card, tail) => PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card)) }
-
-        case ((DrawRound(player :: Nil, done, deck, trump), _), Continue) =>
-          deck.deal { (card, tail) => PlayRound(done :+ player.draw(card), Nil, tail, trump) -> List(CardDealt(player.id, card)) }
-
-        case ((DrawRound(player :: todo, done, deck, trump), _), Continue) =>
-          deck.deal { (card, tail) => DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card)) }
-
-        case ((PlayRound(player :: Nil, done, deck, trump), _), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-          WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card))
-
-        case ((PlayRound(player :: players, done, deck, trump), _), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-          PlayRound(players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card))
-
-        case ((WillCompleteTrick(players, deck, trump), _), Continue) =>
-          val updatedPlayers = completeTrick(players, trump)
-          val winner = updatedPlayers.head
-
-          val state =
-            if (deck.isEmpty && winner.hand.isEmpty) WillCompleteMatch(updatedPlayers, trump)
-            else if (deck.isEmpty) PlayRound(updatedPlayers, Nil, Nil, trump)
-            else DrawRound(updatedPlayers, Nil, deck, trump)
-
-          state -> List(TrickWinner(winner.id))
-
-        case ((WillCompleteMatch(players, trump), _), Continue) =>
-          val teams = players match
-            case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
-            case ps => ps.map(List(_))
-
-          val pointsCount = teams.map(players => PointsCount(players.map(_.id), players.foldRight(0)(_.points + _)))
-
-          val winners = pointsCount.sortBy(-_.points) match
-            case PointsCount(winners, wp) :: PointsCount(losers, lp) :: _ if wp > lp => Some(winners)
-            case _ => None
-
-          val events = pointsCount :+ winners.fold(MatchDraw)(MatchWinners(_))
-
-          Terminated -> events
-
-        case ((m, _), _) => m -> Nil
+        case ((state, _), message) => play(state, message)
       }
       .takeThrough { case ((state, _)) => state != Terminated }
       .flatMap { case (_, events) => fs2.Stream.iterable[F, Event](events).map(Message(room.id, _)) }
+
+  private val play: (MatchState, Command | Event) => (MatchState, List[Event]) = {
+
+    case (_, _: PlayerLeft) =>
+      Terminated -> List(MatchAborted)
+
+    case (Ready(players), ShuffleDeck(seed)) =>
+      val shuffledDeck = new Random(seed).shuffle(Deck.instance)
+
+      val deck =
+        if (players.size == 3) Some(shuffledDeck.filterNot(_ == Card(Rank.Due, Suit.Coppe)))
+        else if (players.size == 2 || players.size == 4) Some(shuffledDeck)
+        else None // 1 or 5+ players not supported
+
+      deck.fold(Terminated -> List(MatchAborted)) { deck =>
+        DealRound(
+          players.map(MatchPlayer(_, Set.empty, Set.empty)),
+          Nil,
+          2,
+          deck
+        ) -> List(DeckShuffled(seed))
+      }
+
+    case (DealRound(player :: Nil, done, 0, deck), Continue) =>
+      deck.deal { (card, tail) => WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card)) }
+
+    case (DealRound(player :: Nil, done, remaining, deck), Continue) =>
+      deck.deal { (card, tail) => DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card)) }
+
+    case (DealRound(player :: todo, done, remaining, deck), Continue) =>
+      deck.deal { (card, tail) => DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card)) }
+
+    case (WillDealTrump(players, deck), Continue) =>
+      deck.deal { (card, tail) => PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card)) }
+
+    case (DrawRound(player :: Nil, done, deck, trump), Continue) =>
+      deck.deal { (card, tail) => PlayRound(done :+ player.draw(card), Nil, tail, trump) -> List(CardDealt(player.id, card)) }
+
+    case (DrawRound(player :: todo, done, deck, trump), Continue) =>
+      deck.deal { (card, tail) => DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card)) }
+
+    case (PlayRound(player :: Nil, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
+      WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card))
+
+    case (PlayRound(player :: players, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
+      PlayRound(players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card))
+
+    case (WillCompleteTrick(players, deck, trump), Continue) =>
+      val updatedPlayers = completeTrick(players, trump)
+      val winner = updatedPlayers.head
+
+      val state =
+        if (deck.isEmpty && winner.hand.isEmpty) WillCompleteMatch(updatedPlayers, trump)
+        else if (deck.isEmpty) PlayRound(updatedPlayers, Nil, Nil, trump)
+        else DrawRound(updatedPlayers, Nil, deck, trump)
+
+      state -> List(TrickWinner(winner.id))
+
+    case (WillCompleteMatch(players, trump), Continue) =>
+      val teams = players match
+        case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
+        case ps => ps.map(List(_))
+
+      val pointsCount = teams.map(players => PointsCount(players.map(_.id), players.foldRight(0)(_.points + _)))
+
+      val winners = pointsCount.sortBy(-_.points) match
+        case PointsCount(winners, wp) :: PointsCount(losers, lp) :: _ if wp > lp => Some(winners)
+        case _ => None
+
+      val events = pointsCount :+ winners.fold(MatchDraw)(MatchWinners(_))
+
+      Terminated -> events
+
+    case (m, _) => m -> Nil
+  }
