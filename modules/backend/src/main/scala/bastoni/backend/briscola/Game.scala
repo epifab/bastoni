@@ -36,6 +36,9 @@ object Game:
     case (_, _: PlayerLeft) =>
       MatchState.Aborted -> List(MatchAborted)
 
+    case (MatchState.Ready(players), GameStarted(_)) =>
+      MatchState.Ready(players) -> List(ActionRequest(players.last.id, Action.ShuffleDeck))
+
     case (MatchState.Ready(players), ShuffleDeck(seed)) =>
       val shuffledDeck = new Random(seed).shuffle(Deck.instance)
 
@@ -63,12 +66,12 @@ object Game:
       deck.deal { (card, tail) => MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
 
     case (MatchState.WillDealTrump(players, deck), Continue) =>
-      deck.deal { (card, tail) => MatchState.PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card), ActionRequest(players.head.id)) }
+      deck.deal { (card, tail) => MatchState.PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card), ActionRequest(players.head.id, Action.PlayCard)) }
 
     case (MatchState.DrawRound(player :: Nil, done, deck, trump), Continue) =>
       deck.deal { (card, tail) =>
         val players = done :+ player.draw(card)
-        MatchState.PlayRound(players, Nil, tail, trump) -> List(CardDealt(player.id, card), ActionRequest(players.head.id)) }
+        MatchState.PlayRound(players, Nil, tail, trump) -> List(CardDealt(player.id, card), ActionRequest(players.head.id, Action.PlayCard)) }
 
     case (MatchState.DrawRound(player :: todo, done, deck, trump), Continue) =>
       deck.deal { (card, tail) => MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card), Continue.shortly) }
@@ -77,7 +80,7 @@ object Game:
       MatchState.WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), Continue.delayed)
 
     case (MatchState.PlayRound(player :: next :: players, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-      MatchState.PlayRound(next :: players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), ActionRequest(next.id))
+      MatchState.PlayRound(next :: players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), ActionRequest(next.id, Action.PlayCard))
 
     case (MatchState.WillCompleteTrick(players, deck, trump), Continue) =>
       val updatedPlayers = completeTrick(players, trump)
@@ -85,7 +88,7 @@ object Game:
 
       val (state, command: (Command | DelayedCommand)) =
         if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers, trump) -> Continue.veryDelayed
-        else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil, trump) -> ActionRequest(updatedPlayers.head.id)
+        else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil, trump) -> ActionRequest(updatedPlayers.head.id, Action.PlayCard)
         else MatchState.DrawRound(updatedPlayers, Nil, deck, trump) -> Continue.delayed
 
       state -> (TrickCompleted(winner.id) :: command :: Nil)
@@ -117,16 +120,16 @@ object Game:
             case player if winners.exists(player.is) => player.win
             case player => player
           }
-          if (rounds == 0)
+
+          def ready(shiftedRound: List[GamePlayer], rounds: Int) =
+            GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), rounds) -> (events :+ ActionRequest(shiftedRound.last.id, Action.ShuffleDeck))
+
+          if (rounds == 0) {
             val winners = newPlayers.groupMap(_.points)(_.id).maxBy(_._1)._2
-            if (winners.size == players.size)
-              val shiftedRound = newPlayers.tail :+ newPlayers.head
-              GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), 0) -> events
-            else
-              GameState.Terminated -> (events :+ GameCompleted(winners))
-          else
-            val shiftedRound = newPlayers.tail :+ newPlayers.head
-            GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), rounds - 1) -> events
+            if (winners.size == players.size) ready(newPlayers.tail :+ newPlayers.head, 0)
+            else GameState.Terminated -> (events :+ GameCompleted(winners))
+          }
+          else ready(newPlayers.tail :+ newPlayers.head, rounds - 1)
 
         case (MatchState.Aborted, events) =>
           GameState.Terminated -> events

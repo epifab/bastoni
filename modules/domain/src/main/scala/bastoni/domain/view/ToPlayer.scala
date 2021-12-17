@@ -1,12 +1,13 @@
 package bastoni.domain.view
 
-import bastoni.domain.model.{Card, Player, PlayerId, Room}
+import bastoni.domain.model.{Card, Command, GameType, Player, PlayerId, Room}
 
 sealed trait ToPlayer
 
 object ToPlayer:
   case class  PlayerJoined(player: Player, room: Room) extends ToPlayer
   case class  PlayerLeft(player: Player, room: Room) extends ToPlayer
+  case class  GameStarted(gameType: GameType) extends ToPlayer
   case object DeckShuffled extends ToPlayer
   case class  CardDealt(playerId: PlayerId, card: Option[Card]) extends ToPlayer
   case class  TrumpRevealed(card: Card) extends ToPlayer
@@ -18,4 +19,4 @@ object ToPlayer:
   case object MatchAborted extends ToPlayer
   case class  GameCompleted(winnerIds: List[PlayerId]) extends ToPlayer
   case object GameAborted extends ToPlayer
-  case class  ActionRequest(player: PlayerId) extends ToPlayer
+  case class  ActionRequest(player: PlayerId, action: Command.Action) extends ToPlayer

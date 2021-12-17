@@ -10,4 +10,9 @@ object Command:
   case class  ShuffleDeck(seed: Int) extends Command
   case class  PlayCard(player: PlayerId, card: Card) extends Command
   case object Continue extends Command
-  case class  ActionRequest(playerId: PlayerId) extends Command
+
+  enum Action:
+    case PlayCard
+    case ShuffleDeck
+
+  case class  ActionRequest(playerId: PlayerId, action: Action) extends Command

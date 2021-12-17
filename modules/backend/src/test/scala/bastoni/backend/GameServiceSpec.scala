@@ -30,6 +30,8 @@ class GameServiceSpec extends AnyFreeSpec with Matchers:
     )
 
     GameService(input).compile.toList shouldBe List(
+      Message(room1.id, GameStarted(GameType.Briscola)),
+      Message(room2.id, GameStarted(GameType.Briscola)),
       Message(room1.id, DeckShuffled(10)),
       DelayedMessage(Message(room1.id, Continue), Delay.Medium),
       Message(room1.id, CardDealt(player1.id, Card(Due, Bastoni))),
@@ -48,7 +50,10 @@ class GameServiceSpec extends AnyFreeSpec with Matchers:
     val room = Room(RoomId.newId, List(player1, player2, player3))
 
     val inputStream =
-      fs2.Stream(Message(room.id, StartGame(room, GameType.Briscola))) ++
+      fs2.Stream(
+        Message(room.id, StartGame(room, GameType.Briscola)), 
+        Message(room.id, GameStarted(GameType.Briscola))
+      ) ++
       Briscola3Spec.input(room.id, player1, player2, player3) ++
       Briscola3Spec.input(room.id, player2, player3, player1) ++
       Briscola3Spec.input(room.id, player3, player1, player2) ++
@@ -56,10 +61,15 @@ class GameServiceSpec extends AnyFreeSpec with Matchers:
       fs2.Stream(Message(room.id, Continue))
 
     val outputStream =
-      Briscola3Spec.output(room.id, player1, player2, player3) ++
-      Briscola3Spec.output(room.id, player2, player3, player1) ++
-      Briscola3Spec.output(room.id, player3, player1, player2) ++
-      Briscola3Spec.output(room.id, player1, player2, player3) ++
+      Message(room.id, GameStarted(GameType.Briscola)) ::
+      (Message(room.id, ActionRequest(player3.id, Action.ShuffleDeck)) ::
+      Briscola3Spec.output(room.id, player1, player2, player3)) ++
+      (Message(room.id, ActionRequest(player1.id, Action.ShuffleDeck)) ::
+      Briscola3Spec.output(room.id, player2, player3, player1)) ++
+      (Message(room.id, ActionRequest(player2.id, Action.ShuffleDeck)) ::
+      Briscola3Spec.output(room.id, player3, player1, player2)) ++
+      (Message(room.id, ActionRequest(player3.id, Action.ShuffleDeck)) ::
+      Briscola3Spec.output(room.id, player1, player2, player3)) ++
       List(Message(room.id, GameCompleted(List(player1.id))))
 
     GameService(inputStream).compile.toList shouldBe outputStream

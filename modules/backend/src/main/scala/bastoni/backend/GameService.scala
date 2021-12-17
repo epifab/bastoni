@@ -8,10 +8,15 @@ import cats.effect.IO
 
 import scala.concurrent.duration.*
 
-enum Delay(val duration: FiniteDuration):
-  case Short extends Delay(500.millis)
-  case Medium extends Delay(1.second)
-  case Long extends Delay(3.seconds)
+enum Delay:
+  case Short, Medium, Long
+
+object Delay:
+  def defaultDuration: Delay => FiniteDuration = {
+    case Delay.Short => 500.millis
+    case Delay.Medium => 1.second
+    case Delay.Long => 3.seconds
+  }
 
 case class DelayedCommand(command: Command, delay: Delay)
 case class DelayedMessage(message: Message, delay: Delay)
@@ -34,7 +39,7 @@ object GameService:
     messages
       .scan[(Map[RoomId, GameStateMachine], List[Message | DelayedMessage])](Map.empty -> Nil) {
         case ((stateMachines, _), Message(roomId, StartGame(room, GameType.Briscola))) if !stateMachines.contains(roomId) =>
-          (stateMachines + (roomId -> briscola.StateMachine(room.players))) -> Nil
+          (stateMachines + (roomId -> briscola.StateMachine(room.players))) -> List(Message(roomId, GameStarted(GameType.Briscola)))
 
         case ((stateMachines, _), Message(roomId, message)) =>
           stateMachines.get(roomId).fold(stateMachines -> Nil) { stateMachine =>
@@ -47,11 +52,11 @@ object GameService:
       }
       .flatMap { case (_, messages) => fs2.Stream.iterable(messages) }
 
-  def run(messageBus: MessageBus[IO]): fs2.Stream[IO, Unit] =
+  def run(messageBus: MessageBus[IO], delayDuration: Delay => FiniteDuration = Delay.defaultDuration): fs2.Stream[IO, Unit] =
     messageBus
       .subscribe
       .through(apply)
       .evalTap {
-        case DelayedMessage(message, delay) => messageBus.publish1(message).delayBy(delay.duration).start
+        case DelayedMessage(message, delay) => messageBus.publish1(message).delayBy(delayDuration(delay)).start
         case message: Message => messageBus.publish1(message)
       }.map(_ => ())
