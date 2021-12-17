@@ -15,126 +15,134 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
 
   val roomId = RoomId.newId
   val room = Room(roomId, List(player1, player2, player3))
-  
+
+  "A game can be played" in {
+    val inputStream = Briscola3Spec.input(roomId, player1, player2, player3)
+    val expectedOut = Briscola3Spec.output(roomId, player1, player2, player3)
+    Game.playMatch[fs2.Pure](room)(inputStream).compile.toList shouldBe expectedOut
+  }
+
+object Briscola3Spec:
+
   val drawCard      = Continue
   val revealTrump   = Continue
   val completeTrick = Continue
   val completeMatch = Continue
 
-  "A game can be played" in {
-    val input =
-      fs2.Stream(
-        ShuffleDeck(10),
+  def input(roomId: RoomId, player1: Player, player2: Player, player3: Player): fs2.Stream[fs2.Pure, Message] =
+    fs2.Stream(
+      ShuffleDeck(10),
 
-        drawCard,
-        drawCard,
-        drawCard,
-        drawCard,
-        drawCard,
-        drawCard,
-        drawCard,
-        drawCard,
-        drawCard,
-        revealTrump,
+      drawCard,
+      drawCard,
+      drawCard,
+      drawCard,
+      drawCard,
+      drawCard,
+      drawCard,
+      drawCard,
+      drawCard,
+      revealTrump,
 
-        PlayCard(player1.id, Card(Quattro, Spade)),
-        PlayCard(player2.id, Card(Asso, Spade)),
-        PlayCard(player3.id, Card(Cinque, Spade)),
-        completeTrick,
+      PlayCard(player1.id, Card(Quattro, Spade)),
+      PlayCard(player2.id, Card(Asso, Spade)),
+      PlayCard(player3.id, Card(Cinque, Spade)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player2.id, Card(Sei, Denari)),
-        PlayCard(player3.id, Card(Sette, Denari)),
-        PlayCard(player1.id, Card(Cinque, Coppe)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player2.id, Card(Sei, Denari)),
+      PlayCard(player3.id, Card(Sette, Denari)),
+      PlayCard(player1.id, Card(Cinque, Coppe)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player3.id, Card(Fante, Bastoni)),
-        PlayCard(player1.id, Card(Due, Denari)),
-        PlayCard(player2.id, Card(Fante, Spade)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player3.id, Card(Fante, Bastoni)),
+      PlayCard(player1.id, Card(Due, Denari)),
+      PlayCard(player2.id, Card(Fante, Spade)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player3.id, Card(Re, Denari)),
-        PlayCard(player1.id, Card(Due, Bastoni)),
-        PlayCard(player2.id, Card(Tre, Spade)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player3.id, Card(Re, Denari)),
+      PlayCard(player1.id, Card(Due, Bastoni)),
+      PlayCard(player2.id, Card(Tre, Spade)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player1.id, Card(Fante, Coppe)),
-        PlayCard(player2.id, Card(Cinque, Bastoni)),
-        PlayCard(player3.id, Card(Sei, Coppe)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player1.id, Card(Fante, Coppe)),
+      PlayCard(player2.id, Card(Cinque, Bastoni)),
+      PlayCard(player3.id, Card(Sei, Coppe)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player2.id, Card(Cavallo, Denari)),
-        PlayCard(player3.id, Card(Tre, Denari)),
-        PlayCard(player1.id, Card(Sette, Bastoni)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player2.id, Card(Cavallo, Denari)),
+      PlayCard(player3.id, Card(Tre, Denari)),
+      PlayCard(player1.id, Card(Sette, Bastoni)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player1.id, Card(Cavallo, Spade)),
-        PlayCard(player2.id, Card(Quattro, Bastoni)),
-        PlayCard(player3.id, Card(Cavallo, Bastoni)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player1.id, Card(Cavallo, Spade)),
+      PlayCard(player2.id, Card(Quattro, Bastoni)),
+      PlayCard(player3.id, Card(Cavallo, Bastoni)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player3.id, Card(Quattro, Coppe)),
-        PlayCard(player1.id, Card(Asso, Coppe)),
-        PlayCard(player2.id, Card(Asso, Bastoni)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player3.id, Card(Quattro, Coppe)),
+      PlayCard(player1.id, Card(Asso, Coppe)),
+      PlayCard(player2.id, Card(Asso, Bastoni)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player2.id, Card(Cinque, Denari)),
-        PlayCard(player3.id, Card(Sette, Coppe)),
-        PlayCard(player1.id, Card(Re, Spade)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player2.id, Card(Cinque, Denari)),
+      PlayCard(player3.id, Card(Sette, Coppe)),
+      PlayCard(player1.id, Card(Re, Spade)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player2.id, Card(Sei, Spade)),
-        PlayCard(player3.id, Card(Quattro, Denari)),
-        PlayCard(player1.id, Card(Fante, Denari)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player2.id, Card(Sei, Spade)),
+      PlayCard(player3.id, Card(Quattro, Denari)),
+      PlayCard(player1.id, Card(Fante, Denari)),
+      completeTrick,
 
-        drawCard,
-        drawCard,
-        drawCard,
-        PlayCard(player2.id, Card(Due, Spade)),
-        PlayCard(player3.id, Card(Cavallo, Coppe)),
-        PlayCard(player1.id, Card(Sei, Bastoni)),
-        completeTrick,
+      drawCard,
+      drawCard,
+      drawCard,
+      PlayCard(player2.id, Card(Due, Spade)),
+      PlayCard(player3.id, Card(Cavallo, Coppe)),
+      PlayCard(player1.id, Card(Sei, Bastoni)),
+      completeTrick,
 
-        PlayCard(player1.id, Card(Asso, Denari)),
-        PlayCard(player2.id, Card(Sette, Spade)),
-        PlayCard(player3.id, Card(Re, Bastoni)),
-        completeTrick,
+      PlayCard(player1.id, Card(Asso, Denari)),
+      PlayCard(player2.id, Card(Sette, Spade)),
+      PlayCard(player3.id, Card(Re, Bastoni)),
+      completeTrick,
 
-        PlayCard(player3.id, Card(Re, Coppe)),
-        PlayCard(player1.id, Card(Tre, Bastoni)),
-        PlayCard(player2.id, Card(Tre, Coppe)),
-        completeTrick,
-        completeMatch,
-      ).map(Message(roomId, _))
+      PlayCard(player3.id, Card(Re, Coppe)),
+      PlayCard(player1.id, Card(Tre, Bastoni)),
+      PlayCard(player2.id, Card(Tre, Coppe)),
+      completeTrick,
+      completeMatch,
+    ).map(Message(roomId, _))
 
-    Game.playMatch[fs2.Pure](room)(input).map(_.message).compile.toList shouldBe List(
+  def output(roomId: RoomId, player1: Player, player2: Player, player3: Player): List[Message] =
+    List(
       DeckShuffled(10),
 
       CardDealt(player1.id, Card(Due, Bastoni)),
@@ -248,5 +256,4 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
       PointsCount(List(player2.id), 41),
       PointsCount(List(player3.id), 25),
       MatchWinners(List(player1.id))
-    )
-  }
+    ).map(Message(roomId, _))

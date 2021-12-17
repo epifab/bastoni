@@ -9,6 +9,8 @@ class StateMachine private(state: GameState) extends GameStateMachine:
       case (GameState.Terminated, events) => None -> events
       case (state, events) => Some(new StateMachine(state)) -> events
 
+  override def toString(): String = state.toString
+
 object StateMachine:
   def apply(players: List[Player]): StateMachine =
     new StateMachine(GameState(players))

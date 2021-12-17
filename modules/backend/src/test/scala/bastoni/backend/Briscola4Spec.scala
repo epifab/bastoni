@@ -16,13 +16,20 @@ class Briscola4Spec extends AnyFreeSpec with Matchers:
   val roomId = RoomId.newId
   val room = Room(roomId, List(player1, player2, player3, player4))
 
+  "A game can be played" in {
+    val inputStream = Briscola4Spec.input(roomId, player1, player2, player3, player4)
+    val expectedOut = Briscola4Spec.output(roomId, player1, player2, player3, player4)
+    Game.playMatch[fs2.Pure](room)(inputStream).compile.toList shouldBe expectedOut
+  }
+
+object Briscola4Spec:
   val drawCard      = Continue
   val revealTrump   = Continue
   val completeTrick = Continue
   val completeMatch = Continue
 
-  "A game can be played" in {
-    val input = fs2.Stream(
+  def input(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
+    fs2.Stream(
       ShuffleDeck(10),
 
       drawCard,
@@ -129,9 +136,10 @@ class Briscola4Spec extends AnyFreeSpec with Matchers:
       completeTrick,
       completeMatch,
 
-    ).map(Message(room.id, _))
+    ).map(Message(roomId, _))
 
-    Game.playMatch[fs2.Pure](room)(input).map(_.message).compile.toList shouldBe List(
+  def output(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
+    List(
       DeckShuffled(10),
 
       CardDealt(player1.id, Card(Due, Bastoni)),
@@ -148,7 +156,7 @@ class Briscola4Spec extends AnyFreeSpec with Matchers:
       CardDealt(player2.id, Card(Sei, Bastoni)),  // Asso Spade, Re Denari, Sei Bastoni
       CardDealt(player3.id, Card(Tre, Spade)),    // Sette Denari, Cinque Coppe, Tre Spade
       CardDealt(player4.id, Card(Tre, Denari)),   // Quattro Spade, Asso Bastoni, Tre Denari
-      
+
       TrumpRevealed(Card(Asso, Coppe)),
 
       CardPlayed(player1.id, Card(Due, Bastoni)),
@@ -243,5 +251,4 @@ class Briscola4Spec extends AnyFreeSpec with Matchers:
       PointsCount(List(player2.id, player4.id), 60),
       PointsCount(List(player3.id, player1.id), 60),
       MatchDraw
-    )
-  }
+    ).map(Message(roomId, _))

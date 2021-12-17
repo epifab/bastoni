@@ -18,7 +18,7 @@ object Lobby:
       .scan[(Map[RoomId, Room], Option[(RoomId, Event)])](Map.empty -> None) {
         case ((lobby, _), Message(roomId, JoinRoom(player))) =>
           lobby.getOrElse(roomId, Room(roomId, Nil)) match
-            case room if room.players.size < roomMaxSize =>
+            case room if room.players.size < roomMaxSize && !room.contains(player) =>
               val newRoom = room.join(player)
               (lobby + (roomId -> newRoom)) -> Some(roomId -> PlayerJoined(player, newRoom))
             case _ => lobby -> None

@@ -115,7 +115,11 @@ object Game:
           }
           if (rounds == 0)
             val winners = newPlayers.groupMap(_.points)(_.id).maxBy(_._1)._2
-            GameState.Terminated -> (events :+ GameWinners(winners))
+            if (winners.size == players.size)
+              val shiftedRound = newPlayers.tail :+ newPlayers.head
+              GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), 0) -> events
+            else
+              GameState.Terminated -> (events :+ GameWinners(winners))
           else
             val shiftedRound = newPlayers.tail :+ newPlayers.head
             GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), rounds - 1) -> events
