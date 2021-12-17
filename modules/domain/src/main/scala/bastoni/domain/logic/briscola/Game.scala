@@ -61,19 +61,19 @@ object Game:
     case (MatchState.DealRound(player :: Nil, done, 0, deck), Continue) =>
       deck.dealOrDie { (card, tail) =>
         MatchState.WillDealTrump(done :+ player.draw(card), tail) ->
-          List(CardDealt(player.id, card, Face.Player), Continue.later)
+          List(CardDealt(player.id, card, Direction.Player), Continue.later)
       }
 
     case (MatchState.DealRound(player :: Nil, done, remaining, deck), Continue) =>
       deck.dealOrDie { (card, tail) =>
         MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) ->
-          List(CardDealt(player.id, card, Face.Player), Continue.shortly)
+          List(CardDealt(player.id, card, Direction.Player), Continue.shortly)
       }
 
     case (MatchState.DealRound(player :: todo, done, remaining, deck), Continue) =>
       deck.dealOrDie { (card, tail) =>
         MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) ->
-          List(CardDealt(player.id, card, Face.Player), Continue.shortly)
+          List(CardDealt(player.id, card, Direction.Player), Continue.shortly)
       }
 
     case (MatchState.WillDealTrump(players, deck), Continue) =>
@@ -86,13 +86,13 @@ object Game:
       deck.dealOrDie { (card, tail) =>
         val players = done :+ player.draw(card)
         MatchState.PlayRound(players, Nil, tail, trump) ->
-          List(CardDealt(player.id, card, Face.Player), ActionRequested(players.head.id, Action.PlayCard))
+          List(CardDealt(player.id, card, Direction.Player), ActionRequested(players.head.id, Action.PlayCard))
       }
 
     case (MatchState.DrawRound(player :: todo, done, deck, trump), Continue) =>
       deck.dealOrDie { (card, tail) =>
         MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) ->
-          List(CardDealt(player.id, card, Face.Player), Continue.shortly)
+          List(CardDealt(player.id, card, Direction.Player), Continue.shortly)
       }
 
     case (MatchState.PlayRound(player :: Nil, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>

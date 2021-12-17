@@ -62,7 +62,7 @@ trait Table[C <: CardView]:
       case Event.TrumpRevealed(card) =>
         updateWith(
           deck = deck match {
-            case head :: tail => tail :+ toC(CardServerView(card, Face.Up))
+            case head :: tail => tail :+ toC(CardServerView(card, Direction.Up))
             case whatever => whatever
           }
         )
@@ -74,7 +74,7 @@ trait Table[C <: CardView]:
               seat.copy(
                 player = Some(acting.done),
                 hand = removeCard(seat.hand, card),
-                played = toC(CardServerView(card, Face.Up)) :: seat.played
+                played = toC(CardServerView(card, Direction.Up)) :: seat.played
               )
             case whatever => whatever
           }

@@ -11,8 +11,8 @@ case class TablePlayerView(
   override protected def updateWith(seats: List[Seat[CardPlayerView]] = this.seats, deck: List[CardPlayerView] = this.deck, active: Boolean = this.active): TablePlayerView =
     TablePlayerView(seats, deck, active)
 
-  override protected def toC(card: CardServerView): CardPlayerView = CardPlayerView(card.face match {
-    case Face.Up => Some(card.card)
+  override protected def toC(card: CardServerView): CardPlayerView = CardPlayerView(card.facing match {
+    case Direction.Up => Some(card.card)
     case _ => None
   })
 
@@ -29,7 +29,7 @@ case class TablePlayerView(
     else cards.removeFirst(_.card.isEmpty)
 
   def update(event: PlayerEvent): TablePlayerView = event match {
-    case Event.DeckShuffledPlayerPOV(numberOfCards) =>
+    case Event.DeckShuffledPlayerView(numberOfCards) =>
       updateWith(
         seats = seats.map {
           case seat@Seat(Some(acting@ActingPlayer(targetPlayer, Action.ShuffleDeck)), _, _, _) =>
@@ -39,7 +39,7 @@ case class TablePlayerView(
         deck = List.fill(numberOfCards)(CardPlayerView(None))
       )
 
-    case event: Event.CardDealtPlayerPOV => cardDealtUpdate(event)
+    case event: Event.CardDealtPlayerView => cardDealtUpdate(event)
 
     case event: PublicEvent => publicEventUpdate(event)
   }

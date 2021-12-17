@@ -27,8 +27,8 @@ object GamePubSub:
           .collect { case Message(_, `roomId`, event: Event) => event }
           .collect {
             case event: PublicEvent => ToPlayer.GameEvent(event)
-            case CardDealtServerPOV(playerId, card) => ToPlayer.GameEvent(CardDealtPlayerPOV(playerId, card.toPlayerView(me.id, Some(playerId))))
-            case DeckShuffledServerPOV(deck) => ToPlayer.GameEvent(DeckShuffledPlayerPOV(deck.size))
+            case CardDealtServerView(playerId, card) => ToPlayer.GameEvent(CardDealtPlayerView(playerId, card.toPlayerView(me.id, Some(playerId))))
+            case DeckShuffledServerView(deck) => ToPlayer.GameEvent(DeckShuffledPlayerView(deck.size))
             case Snapshot(table) => ToPlayer.Snapshot(table.toPlayerView(me))
           }
     }

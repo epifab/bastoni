@@ -157,13 +157,13 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
       DeckShuffled(shuffledDeck).toMessage(room1Id),
       Delayed(Continue.toMessage(room1Id), Delay.Medium),
-      CardDealt(player1.id, Card(Due, Bastoni), Face.Player).toMessage(room1Id),
+      CardDealt(player1.id, Card(Due, Bastoni), Direction.Player).toMessage(room1Id),
       Delayed(Continue.toMessage(room1Id), Delay.Short),
       DeckShuffled(shuffledDeck).toMessage(room2Id),
       Delayed(Continue.toMessage(room2Id), Delay.Medium),
-      CardDealt(player2.id, Card(Asso,Spade), Face.Player).toMessage(room1Id),
+      CardDealt(player2.id, Card(Asso,Spade), Direction.Player).toMessage(room1Id),
       Delayed(Continue.toMessage(room1Id), Delay.Short),
-      CardDealt(player2.id, Card(Due, Bastoni), Face.Player).toMessage(room2Id),
+      CardDealt(player2.id, Card(Due, Bastoni), Direction.Player).toMessage(room2Id),
       Delayed(Continue.toMessage(room2Id), Delay.Short),
       PlayerLeftTable(player1, 2).toMessage(room1Id),
       MatchAborted.toMessage(room1Id),
@@ -228,15 +228,15 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         seats = List(
           Seat(
             player = Some(ActingPlayer(gamePlayer1, Action.PlayCard)),
-            hand = List(CardServerView(player1Card, Face.Player)),
-            collected = player1Collected.map(card => CardServerView(card, Face.Down)),
+            hand = List(CardServerView(player1Card, Direction.Player)),
+            collected = player1Collected.map(card => CardServerView(card, Direction.Down)),
             played = Nil
           ),
           Seat(
             player = Some(WaitingPlayer(gamePlayer2)),
             hand = Nil,
             collected = Nil,
-            played = List(CardServerView(player2Card, Face.Up))
+            played = List(CardServerView(player2Card, Direction.Up))
           )
         ),
         deck = Nil,

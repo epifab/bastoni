@@ -156,17 +156,17 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
     Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
-      CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
+      CardDealt(player1.id, Card(Due, Bastoni), Direction.Player),
       shortDelay,
-      CardDealt(player2.id, Card(Asso, Spade), Face.Player),
+      CardDealt(player2.id, Card(Asso, Spade), Direction.Player),
       shortDelay,
-      CardDealt(player1.id, Card(Sette, Denari), Face.Player),
+      CardDealt(player1.id, Card(Sette, Denari), Direction.Player),
       shortDelay,
-      CardDealt(player2.id, Card(Quattro, Spade), Face.Player),
+      CardDealt(player2.id, Card(Quattro, Spade), Direction.Player),
       shortDelay,
-      CardDealt(player1.id, Card(Sei, Denari), Face.Player),
+      CardDealt(player1.id, Card(Sei, Denari), Direction.Player),
       shortDelay,
-      CardDealt(player2.id, Card(Re, Denari), Face.Player),
+      CardDealt(player2.id, Card(Re, Denari), Direction.Player),
       mediumDelay,
       TrumpRevealed(Card(Cinque, Coppe)),
 
@@ -178,9 +178,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 0
 
       mediumDelay,
-      CardDealt(player1.id, Card(Asso, Bastoni), Face.Player),     // Sette Denari, Sei Denari, Asso Bastoni
+      CardDealt(player1.id, Card(Asso, Bastoni), Direction.Player),     // Sette Denari, Sei Denari, Asso Bastoni
       shortDelay,
-      CardDealt(player2.id, Card(Cinque, Spade), Face.Player),     // Asso Spade, Re Denari, Cinque spade
+      CardDealt(player2.id, Card(Cinque, Spade), Direction.Player),     // Asso Spade, Re Denari, Cinque spade
       ActionRequested(player1.id, Action.PlayCard),
       CardPlayed(player1.id, Card(Sei, Denari)),
       ActionRequested(player2.id, Action.PlayCard),
@@ -189,9 +189,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),  // 4
 
       mediumDelay,
-      CardDealt(player2.id, Card(Sei, Bastoni), Face.Player),      // Asso Spade, Cinque Spade, Sei Bastoni
+      CardDealt(player2.id, Card(Sei, Bastoni), Direction.Player),      // Asso Spade, Cinque Spade, Sei Bastoni
       shortDelay,
-      CardDealt(player1.id, Card(Tre, Spade), Face.Player),        // Sette Denari, Asso Bastoni, Tre Spade
+      CardDealt(player1.id, Card(Tre, Spade), Direction.Player),        // Sette Denari, Asso Bastoni, Tre Spade
       ActionRequested(player2.id, Action.PlayCard),
       CardPlayed(player2.id, Card(Cinque, Spade)),
       ActionRequested(player1.id, Action.PlayCard),
@@ -200,9 +200,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 10
 
       mediumDelay,
-      CardDealt(player1.id, Card(Tre, Denari), Face.Player),       // Sette Denari, Asso Bastoni, Tre Denari
+      CardDealt(player1.id, Card(Tre, Denari), Direction.Player),       // Sette Denari, Asso Bastoni, Tre Denari
       shortDelay,
-      CardDealt(player2.id, Card(Asso, Coppe), Face.Player),       // Asso Spade, Sei Bastoni, Asso Coppe
+      CardDealt(player2.id, Card(Asso, Coppe), Direction.Player),       // Asso Spade, Sei Bastoni, Asso Coppe
       ActionRequested(player1.id, Action.PlayCard),
       CardPlayed(player1.id, Card(Sette, Denari)),
       ActionRequested(player2.id, Action.PlayCard),
@@ -211,9 +211,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 10
 
       mediumDelay,
-      CardDealt(player1.id, Card(Fante, Bastoni), Face.Player),    // Asso Bastoni, Tre Denari, Fante Bastoni
+      CardDealt(player1.id, Card(Fante, Bastoni), Direction.Player),    // Asso Bastoni, Tre Denari, Fante Bastoni
       shortDelay,
-      CardDealt(player2.id, Card(Due, Denari), Face.Player),       // Asso Spade, Asso Coppe, Due Denari
+      CardDealt(player2.id, Card(Due, Denari), Direction.Player),       // Asso Spade, Asso Coppe, Due Denari
       ActionRequested(player1.id, Action.PlayCard),
       CardPlayed(player1.id, Card(Fante, Bastoni)),
       ActionRequested(player2.id, Action.PlayCard),
@@ -222,9 +222,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 12
 
       mediumDelay,
-      CardDealt(player1.id, Card(Fante, Spade), Face.Player),      // Asso Bastoni, Tre Denari, Fante Spade
+      CardDealt(player1.id, Card(Fante, Spade), Direction.Player),      // Asso Bastoni, Tre Denari, Fante Spade
       shortDelay,
-      CardDealt(player2.id, Card(Re, Bastoni), Face.Player),       // Asso Spade, Asso Coppe, Re Bastoni
+      CardDealt(player2.id, Card(Re, Bastoni), Direction.Player),       // Asso Spade, Asso Coppe, Re Bastoni
       ActionRequested(player1.id, Action.PlayCard),
       CardPlayed(player1.id, Card(Tre, Denari)),
       ActionRequested(player2.id, Action.PlayCard),
@@ -233,9 +233,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),  // 25
 
       mediumDelay,
-      CardDealt(player2.id, Card(Sette, Bastoni), Face.Player),    // Asso Spade, Re Bastoni, Sette Bastoni
+      CardDealt(player2.id, Card(Sette, Bastoni), Direction.Player),    // Asso Spade, Re Bastoni, Sette Bastoni
       shortDelay,
-      CardDealt(player1.id, Card(Tre, Coppe), Face.Player),        // Asso Bastoni, Fante Spade, Tre Coppe
+      CardDealt(player1.id, Card(Tre, Coppe), Direction.Player),        // Asso Bastoni, Fante Spade, Tre Coppe
       ActionRequested(player2.id, Action.PlayCard),
       CardPlayed(player2.id, Card(Sette, Bastoni)),
       ActionRequested(player1.id, Action.PlayCard),
@@ -244,9 +244,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 23
 
       mediumDelay,
-      CardDealt(player1.id, Card(Fante, Coppe), Face.Player),      // Fante Spade, Tre Coppe, Fante Coppe
+      CardDealt(player1.id, Card(Fante, Coppe), Direction.Player),      // Fante Spade, Tre Coppe, Fante Coppe
       shortDelay,
-      CardDealt(player2.id, Card(Cinque, Bastoni), Face.Player),   // Asso Spade, Re Bastoni, Cinque Bastoni
+      CardDealt(player2.id, Card(Cinque, Bastoni), Direction.Player),   // Asso Spade, Re Bastoni, Cinque Bastoni
       ActionRequested(player1.id, Action.PlayCard),
       CardPlayed(player1.id, Card(Fante, Spade)),
       ActionRequested(player2.id, Action.PlayCard),
@@ -255,9 +255,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),  // 38
 
       mediumDelay,
-      CardDealt(player2.id, Card(Sei, Coppe), Face.Player),        // Re Bastoni, Cinque Bastoni, Sei Coppe
+      CardDealt(player2.id, Card(Sei, Coppe), Direction.Player),        // Re Bastoni, Cinque Bastoni, Sei Coppe
       shortDelay,
-      CardDealt(player1.id, Card(Cavallo, Denari), Face.Player),   // Tre Coppe, Fante Coppe, Cavallo Denari
+      CardDealt(player1.id, Card(Cavallo, Denari), Direction.Player),   // Tre Coppe, Fante Coppe, Cavallo Denari
       ActionRequested(player2.id, Action.PlayCard),
       CardPlayed(player2.id, Card(Cinque, Bastoni)),
       ActionRequested(player1.id, Action.PlayCard),
@@ -266,9 +266,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),  // 41
 
       mediumDelay,
-      CardDealt(player2.id, Card(Cavallo, Bastoni), Face.Player),  // Re Bastoni, Sei Coppe, Cavallo Bastoni
+      CardDealt(player2.id, Card(Cavallo, Bastoni), Direction.Player),  // Re Bastoni, Sei Coppe, Cavallo Bastoni
       shortDelay,
-      CardDealt(player1.id, Card(Due, Coppe), Face.Player),        // Tre Coppe, Fante Coppe, Due Coppe
+      CardDealt(player1.id, Card(Due, Coppe), Direction.Player),        // Tre Coppe, Fante Coppe, Due Coppe
       ActionRequested(player2.id, Action.PlayCard),
       CardPlayed(player2.id, Card(Re, Bastoni)),
       ActionRequested(player1.id, Action.PlayCard),
@@ -277,9 +277,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 27
 
       mediumDelay,
-      CardDealt(player1.id, Card(Fante, Denari), Face.Player),     // Tre Coppe, Fante Coppe, Fante Denari
+      CardDealt(player1.id, Card(Fante, Denari), Direction.Player),     // Tre Coppe, Fante Coppe, Fante Denari
       shortDelay,
-      CardDealt(player2.id, Card(Cavallo, Spade), Face.Player),    // Sei Coppe, Cavallo Bastoni, Cavallo Spade
+      CardDealt(player2.id, Card(Cavallo, Spade), Direction.Player),    // Sei Coppe, Cavallo Bastoni, Cavallo Spade
       ActionRequested(player1.id, Action.PlayCard),
       CardPlayed(player1.id, Card(Fante, Denari)),
       ActionRequested(player2.id, Action.PlayCard),
@@ -288,9 +288,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 32
 
       mediumDelay,
-      CardDealt(player1.id, Card(Quattro, Bastoni), Face.Player), // Tre Coppe, Fante Coppe, Quattro Bastoni
+      CardDealt(player1.id, Card(Quattro, Bastoni), Direction.Player), // Tre Coppe, Fante Coppe, Quattro Bastoni
       shortDelay,
-      CardDealt(player2.id, Card(Re, Coppe), Face.Player),        // Sei Coppe, Cavallo Spade, Re Coppe
+      CardDealt(player2.id, Card(Re, Coppe), Direction.Player),        // Sei Coppe, Cavallo Spade, Re Coppe
       ActionRequested(player1.id, Action.PlayCard),
       CardPlayed(player1.id, Card(Quattro, Bastoni)),
       ActionRequested(player2.id, Action.PlayCard),
@@ -299,9 +299,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 35
 
       mediumDelay,
-      CardDealt(player1.id, Card(Quattro, Coppe), Face.Player),   // Tre Coppe, Fante Coppe, Quattro Coppe
+      CardDealt(player1.id, Card(Quattro, Coppe), Direction.Player),   // Tre Coppe, Fante Coppe, Quattro Coppe
       shortDelay,
-      CardDealt(player2.id, Card(Asso, Denari), Face.Player),     // Sei Coppe, Re Coppe, Asso Denari
+      CardDealt(player2.id, Card(Asso, Denari), Direction.Player),     // Sei Coppe, Re Coppe, Asso Denari
       ActionRequested(player1.id, Action.PlayCard),
       CardPlayed(player1.id, Card(Quattro, Coppe)),
       ActionRequested(player2.id, Action.PlayCard),
@@ -310,9 +310,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),  // 41
 
       mediumDelay,
-      CardDealt(player2.id, Card(Sette, Spade), Face.Player),    // Re Coppe, Asso Denari, Sette Spade
+      CardDealt(player2.id, Card(Sette, Spade), Direction.Player),    // Re Coppe, Asso Denari, Sette Spade
       shortDelay,
-      CardDealt(player1.id, Card(Cinque, Denari), Face.Player),  // Tre Coppe, Fante Coppe, Cinque Denari
+      CardDealt(player1.id, Card(Cinque, Denari), Direction.Player),  // Tre Coppe, Fante Coppe, Cinque Denari
       ActionRequested(player2.id, Action.PlayCard),
       CardPlayed(player2.id, Card(Sette, Spade)),
       ActionRequested(player1.id, Action.PlayCard),
@@ -321,9 +321,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),  // 41
 
       mediumDelay,
-      CardDealt(player2.id, Card(Sette, Coppe), Face.Player),    // Re Coppe, Asso Denari, Sette Coppe
+      CardDealt(player2.id, Card(Sette, Coppe), Direction.Player),    // Re Coppe, Asso Denari, Sette Coppe
       shortDelay,
-      CardDealt(player1.id, Card(Re, Spade), Face.Player),       // Tre Coppe, Fante Coppe, Re Spade
+      CardDealt(player1.id, Card(Re, Spade), Direction.Player),       // Tre Coppe, Fante Coppe, Re Spade
       ActionRequested(player2.id, Action.PlayCard),
       CardPlayed(player2.id, Card(Sette, Coppe)),
       ActionRequested(player1.id, Action.PlayCard),
@@ -332,9 +332,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),  // 45
 
       mediumDelay,
-      CardDealt(player2.id, Card(Sei, Spade), Face.Player),      // Re Coppe, Asso Denari, Sei Spade
+      CardDealt(player2.id, Card(Sei, Spade), Direction.Player),      // Re Coppe, Asso Denari, Sei Spade
       shortDelay,
-      CardDealt(player1.id, Card(Quattro, Denari), Face.Player), // Tre Coppe, Fante Coppe, Quattro Denari
+      CardDealt(player1.id, Card(Quattro, Denari), Direction.Player), // Tre Coppe, Fante Coppe, Quattro Denari
       ActionRequested(player2.id, Action.PlayCard),
       CardPlayed(player2.id, Card(Sei, Spade)),
       ActionRequested(player1.id, Action.PlayCard),
@@ -343,9 +343,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),  // 45
 
       mediumDelay,
-      CardDealt(player2.id, Card(Tre, Bastoni), Face.Player),    // Re Coppe, Asso Denari, Tre Bastoni
+      CardDealt(player2.id, Card(Tre, Bastoni), Direction.Player),    // Re Coppe, Asso Denari, Tre Bastoni
       shortDelay,
-      CardDealt(player1.id, Card(Due, Spade), Face.Player),      // Tre Coppe, Fante Coppe, Due Spade
+      CardDealt(player1.id, Card(Due, Spade), Direction.Player),      // Tre Coppe, Fante Coppe, Due Spade
       ActionRequested(player2.id, Action.PlayCard),
       CardPlayed(player2.id, Card(Tre, Bastoni)),
       ActionRequested(player1.id, Action.PlayCard),
@@ -354,9 +354,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 47
 
       mediumDelay,
-      CardDealt(player1.id, Card(Cavallo, Coppe), Face.Player),  // Tre Coppe, Due Spade, Cavallo Coppe
+      CardDealt(player1.id, Card(Cavallo, Coppe), Direction.Player),  // Tre Coppe, Due Spade, Cavallo Coppe
       shortDelay,
-      CardDealt(player2.id, Card(Cinque, Coppe), Face.Player),   // Re Coppe, Asso Denari, Cinque Coppe
+      CardDealt(player2.id, Card(Cinque, Coppe), Direction.Player),   // Re Coppe, Asso Denari, Cinque Coppe
       ActionRequested(player1.id, Action.PlayCard),
       CardPlayed(player1.id, Card(Due, Spade)),
       ActionRequested(player2.id, Action.PlayCard),
@@ -413,17 +413,17 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
     Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
-      CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
+      CardDealt(player1.id, Card(Due, Bastoni), Direction.Player),
       shortDelay,
-      CardDealt(player2.id, Card(Asso, Spade), Face.Player),
+      CardDealt(player2.id, Card(Asso, Spade), Direction.Player),
       shortDelay,
-      CardDealt(player1.id, Card(Sette, Denari), Face.Player),
+      CardDealt(player1.id, Card(Sette, Denari), Direction.Player),
       shortDelay,
-      CardDealt(player2.id, Card(Quattro, Spade), Face.Player),
+      CardDealt(player2.id, Card(Quattro, Spade), Direction.Player),
       shortDelay,
-      CardDealt(player1.id, Card(Sei, Denari), Face.Player),
+      CardDealt(player1.id, Card(Sei, Denari), Direction.Player),
       shortDelay,
-      CardDealt(player2.id, Card(Re, Denari), Face.Player),
+      CardDealt(player2.id, Card(Re, Denari), Direction.Player),
       mediumDelay,
       TrumpRevealed(Card(Cinque, Coppe)),
       ActionRequested(player1.id, Action.PlayCard)
@@ -441,7 +441,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
     Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
-      CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
+      CardDealt(player1.id, Card(Due, Bastoni), Direction.Player),
       shortDelay,
       MatchAborted
     ).map(_.toMessage(roomId))
@@ -458,7 +458,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
     Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
-      CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
+      CardDealt(player1.id, Card(Due, Bastoni), Direction.Player),
       shortDelay
     ).map(_.toMessage(roomId))
   }
