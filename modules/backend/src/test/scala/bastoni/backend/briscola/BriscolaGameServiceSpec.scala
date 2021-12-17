@@ -13,6 +13,7 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
+
 import scala.concurrent.duration.DurationInt
 
 class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:

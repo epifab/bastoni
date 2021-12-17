@@ -2,6 +2,9 @@ package bastoni.backend
 
 import bastoni.domain.model.{Message, MessageId, RoomId}
 
+type GameRooms = Map[RoomId, GameStateMachine]
+type Messages  = Map[MessageId, Message | Delayed[Message]]
+
 trait GameServiceRepo[F[_]]:
-  def getSnapshot: F[(Map[RoomId, GameStateMachine], Map[MessageId, Message | Delayed[Message]])]
-  def setSnapshot(snapshot: Map[RoomId, GameStateMachine], inFlight: Map[MessageId, Message | Delayed[Message]]): F[Unit]
+  def getSnapshot: F[(GameRooms, Messages)]
+  def setSnapshot(snapshot: GameRooms, inFlight: Messages): F[Unit]

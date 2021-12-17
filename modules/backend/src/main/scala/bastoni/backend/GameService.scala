@@ -49,8 +49,8 @@ extension (messages: List[Command | Delayed[Command] | Event])
  * @param nextToFly The messages produced after by the latest iteration
  */
 case class GameServiceState(
-  snapshot: Map[RoomId, GameStateMachine],
-  currentlyInFlight: Map[MessageId, Message | Delayed[Message]],
+  snapshot: GameRooms,
+  currentlyInFlight: Messages,
   nextToFly: List[Message | Delayed[Message]]
 ):
   def contains(roomId: RoomId): Boolean = snapshot.contains(roomId)
@@ -94,8 +94,8 @@ object GameService:
   private def runStateMachines[F[_]: Concurrent](
     messages: fs2.Stream[F, Message],
     messageIds: fs2.Stream[F, MessageId],
-    initialSnapshot: Map[RoomId, GameStateMachine] = Map.empty,
-    initialInFlight: Map[MessageId, Message | Delayed[Message]] = Map.empty
+    initialSnapshot: GameRooms = Map.empty,
+    initialInFlight: Messages = Map.empty
   ): fs2.Stream[F, GameServiceState] =
     messages
       .evalScan[F, GameServiceState](GameServiceState(initialSnapshot, initialInFlight, Nil)) { case (state, message) =>
