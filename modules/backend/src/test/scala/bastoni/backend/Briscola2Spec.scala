@@ -6,13 +6,14 @@ import bastoni.domain.Suit.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class Briscola2Spec extends AnyFreeSpec with Matchers {
+class Briscola2Spec extends AnyFreeSpec with Matchers:
 
   val player1 = Player(PlayerId.newId, "Tizio")
   val player2 = Player(PlayerId.newId, "Caio")
+  val player3 = Player(PlayerId.newId, "Sempronio")
 
   val roomId = RoomId.newId
-  val room = Room(roomId, List(player1, player2), 2)
+  val room = Room(roomId, List(player1, player2))
 
   "A game can be played" in {
     val input =
@@ -254,4 +255,22 @@ class Briscola2Spec extends AnyFreeSpec with Matchers {
     )
   }
 
-}
+  "Irrelevant messages are ignored" in {
+    val input = fs2.Stream(
+      Message(room.id, ShuffleDeck(10)),
+      Message(room.id, ShuffleDeck(1)),         // ignored (already shuffled)
+      Message(room.id, DrawCard(player1)),
+      Message(room.id, DrawCard(player1)),      // ignored (not your turn)
+      Message(room.id, DrawCard(player3)),      // ignored (not in the room)
+      Message(room.id, DrawCard(player2)),
+      Message(room.id, PlayCard(player2, Card(Asso, Spade))),       // ignored (not your turn)
+      Message(room.id, PlayCard(player2, Card(Due, Bastoni))),         // ignored (not your card)
+      Message(RoomId.newId, PlayCard(player1, Card(Due, Bastoni))),    // ignored (different room)
+    )
+
+    Briscola[fs2.Pure](room, input).compile.toList shouldBe List(
+      Message(room.id, DeckShuffled(10)),
+      Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
+      Message(room.id, CardDealt(player2.id, Card(Asso, Spade))),
+    )
+  }

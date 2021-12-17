@@ -1,19 +1,19 @@
 package bastoni.backend
 
 import bastoni.domain.*
-import bastoni.domain.Rank.{Sei, Sette, Tre, *}
-import bastoni.domain.Suit.{Coppe, *}
+import bastoni.domain.Rank.*
+import bastoni.domain.Suit.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class Briscola3Spec extends AnyFreeSpec with Matchers {
+class Briscola3Spec extends AnyFreeSpec with Matchers:
 
   val player1 = Player(PlayerId.newId, "Tizio")
   val player2 = Player(PlayerId.newId, "Caio")
   val player3 = Player(PlayerId.newId, "Sempronio")
 
   val roomId = RoomId.newId
-  val room = Room(roomId, List(player1, player2, player3), 3)
+  val room = Room(roomId, List(player1, player2, player3))
 
   "A game can be played" in {
     val input =
@@ -229,5 +229,3 @@ class Briscola3Spec extends AnyFreeSpec with Matchers {
       MatchWinner(player1.id)
     )
   }
-
-}

@@ -75,7 +75,7 @@ object Briscola:
 
         case ((Ready(players), _), ShuffleDeck(seed)) =>
           val shuffledDeck = new Random(seed).shuffle(Deck.instance)
-          val strippedDeck = if (room.size == 3) shuffledDeck.filterNot(_ == Card(Rank.Due, Suit.Coppe)) else shuffledDeck
+          val strippedDeck = if (room.players.size == 3) shuffledDeck.filterNot(_ == Card(Rank.Due, Suit.Coppe)) else shuffledDeck
           DealRound(players.map(MatchPlayer(_, Set.empty, Set.empty)), Nil, 2, strippedDeck) ->
             List(DeckShuffled(seed))
 
@@ -134,6 +134,4 @@ object Briscola:
         case ((m, _), _) => m -> Nil
 
       }
-      .flatMap { case (_, events) =>
-        fs2.Stream.iterable[F, Event](events).map(Message(room.id, _))
-      }
+      .flatMap { case (_, events) => fs2.Stream.iterable[F, Event](events).map(Message(room.id, _)) }

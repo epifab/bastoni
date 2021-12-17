@@ -9,4 +9,4 @@ object RoomId:
   def newId: RoomId = UUID.randomUUID()
   def parse(s: String): Option[RoomId] = Try(UUID.fromString(s)).toOption
 
-case class Room(id: RoomId, players: List[Player], size: Int)
+case class Room(id: RoomId, players: List[Player])
