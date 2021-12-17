@@ -1,7 +1,13 @@
 package bastoni.domain.model
 
+import io.circe.{Encoder, Decoder}
+
 enum Suit:
   case Denari, Coppe, Spade, Bastoni
+
+object Suit:
+  given Encoder[Suit] = Encoder[String].contramap(_.toString)
+  given Decoder[Suit] = Decoder[String].map(Suit.valueOf)
 
 enum Rank(val value: Int):
   case Asso extends Rank(1)
@@ -15,7 +21,15 @@ enum Rank(val value: Int):
   case Cavallo extends Rank(9)
   case Re extends Rank(10)
 
+object Rank:
+  given Encoder[Rank] = Encoder[String].contramap(_.toString)
+  given Decoder[Rank] = Decoder[String].map(Rank.valueOf)
+
 case class Card(rank: Rank, suit: Suit)
+
+object Card:
+  given Encoder[Card] = Encoder[(Rank, Suit)].contramap(card => card.rank -> card.suit)
+  given Decoder[Card] = Decoder[(Rank, Suit)].map { case (rank, suit) => Card(rank, suit) }
 
 object Deck:
   val instance: List[Card] = (for {

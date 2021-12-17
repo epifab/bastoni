@@ -62,8 +62,8 @@ case class GameServiceState(
     copy(
       nextToFly = messages,
       currentlyInFlight = (currentlyInFlight ++ messages.map {
-        case delayed@ Delayed(message: Message, _) => message.messageId -> delayed
-        case message: Message => message.messageId -> message
+        case delayed@ Delayed(message: Message, _) => message.id -> delayed
+        case message: Message => message.id -> message
       })
     )
 
@@ -99,7 +99,7 @@ object GameService:
   ): fs2.Stream[F, GameServiceState] =
     messages
       .evalScan[F, GameServiceState](GameServiceState(initialSnapshot, initialInFlight, Nil)) { case (state, message) =>
-        (state.landed(message.messageId), message) match {
+        (state.landed(message.id), message) match {
           case (state, Message(_, roomId, StartGame(room, gameType))) if !state.contains(roomId) =>
             List(GameStarted(gameType))
               .toMessages(roomId, messageIds)
