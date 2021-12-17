@@ -201,17 +201,18 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           Seat(
             player = Some(ActingPlayer(gamePlayer1, Action.PlayCard, Some(Timeout.Max))),
             hand = List(CardServerView(player1Card, Direction.Player)),
-            collected = player1Collected.map(card => CardServerView(card, Direction.Down)),
+            taken = player1Collected.map(card => CardServerView(card, Direction.Down)),
             played = Nil
           ),
           Seat(
             player = Some(WaitingPlayer(gamePlayer2)),
             hand = Nil,
-            collected = Nil,
+            taken = Nil,
             played = List(CardServerView(player2Card, Direction.Up))
           )
         ),
         deck = Nil,
+        board = Nil,
         active = true
       ),
       stateMachine = Some(new briscola.StateMachine(
@@ -278,17 +279,18 @@ class GameServiceSpec extends AsyncIOFreeSpec:
             Seat(
               player = Some(EndOfGamePlayer(gamePlayer1.win, winner = true)),
               hand = Nil,
-              collected = Nil,
+              taken = Nil,
               played = Nil
             ),
             Seat(
               player = Some(EndOfGamePlayer(gamePlayer2, winner = false)),
               hand = Nil,
-              collected = Nil,
+              taken = Nil,
               played = Nil
             )
           ),
           deck = Nil,
+          board = Nil,
           active = false
         ),
         stateMachine = None

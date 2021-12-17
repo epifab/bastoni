@@ -32,8 +32,5 @@ class MatchPlayerSpec extends AnyFreeSpec with Matchers:
   }
 
   "Player.play" in {
-    matchPlayer.play(Card(Rank.Asso, Suit.Bastoni)) shouldBe (
-      MatchPlayer(gamePlayer, List(Card(Rank.Sette, Suit.Denari)), Nil),
-      Card(Rank.Asso, Suit.Bastoni)
-    )
+    matchPlayer.play(Card(Rank.Asso, Suit.Bastoni)) shouldBe MatchPlayer(gamePlayer, List(Card(Rank.Sette, Suit.Denari)), Nil)
   }

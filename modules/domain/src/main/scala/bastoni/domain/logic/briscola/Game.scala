@@ -112,11 +112,11 @@ object Game:
     case (wait: MatchState.WaitingForPlayer, event) if playMatchStepPF.isDefinedAt(wait.state -> event) => playMatchStepPF(wait.state -> event)
 
     case (MatchState.PlayRound(player :: Nil, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-      MatchState.WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), Continue.later)
+      MatchState.WillCompleteTrick(done :+ (player.play(card), card), deck, trump) -> List(CardPlayed(player.id, card), Continue.later)
 
     case (MatchState.PlayRound(player :: next :: players, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
       withTiemout(
-        state = MatchState.PlayRound(next :: players, done :+ player.play(card), deck, trump),
+        state = MatchState.PlayRound(next :: players, done :+ (player.play(card), card), deck, trump),
         request = ActionRequested(next.id, Action.PlayCard),
         before = List(CardPlayed(player.id, card))
       )
@@ -198,7 +198,7 @@ object Game:
       (points > other.points) || (points == other.points && card.rank.value > other.rank.value)
 
   extension(player: MatchPlayer)
-    def points: Int = player.collected.foldRight(0)(_.points + _)
+    def points: Int = player.taken.foldRight(0)(_.points + _)
 
   private def completeTrick(players: List[(MatchPlayer, Card)], trump: Card): List[MatchPlayer] =
     @tailrec
@@ -213,5 +213,5 @@ object Game:
           trickWinner(Some((opponent -> opponentCard)), tail)
         case (winner, _ :: tail) => trickWinner(winner, tail)
       }
-    val winner: MatchPlayer = trickWinner(None, players).collect(players.map(_(1)))
-    winner :: players.map(_(0)).slideUntil(_.is(winner.player)).tail
+    val winner: MatchPlayer = trickWinner(None, players).take(players.map(_(1)))
+    winner :: players.map(_(0)).slideUntil(_.is(winner)).tail

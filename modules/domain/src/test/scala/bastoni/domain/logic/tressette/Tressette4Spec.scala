@@ -15,7 +15,7 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
 
   val players = List(player1, player2, player3, player4)
 
-  val drawCard      = Continue
+  val drawCards      = Continue
   val completeTrick = Continue
   val completeMatch = Continue
 
@@ -23,7 +23,7 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
     val input =
       (
         fs2.Stream(ShuffleDeck(shuffleSeed)) ++
-        fs2.Stream(drawCard).repeatN(40) ++
+        fs2.Stream(drawCards).repeatN(40) ++
         fs2.Stream(
           PlayCard(player1.id, Card(Sei, Denari)),
           PlayCard(player2.id, Card(Re, Denari)),

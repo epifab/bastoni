@@ -44,6 +44,6 @@ case class GameContext(table: TableServerView, stateMachine: Option[GameStateMac
 object GameContext:
 
   def build(tableSize: Int): GameContext =
-    GameContext(TableServerView(List.fill(4)(Seat(None, Nil, Nil, Nil)), Nil, false), None)
+    GameContext(TableServerView(List.fill(4)(Seat(None, Nil, Nil, Nil)), Nil, Nil, false), None)
 
   given Codec[GameContext] = deriveCodec

@@ -15,6 +15,7 @@ object GameStateMachineFactory:
     gameType match
       case GameType.Briscola => briscola.StateMachine
       case GameType.Tressette => tressette.StateMachine
+      case GameType.Scopa => scopa.StateMachine
 
 
 trait GameStateMachine extends StateMachine[GameStateMachine]:

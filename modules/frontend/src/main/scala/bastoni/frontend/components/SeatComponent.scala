@@ -17,7 +17,7 @@ val SeatComponent =
         ),
         <.p(
           "Collected: ",
-          CardsComponent(seat.collected)
+          CardsComponent(seat.taken)
         ),
         <.p(
           "Played: ",

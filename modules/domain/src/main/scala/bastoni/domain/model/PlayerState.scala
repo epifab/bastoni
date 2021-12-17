@@ -12,9 +12,9 @@ case class SittingOut(override val player: Player) extends PlayerState:
   def sitIn: WaitingPlayer = WaitingPlayer(GamePlayer(player, points = 0))
 
 sealed trait SittingIn(val gamePlayer: GamePlayer) extends PlayerState:
-  override val player: Player = gamePlayer.player
+  override val player: Player = gamePlayer.basePlayer
   def mapPlayer(f: GamePlayer => GamePlayer): SittingIn
-  def sitOut: SittingOut = SittingOut(gamePlayer.player)
+  def sitOut: SittingOut = SittingOut(gamePlayer.basePlayer)
   def act(action: Action, timeout: Option[Timeout]): ActingPlayer = ActingPlayer(gamePlayer, action, timeout)
 
 case class WaitingPlayer(override val gamePlayer: GamePlayer) extends SittingIn(gamePlayer):

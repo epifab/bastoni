@@ -5,6 +5,7 @@ import io.circe.{Encoder, Decoder}
 enum GameType:
   case Briscola
   case Tressette
+  case Scopa
 
 object GameType:
   given Encoder[GameType] = Encoder[String].contramap(_.toString)

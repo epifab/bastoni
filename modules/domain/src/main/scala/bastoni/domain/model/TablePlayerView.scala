@@ -3,16 +3,21 @@ package bastoni.domain.model
 case class TablePlayerView(
   override val seats: List[Seat[CardPlayerView]],
   override val deck: List[CardPlayerView],
+  override val board: List[CardPlayerView],
   override val active: Boolean
 ) extends Table[CardPlayerView]:
 
   override type TableView = TablePlayerView
 
-  override protected def updateWith(seats: List[Seat[CardPlayerView]] = this.seats, deck: List[CardPlayerView] = this.deck, active: Boolean = this.active): TablePlayerView =
-    TablePlayerView(seats, deck, active)
+  override protected def updateWith(
+    seats: List[Seat[CardPlayerView]] = this.seats,
+    deck: List[CardPlayerView] = this.deck,
+    board: List[CardPlayerView] = this.board,
+    active: Boolean = this.active
+  ): TablePlayerView = TablePlayerView(seats, deck, board, active)
 
-  override protected def toC(card: CardServerView): CardPlayerView = CardPlayerView(card.facing match {
-    case Direction.Up => Some(card.card)
+  override protected def buildCard(card: Card, direction: Direction): CardPlayerView = CardPlayerView(direction match {
+    case Direction.Up => Some(card)
     case _ => None
   })
 

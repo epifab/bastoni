@@ -18,14 +18,14 @@ class JsonSpec extends AnyFreeSpec with Matchers:
     val expectedJson = parse(
       s"""
          |{
-         |  "id": "${player.gamePlayer.player.id}",
+         |  "id": "${player.id}",
          |  "name": "John",
          |  "points": 15,
          |  "hand": [
          |    ["Asso", "Denari"],
          |    ["Sette", "Denari"]
          |  ],
-         |  "collected": []
+         |  "taken": []
          |}""".stripMargin
     ).getOrElse(fail("Invalid json"))
 
@@ -39,7 +39,7 @@ class JsonSpec extends AnyFreeSpec with Matchers:
     val expectedJson = parse(
       s"""
          |{
-         |  "id": "${gamePlayer.player.id}",
+         |  "id": "${gamePlayer.id}",
          |  "name": "John",
          |  "points": 15
          |}""".stripMargin

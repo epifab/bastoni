@@ -23,7 +23,9 @@ object Event:
   case class  PlayerLeftTable(player: Player, seat: Int) extends PublicEvent
   case class  GameStarted(gameType: GameType) extends PublicEvent
   case class  TrumpRevealed(card: Card) extends PublicEvent
+  case class  BoardCardsDealt(cards: List[Card]) extends PublicEvent
   case class  CardPlayed(playerId: PlayerId, card: Card) extends PublicEvent
+  case class  CardsTaken(playerId: PlayerId, played: Card, taken: List[Card], extraPoint: Boolean) extends PublicEvent
   case class  ActionRequested(playerId: PlayerId, action: Action, timeout: Option[Timeout.Active] = None) extends PublicEvent
   case class  TimedOut(playerId: PlayerId, action: Action) extends PublicEvent
   case class  TrickCompleted(winnerId: PlayerId) extends PublicEvent
@@ -66,7 +68,9 @@ object Event:
     case obj: ActionRequested   => deriveEncoder[ActionRequested].mapJsonObject(_.add("type", "ActionRequested".asJson))(obj)
     case obj: TimedOut          => deriveEncoder[TimedOut].mapJsonObject(_.add("type", "TimedOut".asJson))(obj)
     case obj: TrumpRevealed     => deriveEncoder[TrumpRevealed].mapJsonObject(_.add("type", "TrumpRevealed".asJson))(obj)
+    case obj: BoardCardsDealt   => deriveEncoder[BoardCardsDealt].mapJsonObject(_.add("type", "BoardCardsDealt".asJson))(obj)
     case obj: CardPlayed        => deriveEncoder[CardPlayed].mapJsonObject(_.add("type", "CardPlayed".asJson))(obj)
+    case obj: CardsTaken        => deriveEncoder[CardsTaken].mapJsonObject(_.add("type", "CardsTaken".asJson))(obj)
     case obj: TrickCompleted    => deriveEncoder[TrickCompleted].mapJsonObject(_.add("type", "TrickCompleted".asJson))(obj)
     case obj: MatchCompleted    => deriveEncoder[MatchCompleted].mapJsonObject(_.add("type", "MatchCompleted".asJson))(obj)
     case obj: GameCompleted     => deriveEncoder[GameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson))(obj)
@@ -94,7 +98,9 @@ object Event:
     case "ActionRequested"   => deriveDecoder[ActionRequested](obj)
     case "TimedOut"          => deriveDecoder[TimedOut](obj)
     case "TrumpRevealed"     => deriveDecoder[TrumpRevealed](obj)
+    case "BoardCardsDealt"   => deriveDecoder[BoardCardsDealt](obj)
     case "CardPlayed"        => deriveDecoder[CardPlayed](obj)
+    case "CardsTaken"        => deriveDecoder[CardsTaken](obj)
     case "TrickCompleted"    => deriveDecoder[TrickCompleted](obj)
     case "MatchCompleted"    => deriveDecoder[MatchCompleted](obj)
     case "GameCompleted"     => deriveDecoder[GameCompleted](obj)

@@ -3,11 +3,7 @@ package bastoni.domain.model
 import io.circe.{Encoder, Decoder}
 import io.circe.generic.semiauto.{deriveEncoder, deriveDecoder}
 
-case class GamePlayer(player: Player, points: Int, dealer: Boolean = false):
-  val id: PlayerId = player.id
-  def is(p: Player): Boolean = p.id == id
-  def is(p: PlayerId): Boolean = p == id
-
+case class GamePlayer(basePlayer: Player, points: Int, dealer: Boolean = false) extends Player(basePlayer.id, basePlayer.name):
   def win: GamePlayer = copy(points = points + 1)
   def win(additionalPoints: Int): GamePlayer = copy(points = points + additionalPoints)
 
@@ -17,8 +13,8 @@ object GamePlayer:
 
   given Encoder[GamePlayer] = deriveEncoder[GamePlayerView].contramap(gamePlayer =>
     GamePlayerView(
-      gamePlayer.player.id,
-      gamePlayer.player.name,
+      gamePlayer.id,
+      gamePlayer.name,
       gamePlayer.points
     )
   )

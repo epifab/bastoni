@@ -30,7 +30,8 @@ object Fixtures:
 
   def willTick(hash: Int): Delayed[Command] = Delayed(Tick(hash), Delay.Tick)
 
-  val drawCard      = Continue
+  val dealCards     = Continue
+  val drawCards     = Continue
   val revealTrump   = Continue
   val completeTrick = Continue
   val completeMatch = Continue

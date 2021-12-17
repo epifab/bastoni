@@ -3,33 +3,30 @@ package bastoni.domain.model
 import io.circe.{Encoder, Decoder}
 import io.circe.generic.semiauto.{deriveEncoder, deriveDecoder}
 
-case class MatchPlayer(gamePlayer: GamePlayer, hand: List[Card], collected: List[Card]):
-  def player: Player = gamePlayer.player
-
-  val id: PlayerId = gamePlayer.id
-  def is(p: Player): Boolean = p.id == id
-  def is(p: PlayerId): Boolean = p == id
-
+case class MatchPlayer(gamePlayer: GamePlayer, hand: List[Card], taken: List[Card], extraPoints: Int = 0) extends Player(gamePlayer.id, gamePlayer.name):
   def has(card: Card): Boolean = hand.contains(card)
   def draw(card: Card) = copy(hand = card :: hand)
   def draw(cards: List[Card]) = copy(hand = cards ++ hand)
+  def addExtraPoints(points: Int): MatchPlayer = copy(extraPoints = extraPoints + points)
 
-  def play(card: Card) =
-    if (!has(card)) throw new IllegalArgumentException("Card not found")
-    copy(hand = hand.filterNot(_ == card)) -> card
+  def play(card: Card): MatchPlayer =
+    assert(has(card), "Players can't play cards that they don't own")
+    copy(hand = hand.filterNot(_ == card))
 
-  def collect(cards: List[Card]) = copy(collected = collected ++ cards)
+  def take(cards: List[Card]): MatchPlayer =
+    assert(!cards.exists(taken.contains), "Players can't take cards that were previously taken")
+    copy(taken = taken ++ cards)
 
 object MatchPlayer:
-  private case class MatchPlayerView(id: PlayerId, name: String, points: Int, hand: List[Card], collected: List[Card])
+  private case class MatchPlayerView(id: PlayerId, name: String, points: Int, hand: List[Card], taken: List[Card])
 
   given Encoder[MatchPlayer] = deriveEncoder[MatchPlayerView].contramap[MatchPlayer](matchPlayer =>
     MatchPlayerView(
-      matchPlayer.gamePlayer.player.id,
-      matchPlayer.gamePlayer.player.name,
+      matchPlayer.id,
+      matchPlayer.name,
       matchPlayer.gamePlayer.points,
       matchPlayer.hand,
-      matchPlayer.collected
+      matchPlayer.taken
     )
   )
 
@@ -40,6 +37,6 @@ object MatchPlayer:
         matchPlayer.points
       ),
       matchPlayer.hand,
-      matchPlayer.collected
+      matchPlayer.taken
     )
   )

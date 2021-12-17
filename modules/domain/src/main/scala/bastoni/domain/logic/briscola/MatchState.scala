@@ -7,8 +7,6 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
 
-import scala.util.hashing.Hashing
-
 sealed trait MatchState
 
 object MatchState:

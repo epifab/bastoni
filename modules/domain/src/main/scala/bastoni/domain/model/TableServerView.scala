@@ -8,15 +8,20 @@ enum TableError:
 case class TableServerView(
   override val seats: List[Seat[CardServerView]],
   override val deck: List[CardServerView],
+  override val board: List[CardServerView],
   override val active: Boolean
 ) extends Table[CardServerView]:
 
   override type TableView = TableServerView
 
-  override protected def updateWith(seats: List[Seat[CardServerView]] = this.seats, deck: List[CardServerView] = this.deck, active: Boolean = this.active): TableServerView =
-    TableServerView(seats, deck, active)
+  override protected def updateWith(
+    seats: List[Seat[CardServerView]] = this.seats,
+    deck: List[CardServerView] = this.deck,
+    board: List[CardServerView] = this.board,
+    active: Boolean = this.active
+  ): TableServerView = TableServerView(seats, deck, board, active)
 
-  override protected def toC(card: CardServerView): CardServerView = card
+  override protected def buildCard(card: Card, direction: Direction): CardServerView = CardServerView(card, direction)
   override protected def removeCard(cards: List[CardServerView], card: Card): List[CardServerView] = cards.filterNot(_.card == card)
 
   def update(event: ServerEvent): TableServerView = event match {
@@ -40,28 +45,29 @@ case class TableServerView(
   def toPlayerView(me: Player): TablePlayerView =
     TablePlayerView(
       seats = seats.map {
-        case Seat(player, hand, collected, played) =>
+        case Seat(player, hand, taken, played) =>
           Seat[CardPlayerView](
             player = player,
             hand = hand.map(_.toPlayerView(me.id, player.map(_.playerId))),
-            collected = collected.map(_.toPlayerView(me.id, player.map(_.playerId))),
+            taken = taken.map(_.toPlayerView(me.id, player.map(_.playerId))),
             played = played.map(_.toPlayerView(me.id, player.map(_.playerId)))
           )
       },
       deck = deck.map(_.toPlayerView(me.id, None)),
+      board = board.map(_.toPlayerView(me.id, None)),
       active = active
     )
 
-  val players: List[Player] = seats.collect { case Seat(Some(player), _, _, _) => player.player }
+  val players: List[Player] = seats.collect { case Seat(Some(seated), _, _, _) => seated.player }
   val size: Int = seats.size
   val isFull: Boolean = seats.forall(_.player.isDefined)
   val isEmpty: Boolean = seats.forall(_.player.isEmpty)
   val nonEmpty: Boolean = seats.exists(_.player.isDefined)
 
-  def contains(p: Player): Boolean = contains(p.id)
-  def contains(p: PlayerId): Boolean = seatIndexFor(p).isDefined
+  def contains(player: Player): Boolean = contains(player.id)
+  def contains(player: PlayerId): Boolean = seatIndexFor(player).isDefined
 
-  def seatIndexFor(p: Player): Option[Int] = seatIndexFor(p.id)
+  def seatIndexFor(player: Player): Option[Int] = seatIndexFor(player.id)
   def seatIndexFor(id: PlayerId): Option[Int] = indexedSeats.collectFirst { case (Seat(Some(player), _, _, _), index) if player.playerId == id => index }
 
   def join(p: Player, seed: Int): Either[TableError, (TableServerView, Int)] =

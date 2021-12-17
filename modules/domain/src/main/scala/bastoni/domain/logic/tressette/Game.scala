@@ -83,15 +83,15 @@ object Game:
 
     case (MatchState.PlayRound(player :: Nil, (firstDone, trump) :: done, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card, trump) =>
       // last player of the trick
-      MatchState.WillCompleteTrick((firstDone, trump) :: (done :+ player.play(card)), deck) -> List(CardPlayed(player.id, card), Continue.later)
+      MatchState.WillCompleteTrick((firstDone, trump) :: (done :+ (player.play(card), card)), deck) -> List(CardPlayed(player.id, card), Continue.later)
 
     case (MatchState.PlayRound(player :: next :: players, Nil, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card) =>
       // first player of the trick (can play any card)
-      MatchState.PlayRound(next :: players, player.play(card) :: Nil, deck) -> List(CardPlayed(player.id, card), ActionRequested(next.id, Action.PlayCardOf(card.suit)))
+      MatchState.PlayRound(next :: players, (player.play(card), card) :: Nil, deck) -> List(CardPlayed(player.id, card), ActionRequested(next.id, Action.PlayCardOf(card.suit)))
 
     case (MatchState.PlayRound(player :: next :: players, (firstDone, trump) :: done, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card, trump) =>
       // middle player of the trick
-      MatchState.PlayRound(next :: players, (firstDone, trump) :: (done :+ player.play(card)), deck) -> List(CardPlayed(player.id, card), ActionRequested(next.id, Action.PlayCardOf(trump.suit)))
+      MatchState.PlayRound(next :: players, (firstDone, trump) :: (done :+ (player.play(card), card)), deck) -> List(CardPlayed(player.id, card), ActionRequested(next.id, Action.PlayCardOf(trump.suit)))
 
     case (MatchState.WillCompleteTrick(players, deck), Continue) =>
       val updatedPlayers: List[MatchPlayer] = completeTrick(players)
@@ -185,7 +185,7 @@ object Game:
     def >(other: Card): Boolean = value > other.value
 
   extension(player: MatchPlayer)
-    def points: Int = player.collected.foldRight(0)(_.points + _)
+    def points: Int = player.taken.foldRight(0)(_.points + _)
     def canPlay(card: Card) = player.has(card)
     def canPlay(card: Card, trump: Card) = player.has(card) && (card.suit == trump.suit || player.hand.forall(_.suit != trump.suit))
 
@@ -200,5 +200,5 @@ object Game:
           trickWinner(Some((opponent, opponentCard)), tail)
         case (winner, _ :: tail) => trickWinner(winner, tail)
       }
-    val winner: MatchPlayer = trickWinner(None, players).collect(players.map(_(1)))
-    winner :: players.map(_(0)).slideUntil(_.is(winner.player)).tail
+    val winner: MatchPlayer = trickWinner(None, players).take(players.map(_(1)))
+    winner :: players.map(_(0)).slideUntil(_.is(winner)).tail

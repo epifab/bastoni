@@ -5,8 +5,6 @@ import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
 
-import scala.util.hashing.Hashing
-
 sealed trait Command
 
 object Command:
@@ -17,6 +15,7 @@ object Command:
   case class  StartGame(player: PlayerId, gameType: GameType) extends Command
   case class  ShuffleDeck(seed: Int) extends Command
   case class  PlayCard(player: PlayerId, card: Card) extends Command
+  case class  TakeCards(player: PlayerId, played: Card, taken: List[Card]) extends Command
   case object Continue extends Command
   case class  Tick(ref: Int) extends Command
 
@@ -26,6 +25,7 @@ object Command:
     case obj: StartGame     => deriveEncoder[StartGame].mapJsonObject(_.add("type", "StartGame".asJson))(obj)
     case obj: ShuffleDeck   => deriveEncoder[ShuffleDeck].mapJsonObject(_.add("type", "ShuffleDeck".asJson))(obj)
     case obj: PlayCard      => deriveEncoder[PlayCard].mapJsonObject(_.add("type", "PlayCard".asJson))(obj)
+    case obj: TakeCards     => deriveEncoder[TakeCards].mapJsonObject(_.add("type", "TakeCards".asJson))(obj)
     case obj: Tick          => deriveEncoder[Tick].mapJsonObject(_.add("type", "Tick".asJson))(obj)
     case Connect            => Json.obj("type" -> "Connect".asJson)
     case Continue           => Json.obj("type" -> "Continue".asJson)
@@ -37,6 +37,7 @@ object Command:
     case "StartGame"     => deriveDecoder[StartGame](obj)
     case "ShuffleDeck"   => deriveDecoder[ShuffleDeck](obj)
     case "PlayCard"      => deriveDecoder[PlayCard](obj)
+    case "TakeCards"     => deriveDecoder[TakeCards](obj)
     case "Tick"          => deriveDecoder[Tick](obj)
     case "Connect"       => Right(Connect)
     case "Continue"      => Right(Continue)

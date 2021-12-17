@@ -15,7 +15,7 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
 
   val players = List(player1, player2)
 
-  val drawCard      = Continue
+  val drawCards      = Continue
   val completeTrick = Continue
   val completeMatch = Continue
 
@@ -23,68 +23,68 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
     val input =
       (
         fs2.Stream(ShuffleDeck(shuffleSeed)) ++
-        fs2.Stream(drawCard).repeatN(20) ++
+        fs2.Stream(drawCards).repeatN(20) ++
         fs2.Stream(
           PlayCard(player1.id, Card(Sei, Denari)),
           PlayCard(player2.id, Card(Re, Denari)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player2.id, Card(Sei, Bastoni)),
           PlayCard(player1.id, Card(Re, Bastoni)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player1.id, Card(Sette, Denari)),
           PlayCard(player2.id, Card(Tre, Denari)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player2.id, Card(Cinque, Bastoni)),
           PlayCard(player1.id, Card(Due, Bastoni)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player1.id, Card(Cavallo, Denari)),
           PlayCard(player2.id, Card(Sette, Bastoni)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player1.id, Card(Fante, Denari)),
           PlayCard(player2.id, Card(Quattro, Bastoni)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player1.id, Card(Asso, Denari)),
           PlayCard(player2.id, Card(Sette, Spade)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player1.id, Card(Cinque, Denari)),
           PlayCard(player2.id, Card(Sette, Coppe)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player1.id, Card(Tre, Coppe)),
           PlayCard(player2.id, Card(Quattro, Coppe)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player1.id, Card(Quattro, Denari)),
           PlayCard(player2.id, Card(Quattro, Spade)),
           completeTrick,
 
-          drawCard,
-          drawCard,
+          drawCards,
+          drawCards,
           PlayCard(player1.id, Card(Due, Denari)),
           PlayCard(player2.id, Card(Sei, Spade)),
           completeTrick,
@@ -373,9 +373,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
   "Game is aborted if one of the active players leaves" ignore {
     val input = fs2.Stream[fs2.Pure, ServerEvent | Command](
       ShuffleDeck(shuffleSeed),
-      drawCard,
+      drawCards,
       PlayerLeftTable(player1, 1),
-      drawCard, // too late, game was aborted
+      drawCards, // too late, game was aborted
     ).map(_.toMessage(room1))
 
     Game.playMatch[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
@@ -392,7 +392,7 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       ShuffleDeck(shuffleSeed),
       PlayerJoinedTable(player3, 3),
       PlayerLeftTable(player3, 3),
-      drawCard,
+      drawCards,
     ).map(_.toMessage(room1))
 
     Game.playMatch[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
