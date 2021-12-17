@@ -132,3 +132,36 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     newStapshot shouldBe Map.empty        // when a game completes, the state machine goes away
     undeliveredEvents shouldBe Map.empty  // all outstanding events are expected to have been fully processed
   }
+
+  "Future undelivered events will still be sent" in {
+
+    val message1: Delayed[Message] = Delayed(Message(MessageId.newId, room1.id, CardPlayed(player2.id, Card(Rank.Asso, Suit.Coppe))), Delay.Long)
+    val message2: Delayed[Message] = Delayed(Message(MessageId.newId, room1.id, CardPlayed(player2.id, Card(Rank.Due, Suit.Coppe))), Delay.Medium)
+    val message3: Delayed[Message] = Delayed(Message(MessageId.newId, room1.id, CardPlayed(player2.id, Card(Rank.Tre, Suit.Coppe))), Delay.Short)
+
+    val events = (for {
+      bus <- MessageBus.inMemory[IO]
+      repo <- InMemoryGameServiceRepo[IO]
+      _ <- repo.setSnapshot(
+        Map.empty,
+        Map(
+          message1.inner.messageId -> message1,
+          message2.inner.messageId -> message2,
+          message3.inner.messageId -> message3
+        )
+      )
+      events <- (for {
+        subscription <- fs2.Stream.resource(bus.subscribeAwait)
+        message <- subscription
+          .concurrently(bus.run)
+          .concurrently(GameService.run[IO](bus, repo, {
+            case Delay.Short => 10.milli
+            case Delay.Medium => 20.millis
+            case Delay.Long => 30.millis
+          }))
+          .interruptAfter(100.millis)
+      } yield message).compile.toList
+    } yield events).unsafeRunSync()
+
+    events shouldBe List(message3.inner, message2.inner, message1.inner)
+  }
