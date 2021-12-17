@@ -1,6 +1,6 @@
-package bastoni.backend.briscola
+package bastoni.backend
+package briscola
 
-import bastoni.backend.{GamePlayer, GameStateMachine, MatchPlayer}
 import bastoni.domain.*
 
 import scala.annotation.tailrec
@@ -8,28 +8,28 @@ import scala.util.Random
 
 object Game:
 
-  def playMatch[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
+  def playMatch[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | DelayedMessage] =
     playStream(room, MatchState(room.players), playMatchStep, s => s.isInstanceOf[MatchState.Terminated], messages)
 
-  def playGame[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
+  def playGame[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | DelayedMessage] =
     playStream(room, GameState(room.players), playGameStep, s => s == GameState.Terminated, messages)
 
   private def playStream[F[_], State](
     room: Room,
     initialState: State,
-    handler: (State, Event | Command) => (State, List[Event]),
+    handler: (State, Event | Command) => (State, List[Event | Command | DelayedCommand]),
     isFinal: State => Boolean,
     messages: fs2.Stream[F, Message]
-  ): fs2.Stream[F, Message] =
+  ): fs2.Stream[F, Message | DelayedMessage] =
     messages
       .collect { case Message(roomId, message) if roomId == room.id => message }
-      .scan[(State, List[Event])](initialState -> Nil) {
+      .scan[(State, List[Event | Command | DelayedCommand])](initialState -> Nil) {
         case ((state, _), message) => handler(state, message)
       }
       .takeThrough { case ((state, _)) => !isFinal(state) }
-      .flatMap { case (_, events) => fs2.Stream.iterable[F, Event](events).map(Message(room.id, _)) }
+      .flatMap { case (_, events) => fs2.Stream.iterable(events).map(_.toMessage(room.id)) }
 
-  private[briscola] val playMatchStep: (MatchState, Command | Event) => (MatchState, List[Event]) = {
+  private[briscola] val playMatchStep: (MatchState, Command | Event) => (MatchState, List[Event | Command | DelayedCommand]) = {
 
     case (_, _: PlayerLeft) =>
       MatchState.Aborted -> List(MatchAborted)
@@ -48,17 +48,17 @@ object Game:
           Nil,
           2,
           deck
-        ) -> List(DeckShuffled(seed))
+        ) -> List(DeckShuffled(seed), Continue.delayed)
       }
 
     case (MatchState.DealRound(player :: Nil, done, 0, deck), Continue) =>
-      deck.deal { (card, tail) => MatchState.WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card)) }
+      deck.deal { (card, tail) => MatchState.WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card), Continue.delayed) }
 
     case (MatchState.DealRound(player :: Nil, done, remaining, deck), Continue) =>
-      deck.deal { (card, tail) => MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card)) }
+      deck.deal { (card, tail) => MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
 
     case (MatchState.DealRound(player :: todo, done, remaining, deck), Continue) =>
-      deck.deal { (card, tail) => MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card)) }
+      deck.deal { (card, tail) => MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
 
     case (MatchState.WillDealTrump(players, deck), Continue) =>
       deck.deal { (card, tail) => MatchState.PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card)) }
@@ -67,10 +67,10 @@ object Game:
       deck.deal { (card, tail) => MatchState.PlayRound(done :+ player.draw(card), Nil, tail, trump) -> List(CardDealt(player.id, card)) }
 
     case (MatchState.DrawRound(player :: todo, done, deck, trump), Continue) =>
-      deck.deal { (card, tail) => MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card)) }
+      deck.deal { (card, tail) => MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card), Continue.shortly) }
 
     case (MatchState.PlayRound(player :: Nil, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-      MatchState.WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card))
+      MatchState.WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), Continue.delayed)
 
     case (MatchState.PlayRound(player :: players, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
       MatchState.PlayRound(players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card))
@@ -79,12 +79,12 @@ object Game:
       val updatedPlayers = completeTrick(players, trump)
       val winner = updatedPlayers.head
 
-      val state =
-        if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers, trump)
-        else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil, trump)
-        else MatchState.DrawRound(updatedPlayers, Nil, deck, trump)
+      val (state, delay) =
+        if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers, trump) -> Some(Continue.veryDelayed)
+        else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil, trump) -> None
+        else MatchState.DrawRound(updatedPlayers, Nil, deck, trump) -> Some(Continue.delayed)
 
-      state -> List(TrickWinner(winner.id))
+      state -> (TrickWinner(winner.id) :: delay.toList)
 
     case (MatchState.WillComplete(players, trump), Continue) =>
       val teams = players match
@@ -104,7 +104,7 @@ object Game:
     case (m, _) => m -> Nil
   }
 
-  private[briscola] val playGameStep: (GameState, Command | Event) => (GameState, List[Event]) = {
+  private[briscola] val playGameStep: (GameState, Command | Event) => (GameState, List[Event | Command | DelayedCommand]) = {
 
     case (GameState.InProgress(players, matchState, rounds), message) =>
       playMatchStep(matchState, message) match

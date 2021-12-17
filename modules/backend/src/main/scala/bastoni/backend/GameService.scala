@@ -3,12 +3,29 @@ package bastoni.backend
 import bastoni.backend.briscola
 import bastoni.domain.*
 
-trait GameStateMachine extends ((Event | Command) => (Option[GameStateMachine], List[Event]))
+enum Delay:
+  case Short, Medium, Long
+
+case class DelayedCommand(command: Command, delay: Delay)
+case class DelayedMessage(message: Message, delay: Delay)
+
+extension (command: Command)
+  def shortly: DelayedCommand = DelayedCommand(command, Delay.Short)
+  def delayed: DelayedCommand = DelayedCommand(command, Delay.Medium)
+  def veryDelayed: DelayedCommand = DelayedCommand(command, Delay.Long)
+
+extension (message: Command | DelayedCommand | Event)
+  def toMessage(roomId: RoomId): Message | DelayedMessage = message match
+    case DelayedCommand(command, delay) => DelayedMessage(Message(roomId, command), delay)
+    case command: Command => Message(roomId, command)
+    case event: Event => Message(roomId, event)
+
+trait GameStateMachine extends ((Event | Command) => (Option[GameStateMachine], List[Command | DelayedCommand | Event]))
 
 object GameService:
-  def apply[F[_]](messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
+  def apply[F[_]](messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | DelayedMessage] =
     messages
-      .scan[(Map[RoomId, GameStateMachine], List[Message])](Map.empty -> Nil) {
+      .scan[(Map[RoomId, GameStateMachine], List[Message | DelayedMessage])](Map.empty -> Nil) {
         case ((stateMachines, _), Message(roomId, StartGame(room, GameType.Briscola))) if !stateMachines.contains(roomId) =>
           (stateMachines + (roomId -> briscola.StateMachine(room.players))) -> Nil
 
@@ -16,9 +33,9 @@ object GameService:
           stateMachines.get(roomId).fold(stateMachines -> Nil) { stateMachine =>
             stateMachine(message) match
               case (Some(newStateMachine), events) =>
-                (stateMachines + (roomId -> newStateMachine)) -> events.map(Message(roomId, _))
+                (stateMachines + (roomId -> newStateMachine)) -> events.map(_.toMessage(roomId))
               case (None, events) =>
-                (stateMachines - roomId) -> events.map(Message(roomId, _))
+                (stateMachines - roomId) -> events.map(_.toMessage(roomId))
           }
       }
       .flatMap { case (_, messages) => fs2.Stream.iterable(messages) }

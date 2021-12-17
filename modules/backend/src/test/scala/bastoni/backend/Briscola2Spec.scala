@@ -1,5 +1,6 @@
 package bastoni.backend
 
+import bastoni.backend
 import bastoni.backend.briscola.Game
 import bastoni.domain.*
 import bastoni.domain.Rank.*
@@ -20,6 +21,10 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
   val revealTrump   = Continue
   val completeTrick = Continue
   val completeMatch = Continue
+
+  val shortDelay = DelayedCommand(Continue, Delay.Short)
+  val mediumDelay = DelayedCommand(Continue, Delay.Medium)
+  val longDelay = DelayedCommand(Continue, Delay.Long)
 
   "A game can be played" in {
     val input =
@@ -151,136 +156,196 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
       ).map(Message(roomId, _))
 
-    Game.playMatch[fs2.Pure](room)(input).map(_.message).compile.toList shouldBe List(
+    Game.playMatch[fs2.Pure](room)(input).compile.toList shouldBe List[Event | DelayedCommand](
       DeckShuffled(10),
-
+      mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni)),
+      shortDelay,
       CardDealt(player2.id, Card(Asso, Spade)),
+      shortDelay,
       CardDealt(player1.id, Card(Sette, Denari)),
+      shortDelay,
       CardDealt(player2.id, Card(Quattro, Spade)),
+      shortDelay,
       CardDealt(player1.id, Card(Sei, Denari)),
+      shortDelay,
       CardDealt(player2.id, Card(Re, Denari)),
-
+      mediumDelay,
       TrumpRevealed(Card(Cinque, Coppe)),
 
       CardPlayed(player1.id, Card(Due, Bastoni)),
       CardPlayed(player2.id, Card(Quattro, Spade)),
+      mediumDelay,
       TrickWinner(player1.id),  // 0
 
+      mediumDelay,
       CardDealt(player1.id, Card(Asso, Bastoni)),     // Sette Denari, Sei Denari, Asso Bastoni
+      shortDelay,
       CardDealt(player2.id, Card(Cinque, Spade)),     // Asso Spade, Re Denari, Cinque spade
       CardPlayed(player1.id, Card(Sei, Denari)),
       CardPlayed(player2.id, Card(Re, Denari)),
+      mediumDelay,
       TrickWinner(player2.id),  // 4
 
+      mediumDelay,
       CardDealt(player2.id, Card(Sei, Bastoni)),      // Asso Spade, Cinque Spade, Sei Bastoni
+      shortDelay,
       CardDealt(player1.id, Card(Tre, Spade)),        // Sette Denari, Asso Bastoni, Tre Spade
       CardPlayed(player2.id, Card(Cinque, Spade)),
       CardPlayed(player1.id, Card(Tre, Spade)),
+      mediumDelay,
       TrickWinner(player1.id),  // 10
 
+      mediumDelay,
       CardDealt(player1.id, Card(Tre, Denari)),       // Sette Denari, Asso Bastoni, Tre Denari
+      shortDelay,
       CardDealt(player2.id, Card(Asso, Coppe)),       // Asso Spade, Sei Bastoni, Asso Coppe
       CardPlayed(player1.id, Card(Sette, Denari)),
       CardPlayed(player2.id, Card(Sei, Bastoni)),
+      mediumDelay,
       TrickWinner(player1.id),  // 10
 
+      mediumDelay,
       CardDealt(player1.id, Card(Fante, Bastoni)),    // Asso Bastoni, Tre Denari, Fante Bastoni
+      shortDelay,
       CardDealt(player2.id, Card(Due, Denari)),       // Asso Spade, Asso Coppe, Due Denari
       CardPlayed(player1.id, Card(Fante, Bastoni)),
       CardPlayed(player2.id, Card(Due, Denari)),
+      mediumDelay,
       TrickWinner(player1.id),  // 12
 
+      mediumDelay,
       CardDealt(player1.id, Card(Fante, Spade)),      // Asso Bastoni, Tre Denari, Fante Spade
+      shortDelay,
       CardDealt(player2.id, Card(Re, Bastoni)),       // Asso Spade, Asso Coppe, Re Bastoni
       CardPlayed(player1.id, Card(Tre, Denari)),
       CardPlayed(player2.id, Card(Asso, Coppe)),
+      mediumDelay,
       TrickWinner(player2.id),  // 25
 
+      mediumDelay,
       CardDealt(player2.id, Card(Sette, Bastoni)),    // Asso Spade, Re Bastoni, Sette Bastoni
+      shortDelay,
       CardDealt(player1.id, Card(Tre, Coppe)),        // Asso Bastoni, Fante Spade, Tre Coppe
       CardPlayed(player2.id, Card(Sette, Bastoni)),
       CardPlayed(player1.id, Card(Asso, Bastoni)),
+      mediumDelay,
       TrickWinner(player1.id),  // 23
 
+      mediumDelay,
       CardDealt(player1.id, Card(Fante, Coppe)),      // Fante Spade, Tre Coppe, Fante Coppe
+      shortDelay,
       CardDealt(player2.id, Card(Cinque, Bastoni)),   // Asso Spade, Re Bastoni, Cinque Bastoni
       CardPlayed(player1.id, Card(Fante, Spade)),
       CardPlayed(player2.id, Card(Asso, Spade)),
+      mediumDelay,
       TrickWinner(player2.id),  // 38
 
+      mediumDelay,
       CardDealt(player2.id, Card(Sei, Coppe)),        // Re Bastoni, Cinque Bastoni, Sei Coppe
+      shortDelay,
       CardDealt(player1.id, Card(Cavallo, Denari)),   // Tre Coppe, Fante Coppe, Cavallo Denari
       CardPlayed(player2.id, Card(Cinque, Bastoni)),
       CardPlayed(player1.id, Card(Cavallo, Denari)),
+      mediumDelay,
       TrickWinner(player2.id),  // 41
 
+      mediumDelay,
       CardDealt(player2.id, Card(Cavallo, Bastoni)),  // Re Bastoni, Sei Coppe, Cavallo Bastoni
+      shortDelay,
       CardDealt(player1.id, Card(Due, Coppe)),        // Tre Coppe, Fante Coppe, Due Coppe
       CardPlayed(player2.id, Card(Re, Bastoni)),
       CardPlayed(player1.id, Card(Due, Coppe)),
+      mediumDelay,
       TrickWinner(player1.id),  // 27
 
+      mediumDelay,
       CardDealt(player1.id, Card(Fante, Denari)),     // Tre Coppe, Fante Coppe, Fante Denari
+      shortDelay,
       CardDealt(player2.id, Card(Cavallo, Spade)),    // Sei Coppe, Cavallo Bastoni, Cavallo Spade
       CardPlayed(player1.id, Card(Fante, Denari)),
       CardPlayed(player2.id, Card(Cavallo, Bastoni)),
+      mediumDelay,
       TrickWinner(player1.id),  // 32
 
+      mediumDelay,
       CardDealt(player1.id, Card(Quattro, Bastoni)), // Tre Coppe, Fante Coppe, Quattro Bastoni
+      shortDelay,
       CardDealt(player2.id, Card(Re, Coppe)),        // Sei Coppe, Cavallo Spade, Re Coppe
       CardPlayed(player1.id, Card(Quattro, Bastoni)),
       CardPlayed(player2.id, Card(Cavallo, Spade)),
+      mediumDelay,
       TrickWinner(player1.id),  // 35
 
+      mediumDelay,
       CardDealt(player1.id, Card(Quattro, Coppe)),   // Tre Coppe, Fante Coppe, Quattro Coppe
+      shortDelay,
       CardDealt(player2.id, Card(Asso, Denari)),     // Sei Coppe, Re Coppe, Asso Denari
       CardPlayed(player1.id, Card(Quattro, Coppe)),
       CardPlayed(player2.id, Card(Sei, Coppe)),
+      mediumDelay,
       TrickWinner(player2.id),  // 41
 
+      mediumDelay,
       CardDealt(player2.id, Card(Sette, Spade)),    // Re Coppe, Asso Denari, Sette Spade
+      shortDelay,
       CardDealt(player1.id, Card(Cinque, Denari)),  // Tre Coppe, Fante Coppe, Cinque Denari
       CardPlayed(player2.id, Card(Sette, Spade)),
       CardPlayed(player1.id, Card(Cinque, Denari)),
+      mediumDelay,
       TrickWinner(player2.id),  // 41
 
+      mediumDelay,
       CardDealt(player2.id, Card(Sette, Coppe)),    // Re Coppe, Asso Denari, Sette Coppe
+      shortDelay,
       CardDealt(player1.id, Card(Re, Spade)),       // Tre Coppe, Fante Coppe, Re Spade
       CardPlayed(player2.id, Card(Sette, Coppe)),
       CardPlayed(player1.id, Card(Re, Spade)),
+      mediumDelay,
       TrickWinner(player2.id),  // 45
 
+      mediumDelay,
       CardDealt(player2.id, Card(Sei, Spade)),      // Re Coppe, Asso Denari, Sei Spade
+      shortDelay,
       CardDealt(player1.id, Card(Quattro, Denari)), // Tre Coppe, Fante Coppe, Quattro Denari
       CardPlayed(player2.id, Card(Sei, Spade)),
       CardPlayed(player1.id, Card(Quattro, Denari)),
+      mediumDelay,
       TrickWinner(player2.id),  // 45
 
+      mediumDelay,
       CardDealt(player2.id, Card(Tre, Bastoni)),    // Re Coppe, Asso Denari, Tre Bastoni
+      shortDelay,
       CardDealt(player1.id, Card(Due, Spade)),      // Tre Coppe, Fante Coppe, Due Spade
       CardPlayed(player2.id, Card(Tre, Bastoni)),
       CardPlayed(player1.id, Card(Fante, Coppe)),
+      mediumDelay,
       TrickWinner(player1.id),  // 47
 
+      mediumDelay,
       CardDealt(player1.id, Card(Cavallo, Coppe)),  // Tre Coppe, Due Spade, Cavallo Coppe
+      shortDelay,
       CardDealt(player2.id, Card(Cinque, Coppe)),   // Re Coppe, Asso Denari, Cinque Coppe
       CardPlayed(player1.id, Card(Due, Spade)),
       CardPlayed(player2.id, Card(Asso, Denari)),
+      mediumDelay,
       TrickWinner(player1.id),  // 58
 
       CardPlayed(player1.id, Card(Cavallo, Coppe)),
       CardPlayed(player2.id, Card(Re, Coppe)),
+      mediumDelay,
       TrickWinner(player2.id),  // 52
 
       CardPlayed(player2.id, Card(Cinque, Coppe)),
       CardPlayed(player1.id, Card(Tre, Coppe)),
+      mediumDelay,
       TrickWinner(player1.id),  // 68
 
+      longDelay,
       PointsCount(List(player1.id), 68),
       PointsCount(List(player2.id), 52),
       MatchWinners(List(player1.id))
-    )
+    ).map(_.toMessage(roomId))
   }
 
   "Irrelevant messages are ignored" in {
@@ -300,16 +365,23 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       Message(RoomId.newId, PlayCard(player1.id, Card(Due, Bastoni))), // ignored (different room)
     )
 
-    Game.playMatch[fs2.Pure](room)(input).compile.toList shouldBe List(
-      Message(room.id, DeckShuffled(10)),
-      Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
-      Message(room.id, CardDealt(player2.id, Card(Asso, Spade))),
-      Message(room.id, CardDealt(player1.id, Card(Sette, Denari))),
-      Message(room.id, CardDealt(player2.id, Card(Quattro, Spade))),
-      Message(room.id, CardDealt(player1.id, Card(Sei, Denari))),
-      Message(room.id, CardDealt(player2.id, Card(Re, Denari))),
-      Message(room.id, TrumpRevealed(Card(Cinque, Coppe)))
-    )
+    Game.playMatch[fs2.Pure](room)(input).compile.toList shouldBe List[Event | DelayedCommand](
+      DeckShuffled(10),
+      mediumDelay,
+      CardDealt(player1.id, Card(Due, Bastoni)),
+      shortDelay,
+      CardDealt(player2.id, Card(Asso, Spade)),
+      shortDelay,
+      CardDealt(player1.id, Card(Sette, Denari)),
+      shortDelay,
+      CardDealt(player2.id, Card(Quattro, Spade)),
+      shortDelay,
+      CardDealt(player1.id, Card(Sei, Denari)),
+      shortDelay,
+      CardDealt(player2.id, Card(Re, Denari)),
+      mediumDelay,
+      TrumpRevealed(Card(Cinque, Coppe))
+    ).map(_.toMessage(room.id))
   }
 
   "Game is aborted if a player leaves" in {
@@ -320,9 +392,11 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       Message(room.id, drawCard), // too late, game was aborted
     )
 
-    Game.playMatch[fs2.Pure](room)(input).compile.toList shouldBe List(
-      Message(room.id, DeckShuffled(10)),
-      Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
-      Message(room.id, MatchAborted)
-    )
+    Game.playMatch[fs2.Pure](room)(input).compile.toList shouldBe List[Event | DelayedCommand](
+      DeckShuffled(10),
+      mediumDelay,
+      CardDealt(player1.id, Card(Due, Bastoni)),
+      shortDelay,
+      MatchAborted
+    ).map(_.toMessage(room.id))
   }

@@ -29,10 +29,15 @@ class GameServiceSpec extends AnyFreeSpec with Matchers:
 
     GameService(input).compile.toList shouldBe List(
       Message(room1.id, DeckShuffled(10)),
+      DelayedMessage(Message(room1.id, Continue), Delay.Medium),
       Message(room1.id, CardDealt(player1.id, Card(Due, Bastoni))),
+      DelayedMessage(Message(room1.id, Continue), Delay.Short),
       Message(room2.id, DeckShuffled(10)),
+      DelayedMessage(Message(room2.id, Continue), Delay.Medium),
       Message(room1.id, CardDealt(player2.id, Card(Asso,Spade))),
+      DelayedMessage(Message(room1.id, Continue), Delay.Short),
       Message(room2.id, CardDealt(player2.id, Card(Due, Bastoni))),
+      DelayedMessage(Message(room2.id, Continue), Delay.Short),
       Message(room1.id, MatchAborted)
     )
   }

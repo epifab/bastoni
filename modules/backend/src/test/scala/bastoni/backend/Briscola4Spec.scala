@@ -28,6 +28,10 @@ object Briscola4Spec:
   val completeTrick = Continue
   val completeMatch = Continue
 
+  val shortDelay = DelayedCommand(Continue, Delay.Short)
+  val mediumDelay = DelayedCommand(Continue, Delay.Medium)
+  val longDelay = DelayedCommand(Continue, Delay.Long)
+
   def input(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
     fs2.Stream(
       ShuffleDeck(10),
@@ -139,116 +143,168 @@ object Briscola4Spec:
     ).map(Message(roomId, _))
 
   def output(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
-    List(
+    List[Event | DelayedCommand](
       DeckShuffled(10),
+      mediumDelay,
 
       CardDealt(player1.id, Card(Due, Bastoni)),
+      shortDelay,
       CardDealt(player2.id, Card(Asso, Spade)),
+      shortDelay,
       CardDealt(player3.id, Card(Sette, Denari)),
+      shortDelay,
       CardDealt(player4.id, Card(Quattro, Spade)),
 
+      shortDelay,
       CardDealt(player1.id, Card(Sei, Denari)),
+      shortDelay,
       CardDealt(player2.id, Card(Re, Denari)),
+      shortDelay,
       CardDealt(player3.id, Card(Cinque, Coppe)),
+      shortDelay,
       CardDealt(player4.id, Card(Asso, Bastoni)),
 
+      shortDelay,
       CardDealt(player1.id, Card(Cinque, Spade)), // Due Bastoni, Sei Denari, Cinque Spade
+      shortDelay,
       CardDealt(player2.id, Card(Sei, Bastoni)),  // Asso Spade, Re Denari, Sei Bastoni
+      shortDelay,
       CardDealt(player3.id, Card(Tre, Spade)),    // Sette Denari, Cinque Coppe, Tre Spade
+      shortDelay,
       CardDealt(player4.id, Card(Tre, Denari)),   // Quattro Spade, Asso Bastoni, Tre Denari
 
+      mediumDelay,
       TrumpRevealed(Card(Asso, Coppe)),
 
       CardPlayed(player1.id, Card(Due, Bastoni)),
       CardPlayed(player2.id, Card(Sei, Bastoni)),
       CardPlayed(player3.id, Card(Sette, Denari)),
       CardPlayed(player4.id, Card(Asso, Bastoni)),
+      mediumDelay,
       TrickWinner(player4.id),  // 11
 
+      mediumDelay,
       CardDealt(player4.id, Card(Fante, Bastoni)),  // Quattro Spade, Tre Denari, Fante Bastoni
+      shortDelay,
       CardDealt(player1.id, Card(Due, Denari)),     // Sei Denari, Cinque Spade, Due Denari
+      shortDelay,
       CardDealt(player2.id, Card(Fante, Spade)),    // Asso Spade, Re Denari, Fante Spade
+      shortDelay,
       CardDealt(player3.id, Card(Re, Bastoni)),     // Cinque Coppe, Tre Spade, Re Bastoni
       CardPlayed(player4.id, Card(Fante, Bastoni)),
       CardPlayed(player1.id, Card(Due, Denari)),
       CardPlayed(player2.id, Card(Fante, Spade)),
       CardPlayed(player3.id, Card(Re, Bastoni)),
+      mediumDelay,
       TrickWinner(player3.id),  // 8
 
+      mediumDelay,
       CardDealt(player3.id, Card(Sette, Bastoni)),  // Cinque Coppe, Tre Spade, Sette Bastoni
+      shortDelay,
       CardDealt(player4.id, Card(Tre, Coppe)),      // Quattro Spade, Tre Denari, Tre Coppe
+      shortDelay,
       CardDealt(player1.id, Card(Fante, Coppe)),    // Sei Denari, Cinque Spade, Fante Coppe
+      shortDelay,
       CardDealt(player2.id, Card(Cinque, Bastoni)), // Asso Spade, Re Denari, Cinque Bastoni
       CardPlayed(player3.id, Card(Sette, Bastoni)),
       CardPlayed(player4.id, Card(Quattro, Spade)),
       CardPlayed(player1.id, Card(Sei, Denari)),
       CardPlayed(player2.id, Card(Cinque, Bastoni)),
+      mediumDelay,
       TrickWinner(player3.id),  // 0 + 8 = 8
 
+      mediumDelay,
       CardDealt(player3.id, Card(Sei, Coppe)),        // Cinque Coppe, Tre Spade, Sei Coppe
+      shortDelay,
       CardDealt(player4.id, Card(Cavallo, Denari)),   // Tre Denari, Tre Coppe, Cavallo Denari
+      shortDelay,
       CardDealt(player1.id, Card(Cavallo, Bastoni)),  // Cinque Spade, Fante Coppe, Cavallo Bastoni
+      shortDelay,
       CardDealt(player2.id, Card(Due, Coppe)),        // Asso Spade, Re Denari, Due Coppe
       CardPlayed(player3.id, Card(Sei, Coppe)),
       CardPlayed(player4.id, Card(Cavallo, Denari)),
       CardPlayed(player1.id, Card(Cavallo, Bastoni)),
       CardPlayed(player2.id, Card(Re, Denari)),
+      mediumDelay,
       TrickWinner(player3.id),  // 10 + 8 = 18
 
+      mediumDelay,
       CardDealt(player3.id, Card(Fante, Denari)),     // Cinque Coppe, Tre Spade, Fante Denari
+      shortDelay,
       CardDealt(player4.id, Card(Cavallo, Spade)),    // Tre Denari, Tre Coppe, Cavallo Spade
+      shortDelay,
       CardDealt(player1.id, Card(Quattro, Bastoni)),  // Cinque Spade, Fante Coppe, Quattro Bastoni
+      shortDelay,
       CardDealt(player2.id, Card(Re, Coppe)),         // Asso Spade, Due Coppe, Re Coppe
       CardPlayed(player3.id, Card(Fante, Denari)),
       CardPlayed(player4.id, Card(Tre, Denari)),
       CardPlayed(player1.id, Card(Quattro, Bastoni)),
       CardPlayed(player2.id, Card(Re, Coppe)),
+      mediumDelay,
       TrickWinner(player2.id),  // 16 + 11 = 27
 
+      mediumDelay,
       CardDealt(player2.id, Card(Quattro, Coppe)),  // Asso Spade, Due Coppe, Quattro Coppe
+      shortDelay,
       CardDealt(player3.id, Card(Asso, Denari)),    // Cinque Coppe, Tre Spade, Asso Denari
+      shortDelay,
       CardDealt(player4.id, Card(Sette, Spade)),    // Tre Coppe, Cavallo Spade, Sette Spade
+      shortDelay,
       CardDealt(player1.id, Card(Cinque, Denari)),  // Cinque Spade, Fante Coppe, Cinque Denari
       CardPlayed(player2.id, Card(Due, Coppe)),
       CardPlayed(player3.id, Card(Cinque, Coppe)),
       CardPlayed(player4.id, Card(Sette, Spade)),
       CardPlayed(player1.id, Card(Cinque, Spade)),
+      mediumDelay,
       TrickWinner(player3.id),  // 0 + 18 = 18
 
+      mediumDelay,
       CardDealt(player3.id, Card(Sette, Coppe)),    // Tre Spade, Asso Denari, Sette Coppe
+      shortDelay,
       CardDealt(player4.id, Card(Re, Spade)),       // Tre Coppe, Cavallo Spade, Re Spade
+      shortDelay,
       CardDealt(player1.id, Card(Sei, Spade)),      // Fante Coppe, Cinque Denari, Sei Spade
+      shortDelay,
       CardDealt(player2.id, Card(Quattro, Denari)), // Asso Spade, Quattro Coppe, Quattro Denari
       CardPlayed(player3.id, Card(Sette, Coppe)),
       CardPlayed(player4.id, Card(Cavallo, Spade)),
       CardPlayed(player1.id, Card(Sei, Spade)),
       CardPlayed(player2.id, Card(Quattro, Denari)),
+      mediumDelay,
       TrickWinner(player3.id),  // 3 + 18 = 21
 
+      mediumDelay,
       CardDealt(player3.id, Card(Tre, Bastoni)),      // Tre Spade, Asso Denari, Tre Bastoni
+      shortDelay,
       CardDealt(player4.id, Card(Due, Spade)),        // Tre Coppe, Re Spade, Due Spade
+      shortDelay,
       CardDealt(player1.id, Card(Cavallo, Coppe)),    // Fante Coppe, Cinque Denari, Cavallo Coppe
+      shortDelay,
       CardDealt(player2.id, Card(Asso, Coppe)),       // Asso Spade, Quattro Coppe, Asso Coppe
 
       CardPlayed(player3.id, Card(Tre, Bastoni)),      // Tre Spade, Asso Denari, ***
       CardPlayed(player4.id, Card(Re, Spade)),         // Tre Coppe, ***, Due Spade
       CardPlayed(player1.id, Card(Cavallo, Coppe)),    // Fante Coppe, Cinque Denari, ***
       CardPlayed(player2.id, Card(Quattro, Coppe)),    // Asso Spade, ***, Asso Coppe
+      mediumDelay,
       TrickWinner(player1.id),  // 17 + 21 = 38
 
       CardPlayed(player1.id, Card(Cinque, Denari)),    // Fante Coppe, ***, ***
       CardPlayed(player2.id, Card(Asso, Spade)),       // ***, ***, Asso Coppe
       CardPlayed(player3.id, Card(Asso, Denari)),      // Tre Spade, ***, ***
       CardPlayed(player4.id, Card(Due, Spade)),        // Tre Coppe, ***, ***
+      mediumDelay,
       TrickWinner(player3.id),  // 22 + 38 = 60
 
       CardPlayed(player3.id, Card(Tre, Spade)),
       CardPlayed(player4.id, Card(Tre, Coppe)),
       CardPlayed(player1.id, Card(Fante, Coppe)),
       CardPlayed(player2.id, Card(Asso, Coppe)),
+      mediumDelay,
       TrickWinner(player2.id),  // 33 + 27 = 60
 
+      longDelay,
       PointsCount(List(player2.id, player4.id), 60),
       PointsCount(List(player3.id, player1.id), 60),
       MatchDraw
-    ).map(Message(roomId, _))
+    ).map(_.toMessage(roomId))
