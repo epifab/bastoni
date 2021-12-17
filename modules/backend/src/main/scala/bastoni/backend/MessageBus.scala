@@ -3,7 +3,7 @@ package bastoni.backend
 import bastoni.domain.model.*
 import cats.Monad
 import cats.effect.std.Queue
-import cats.effect.{Concurrent, Sync}
+import cats.effect.{Resource, Concurrent, Sync}
 import cats.syntax.flatMap.toFlatMapOps
 import cats.syntax.functor.toFunctorOps
 import fs2.concurrent.Topic
@@ -12,6 +12,7 @@ trait MessageBus[F[_]]:
   def publish1(message: Message): F[Unit]
   def publish(messages: fs2.Stream[F, Message]): fs2.Stream[F, Unit]
   def subscribe: fs2.Stream[F, Message]
+  def subscribeAwait: Resource[F, fs2.Stream[F, Message]]
   def run: fs2.Stream[F, Unit]
 
 class MessageBusImpl[F[_]](
@@ -22,6 +23,7 @@ class MessageBusImpl[F[_]](
   def publish1(message: Message): F[Unit] = queue.offer(message)
   def publish(messages: fs2.Stream[F, Message]): fs2.Stream[F, Unit] = messages.evalMap(publish1)
   val subscribe: fs2.Stream[F, Message] = topic.subscribe(128)
+  val subscribeAwait: Resource[F, fs2.Stream[F, Message]] = topic.subscribeAwait(128)
 
 
 object MessageBus {

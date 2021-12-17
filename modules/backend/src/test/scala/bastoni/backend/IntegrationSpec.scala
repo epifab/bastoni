@@ -50,6 +50,7 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
   ): Event = {
     (for {
       bus <- MessageBus.inMemory[IO]
+      repo <- InMemoryGameServiceRepo[IO]
       gameBus = GameBus(bus)
 
       twoPlayers = player1.dumb(gameBus).concurrently(player2.dumb(gameBus))
@@ -72,7 +73,7 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
           case Message(_, `roomId`, Event.GameAborted) => Event.GameAborted
         }
         .concurrently(bus.run)
-        .concurrently(if (realSpeed) GameService.run(bus) else GameService.run(bus, _ => 2.millis))
+        .concurrently(if (realSpeed) GameService.run(bus, repo) else GameService.run(bus, repo, _ => 2.millis))
         .concurrently(Lobby.run(bus))
         .concurrently(activateStream)
         .concurrently(playStreams)
