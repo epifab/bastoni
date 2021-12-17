@@ -6,12 +6,12 @@ import bastoni.domain.model.Event.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import cats.effect.Sync
 
-class GameBus[F[_]](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int]):
+class GameBus[F[_]](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int], messageIds: fs2.Stream[F, MessageId]):
 
   def subscribe(me: Player, roomId: RoomId): fs2.Stream[F, ToPlayer] =
     messageBus
       .subscribe
-      .collect { case Message(`roomId`, event: (Event | ActionRequest)) => event }
+      .collect { case Message(_, `roomId`, event: (Event | ActionRequest)) => event }
       .map {
         case PlayerJoined(player, room)                     => ToPlayer.PlayerJoined(player, room)
         case PlayerLeft(player, room)                       => ToPlayer.PlayerLeft(player, room)
@@ -45,10 +45,15 @@ class GameBus[F[_]](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int]):
     events
       .zip(seeds)
       .map(toModel(me))
-      .map(Message(roomId, _))
+      .zip(messageIds)
+      .map { case (message, id) => Message(id, roomId, message) }
       .through(messageBus.publish)
 
 
 object GameBus:
   def apply[F[_]: Sync](bus: MessageBus[F]): GameBus[F] =
-    new GameBus(bus, fs2.Stream.repeatEval(Sync[F].delay(scala.util.Random.nextInt())))
+    new GameBus(
+      bus,
+      fs2.Stream.repeatEval(Sync[F].delay(scala.util.Random.nextInt())),
+      fs2.Stream.repeatEval(Sync[F].delay(MessageId.newId))
+    )

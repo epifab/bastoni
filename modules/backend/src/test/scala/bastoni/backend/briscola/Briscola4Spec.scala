@@ -1,19 +1,16 @@
 package bastoni.backend
 package briscola
 
+import bastoni.backend.Fixtures.*
 import bastoni.domain.model.*
-import bastoni.domain.model.Event.*
 import bastoni.domain.model.Command.*
+import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 class Briscola4Spec extends AnyFreeSpec with Matchers:
-  val player1 = Player(PlayerId.newId, "Tizio")
-  val player2 = Player(PlayerId.newId, "Caio")
-  val player3 = Player(PlayerId.newId, "Sempronio")
-  val player4 = Player(PlayerId.newId, "Giuda")
 
   val roomId = RoomId.newId
   val room = Room(roomId, List(player1, player2, player3, player4))
@@ -21,7 +18,7 @@ class Briscola4Spec extends AnyFreeSpec with Matchers:
   "A game can be played" in {
     val inputStream = Briscola4Spec.input(roomId, player1, player2, player3, player4)
     val expectedOut = Briscola4Spec.output(roomId, player1, player2, player3, player4)
-    Game.playMatch[fs2.Pure](room)(inputStream).compile.toList shouldBe expectedOut
+    Game.playMatch[fs2.Pure](room, messageIds)(inputStream).compile.toList shouldBe expectedOut
   }
 
 object Briscola4Spec:
@@ -29,10 +26,6 @@ object Briscola4Spec:
   val revealTrump   = Continue
   val completeTrick = Continue
   val completeMatch = Continue
-
-  val shortDelay = DelayedCommand(Continue, Delay.Short)
-  val mediumDelay = DelayedCommand(Continue, Delay.Medium)
-  val longDelay = DelayedCommand(Continue, Delay.Long)
 
   def input(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
     fs2.Stream(
@@ -142,10 +135,10 @@ object Briscola4Spec:
       completeTrick,
       completeMatch,
 
-    ).map(Message(roomId, _))
+    ).map(_.toMessage(roomId))
 
   def output(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
-    List[Event | Command | DelayedCommand](
+    List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
       mediumDelay,
 

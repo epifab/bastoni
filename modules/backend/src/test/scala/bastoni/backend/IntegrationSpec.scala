@@ -1,5 +1,6 @@
 package bastoni.backend
 
+import bastoni.backend.Fixtures.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.Continue
 import bastoni.domain.view.FromPlayer.*
@@ -36,11 +37,6 @@ object DumbPlayer:
 
 class IntegrationSpec extends AnyFreeSpec with Matchers:
 
-  val player1 = Player(PlayerId.newId, "Tizio")
-  val player2 = Player(PlayerId.newId, "Caio")
-  val player3 = Player(PlayerId.newId, "Sempronio")
-  val player4 = Player(PlayerId.newId, "Giuda")
-
   extension (player: Player)
     def dumb[F[_]](gameBus: GameBus[F]): fs2.Stream[F, Unit] = DumbPlayer(player, roomId, gameBus)
 
@@ -72,8 +68,8 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
       )
       lastMessage <-
         bus.subscribe.collect[Event] {
-          case Message(`roomId`, e: Event.GameCompleted) => e
-          case Message(`roomId`, Event.GameAborted) => Event.GameAborted
+          case Message(_, `roomId`, e: Event.GameCompleted) => e
+          case Message(_, `roomId`, Event.GameAborted) => Event.GameAborted
         }
         .concurrently(bus.run)
         .concurrently(if (realSpeed) GameService.run(bus) else GameService.run(bus, _ => 2.millis))

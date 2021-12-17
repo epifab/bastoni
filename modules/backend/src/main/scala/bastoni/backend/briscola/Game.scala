@@ -10,28 +10,29 @@ import scala.util.Random
 
 object Game:
 
-  def playMatch[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | DelayedMessage] =
-    playStream(room, MatchState(room.players), playMatchStep, s => s.isInstanceOf[MatchState.Terminated], messages)
+  def playMatch[F[_]](room: Room, messageIds: fs2.Stream[F, MessageId])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
+    playStream(room, MatchState(room.players), playMatchStep, s => s.isInstanceOf[MatchState.Terminated], messages, messageIds)
 
-  def playGame[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | DelayedMessage] =
-    playStream(room, GameState(room.players), playGameStep, s => s == GameState.Terminated, messages)
+  def playGame[F[_]](room: Room, messageIds: fs2.Stream[F, MessageId])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
+    playStream(room, GameState(room.players), playGameStep, s => s == GameState.Terminated, messages, messageIds)
 
   private def playStream[F[_], State](
     room: Room,
     initialState: State,
-    handler: (State, Event | Command) => (State, List[Event | Command | DelayedCommand]),
+    handler: (State, Event | Command) => (State, List[Event | Command | Delayed[Command]]),
     isFinal: State => Boolean,
-    messages: fs2.Stream[F, Message]
-  ): fs2.Stream[F, Message | DelayedMessage] =
+    messages: fs2.Stream[F, Message],
+    messageIds: fs2.Stream[F, MessageId]
+  ): fs2.Stream[F, Message | Delayed[Message]] =
     messages
-      .collect { case Message(roomId, message) if roomId == room.id => message }
-      .scan[(State, List[Event | Command | DelayedCommand])](initialState -> Nil) {
+      .collect { case Message(_, roomId, message) if roomId == room.id => message }
+      .scan[(State, List[Event | Command | Delayed[Command]])](initialState -> Nil) {
         case ((state, _), message) => handler(state, message)
       }
       .takeThrough { case ((state, _)) => !isFinal(state) }
-      .flatMap { case (_, events) => fs2.Stream.iterable(events).map(_.toMessage(room.id)) }
+      .flatMap { case (_, events) => events.toMessages(room.id, messageIds) }
 
-  private[briscola] val playMatchStep: (MatchState, Command | Event) => (MatchState, List[Event | Command | DelayedCommand]) = {
+  private[briscola] val playMatchStep: (MatchState, Command | Event) => (MatchState, List[Event | Command | Delayed[Command]]) = {
 
     case (_, _: PlayerLeft) =>
       MatchState.Aborted -> List(MatchAborted)
@@ -86,7 +87,7 @@ object Game:
       val updatedPlayers = completeTrick(players, trump)
       val winner = updatedPlayers.head
 
-      val (state, command: (Command | DelayedCommand)) =
+      val (state, command: (Command | Delayed[Command])) =
         if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers, trump) -> Continue.muchLater
         else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil, trump) -> ActionRequest(updatedPlayers.head.id, Action.PlayCard)
         else MatchState.DrawRound(updatedPlayers, Nil, deck, trump) -> Continue.later
@@ -111,7 +112,7 @@ object Game:
     case (m, _) => m -> Nil
   }
 
-  private[briscola] val playGameStep: (GameState, Command | Event) => (GameState, List[Event | Command | DelayedCommand]) = {
+  private[briscola] val playGameStep: (GameState, Command | Event) => (GameState, List[Event | Command | Delayed[Command]]) = {
 
     case (GameState.InProgress(players, matchState, rounds), message) =>
       playMatchStep(matchState, message) match

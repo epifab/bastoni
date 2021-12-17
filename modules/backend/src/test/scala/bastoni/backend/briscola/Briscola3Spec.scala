@@ -1,27 +1,23 @@
 package bastoni.backend
 package briscola
 
+import bastoni.backend.Fixtures.*
 import bastoni.domain.model.*
-import bastoni.domain.model.Event.*
 import bastoni.domain.model.Command.*
+import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 class Briscola3Spec extends AnyFreeSpec with Matchers:
-
-  val player1 = Player(PlayerId.newId, "Tizio")
-  val player2 = Player(PlayerId.newId, "Caio")
-  val player3 = Player(PlayerId.newId, "Sempronio")
-
   val roomId = RoomId.newId
   val room = Room(roomId, List(player1, player2, player3))
 
   "A game can be played" in {
     val inputStream = Briscola3Spec.input(roomId, player1, player2, player3)
     val expectedOut = Briscola3Spec.output(roomId, player1, player2, player3)
-    Game.playMatch[fs2.Pure](room)(inputStream).compile.toList shouldBe expectedOut
+    Game.playMatch[fs2.Pure](room, messageIds)(inputStream).compile.toList shouldBe expectedOut
   }
 
 object Briscola3Spec:
@@ -30,10 +26,6 @@ object Briscola3Spec:
   val revealTrump   = Continue
   val completeTrick = Continue
   val completeMatch = Continue
-
-  val shortDelay = DelayedCommand(Continue, Delay.Short)
-  val mediumDelay = DelayedCommand(Continue, Delay.Medium)
-  val longDelay = DelayedCommand(Continue, Delay.Long)
 
   def input(roomId: RoomId, player1: Player, player2: Player, player3: Player): fs2.Stream[fs2.Pure, Message] =
     fs2.Stream(
@@ -145,10 +137,10 @@ object Briscola3Spec:
       PlayCard(player2.id, Card(Tre, Coppe)),
       completeTrick,
       completeMatch,
-    ).map(Message(roomId, _))
+    ).map(_.toMessage(roomId))
 
-  def output(roomId: RoomId, player1: Player, player2: Player, player3: Player): List[Message | DelayedMessage] =
-    List[Event | Command | DelayedCommand](
+  def output(roomId: RoomId, player1: Player, player2: Player, player3: Player): List[Message | Delayed[Message]] =
+    List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
 
       mediumDelay,

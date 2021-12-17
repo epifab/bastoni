@@ -1,7 +1,6 @@
 package bastoni.backend
 package tressette
 
-import bastoni.backend.DelayedMessage
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
@@ -11,8 +10,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 class Tressette2Spec extends AnyFreeSpec with Matchers:
-  val player1 = Player(PlayerId.newId, "Tizio")
-  val player2 = Player(PlayerId.newId, "Caio")
+  import Fixtures.*
 
   val roomId = RoomId.newId
   val room = Room(roomId, List(player1, player2))
@@ -20,10 +18,6 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
   val drawCard      = Continue
   val completeTrick = Continue
   val completeMatch = Continue
-
-  val shortDelay = DelayedCommand(Continue, Delay.Short)
-  val mediumDelay = DelayedCommand(Continue, Delay.Medium)
-  val longDelay = DelayedCommand(Continue, Delay.Long)
 
   "A game can be played" in {
     val input =
@@ -134,9 +128,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
           completeMatch
         )
 
-      ).map(Message(roomId, _))
+      ).map(Message(messageId, roomId, _))
 
-    Game.playMatch[fs2.Pure](room)(input).compile.toList shouldBe List[Event | Command | DelayedCommand](
+    Game.playMatch[fs2.Pure](room, fs2.Stream.constant(messageId))(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni)),
