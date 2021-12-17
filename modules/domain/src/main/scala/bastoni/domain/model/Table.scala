@@ -98,9 +98,9 @@ sealed trait Table[C <: CardView]:
             player = seat.player.map {
               case active: SittingIn =>
                 EndOfMatchPlayer(
-                  player = active.player.copy(points = gamePoints.pointsFor(active.player).getOrElse(active.player.points)),
-                  points = matchPoints.pointsFor(active.player).getOrElse(0),
-                  winner = winnerIds.exists(active.player.is)
+                  gamePlayer = active.gamePlayer.copy(points = gamePoints.pointsFor(active.gamePlayer).getOrElse(active.gamePlayer.points)),
+                  points = matchPoints.pointsFor(active.gamePlayer).getOrElse(0),
+                  winner = winnerIds.exists(active.gamePlayer.is)
                 )
               case whatever => whatever
             },
@@ -115,7 +115,7 @@ sealed trait Table[C <: CardView]:
         updateWith(
           seats = seats.map {
             case seat@ Seat(Some(active: SittingIn), _, _, _) =>
-              seat.copy(player = Some(EndOfGamePlayer(active.player, winner = winnerIds.contains(active.player.id))))
+              seat.copy(player = Some(EndOfGamePlayer(active.gamePlayer, winner = winnerIds.contains(active.player.id))))
             case whatever => whatever
           },
           deck = Nil,
