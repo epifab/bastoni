@@ -13,9 +13,6 @@ object RoomId:
   given Encoder[RoomId] = Encoder[String].contramap(_.toString)
   given Decoder[RoomId] = Decoder[String].emap(parse(_).toRight("Not a valid ID"))
 
-enum RoomError:
-  case FullRoom, PlayerNotFound, DuplicatePlayer
-
 case class Room(id: RoomId, seats: List[Option[Player]]):
   lazy val players: List[Player] = seats.collect { case Some(player) => player }
   lazy val indexedSeats = seats.zipWithIndex
@@ -29,12 +26,12 @@ case class Room(id: RoomId, seats: List[Option[Player]]):
   def seatFor(p: Player): Option[Int] =
     indexedSeats.collectFirst { case (Some(player), index) if player.id == p.id => index }
 
-  def join(p: Player, random: Random): Either[RoomError, Room] =
-    if (contains(p)) Left(RoomError.DuplicatePlayer) else {
+  def join(p: Player, random: Random): Either[TableError, Room] =
+    if (contains(p)) Left(TableError.DuplicatePlayer) else {
       random
         .shuffle(indexedSeats)
         .collectFirst { case (None, index) => index }
-        .fold[Either[RoomError, Room]](Left(RoomError.FullRoom)) { targetIndex =>
+        .fold[Either[TableError, Room]](Left(TableError.FullTable)) { targetIndex =>
           Right(copy(
             seats = indexedSeats.map {
               case (_, index) if index == targetIndex => Some(p)
@@ -44,7 +41,7 @@ case class Room(id: RoomId, seats: List[Option[Player]]):
         }
     }
 
-  def leave(p: Player): Either[RoomError, Room] =
+  def leave(p: Player): Either[TableError, Room] =
     seatFor(p) match
       case Some(targetIndex) =>
         Right(copy(
@@ -54,7 +51,7 @@ case class Room(id: RoomId, seats: List[Option[Player]]):
           }
         ))
 
-      case None => Left(RoomError.PlayerNotFound)
+      case None => Left(TableError.PlayerNotFound)
 
 
 object Room:

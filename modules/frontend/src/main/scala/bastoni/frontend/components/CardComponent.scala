@@ -14,5 +14,5 @@ val CardComponent =
     }
     .build
 
-def CardsComponent(cards: List[PlayerCardView]) =
+def CardsComponent(cards: List[CardPlayerView]) =
   if (cards.isEmpty) <.span("No cards") else cards.map(c => CardComponent(c.card)).toTagMod

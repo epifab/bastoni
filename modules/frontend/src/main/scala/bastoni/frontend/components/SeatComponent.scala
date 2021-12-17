@@ -6,7 +6,7 @@ import japgolly.scalajs.react.vdom.html_<^.*
 
 val SeatComponent =
   ScalaComponent
-    .builder[(Seat[PlayerCardView], Int)]
+    .builder[(Seat[CardPlayerView], Int)]
     .noBackend
     .render_P { case (seat, index) =>
       <.div(^.className := s"seat seat-$index",

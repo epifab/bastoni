@@ -40,15 +40,15 @@ object Event:
     def playerId: PlayerId
     def card: C
 
-  case class   CardDealtServerPOV(playerId: PlayerId, card: ServerCardView) extends CardDealt[ServerCardView] with ServerEvent
-  case class   CardDealtPlayerPOV(playerId: PlayerId, card: PlayerCardView) extends CardDealt[PlayerCardView] with PlayerEvent
+  case class   CardDealtServerPOV(playerId: PlayerId, card: CardServerView) extends CardDealt[CardServerView] with ServerEvent
+  case class   CardDealtPlayerPOV(playerId: PlayerId, card: CardPlayerView) extends CardDealt[CardPlayerView] with PlayerEvent
 
   object CardDealt:
     def apply(playerId: PlayerId, card: Card, face: Face): CardDealtServerPOV =
-      CardDealtServerPOV(playerId, ServerCardView(card, face))
+      CardDealtServerPOV(playerId, CardServerView(card, face))
 
     def apply(playerId: PlayerId, card: Option[Card]): CardDealtPlayerPOV =
-      CardDealtPlayerPOV(playerId, PlayerCardView(card))
+      CardDealtPlayerPOV(playerId, CardPlayerView(card))
 
   case class   DeckShuffledServerPOV(cards: List[Card]) extends GameEvent with ServerEvent
   case class   DeckShuffledPlayerPOV(numberOfCards: Int) extends GameEvent with PlayerEvent

@@ -3,6 +3,8 @@ package bastoni.domain.model
 import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec
 
+import scala.util.Random
+
 case class Seat[C <: CardView](
   player: Option[PlayerState],
   hand: List[C],
@@ -11,19 +13,19 @@ case class Seat[C <: CardView](
 )
 
 object Seat:
-  given playerView: Codec[Seat[PlayerCardView]] = deriveCodec
-  given serverView: Codec[Seat[ServerCardView]] = deriveCodec
+  given playerView: Codec[Seat[CardPlayerView]] = deriveCodec
+  given serverView: Codec[Seat[CardServerView]] = deriveCodec
 
 case class PlayerSeat[C <: CardView](player: PlayerState, hand: List[C], collected: List[C], played: List[C])
 
-sealed trait Table[C <: CardView]:
+trait Table[C <: CardView]:
   type TableView
 
   def seats: List[Seat[C]]
   def deck: List[C]
   def active: Boolean
 
-  protected def toC(card: ServerCardView): C
+  protected def toC(card: CardServerView): C
   protected def removeCard(cards: List[C], card: Card): List[C]
 
   protected def updateWith(seats: List[Seat[C]] = this.seats, deck: List[C] = this.deck, active: Boolean = active): TableView
@@ -58,7 +60,7 @@ sealed trait Table[C <: CardView]:
       case Event.TrumpRevealed(card) =>
         updateWith(
           deck = deck match {
-            case head :: tail => tail :+ toC(ServerCardView(card, Face.Up))
+            case head :: tail => tail :+ toC(CardServerView(card, Face.Up))
             case whatever => whatever
           }
         )
@@ -70,7 +72,7 @@ sealed trait Table[C <: CardView]:
               seat.copy(
                 player = Some(acting.done),
                 hand = removeCard(seat.hand, card),
-                played = toC(ServerCardView(card, Face.Up)) :: seat.played
+                played = toC(CardServerView(card, Face.Up)) :: seat.played
               )
             case whatever => whatever
           }
@@ -173,116 +175,18 @@ sealed trait Table[C <: CardView]:
     }
 
 
-case class ServerTableView(
-  override val seats: List[Seat[ServerCardView]],
-  override val deck: List[ServerCardView],
-  override val active: Boolean
-) extends Table[ServerCardView]:
-
-  override type TableView = ServerTableView
-
-  override protected def updateWith(seats: List[Seat[ServerCardView]] = this.seats, deck: List[ServerCardView] = this.deck, active: Boolean = this.active): ServerTableView =
-    ServerTableView(seats, deck, active)
-
-  override protected def toC(card: ServerCardView): ServerCardView = card
-  override protected def removeCard(cards: List[ServerCardView], card: Card): List[ServerCardView] = cards.filterNot(_.card == card)
-
-  def update(event: ServerEvent): ServerTableView = event match {
-    case Event.DeckShuffledServerPOV(deck) =>
-      updateWith(
-        seats = seats.map {
-          case seat@ Seat(Some(acting@ ActingPlayer(targetPlayer, Action.ShuffleDeck)), _, _, _) =>
-            seat.copy(player = Some(acting.done))
-          case whatever => whatever
-        },
-        deck = deck.map(card => ServerCardView(card, Face.Down))
-      )
-
-    case event: Event.CardDealtServerPOV => cardDealtUpdate(event)
-
-    case event: PublicEvent => publicEventUpdate(event)
-  }
-
-  extension (state: ServerCardView)
-    def toPlayerView(me: Player, player: Option[PlayerState]): PlayerCardView = state match {
-      case ServerCardView(card, Face.Up) => PlayerCardView(Some(card))
-      case ServerCardView(card, Face.Down) => PlayerCardView(None)
-      case ServerCardView(card, Face.Player) => PlayerCardView(Option.when(player.exists(_.playerId == me.id))(card))
-    }
-
-  def toPlayerView(me: Player): PlayerTableView =
-    PlayerTableView(
-      seats = seats.map {
-        case Seat(player, hand, collected, played) =>
-          Seat[PlayerCardView](
-            player = player,
-            hand = hand.map(_.toPlayerView(me, player)),
-            collected = collected.map(_.toPlayerView(me, player)),
-            played = played.map(_.toPlayerView(me, player))
-          )
-      },
-      deck = deck.map(_.toPlayerView(me, None)),
-      active = active
-    )
-
-
-case class PlayerTableView(
-  override val seats: List[Seat[PlayerCardView]],
-  override val deck: List[PlayerCardView],
-  override val active: Boolean
-) extends Table[PlayerCardView]:
-
-  override type TableView = PlayerTableView
-
-  override protected def updateWith(seats: List[Seat[PlayerCardView]] = this.seats, deck: List[PlayerCardView] = this.deck, active: Boolean = this.active): PlayerTableView =
-    PlayerTableView(seats, deck, active)
-
-  override protected def toC(card: ServerCardView): PlayerCardView = PlayerCardView(card.face match {
-    case Face.Up => Some(card.card)
-    case _ => None
-  })
-
-  extension[T](list: List[T])
-    def removeFirst(cond: T => Boolean): List[T] =
-      list match {
-        case head :: tail if cond(head) => tail
-        case head :: tail => head :: tail.removeFirst(cond)
-        case Nil => Nil
-      }
-
-  override protected def removeCard(cards: List[PlayerCardView], card: Card): List[PlayerCardView] =
-    if (cards.exists(_.card.contains(card))) cards.removeFirst(_.card.contains(card))
-    else cards.removeFirst(_.card.isEmpty)
-
-  def update(event: PlayerEvent): PlayerTableView = event match {
-    case Event.DeckShuffledPlayerPOV(numberOfCards) =>
-      updateWith(
-        seats = seats.map {
-          case seat@Seat(Some(acting@ActingPlayer(targetPlayer, Action.ShuffleDeck)), _, _, _) =>
-            seat.copy(player = Some(acting.done))
-          case whatever => whatever
-        },
-        deck = List.fill(numberOfCards)(PlayerCardView(None))
-      )
-
-    case event: Event.CardDealtPlayerPOV => cardDealtUpdate(event)
-
-    case event: PublicEvent => publicEventUpdate(event)
-  }
-
-
 object Table:
-  given serverTableViewCodec: Codec[ServerTableView] = deriveCodec
+  given serverTableViewCodec: Codec[TableServerView] = deriveCodec
   given playerTableViewCodec: Codec[PlayerTableView] = deriveCodec
 
-  def apply(message: ServerEvent): Option[ServerTableView] =
+  def apply(message: ServerEvent): Option[TableServerView] =
     val room = message match {
       case event: Event.RoomEvent => Some(event.room)
       case _ => None
     }
 
     room.map { room =>
-      ServerTableView(
+      TableServerView(
         seats = room.seats.map(seat =>
           Seat(
             seat.map(SittingOut(_)),
