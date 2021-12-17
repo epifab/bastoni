@@ -31,7 +31,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
         drawCard,
         drawCard,
         drawCard,
-        completeTrick,
+        revealTrump,
 
         PlayCard(player1.id, Card(Due, Bastoni)),
         PlayCard(player2.id, Card(Quattro, Spade)),
@@ -150,7 +150,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
       ).map(Message(roomId, _))
 
-    Briscola.playMatch[fs2.Pure](room, input).map(_.message).compile.toList shouldBe List(
+    Briscola.playMatch[fs2.Pure](room)(input).map(_.message).compile.toList shouldBe List(
       DeckShuffled(10),
 
       CardDealt(player1.id, Card(Due, Bastoni)),
@@ -299,7 +299,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       Message(RoomId.newId, PlayCard(player1.id, Card(Due, Bastoni))), // ignored (different room)
     )
 
-    Briscola.playMatch[fs2.Pure](room, input).compile.toList shouldBe List(
+    Briscola.playMatch[fs2.Pure](room)(input).compile.toList shouldBe List(
       Message(room.id, DeckShuffled(10)),
       Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
       Message(room.id, CardDealt(player2.id, Card(Asso, Spade))),
@@ -319,7 +319,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       Message(room.id, drawCard), // too late, game was aborted
     )
 
-    Briscola.playMatch[fs2.Pure](room, input).compile.toList shouldBe List(
+    Briscola.playMatch[fs2.Pure](room)(input).compile.toList shouldBe List(
       Message(room.id, DeckShuffled(10)),
       Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
       Message(room.id, MatchAborted)

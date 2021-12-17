@@ -16,6 +16,9 @@ class MatchPlayerSpec extends AnyFreeSpec with Matchers:
     matchPlayer.is(player1) shouldBe true
     matchPlayer.is(player2) shouldBe false
     matchPlayer.is(player3) shouldBe true
+    matchPlayer.is(player1.id) shouldBe true
+    matchPlayer.is(player2.id) shouldBe false
+    matchPlayer.is(player3.id) shouldBe true
   }
 
   "Player.has" in {

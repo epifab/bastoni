@@ -15,6 +15,9 @@ class GamePlayerSpec extends AnyFreeSpec with Matchers:
     gamePlayer.is(player1) shouldBe true
     gamePlayer.is(player2) shouldBe false
     gamePlayer.is(player3) shouldBe true
+    gamePlayer.is(player1.id) shouldBe true
+    gamePlayer.is(player2.id) shouldBe false
+    gamePlayer.is(player3.id) shouldBe true
   }
 
   "Player wins a point" in {

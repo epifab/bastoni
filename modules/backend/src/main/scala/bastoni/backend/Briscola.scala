@@ -5,7 +5,7 @@ import bastoni.domain.*
 import scala.annotation.tailrec
 import scala.util.Random
 
-object Briscola:
+object Briscola extends Game:
 
   // State machine model
   sealed trait MatchState
@@ -65,7 +65,7 @@ object Briscola:
     val winner: MatchPlayer = trickWinner(None, players).collect(players.map(_(1)).toSet)
     winner :: players.map(_(0)).slideUntil(_.is(winner.player)).tail
 
-  def playMatch[F[_]](room: Room, messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
+  def playMatch[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
     messages
       .collect { case Message(roomId, message) if roomId == room.id => message }
 

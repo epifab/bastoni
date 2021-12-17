@@ -36,7 +36,6 @@ class Briscola4Spec extends AnyFreeSpec with Matchers:
       drawCard,
       drawCard,
       drawCard,
-
       revealTrump,
 
       PlayCard(player1.id, Card(Due, Bastoni)),
@@ -131,7 +130,7 @@ class Briscola4Spec extends AnyFreeSpec with Matchers:
 
     ).map(Message(room.id, _))
 
-    Briscola.playMatch[fs2.Pure](room, input).map(_.message).compile.toList shouldBe List(
+    Briscola.playMatch[fs2.Pure](room)(input).map(_.message).compile.toList shouldBe List(
       DeckShuffled(10),
 
       CardDealt(player1.id, Card(Due, Bastoni)),

@@ -133,7 +133,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         completeMatch,
       ).map(Message(roomId, _))
 
-    Briscola.playMatch[fs2.Pure](room, input).map(_.message).compile.toList shouldBe List(
+    Briscola.playMatch[fs2.Pure](room)(input).map(_.message).compile.toList shouldBe List(
       DeckShuffled(10),
 
       CardDealt(player1.id, Card(Due, Bastoni)),
