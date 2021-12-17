@@ -2,7 +2,8 @@ package bastoni.domain.logic
 package briscola
 
 import bastoni.domain.logic.Fixtures.*
-import bastoni.domain.logic.{GameBus, InMemoryGameServiceRepo}
+import bastoni.domain.logic.GameBus
+import bastoni.domain.repos.{GameRepo, MessageRepo}
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
@@ -33,7 +34,13 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       PlayerLeft(player1, Room(room1.id, List(None, Some(player2)))).toMessage(room1.id),
     )
 
-    InMemoryGameServiceRepo[IO].flatMap(repo => GameService[IO](IO(messageId), repo)(input).compile.toList).unsafeRunSync() shouldBe List(
+    val resultIO = for {
+      gameRepo <- GameRepo.inMemory[IO]
+      messageRepo <- MessageRepo.inMemory[IO]
+      output <- GameService[IO](IO.pure(messageId), gameRepo, messageRepo)(input).compile.toList
+    } yield output
+
+    resultIO.unsafeRunSync() shouldBe List(
       GameStarted(GameType.Briscola).toMessage(room1.id),
       GameStarted(GameType.Briscola).toMessage(room2.id),
       DeckShuffled(10).toMessage(room1.id),
@@ -77,7 +84,13 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       Briscola3Spec.output(room.id, player1, player2, player3)) ++
       List(GameCompleted(List(player1.id)).toMessage(room.id))
 
-    InMemoryGameServiceRepo[IO].flatMap(repo => GameService[IO](IO(messageId), repo)(inputStream).compile.toList).unsafeRunSync() shouldBe outputStream
+    val resultIO = for {
+      gameRepo <- GameRepo.inMemory[IO]
+      messageRepo <- MessageRepo.inMemory[IO]
+      output <- GameService[IO](IO.pure(messageId), gameRepo, messageRepo)(inputStream).compile.toList
+    } yield output
+
+    resultIO.unsafeRunSync() shouldBe outputStream
   }
 
   "A pre-existing game can be resumed" in {
@@ -110,7 +123,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       events <- (for {
         subscription <- fs2.Stream.resource(bus.subscribeAwait)
         event <- subscription.concurrently(bus.run)
-          .concurrently(GameService.run[IO](bus, repo, _ => 2.millis))
+          .concurrently(GameService.run[IO](bus, repo, repo, _ => 2.millis))
           .concurrently(GameBus(bus).publish(player1, room1.id, fs2.Stream(FromPlayer.PlayCard(player1Card)).delayBy(100.millis)))
           .collect { case Message(_, _, event: Event) => event }
           .takeThrough(!_.isInstanceOf[Event.GameCompleted])
@@ -150,7 +163,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
         subscription <- fs2.Stream.resource(bus.subscribeAwait)
         message <- subscription
           .concurrently(bus.run)
-          .concurrently(GameService.run[IO](bus, repo, {
+          .concurrently(GameService.run[IO](bus, repo, repo, {
             case Delay.Short => 10.milli
             case Delay.Medium => 20.millis
             case Delay.Long => 30.millis

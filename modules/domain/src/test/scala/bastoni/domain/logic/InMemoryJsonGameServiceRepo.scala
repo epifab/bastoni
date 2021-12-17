@@ -2,11 +2,12 @@ package bastoni.domain.logic
 
 import bastoni.domain.model.*
 import bastoni.domain.model.PotentiallyDelayed.{decoder, messageEncoder}
+import bastoni.domain.repos.{GameRepo, MessageRepo}
 import cats.effect.{Concurrent, Ref}
 import cats.syntax.all.*
 import io.circe.{Decoder, Encoder, Json}
 
-class InMemoryJsonGameServiceRepo[F[_]: Concurrent](val gameRooms: Ref[F, Map[RoomId, Json]], val messages: Ref[F, Map[MessageId, Json]]) extends GameServiceRepo[F]:
+class InMemoryJsonGameServiceRepo[F[_]: Concurrent](val gameRooms: Ref[F, Map[RoomId, Json]], val messages: Ref[F, Map[MessageId, Json]]) extends GameRepo[F] with MessageRepo[F]:
 
   val decodeGameMachine = (Decoder[GameStateMachine].decodeJson _).andThen {
     case Right(done) => done
