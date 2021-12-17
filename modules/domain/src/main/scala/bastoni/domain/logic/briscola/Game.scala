@@ -170,19 +170,10 @@ object Game extends GameLogic[MatchState]:
   }
 
   extension(card: Card)
-    def points: Int = card.rank match
-      case Rank.Asso => 11
-      case Rank.Tre => 10
-      case Rank.Re => 4
-      case Rank.Cavallo => 3
-      case Rank.Fante => 2
-      case _ => 0
-
     def >(other: Card): Boolean =
-      (points > other.points) || (points == other.points && card.rank.value > other.rank.value)
-
-  extension(player: Player)
-    def points: Int = player.taken.foldRight(0)(_.points + _)
+      val points = GameScore.pointsFor(card)
+      val otherPoints = GameScore.pointsFor(other)
+      (points > otherPoints) || (points == otherPoints && card.rank.value > other.rank.value)
 
   private def completeTrick(players: List[(Player, Card)], trump: Card): List[Player] =
     @tailrec

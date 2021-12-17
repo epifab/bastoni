@@ -2418,6 +2418,10 @@
               "type" : "Carte"
             },
             {
+              "count" : 6,
+              "type" : "Denari"
+            },
+            {
               "cards" : [
                 [
                   "Sette",
@@ -2467,7 +2471,7 @@
           "playerIds" : [
             "dc5d9b78-e403-4431-b6f2-92c31d397db9"
           ],
-          "points" : 3
+          "points" : 4
         },
         {
           "playerIds" : [

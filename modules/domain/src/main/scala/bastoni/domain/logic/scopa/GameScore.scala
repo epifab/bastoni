@@ -18,7 +18,7 @@ object GameScoreItem:
 
   given Encoder[GameScoreItem] = Encoder.instance {
     case obj: Carte => deriveEncoder[Carte].mapJsonObject(_.add("type", "Carte".asJson))(obj)
-    case obj: Denari => deriveEncoder[Denari].mapJsonObject(_.add("type", "Carte".asJson))(obj)
+    case obj: Denari => deriveEncoder[Denari].mapJsonObject(_.add("type", "Denari".asJson))(obj)
     case SetteBello => Json.obj("type" -> "SetteBello".asJson)
     case obj: Primiera => deriveEncoder[Primiera].mapJsonObject(_.add("type", "Primiera".asJson))(obj)
     case obj: Scope => deriveEncoder[Scope].mapJsonObject(_.add("type", "Scope".asJson))(obj)
@@ -47,7 +47,7 @@ object GameScore:
 
     val denari: Option[(List[Player], GameScoreItem)] =
       teamWithCards
-        .view.mapValues(cards => GameScoreItem.Denari(cards.filter(_.rank == Denari).size))
+        .view.mapValues(cards => GameScoreItem.Denari(cards.count(_.suit == Denari)))
         .toList.bestBy(_._2.count)
 
     val primiera: Option[(List[Player], GameScoreItem)] =
@@ -64,8 +64,7 @@ object GameScore:
     teams.map(team =>
       val points =
         List(carte, denari, primiera, setteBello)
-          .map(_.collect { case (t, s) if t == team => s })
-          .flatten
+          .flatMap(_.collect { case (t, s) if t == team => s })
 
       new GameScore(
         team.map(_.id),

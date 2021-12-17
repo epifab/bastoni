@@ -178,15 +178,6 @@ object Game extends GameLogic[MatchState]:
   }
 
   extension(card: Card)
-    def points: Int = card.rank match
-      case Rank.Asso => 3
-      case Rank.Tre => 1
-      case Rank.Due => 1
-      case Rank.Re => 1
-      case Rank.Cavallo => 1
-      case Rank.Fante => 1
-      case _ => 0
-
     def value: Int =
       card.rank match
         case Rank.Tre => 10
@@ -197,7 +188,6 @@ object Game extends GameLogic[MatchState]:
     def >(other: Card): Boolean = value > other.value
 
   extension(player: Player)
-    def points: Int = player.taken.foldRight(0)(_.points + _)
     def canPlay(card: Card) = player.has(card)
     def canPlay(card: Card, trump: Card) = player.has(card) && (card.suit == trump.suit || player.hand.forall(_.suit != trump.suit))
 

@@ -3,7 +3,7 @@ package bastoni.domain.logic.generic
 import bastoni.domain.logic.briscola.GameState
 import bastoni.domain.logic.briscola.GameState.{Aborted, PlayRound, WaitingForPlayer}
 import bastoni.domain.model.*
-import io.circe.Encoder
+import io.circe.{Encoder, Printer}
 import io.circe.generic.semiauto.deriveEncoder
 
 trait Timer[State, Self <: Timer[State, Self]]:
@@ -34,4 +34,4 @@ object Timer:
     // one option here would be to use a.hashCode,
     // but that's probably going to return different values for different application execution
     // which would make it difficult to test. hashCode on a string seems to be consistent
-    encoder(a).printWith(io.circe.Printer.noSpaces.copy(dropNullValues = true, sortKeys = true)).hashCode
+    encoder(a).printWith(Printer.noSpaces.copy(dropNullValues = true, sortKeys = true)).hashCode

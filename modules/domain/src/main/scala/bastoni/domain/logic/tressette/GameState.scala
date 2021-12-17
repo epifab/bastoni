@@ -12,9 +12,6 @@ import io.circe.{Decoder, Encoder, Json}
 sealed trait GameState
 
 object GameState:
-  def apply(players: List[User]): Ready =
-    Ready(players.map(MatchPlayer(_, 0)))
-
   sealed trait Active(val activePlayers: List[MatchPlayer]) extends GameState
   case class   Ready(players: List[MatchPlayer]) extends Active(players)
   case class   DealRound(todo: List[Player], done: List[Player], remaining: Int, deck: List[Card]) extends Active((done ++ todo).map(_.matchPlayer))

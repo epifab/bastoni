@@ -2395,6 +2395,10 @@
               "type" : "Scope"
             },
             {
+              "count" : 6,
+              "type" : "Denari"
+            },
+            {
               "cards" : [
                 [
                   "Sette",
@@ -2438,7 +2442,7 @@
           "playerIds" : [
             "6517fc2f-6fed-4169-8c77-17d21492d450"
           ],
-          "points" : 2
+          "points" : 3
         },
         {
           "playerIds" : [
