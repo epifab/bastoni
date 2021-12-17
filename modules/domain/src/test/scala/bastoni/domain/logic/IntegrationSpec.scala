@@ -1,4 +1,5 @@
-package bastoni.domain.logic
+package bastoni.domain
+package logic
 
 import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.model.*
@@ -7,14 +8,13 @@ import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.ToPlayer.*
 import bastoni.domain.view.{FromPlayer, TableView, ToPlayer}
 import cats.effect.syntax.all.*
-import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Sync}
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration.DurationInt
 
-class IntegrationSpec extends AnyFreeSpec with Matchers:
+class IntegrationSpec extends AsyncIOFreeSpec:
+  // on scalajs tests run very slow, possibly due to the single threaded EC
+  private val timeout = 30.seconds
 
   extension (player: Player)
     def dumb[F[_]: Sync](sub: GameSubscriber[F], pub: GamePublisher[F]): fs2.Stream[F, Unit] = DumbPlayer(player, roomId, sub, pub)
@@ -26,7 +26,7 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
     gameType: GameType,
     realSpeed: Boolean = false,
     extraMessages: fs2.Stream[IO, FromPlayer] = fs2.Stream.empty
-  ): Event = {
+  ): IO[Event] = {
     (for {
       messageBus <- fs2.Stream.eval(MessageBus.inMemory[IO])
       snapshotBus <- fs2.Stream.eval(SnapshotBus.inMemory[IO])
@@ -69,34 +69,34 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
           .concurrently(lobbyRunner)
           .concurrently(activateStream)
           .concurrently(playStreams)
-          .evalTap(message => IO(println(message.data.getClass.getSimpleName)))
+          // .evalTap(message => IO(println(message.data.getClass.getSimpleName)))
           .collect[Event] {
             case Message(_, `roomId`, e: Event.GameCompleted) => e
             case Message(_, `roomId`, Event.GameAborted) => Event.GameAborted
           }
           .take(1)
-          .interruptAfter(3.seconds)
-    } yield lastMessage).compile.lastOrError.unsafeRunSync()
+          .interruptAfter(timeout)
+    } yield lastMessage).compile.lastOrError
   }
 
   "Two players can play an entire briscola game" in {
-    playGame(2, GameType.Briscola) shouldBe a[Event.GameCompleted]
+    playGame(2, GameType.Briscola).asserting(_ shouldBe a[Event.GameCompleted])
   }
 
   "Three players can play an entire briscola game" in {
-    playGame(3, GameType.Briscola) shouldBe a[Event.GameCompleted]
+    playGame(3, GameType.Briscola).asserting(_ shouldBe a[Event.GameCompleted])
   }
 
   "Four players can play an entire briscola game" in {
-    playGame(4, GameType.Briscola) shouldBe a[Event.GameCompleted]
+    playGame(4, GameType.Briscola).asserting(_ shouldBe a[Event.GameCompleted])
   }
 
   "Two players can play an entire tressette game" in {
-    playGame(2, GameType.Tressette) shouldBe a[Event.GameCompleted]
+    playGame(2, GameType.Tressette).asserting(_ shouldBe a[Event.GameCompleted])
   }
 
   "Four players can play an entire tressette game" in {
-    playGame(4, GameType.Tressette) shouldBe a[Event.GameCompleted]
+    playGame(4, GameType.Tressette).asserting(_ shouldBe a[Event.GameCompleted])
   }
 
   "Aborting a game" in {
@@ -105,5 +105,5 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
       GameType.Tressette,
       realSpeed = true,
       extraMessages = fs2.Stream.awakeEvery[IO](2.seconds).map(_ => LeaveRoom)
-    ) shouldBe Event.GameAborted
+    ).asserting(_ shouldBe Event.GameAborted)
   }

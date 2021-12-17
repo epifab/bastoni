@@ -1,4 +1,5 @@
-package bastoni.domain.logic
+package bastoni.domain
+package logic
 package briscola
 
 import bastoni.domain.logic.Fixtures.*
@@ -11,13 +12,10 @@ import bastoni.domain.model.Suit.*
 import bastoni.domain.repos.{GameRepo, MessageRepo}
 import bastoni.domain.view.FromPlayer
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration.DurationInt
 
-class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
+class BriscolaGameServiceSpec extends AsyncIOFreeSpec:
 
   val room1 = Room.cosy(RoomId.newId, player1, player2)
   val room2 = Room.cosy(RoomId.newId, player2, player3)
@@ -40,7 +38,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       output <- GameService[IO](IO.pure(messageId), gameRepo, messageRepo)(input).compile.toList
     } yield output
 
-    resultIO.unsafeRunSync() shouldBe List(
+    resultIO.asserting(_ shouldBe List(
       GameStarted(GameType.Briscola).toMessage(room1.id),
       GameStarted(GameType.Briscola).toMessage(room2.id),
       DeckShuffled(shuffledDeck).toMessage(room1.id),
@@ -55,7 +53,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       Delayed(Continue.toMessage(room2.id), Delay.Short),
       MatchAborted.toMessage(room1.id),
       GameAborted.toMessage(room1.id),
-    )
+    ))
   }
 
   "A complete game can be played" in {
@@ -96,7 +94,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       output <- GameService[IO](IO.pure(messageId), gameRepo, messageRepo)(inputStream).compile.toList
     } yield output
 
-    resultIO.unsafeRunSync() shouldBe outputStream
+    resultIO.asserting(_ shouldBe outputStream)
   }
 
   "A pre-existing game can be resumed" in {
@@ -108,7 +106,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
 
     val player1Collected = Deck.instance.filter(card => card != player1Card && card != player2Card)
 
-    val stateMachine = new briscola.StateMachine(
+    val initialStateMachine = new briscola.StateMachine(
       briscola.GameState.InProgress(
         List(gamePlayer1, gamePlayer2),
         briscola.MatchState.PlayRound(
@@ -123,10 +121,10 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
 
     val oldMessage = CardPlayed(player2.id, player2Card).toMessage(room1.id)
 
-    val (events, actualStateMachine, messages) = (for {
+    val resultIO = (for {
       gameRepo <- JsonRepos.gameRepo
       messageRepo <- JsonRepos.messageRepo
-      _ <- gameRepo.set(room1.id, stateMachine)
+      _ <- gameRepo.set(room1.id, initialStateMachine)
       _ <- messageRepo.flying(oldMessage)
       messageBus <- MessageBus.inMemory[IO]
       events <- (for {
@@ -139,32 +137,34 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
               .through(GameSnapshotService.publisher(messageBus).publish(player1, room1.id))
           )
           .collect { case Message(_, _, event: Event) => event }
-          .interruptAfter(300.millis)
+          .interruptAfter(2.seconds)
       } yield event).compile.toList
-      newStateMachine <- gameRepo.get(room1.id)
+      stateMachine <- gameRepo.get(room1.id)
       messages <- messageRepo.inFlight.compile.toList
-    } yield (events, newStateMachine, messages)).unsafeRunSync()
+    } yield (events, stateMachine, messages))
 
-    events shouldBe List(
-      oldMessage.data,
-      CardPlayed(player1.id, player1Card),
-      TrickCompleted(player2.id),
-      MatchCompleted(
-        winnerIds = List(player1.id),
-        matchPoints = List(
-          PointsCount(List(player2.id), 21),
-          PointsCount(List(player1.id), 99),
+    resultIO.asserting { case (events, stateMachine, messages) =>
+      events shouldBe List(
+        oldMessage.data,
+        CardPlayed(player1.id, player1Card),
+        TrickCompleted(player2.id),
+        MatchCompleted(
+          winnerIds = List(player1.id),
+          matchPoints = List(
+            PointsCount(List(player2.id), 21),
+            PointsCount(List(player1.id), 99),
+          ),
+          gamePoints = List(
+            PointsCount(List(player2.id), 1),
+            PointsCount(List(player1.id), 3)
+          )
         ),
-        gamePoints = List(
-          PointsCount(List(player2.id), 1),
-          PointsCount(List(player1.id), 3)
-        )
-      ),
-      GameCompleted(List(player1.id))
-    )
+        GameCompleted(List(player1.id))
+      )
 
-    actualStateMachine shouldBe None
-    messages shouldBe Nil
+      stateMachine shouldBe None
+      messages shouldBe Nil
+    }
   }
 
   "Future undelivered events will still be sent" in {
@@ -173,7 +173,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     val message2: Delayed[Message] = Delayed(Message(MessageId.newId, room1.id, CardPlayed(player2.id, Card(Rank.Due, Suit.Coppe))), Delay.Medium)
     val message3: Delayed[Message] = Delayed(Message(MessageId.newId, room1.id, CardPlayed(player2.id, Card(Rank.Tre, Suit.Coppe))), Delay.Short)
 
-    val events = (for {
+    val eventsIO = (for {
       bus <- MessageBus.inMemory[IO]
       gameRepo <- JsonRepos.gameRepo
       messageRepo <- JsonRepos.messageRepo
@@ -192,9 +192,9 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
         message <- subscription
           .concurrently(bus.run)
           .concurrently(gameServiceRunner)
-          .interruptAfter(100.millis)
+          .interruptAfter(2.seconds)
       } yield message).compile.toList
-    } yield events).unsafeRunSync()
+    } yield events)
 
-    events shouldBe List(message3.inner, message2.inner, message1.inner)
+    eventsIO.asserting(_ shouldBe List(message3.inner, message2.inner, message1.inner))
   }

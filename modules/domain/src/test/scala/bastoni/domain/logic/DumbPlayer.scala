@@ -29,5 +29,5 @@ object DumbPlayer:
         .collect { case Some(event) => event }
 
     actions
-      .evalTap { act => Sync[F].delay(println(s"${me.name} will ${act.getClass.getSimpleName.filter(_ != '$')}")) }
+      // .evalTap { act => Sync[F].delay(println(s"${me.name} will ${act.getClass.getSimpleName.filter(_ != '$')}")) }
       .through(publisher.publish(me, roomId))

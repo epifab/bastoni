@@ -25,7 +25,7 @@ object Services:
         .concurrently(gameSnapshotService)
     }
 
-  def inMemory[F[_]: Async] =
+  def inMemory[F[_]: Async]: Resource[F, fs2.Stream[F, Unit]] =
     for {
       messageBus  <- Resource.eval(MessageBus.inMemory)
       snapshotBus <- Resource.eval(SnapshotBus.inMemory)
