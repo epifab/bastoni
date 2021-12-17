@@ -4,10 +4,10 @@ import bastoni.backend.briscola
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
-import cats.{Functor, Monad}
+import cats.Applicative
 import cats.effect.{Async, Concurrent}
 import cats.effect.syntax.all.*
-import cats.syntax.functor.toFunctorOps
+import cats.syntax.all.*
 
 import scala.concurrent.duration.*
 
@@ -42,80 +42,33 @@ extension (messages: List[Command | Delayed[Command] | Event])
         case (Delayed(command: Command, delay), id) => Delayed(Message(id, roomId, command), delay)
       }
 
-/**
- * The game service state
- * @param snapshot Snapshot of all active state machines
- * @param currentlyInFlight A set of messages that were previously produced but not yet consumed by the GameService
- * @param nextToFly The messages produced after by the latest iteration
- */
-case class GameServiceState(
-  snapshot: GameRooms,
-  currentlyInFlight: Messages,
-  nextToFly: List[Message | Delayed[Message]]
-):
-  def contains(roomId: RoomId): Boolean = snapshot.contains(roomId)
-  def get(roomId: RoomId): Option[GameStateMachine] = snapshot.get(roomId)
-  def set(roomId: RoomId, stateMachine: GameStateMachine): GameServiceState = copy(snapshot = snapshot + (roomId -> stateMachine))
-  def remove(roomId: RoomId): GameServiceState = copy(snapshot = snapshot - roomId)
-
-  def fly(messages: List[Message | Delayed[Message]]): GameServiceState =
-    copy(
-      nextToFly = messages,
-      currentlyInFlight = (currentlyInFlight ++ messages.map {
-        case delayed@ Delayed(message: Message, _) => message.id -> delayed
-        case message: Message => message.id -> message
-      })
-    )
-
-  def landed(messageId: MessageId): GameServiceState =
-    copy(
-      currentlyInFlight = currentlyInFlight - messageId,
-      nextToFly = Nil
-    )
+  def toMessages[F[_]: Applicative](roomId: RoomId, newId: F[MessageId]): F[List[Message | Delayed[Message]]] =
+    messages
+      .traverse {
+        case event: Event                     => newId.map(id => Message(id, roomId, event))
+        case command: Command                 => newId.map(id => Message(id, roomId, command))
+        case Delayed(command: Command, delay) => newId.map(id => Delayed(Message(id, roomId, command), delay))
+      }
 
 
 object GameService:
-
-  def apply[F[_]: Concurrent](messageIds: fs2.Stream[F, MessageId])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
-    runStateMachines(messages, messageIds)
-      .flatMap { case state => fs2.Stream.iterable(state.nextToFly) }
-
-  def apply[F[_]: Concurrent](messageIds: fs2.Stream[F, MessageId], gameServiceRepo: GameServiceRepo[F])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
-    for {
-      state <- fs2.Stream.eval(gameServiceRepo.getSnapshot)
-      (snapshot, inFlight) = state
-      oldEvents = fs2.Stream.iterable[F, Message | Delayed[Message]](inFlight.values)
-      newEvents = runStateMachines(messages, messageIds, snapshot, inFlight)
-        .evalTap { case state => gameServiceRepo.setSnapshot(state.snapshot, state.currentlyInFlight) }
-        .flatMap { case state => fs2.Stream.iterable(state.nextToFly) }
-      event <- oldEvents ++ newEvents
-    } yield event
-
-  private def runStateMachines[F[_]: Concurrent](
-    messages: fs2.Stream[F, Message],
-    messageIds: fs2.Stream[F, MessageId],
-    initialSnapshot: GameRooms = Map.empty,
-    initialInFlight: Messages = Map.empty
-  ): fs2.Stream[F, GameServiceState] =
+  private def runStateMachines[F[_]: Concurrent](newId: F[MessageId], repo: GameServiceRepo[F])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
     messages
-      .evalScan[F, GameServiceState](GameServiceState(initialSnapshot, initialInFlight, Nil)) { case (state, message) =>
-        (state.landed(message.id), message) match {
-          case (state, Message(_, roomId, StartGame(room, gameType))) if !state.contains(roomId) =>
-            List(GameStarted(gameType))
-              .toMessages(roomId, messageIds)
-              .compile.toList
-              .map(state.set(roomId, stateMachineFor(room.players, gameType)).fly _)
-
-          case (state, Message(_, roomId, message)) =>
-            state.get(roomId).fold(Monad[F].pure(state)) { stateMachine =>
-              val (newStateMachine, events) = stateMachine(message)
-              events
-                .toMessages(roomId, messageIds)
-                .compile.toList
-                .map(newStateMachine.fold(state.remove(roomId))(state.set(roomId, _)).fly _)
-            }
-        }
+      .evalMap { case Message(id, roomId, data) =>
+        for {
+          _ <- repo.landed(id)
+          stateMachine <- repo.get(roomId)
+          (newStateMachine, messagesData) = (stateMachine, data) match {
+            case (None, StartGame(room, gameType)) => Some(stateMachineFor(room.players, gameType)) -> List(GameStarted(gameType))
+            case (Some(state), event) => state(event)
+            case (state, _) => state -> Nil
+          }
+          _ <- newStateMachine.fold(repo.remove(roomId))(repo.set(roomId, _))
+          messages <- messagesData.toMessages(roomId, newId)
+          _ <- messages.traverse(repo.flying)
+        } yield messages
       }
+      .flatMap(fs2.Stream.iterable)
 
   def stateMachineFor(players: List[Player], gameType: GameType): GameStateMachine =
     gameType match
@@ -127,9 +80,7 @@ object GameService:
     repo: GameServiceRepo[F],
     delayDuration: Delay => FiniteDuration = Delay.defaultDuration
   ): fs2.Stream[F, Unit] =
-    messageBus
-      .subscribe
-      .through(apply(fs2.Stream.repeatEval(Async[F].delay(MessageId.newId)), repo))
+    (repo.inFlight ++ messageBus.subscribe.through(runStateMachines(Async[F].delay(MessageId.newId), repo)))
       .evalMap {
         case Delayed(message, delay) => messageBus.publish1(message).delayBy(delayDuration(delay)).start.void
         case message: Message => messageBus.publish1(message)
