@@ -24,6 +24,9 @@ object Briscola:
       case Rank.Fante => 2
       case _ => 0
 
+    def >(other: Card): Boolean =
+      (points > other.points) || (points == other.points && card.rank.value > other.rank.value)
+
   extension(player: MatchPlayer)
     def points: Int = player.collected.foldRight(0)(_.points + _)
 
@@ -56,9 +59,9 @@ object Briscola:
         case (Some((winner, card)), Nil) => winner
         case (None, Nil) => throw new IllegalArgumentException("Can't detect the winner for an empty list of players")
         case (None, head :: tail) => trickWinner(Some(head), tail)
-        case (Some((winner, winnerCard)), (opponent, opponentCard) :: tail) if winnerCard.suit == opponentCard.suit && opponentCard.points > winnerCard.points =>
+        case (Some((winner, winnerCard)), (opponent, opponentCard) :: tail) if winnerCard.suit == opponentCard.suit && opponentCard > winnerCard =>
           trickWinner(Some((opponent, opponentCard)), tail)
-        case (Some((winner, winnerCard)), (opponent, opponentCard) :: tail) if opponentCard.suit == trump.suit =>
+        case (Some((winner, winnerCard)), (opponent, opponentCard) :: tail) if winnerCard.suit != opponentCard.suit && opponentCard.suit == trump.suit =>
           trickWinner(Some((opponent -> opponentCard)), tail)
         case (winner, _ :: tail) => trickWinner(winner, tail)
       }
@@ -71,7 +74,9 @@ object Briscola:
       .scan[(Match, List[Event])](Ready(room.players.map(p => GamePlayer(p, 0))) -> Nil) {
 
         case ((Ready(players), _), ShuffleDeck(seed)) =>
-          DealRound(players.map(MatchPlayer(_, Set.empty, Set.empty)), Nil, 2, new Random(seed).shuffle(Deck.instance)) ->
+          val shuffledDeck = new Random(seed).shuffle(Deck.instance)
+          val strippedDeck = if (room.size == 3) shuffledDeck.filterNot(_ == Card(Rank.Due, Suit.Coppe)) else shuffledDeck
+          DealRound(players.map(MatchPlayer(_, Set.empty, Set.empty)), Nil, 2, strippedDeck) ->
             List(DeckShuffled(seed))
 
         case ((DealRound(player :: Nil, done, 0, deck), _), DrawCard(p)) if player.is(p) =>

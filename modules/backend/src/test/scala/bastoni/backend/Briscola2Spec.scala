@@ -6,7 +6,7 @@ import bastoni.domain.Suit.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class BriscolaSpec extends AnyFreeSpec with Matchers {
+class Briscola2Spec extends AnyFreeSpec with Matchers {
 
   val player1 = Player(PlayerId.newId, "Tizio")
   val player2 = Player(PlayerId.newId, "Caio")
