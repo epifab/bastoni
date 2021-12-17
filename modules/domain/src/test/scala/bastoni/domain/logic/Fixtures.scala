@@ -1,7 +1,7 @@
 package bastoni.domain.logic
 
 import bastoni.domain.model.*
-import bastoni.domain.model.Command.Continue
+import bastoni.domain.model.Command.{Continue, Tick}
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
 
@@ -17,13 +17,23 @@ extension (message: ServerEvent | Command | Delayed[Command])
       case Delayed(command: Command, delay) => Delayed(command.toMessage(roomId), delay)
 
 object Fixtures:
-  val player1 = Player(PlayerId.newId, "Tizio")
-  val player2 = Player(PlayerId.newId, "Caio")
-  val player3 = Player(PlayerId.newId, "Sempronio")
-  val player4 = Player(PlayerId.newId, "Giuda")
-  val player5 = Player(PlayerId.newId, "Ultimo")
+  val room1 = RoomId.unsafeParse("DA97C007-DE93-415E-8705-DD2E1911A651")
+  val room2 = RoomId.unsafeParse("14260D31-75C7-4AC5-B03E-4AFFF99BAF16")
 
-  val messageId: MessageId = MessageId.newId
+  val player1 = Player(PlayerId.unsafeParse("6517FC2F-6FED-4169-8C77-17D21492D450"), "Tizio")
+  val player2 = Player(PlayerId.unsafeParse("DC5D9B78-E403-4431-B6F2-92C31D397DB9"), "Caio")
+  val player3 = Player(PlayerId.unsafeParse("FFDBB2B6-C66C-49B6-9C2A-B0DB61FCD1A3"), "Sempronio")
+  val player4 = Player(PlayerId.unsafeParse("1AB05667-7571-40D4-9108-A2C211E308A6"), "Giuda")
+  val player5 = Player(PlayerId.unsafeParse("46CC23E1-751C-4976-9CAF-7A7678297104"), "Ultimo")
+
+  val messageId: MessageId = MessageId.unsafeParse("1FA083E5-802E-476A-B17D-48C81D637B51")
+
+  def willTick(hash: Int): Delayed[Command] = Delayed(Tick(hash), Delay.Tick)
+
+  val drawCard      = Continue
+  val revealTrump   = Continue
+  val completeTrick = Continue
+  val completeMatch = Continue
 
   val shortDelay: Delayed[Command] = Delayed(Continue, Delay.Short)
   val mediumDelay: Delayed[Command] = Delayed(Continue, Delay.Medium)

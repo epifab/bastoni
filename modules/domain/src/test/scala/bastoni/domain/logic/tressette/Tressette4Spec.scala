@@ -13,7 +13,6 @@ import org.scalatest.matchers.should.Matchers
 class Tressette4Spec extends AnyFreeSpec with Matchers:
   import Fixtures.*
 
-  val roomId = RoomId.newId
   val players = List(player1, player2, player3, player4)
 
   val drawCard      = Continue
@@ -88,9 +87,9 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
           completeMatch
         )
 
-      ).map(Message(messageId, roomId, _))
+      ).map(Message(messageId, room1, _))
 
-    Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Direction.Player),
@@ -358,5 +357,5 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
           PointsCount(List(player4.id, player2.id), 0)
         )
       )
-    ).map(_.toMessage(roomId))
+    ).map(_.toMessage(room1))
   }

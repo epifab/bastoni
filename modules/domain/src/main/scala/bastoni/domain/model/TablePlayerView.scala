@@ -32,7 +32,7 @@ case class TablePlayerView(
     case Event.DeckShuffledPlayerView(numberOfCards) =>
       updateWith(
         seats = seats.map {
-          case seat@Seat(Some(acting@ActingPlayer(targetPlayer, Action.ShuffleDeck)), _, _, _) =>
+          case seat@Seat(Some(acting@ActingPlayer(targetPlayer, Action.ShuffleDeck, _)), _, _, _) =>
             seat.copy(player = Some(acting.done))
           case whatever => whatever
         },

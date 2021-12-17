@@ -43,7 +43,7 @@ object Game:
     case (MatchState.Ready(players), ShuffleDeck(seed)) =>
       val deck = new Random(seed).shuffle(Deck.instance)
       MatchState.DealRound(
-        players.map(MatchPlayer(_, Set.empty, Set.empty)),
+        players.map(MatchPlayer(_, Nil, Nil)),
         Nil,
         9,
         deck
@@ -97,7 +97,7 @@ object Game:
       val updatedPlayers: List[MatchPlayer] = completeTrick(players)
       val winner = updatedPlayers.head
 
-      val (state, command: (ServerEvent | Command | Delayed[Command])) =
+      val (state, command: StateMachineOutput) =
         if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers) -> Continue.muchLater
         else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil) -> ActionRequested(updatedPlayers.head.id, Action.PlayCard)
         else MatchState.DrawRound(updatedPlayers, Nil, deck) -> Continue.later
@@ -200,5 +200,5 @@ object Game:
           trickWinner(Some((opponent, opponentCard)), tail)
         case (winner, _ :: tail) => trickWinner(winner, tail)
       }
-    val winner: MatchPlayer = trickWinner(None, players).collect(players.map(_(1)).toSet)
+    val winner: MatchPlayer = trickWinner(None, players).collect(players.map(_(1)))
     winner :: players.map(_(0)).slideUntil(_.is(winner.player)).tail

@@ -186,32 +186,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       Briscola3Spec.input(room1Id, player1, player2, player3) ++
       fs2.Stream(Continue.toMessage(room1Id))
 
-    val outputStream =
-      List[ServerEvent | Command](
-        PlayerJoinedTable(player3, 3),
-        PlayerJoinedTable(player2, 2),
-        PlayerJoinedTable(player1, 1),
-        GameStarted(GameType.Briscola),
-      ).map(_.toMessage(room1Id)) ++
-      (
-        ActionRequested(player3.id, Action.ShuffleDeck).toMessage(room1Id) ::
-        Briscola3Spec.output(room1Id, GamePlayer(player1, 0), GamePlayer(player2, 0), GamePlayer(player3, 0))
-      ) ++
-      (
-        ActionRequested(player1.id, Action.ShuffleDeck).toMessage(room1Id) ::
-        Briscola3Spec.output(room1Id, GamePlayer(player2, 0), GamePlayer(player3, 0), GamePlayer(player1, 1))
-      ) ++
-      (
-        ActionRequested(player2.id, Action.ShuffleDeck).toMessage(room1Id) ::
-        Briscola3Spec.output(room1Id, GamePlayer(player3, 0), GamePlayer(player1, 1), GamePlayer(player2, 1))
-      ) ++
-      (
-        ActionRequested(player3.id, Action.ShuffleDeck).toMessage(room1Id) ::
-        Briscola3Spec.output(room1Id, GamePlayer(player1, 1), GamePlayer(player2, 1), GamePlayer(player3, 1))
-      ) ++
-      List(GameCompleted(List(player1.id)).toMessage(room1Id))
-
-    gameService(inputStream).asserting(_ shouldBe outputStream)
+    gameService(inputStream).asserting(_.last shouldBe GameCompleted(List(player1.id)).toMessage(room1Id))
   }
 
   "A pre-existing game can be resumed and completed" in {
@@ -227,7 +202,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       table = new TableServerView(
         seats = List(
           Seat(
-            player = Some(ActingPlayer(gamePlayer1, Action.PlayCard)),
+            player = Some(ActingPlayer(gamePlayer1, Action.PlayCard, Some(Timeout.Max))),
             hand = List(CardServerView(player1Card, Direction.Player)),
             collected = player1Collected.map(card => CardServerView(card, Direction.Down)),
             played = Nil
@@ -246,8 +221,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         briscola.GameState.InProgress(
           List(gamePlayer1, gamePlayer2),
           briscola.MatchState.PlayRound(
-            List(MatchPlayer(gamePlayer1, Set(player1Card), player1Collected.toSet)),
-            List(MatchPlayer(gamePlayer2, Set.empty, Set.empty) -> player2Card),
+            List(MatchPlayer(gamePlayer1, List(player1Card), player1Collected)),
+            List(MatchPlayer(gamePlayer2, Nil, Nil) -> player2Card),
             Nil,
             player1Card
           ),
@@ -345,6 +320,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
             case Delay.Short => 10.milli
             case Delay.Medium => 20.millis
             case Delay.Long => 30.millis
+            case Delay.Tick => 100.millis
           })
         )
         subscription <- fs2.Stream.resource(bus.subscribeAwait)

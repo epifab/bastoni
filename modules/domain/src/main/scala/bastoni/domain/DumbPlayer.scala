@@ -22,13 +22,13 @@ object DumbPlayer:
         .collect { case Some(table) => table }
         .map(
           _.seatFor(me) match {
-            case Some(PlayerSeat(ActingPlayer(_, Action.PlayCard), hand, _, _)) =>
+            case Some(PlayerSeat(ActingPlayer(_, Action.PlayCard, _), hand, _, _)) =>
               Some(PlayCard(hand.flatMap(_.card).headOption.getOrElse(throw new IllegalStateException("No cards in hand"))))
 
-            case Some(PlayerSeat(ActingPlayer(_, Action.PlayCardOf(suit)), hand, _, _)) =>
+            case Some(PlayerSeat(ActingPlayer(_, Action.PlayCardOf(suit), _), hand, _, _)) =>
               Some(PlayCard(hand.flatMap(_.card).pipe(hand => hand.find(_.suit == suit).orElse(hand.headOption)).getOrElse(throw new IllegalStateException("No cards in hand"))))
 
-            case Some(PlayerSeat(ActingPlayer(_, Action.ShuffleDeck), _, _, _)) =>
+            case Some(PlayerSeat(ActingPlayer(_, Action.ShuffleDeck, _), _, _, _)) =>
               Some(ShuffleDeck)
 
             case _ => None

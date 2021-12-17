@@ -10,9 +10,10 @@ opaque type MessageId = UUID
 
 object MessageId:
   def newId: MessageId = UUID.randomUUID()
-  def parse(s: String): Option[MessageId] = Try(UUID.fromString(s)).toOption
+  def tryParse(s: String): Option[MessageId] = Try(unsafeParse(s)).toOption
+  def unsafeParse(s: String): MessageId = UUID.fromString(s)
   given Encoder[MessageId] = Encoder[String].contramap(_.toString)
-  given Decoder[MessageId] = Decoder[String].emap(parse(_).toRight("Not a valid ID"))
+  given Decoder[MessageId] = Decoder[String].emap(tryParse(_).toRight("Not a valid ID"))
 
 case class Message(id: MessageId, roomId: RoomId, data: ServerEvent | Command)
 

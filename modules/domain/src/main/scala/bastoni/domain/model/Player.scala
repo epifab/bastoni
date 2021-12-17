@@ -10,9 +10,10 @@ opaque type PlayerId = UUID
 
 object PlayerId:
   def newId: PlayerId = UUID.randomUUID()
-  def parse(s: String): Option[PlayerId] = Try(UUID.fromString(s)).toOption
+  def tryParse(s: String): Option[PlayerId] = Try(unsafeParse(s)).toOption
+  def unsafeParse(s: String): PlayerId = UUID.fromString(s)
   given Encoder[PlayerId] = Encoder[String].contramap(_.toString)
-  given Decoder[PlayerId] = Decoder[String].emap(parse(_).toRight("Not a valid ID"))
+  given Decoder[PlayerId] = Decoder[String].emap(tryParse(_).toRight("Not a valid ID"))
 
 case class Player(id: PlayerId, name: String)
 

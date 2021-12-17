@@ -11,8 +11,8 @@ class JsonSpec extends AnyFreeSpec with Matchers:
   "Encoding of match players" in {
     val player = MatchPlayer(
       GamePlayer(Player(PlayerId.newId, "John"), 15),
-      Set(Card(Rank.Asso, Suit.Denari), Card(Rank.Sette, Suit.Denari)),
-      Set.empty
+      List(Card(Rank.Asso, Suit.Denari), Card(Rank.Sette, Suit.Denari)),
+      Nil
     )
 
     val expectedJson = parse(

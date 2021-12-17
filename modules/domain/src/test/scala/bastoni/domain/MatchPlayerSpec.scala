@@ -10,7 +10,7 @@ class MatchPlayerSpec extends AnyFreeSpec with Matchers:
   val player3 = Player(player1.id, "Jack")
 
   val gamePlayer: GamePlayer = GamePlayer(player1, 99)
-  val matchPlayer = MatchPlayer(gamePlayer, Set(Card(Rank.Asso, Suit.Bastoni), Card(Rank.Sette, Suit.Denari)), Set.empty)
+  val matchPlayer = MatchPlayer(gamePlayer, List(Card(Rank.Asso, Suit.Bastoni), Card(Rank.Sette, Suit.Denari)), Nil)
 
   "Comparing 2 players" in {
     matchPlayer.is(player1) shouldBe true
@@ -33,7 +33,7 @@ class MatchPlayerSpec extends AnyFreeSpec with Matchers:
 
   "Player.play" in {
     matchPlayer.play(Card(Rank.Asso, Suit.Bastoni)) shouldBe (
-      MatchPlayer(gamePlayer, Set(Card(Rank.Sette, Suit.Denari)), Set.empty),
+      MatchPlayer(gamePlayer, List(Card(Rank.Sette, Suit.Denari)), Nil),
       Card(Rank.Asso, Suit.Bastoni)
     )
   }

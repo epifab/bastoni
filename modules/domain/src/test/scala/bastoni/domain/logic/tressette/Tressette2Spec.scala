@@ -13,7 +13,6 @@ import org.scalatest.matchers.should.Matchers
 class Tressette2Spec extends AnyFreeSpec with Matchers:
   import Fixtures.*
 
-  val roomId = RoomId.newId
   val players = List(player1, player2)
 
   val drawCard      = Continue
@@ -129,9 +128,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
           completeMatch
         )
 
-      ).map(Message(messageId, roomId, _))
+      ).map(Message(messageId, room1, _))
 
-    Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Direction.Player),
@@ -400,7 +399,7 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
           PointsCount(List(player1.id), 5)
         )
       )
-    ).map(_.toMessage(roomId))
+    ).map(_.toMessage(room1))
   }
 
   "Game is aborted if one of the active players leaves" in {
@@ -409,15 +408,15 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       drawCard,
       PlayerLeftTable(player1, 1),
       drawCard, // too late, game was aborted
-    ).map(_.toMessage(roomId))
+    ).map(_.toMessage(room1))
 
-    Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Direction.Player),
       shortDelay,
       MatchAborted
-    ).map(_.toMessage(roomId))
+    ).map(_.toMessage(room1))
   }
 
   "Game continues if another player joins and leaves" in {
@@ -426,12 +425,12 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       PlayerJoinedTable(player3, 3),
       PlayerLeftTable(player3, 3),
       drawCard,
-    ).map(_.toMessage(roomId))
+    ).map(_.toMessage(room1))
 
-    Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Direction.Player),
       shortDelay
-    ).map(_.toMessage(roomId))
+    ).map(_.toMessage(room1))
   }

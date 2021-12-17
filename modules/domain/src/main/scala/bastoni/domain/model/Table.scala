@@ -137,25 +137,35 @@ trait Table[C <: CardView]:
           deck = Nil
         )
 
-      case Event.ActionRequested(playerId, Action.ShuffleDeck) =>
+      case Event.ActionRequested(playerId, Action.ShuffleDeck, timeout) =>
         updateWith(
           seats = seats.map {
             case seat@ Seat(Some(waiting: SittingIn), _, _, _) if waiting.playerId == playerId =>
-              seat.copy(player = Some(waiting.act(Action.ShuffleDeck).mapPlayer(_.copy(dealer = true))))
+              seat.copy(player = Some(waiting.act(Action.ShuffleDeck, timeout).mapPlayer(_.copy(dealer = true))))
             case seat@ Seat(Some(sittingIn: SittingIn), _, _, _) =>
               seat.copy(player = Some(sittingIn.mapPlayer(_.copy(dealer = false))))
             case whatever => whatever
           }
         )
 
-      case Event.ActionRequested(playerId, action) =>
+      case Event.ActionRequested(playerId, action, timeout) =>
         updateWith(
           seats = seats.map {
-            case seat@ Seat(Some(waiting: SittingIn), _, _, _) if waiting.playerId == playerId =>
-              seat.copy(player = Some(waiting.act(action)))
+            case seat@ Seat(Some(p: SittingIn), _, _, _) if p.playerId == playerId =>
+              seat.copy(player = Some(p.act(action, timeout)))
             case whatever => whatever
           }
         )
+
+      case Event.TimedOut(playerId, _) =>
+        updateWith(
+          seats = seats.map {
+            case seat@ Seat(Some(p: ActingPlayer), _, _, _) if p.playerId == playerId =>
+              seat.copy(player = Some(p.copy(timeout = Some(Timeout.TimedOut))))
+            case whatver => whatver
+          }
+        )
+
 
   protected def cardDealtUpdate(event: Event.CardDealt[C]): TableView =
     updateWith(

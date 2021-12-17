@@ -3,7 +3,7 @@ package bastoni.domain.model
 import io.circe.{Encoder, Decoder}
 import io.circe.generic.semiauto.{deriveEncoder, deriveDecoder}
 
-case class MatchPlayer(gamePlayer: GamePlayer, hand: Set[Card], collected: Set[Card]):
+case class MatchPlayer(gamePlayer: GamePlayer, hand: List[Card], collected: List[Card]):
   def player: Player = gamePlayer.player
 
   val id: PlayerId = gamePlayer.id
@@ -11,16 +11,16 @@ case class MatchPlayer(gamePlayer: GamePlayer, hand: Set[Card], collected: Set[C
   def is(p: PlayerId): Boolean = p == id
 
   def has(card: Card): Boolean = hand.contains(card)
-  def draw(card: Card) = copy(hand = hand + card)
+  def draw(card: Card) = copy(hand = card :: hand)
 
   def play(card: Card) =
     if (!has(card)) throw new IllegalArgumentException("Card not found")
-    copy(hand = hand - card) -> card
+    copy(hand = hand.filterNot(_ == card)) -> card
 
-  def collect(cards: Set[Card]) = copy(collected = collected ++ cards)
+  def collect(cards: List[Card]) = copy(collected = collected ++ cards)
 
 object MatchPlayer:
-  private case class MatchPlayerView(id: PlayerId, name: String, points: Int, hand: Set[Card], collected: Set[Card])
+  private case class MatchPlayerView(id: PlayerId, name: String, points: Int, hand: List[Card], collected: List[Card])
 
   given Encoder[MatchPlayer] = deriveEncoder[MatchPlayerView].contramap[MatchPlayer](matchPlayer =>
     MatchPlayerView(

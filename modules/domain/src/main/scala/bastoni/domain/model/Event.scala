@@ -24,7 +24,8 @@ object Event:
   case class  GameStarted(gameType: GameType) extends PublicEvent
   case class  TrumpRevealed(card: Card) extends PublicEvent
   case class  CardPlayed(playerId: PlayerId, card: Card) extends PublicEvent
-  case class  ActionRequested(playerId: PlayerId, action: Action) extends PublicEvent
+  case class  ActionRequested(playerId: PlayerId, action: Action, timeout: Option[Timeout.Active] = None) extends PublicEvent
+  case class  TimedOut(playerId: PlayerId, action: Action) extends PublicEvent
   case class  TrickCompleted(winnerId: PlayerId) extends PublicEvent
   case class  MatchCompleted(winnerIds: List[PlayerId], matchPoints: List[PointsCount], gamePoints: List[PointsCount]) extends PublicEvent
   case class  GameCompleted(winnerIds: List[PlayerId]) extends PublicEvent
@@ -63,6 +64,7 @@ object Event:
     case obj: PlayerLeftTable   => deriveEncoder[PlayerLeftTable].mapJsonObject(_.add("type", "PlayerLeftTable".asJson))(obj)
     case obj: GameStarted       => deriveEncoder[GameStarted].mapJsonObject(_.add("type", "GameStarted".asJson))(obj)
     case obj: ActionRequested   => deriveEncoder[ActionRequested].mapJsonObject(_.add("type", "ActionRequested".asJson))(obj)
+    case obj: TimedOut          => deriveEncoder[TimedOut].mapJsonObject(_.add("type", "TimedOut".asJson))(obj)
     case obj: TrumpRevealed     => deriveEncoder[TrumpRevealed].mapJsonObject(_.add("type", "TrumpRevealed".asJson))(obj)
     case obj: CardPlayed        => deriveEncoder[CardPlayed].mapJsonObject(_.add("type", "CardPlayed".asJson))(obj)
     case obj: TrickCompleted    => deriveEncoder[TrickCompleted].mapJsonObject(_.add("type", "TrickCompleted".asJson))(obj)
@@ -90,6 +92,7 @@ object Event:
     case "PlayerLeftTable"   => deriveDecoder[PlayerLeftTable](obj)
     case "GameStarted"       => deriveDecoder[GameStarted](obj)
     case "ActionRequested"   => deriveDecoder[ActionRequested](obj)
+    case "TimedOut"          => deriveDecoder[TimedOut](obj)
     case "TrumpRevealed"     => deriveDecoder[TrumpRevealed](obj)
     case "CardPlayed"        => deriveDecoder[CardPlayed](obj)
     case "TrickCompleted"    => deriveDecoder[TrickCompleted](obj)

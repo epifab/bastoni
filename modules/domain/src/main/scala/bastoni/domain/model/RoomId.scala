@@ -9,6 +9,7 @@ opaque type RoomId = UUID
 
 object RoomId:
   def newId: RoomId = UUID.randomUUID()
-  def parse(s: String): Option[RoomId] = Try(UUID.fromString(s)).toOption
+  def tryParse(s: String): Option[RoomId] = Try(unsafeParse(s)).toOption
+  def unsafeParse(s: String): RoomId = UUID.fromString(s)
   given Encoder[RoomId] = Encoder[String].contramap(_.toString)
-  given Decoder[RoomId] = Decoder[String].emap(parse(_).toRight("Not a valid ID"))
+  given Decoder[RoomId] = Decoder[String].emap(tryParse(_).toRight("Not a valid ID"))

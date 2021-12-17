@@ -4,13 +4,13 @@ import io.circe.{Decoder, Encoder, Codec}
 import io.circe.generic.semiauto.deriveCodec
 
 enum Delay:
-  case Short, Medium, Long
+  case Short, Medium, Long, Tick
 
 object Delay:
   given Encoder[Delay] = Encoder[String].contramap(_.toString)
   given Decoder[Delay] = Decoder[String].map(Delay.valueOf)
 
-case class Delayed[T](inner: T, delay: Delay):
+case class Delayed[+T](inner: T, delay: Delay):
   def map[U](f: T => U): Delayed[U] = Delayed(f(inner), delay)
 
 object Delayed:

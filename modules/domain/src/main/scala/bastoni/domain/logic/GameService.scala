@@ -46,8 +46,9 @@ object GameService:
     messageRepo: MessageRepo[F],
     delayDuration: Delay => FiniteDuration = {
       case Delay.Short => 500.millis
-      case Delay.Medium => 1.second
-      case Delay.Long => 3.seconds
+      case Delay.Medium => 2.second
+      case Delay.Long => 5.seconds
+      case Delay.Tick => 1.second
     }
   ): ServiceRunner[F] =
     messageBus.subscribeAwait.map { subscription =>

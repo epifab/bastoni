@@ -16,7 +16,7 @@ val PlayerComponent =
           <.strong(player.name),
           s" ($points points)"
         )
-      case Some(ActingPlayer(GamePlayer(player, points, dealer), _)) =>
+      case Some(ActingPlayer(GamePlayer(player, points, dealer), _, _)) =>
         <.div(^.className := (List("player", "acting") ++ Option.when(dealer)("dealer").toList).mkString(" "),
           <.strong(player.name),
           s" ($points points)"
