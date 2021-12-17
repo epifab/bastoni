@@ -21,7 +21,7 @@ object MatchState:
   case class   WillComplete(players: List[MatchPlayer], trump: Card) extends Active(players.map(_.gamePlayer))
 
   sealed trait Terminated extends MatchState
-  case class   Completed(winners: List[PlayerId]) extends Terminated
+  case class   Completed(players: List[GamePlayer]) extends Terminated
   case object  Aborted extends Terminated
 
   given Encoder[MatchState] = Encoder.instance {

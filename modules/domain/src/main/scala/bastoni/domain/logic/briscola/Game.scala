@@ -114,19 +114,27 @@ object Game:
       state -> (TrickCompleted(winner.id) :: command :: Nil)
 
     case (MatchState.WillComplete(players, trump), Continue) =>
-      val teams = players match
+      val teams: List[List[MatchPlayer]] = players match
         case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
         case ps => ps.map(List(_))
 
-      val pointsCount = teams.map(players => MatchPointsCount(players.map(_.id), players.foldRight(0)(_.points + _)))
+      val matchPoints = teams.map(players => PointsCount(players.map(_.id), players.foldRight(0)(_.points + _)))
 
-      val winners: Option[List[PlayerId]] = pointsCount.sortBy(-_.points) match
-        case MatchPointsCount(winners, wp) :: MatchPointsCount(losers, lp) :: _ if wp > lp => Some(winners)
-        case _ => None
+      val winners: List[PlayerId] = matchPoints.sortBy(-_.points) match
+        case PointsCount(winners, wp) :: PointsCount(_, lp) :: _ if wp > lp => winners
+        case _ => Nil
 
-      val events = pointsCount :+ winners.fold(MatchDraw)(MatchCompleted(_))
+      val gamePoints: List[PointsCount] = teams.flatMap(teamPlayers => teamPlayers.headOption.map {
+        case winner if winners.exists(winner.is) => PointsCount(teamPlayers.map(_.id), winner.gamePlayer.win.points)
+        case loser => PointsCount(teamPlayers.map(_.id), loser.gamePlayer.points)
+      })
 
-      MatchState.Completed(winners.getOrElse(Nil)) -> events
+      val updatedPlayers = players.map {
+        case winner if winners.exists(winner.is) => winner.gamePlayer.win
+        case loser => loser.gamePlayer
+      }
+
+      MatchState.Completed(updatedPlayers) -> List(MatchCompleted(winners, matchPoints, gamePoints))
 
     case (m, _) => m -> Nil
   }
@@ -135,25 +143,20 @@ object Game:
 
     case (GameState.InProgress(players, matchState, rounds), message) =>
       playMatchStep(matchState, message) match
-        case (MatchState.Completed(winners), matchEvents) =>
-          val newPlayers = players.map {
-            case player if winners.exists(player.is) => player.win
-            case player => player
-          }
-
-          val allEvents = matchEvents ++ newPlayers.groupBy(_.points).map { case (points, players) => GamePointsCount(players.map(_.id), points) }
+        case (MatchState.Completed(players), events) =>
 
           def ready(shiftedRound: List[GamePlayer], rounds: Int) =
-            GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), rounds) -> (allEvents :+ ActionRequest(shiftedRound.last.id, Action.ShuffleDeck))
+            GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), rounds) -> (events :+ ActionRequest(shiftedRound.last.id, Action.ShuffleDeck))
 
           val teamSize = if (players.size == 4) 2 else 1
 
           if (rounds == 0) {
-            val winners = newPlayers.groupMap(_.points)(_.id).maxBy(_._1)._2
-            if (winners.size > teamSize) ready(newPlayers.tail :+ newPlayers.head, 0)
-            else GameState.Terminated -> (allEvents :+ GameCompleted(winners))
+            players.groupMap(_.points)(_.id).maxBy(_._1)._2 match {
+              case winners if winners.size == teamSize => GameState.Terminated -> (events :+ GameCompleted(winners))
+              case _ => ready(players.tail :+ players.head, 0)
+            }
           }
-          else ready(newPlayers.tail :+ newPlayers.head, rounds - 1)
+          else ready(players.tail :+ players.head, rounds - 1)
 
         case (MatchState.Aborted, events) =>
           GameState.Terminated -> (events :+ GameAborted)

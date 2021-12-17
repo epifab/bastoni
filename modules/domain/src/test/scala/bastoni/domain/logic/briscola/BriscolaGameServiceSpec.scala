@@ -75,30 +75,20 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     val outputStream =
       GameStarted(GameType.Briscola).toMessage(room.id) ::
       (ActionRequest(player3.id, Action.ShuffleDeck).toMessage(room.id) ::
-      Briscola3Spec.output(room.id, player1, player2, player3)) ++
+      Briscola3Spec.output(room.id, GamePlayer(player1, 0), GamePlayer(player2, 0), GamePlayer(player3, 0))) ++
       (
-        GamePointsCount(List(player2.id, player3.id), 0).toMessage(room.id) ::
-        GamePointsCount(List(player1.id), 1).toMessage(room.id) ::
         ActionRequest(player1.id, Action.ShuffleDeck).toMessage(room.id) ::
-        Briscola3Spec.output(room.id, player2, player3, player1)
+        Briscola3Spec.output(room.id, GamePlayer(player2, 0), GamePlayer(player3, 0), GamePlayer(player1, 1))
       ) ++
       (
-        GamePointsCount(List(player3.id), 0).toMessage(room.id) ::
-        GamePointsCount(List(player2.id, player1.id), 1).toMessage(room.id) ::
         ActionRequest(player2.id, Action.ShuffleDeck).toMessage(room.id) ::
-        Briscola3Spec.output(room.id, player3, player1, player2)
+        Briscola3Spec.output(room.id, GamePlayer(player3, 0), GamePlayer(player1, 1), GamePlayer(player2, 1))
       ) ++
       (
-        GamePointsCount(List(player3.id, player1.id, player2.id), 1).toMessage(room.id) ::
         ActionRequest(player3.id, Action.ShuffleDeck).toMessage(room.id) ::
-        Briscola3Spec.output(room.id, player1, player2, player3)
+        Briscola3Spec.output(room.id, GamePlayer(player1, 1), GamePlayer(player2, 1), GamePlayer(player3, 1))
       ) ++
-      (
-        GamePointsCount(List(player2.id, player3.id), 1).toMessage(room.id) ::
-        GamePointsCount(List(player1.id), 2).toMessage(room.id) ::
-        GameCompleted(List(player1.id)).toMessage(room.id) ::
-        Nil
-      )
+      List(GameCompleted(List(player1.id)).toMessage(room.id))
 
     val resultIO = for {
       gameRepo <- GameRepo.inMemory[IO]
@@ -131,12 +121,12 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       )
     )
 
-    val gameRoom = new GameRoom(
+    val gameContext = new GameContext(
       List(
         Seat(None, Nil, Nil, Nil),
         Seat(Some(ActingPlayer(gamePlayer1)), List(CardState(player1Card, Face.Player)), player1Collected.map(card => CardState(card, Face.Down)), Nil),
         Seat(None, Nil, Nil, Nil),
-        Seat(Some(ActivePlayer(gamePlayer2)), Nil, Nil, List(CardState(player2Card, Face.Up)))
+        Seat(Some(WatingPlayer(gamePlayer2)), Nil, Nil, List(CardState(player2Card, Face.Up)))
       ),
       deck = Nil,
       stateMachine = Some(stateMachine)
@@ -147,7 +137,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     val (events, finalGameRoom, messages) = (for {
       gameRepo <- JsonRepos.gameRepo
       messageRepo <- JsonRepos.messageRepo
-      _ <- gameRepo.set(room1.id, gameRoom)
+      _ <- gameRepo.set(room1.id, gameContext)
       _ <- messageRepo.flying(oldMessage)
       bus <- MessageBus.inMemory[IO]
       events <- (for {
@@ -166,15 +156,21 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       oldMessage.data,
       CardPlayed(player1.id, player1Card),
       TrickCompleted(player2.id),
-      MatchPointsCount(List(player2.id), 21),
-      MatchPointsCount(List(player1.id), 99),
-      MatchCompleted(List(player1.id)),
-      GamePointsCount(List(player2.id), 1),
-      GamePointsCount(List(player1.id), 3),
+      MatchCompleted(
+        winnerIds = List(player1.id),
+        matchPoints = List(
+          PointsCount(List(player2.id), 21),
+          PointsCount(List(player1.id), 99),
+        ),
+        gamePoints = List(
+          PointsCount(List(player2.id), 1),
+          PointsCount(List(player1.id), 3)
+        )
+      ),
       GameCompleted(List(player1.id))
     )
 
-    finalGameRoom shouldBe Some(new GameRoom(
+    finalGameRoom shouldBe Some(new GameContext(
       seats = List(
         Seat(None, Nil, Nil, Nil),
         Seat(Some(EndOfGamePlayer(gamePlayer1.win, winner = true)), Nil, Nil, Nil),

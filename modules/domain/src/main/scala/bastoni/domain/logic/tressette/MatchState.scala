@@ -1,7 +1,6 @@
 package bastoni.domain.logic.tressette
 
 import bastoni.domain.model.{GamePlayer, *}
-import bastoni.domain.model.Event.MatchPointsCount
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
@@ -21,11 +20,8 @@ object MatchState:
   case class   WillComplete(players: List[MatchPlayer]) extends Active(players.map(_.gamePlayer))
 
   sealed trait Terminated extends MatchState
-  case class   Completed(points: List[MatchPointsCount]) extends Terminated
+  case class   Completed(points: List[GamePlayer]) extends Terminated
   case object  Aborted extends Terminated
-
-  given Encoder[MatchPointsCount] = deriveEncoder
-  given Decoder[MatchPointsCount] = deriveDecoder
 
   given Encoder[MatchState] = Encoder.instance {
     case s: Ready             => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)

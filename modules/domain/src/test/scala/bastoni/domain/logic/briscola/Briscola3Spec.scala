@@ -17,7 +17,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
 
   "A game can be played" in {
     val inputStream = Briscola3Spec.input(roomId, player1, player2, player3)
-    val expectedOut = Briscola3Spec.output(roomId, player1, player2, player3)
+    val expectedOut = Briscola3Spec.output(roomId, GamePlayer(player1, 0), GamePlayer(player2, 0), GamePlayer(player3, 0))
     Game.playMatch[cats.Id](room, messageId)(inputStream).compile.toList shouldBe expectedOut
   }
 
@@ -140,7 +140,7 @@ object Briscola3Spec:
       completeMatch,
     ).map(_.toMessage(roomId))
 
-  def output(roomId: RoomId, player1: Player, player2: Player, player3: Player): List[Message | Delayed[Message]] =
+  def output(roomId: RoomId, player1: GamePlayer, player2: GamePlayer, player3: GamePlayer): List[Message | Delayed[Message]] =
     List[Event | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck.filterNot(_ == Card(Due, Coppe))),
 
@@ -344,8 +344,17 @@ object Briscola3Spec:
       TrickCompleted(player1.id),  // 24
 
       longDelay,
-      MatchPointsCount(List(player1.id), 54),
-      MatchPointsCount(List(player2.id), 41),
-      MatchPointsCount(List(player3.id), 25),
-      MatchCompleted(List(player1.id))
+      MatchCompleted(
+        winnerIds = List(player1.id),
+        matchPoints = List(
+          PointsCount(List(player1.id), 54),
+          PointsCount(List(player2.id), 41),
+          PointsCount(List(player3.id), 25),
+        ),
+        gamePoints = List(
+          PointsCount(List(player1.id), player1.points + 1),
+          PointsCount(List(player2.id), player2.points),
+          PointsCount(List(player3.id), player3.points)
+        )
+      )
     ).map(_.toMessage(roomId))

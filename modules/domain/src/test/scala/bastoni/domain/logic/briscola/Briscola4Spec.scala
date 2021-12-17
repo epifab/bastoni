@@ -340,7 +340,15 @@ object Briscola4Spec:
       TrickCompleted(player2.id),  // 33 + 27 = 60
 
       longDelay,
-      MatchPointsCount(List(player2.id, player4.id), 60),
-      MatchPointsCount(List(player3.id, player1.id), 60),
-      MatchDraw
+      MatchCompleted(
+        winnerIds = Nil,
+        matchPoints = List(
+          PointsCount(List(player2.id, player4.id), 60),
+          PointsCount(List(player3.id, player1.id), 60)
+        ),
+        gamePoints = List(
+          PointsCount(List(player2.id, player4.id), 0),
+          PointsCount(List(player3.id, player1.id), 0)
+        )
+      )
     ).map(_.toMessage(roomId))

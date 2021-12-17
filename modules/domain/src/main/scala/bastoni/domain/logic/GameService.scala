@@ -29,7 +29,7 @@ object GameService:
       .evalMap { case Message(id, roomId, data) =>
         for {
           existingRoom <- gameRepo.get(roomId)
-          (newGameRoom, messagesData) = existingRoom.map(_.update(data)).orElse(GameRoom.build(data)) match {
+          (newGameRoom, messagesData) = existingRoom.map(_.update(data)).orElse(GameContext.build(data)) match {
             case None => None -> Nil
             case Some(room) =>
               val (stateMachine, messagesData) = (room.stateMachine, data) match {

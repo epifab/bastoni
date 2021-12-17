@@ -347,8 +347,16 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player3.id),
 
       longDelay,
-      MatchPointsCount(List(player3.id, player1.id), 11),
-      MatchPointsCount(List(player4.id, player2.id), 0),
-      MatchCompleted(List(player3.id, player1.id))
+      MatchCompleted(
+        winnerIds = List(player3.id, player1.id),
+        matchPoints = List(
+          PointsCount(List(player3.id, player1.id), 11),
+          PointsCount(List(player4.id, player2.id), 0)
+        ),
+        gamePoints = List(
+          PointsCount(List(player3.id, player1.id), 11),
+          PointsCount(List(player4.id, player2.id), 0)
+        )
+      )
     ).map(_.toMessage(roomId))
   }

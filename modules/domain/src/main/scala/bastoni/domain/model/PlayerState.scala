@@ -13,30 +13,35 @@ case class SittingOut(player: Player) extends PlayerState:
 sealed trait SittingIn extends PlayerState:
   def player: GamePlayer
   def playerId: PlayerId = player.id
+  def map(f: GamePlayer => GamePlayer): SittingIn
 
-case class ActivePlayer(player: GamePlayer) extends SittingIn
-case class ActingPlayer(player: GamePlayer) extends SittingIn
-case class PlayerWithPoints(player: GamePlayer, points: Int) extends SittingIn
-case class EndOfMatchPlayer(player: GamePlayer, points: Int, winner: Boolean) extends SittingIn
-case class EndOfGamePlayer(player: GamePlayer, winner: Boolean) extends SittingIn
+case class WatingPlayer(player: GamePlayer) extends SittingIn:
+  def map(f: GamePlayer => GamePlayer): WatingPlayer  = copy(player = f(player))
+
+case class ActingPlayer(player: GamePlayer) extends SittingIn:
+  def map(f: GamePlayer => GamePlayer): ActingPlayer  = copy(player = f(player))
+
+case class EndOfMatchPlayer(player: GamePlayer, points: Int, winner: Boolean) extends SittingIn:
+  def map(f: GamePlayer => GamePlayer): EndOfMatchPlayer  = copy(player = f(player))
+
+case class EndOfGamePlayer(player: GamePlayer, winner: Boolean) extends SittingIn:
+  def map(f: GamePlayer => GamePlayer): EndOfGamePlayer = copy(player = f(player))
 
 
 object PlayerState:
 
   given Encoder[PlayerState] = Encoder.instance {
     case obj: SittingOut       => deriveEncoder[SittingOut].mapJsonObject(_.add("type", "SittingOut".asJson))(obj)
-    case obj: ActivePlayer     => deriveEncoder[ActivePlayer].mapJsonObject(_.add("type", "ActivePlayer".asJson))(obj)
+    case obj: WatingPlayer     => deriveEncoder[WatingPlayer].mapJsonObject(_.add("type", "ActivePlayer".asJson))(obj)
     case obj: ActingPlayer     => deriveEncoder[ActingPlayer].mapJsonObject(_.add("type", "ActingPlayer".asJson))(obj)
-    case obj: PlayerWithPoints => deriveEncoder[PlayerWithPoints].mapJsonObject(_.add("type", "PlayerWithPoints".asJson))(obj)
     case obj: EndOfMatchPlayer => deriveEncoder[EndOfMatchPlayer].mapJsonObject(_.add("type", "EndOfMatchPlayer".asJson))(obj)
     case obj: EndOfGamePlayer  => deriveEncoder[EndOfGamePlayer].mapJsonObject(_.add("type", "EndOfGamePlayer".asJson))(obj)
   }
 
   given Decoder[PlayerState] = Decoder.instance { cursor => cursor.downField("type").as[String].flatMap {
     case "SittingOut"       => deriveDecoder[SittingOut].tryDecode(cursor)
-    case "ActivePlayer"     => deriveDecoder[ActivePlayer].tryDecode(cursor)
+    case "ActivePlayer"     => deriveDecoder[WatingPlayer].tryDecode(cursor)
     case "ActingPlayer"     => deriveDecoder[ActingPlayer].tryDecode(cursor)
-    case "PlayerWithPoints" => deriveDecoder[PlayerWithPoints].tryDecode(cursor)
     case "EndOfMatchPlayer" => deriveDecoder[EndOfMatchPlayer].tryDecode(cursor)
     case "EndOfGamePlayer"  => deriveDecoder[EndOfGamePlayer].tryDecode(cursor)
   }}

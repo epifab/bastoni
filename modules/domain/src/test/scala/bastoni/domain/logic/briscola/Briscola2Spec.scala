@@ -379,9 +379,17 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),  // 68
 
       longDelay,
-      MatchPointsCount(List(player1.id), 68),
-      MatchPointsCount(List(player2.id), 52),
-      MatchCompleted(List(player1.id))
+      MatchCompleted(
+        winnerIds = List(player1.id),
+        matchPoints = List(
+          PointsCount(List(player1.id), 68),
+          PointsCount(List(player2.id), 52),
+        ),
+        gamePoints = List(
+          PointsCount(List(player1.id), 1),
+          PointsCount(List(player2.id), 0)
+        )
+      )
     ).map(_.toMessage(roomId))
   }
 
