@@ -167,6 +167,100 @@ class GameServiceSpec extends AsyncIOFreeSpec:
     ))
   }
 
+  "Snapshots are accurate" in {
+    val inputStream = fs2.Stream[fs2.Pure, StateMachineInput](
+      JoinTable(user2, joinSeed),
+      JoinTable(user1, joinSeed),
+
+      StartGame(user2.id, GameType.Briscola),
+      ShuffleDeck(shuffleSeed),
+      Continue,
+      Continue,
+      Continue,
+      Connect,
+      PlayCard(user1.id, Card(Due, Bastoni)),
+      Connect
+    ).map(_.toMessage(room1))
+
+    gameService(inputStream).asserting { events =>
+      events.collect { case Message(_, _, s: Snapshot) => s } shouldBe
+        List(
+          Snapshot(
+            TableServerView(
+              List(
+                Seat(None, Nil, Nil, Nil),
+                Seat(None, Nil, Nil, Nil),
+                Seat(
+                  Some(
+                    ActingPlayer(
+                      MatchPlayer(user1, 0, false),
+                      Action.PlayCard,
+                      Some(Timeout.Max)
+                    )
+                  ),
+                  hand = List(
+                    CardServerView(Card(Due, Bastoni), Direction.Player),
+                    CardServerView(Card(Asso, Spade), Direction.Player),
+                    CardServerView(Card(Sette, Denari), Direction.Player)
+                  ),
+                  taken = Nil,
+                  played = Nil
+                ),
+                Seat(
+                  Some(WaitingPlayer(MatchPlayer(user2, 0, false))),
+                  hand = List(
+                    CardServerView(Card(Quattro, Spade), Direction.Player),
+                    CardServerView(Card(Sei, Denari), Direction.Player),
+                    CardServerView(Card(Re, Denari), Direction.Player)
+                  ),
+                  taken = Nil,
+                  played = Nil
+                )
+              ),
+              deck = shuffledDeck.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(Card(Cinque, Coppe), Direction.Up),
+              board = Nil,
+              active = true
+            )
+          ),
+          Snapshot(
+            TableServerView(
+              List(
+                Seat(None, Nil, Nil, Nil),
+                Seat(None, Nil, Nil, Nil),
+                Seat(
+                  Some(
+                    WaitingPlayer(MatchPlayer(user1, 0, false))
+                  ),
+                  hand = List(
+                    CardServerView(Card(Asso, Spade), Direction.Player),
+                    CardServerView(Card(Sette, Denari), Direction.Player)
+                  ),
+                  taken = Nil,
+                  played = List(
+                    CardServerView(Card(Due, Bastoni), Direction.Player)
+                  )
+                ),
+                Seat(
+                  Some(ActingPlayer(MatchPlayer(user2, 0, false), Action.PlayCard, Some(Timeout.Max))),
+                  hand = List(
+                    CardServerView(Card(Quattro, Spade), Direction.Player),
+                    CardServerView(Card(Sei, Denari), Direction.Player),
+                    CardServerView(Card(Re, Denari), Direction.Player)
+                  ),
+                  taken = Nil,
+                  played = Nil
+                )
+              ),
+              deck = shuffledDeck.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(Card(Cinque, Coppe), Direction.Up),
+              board = Nil,
+              active = true
+            )
+          )
+        )
+
+    }
+  }
+
   "A pre-existing game can be resumed and completed" in {
     val player1 = MatchPlayer(user1, 2)
     val player2 = MatchPlayer(user2, 1)
