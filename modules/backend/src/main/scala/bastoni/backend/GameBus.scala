@@ -13,23 +13,24 @@ class GameBus[F[_]](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int]):
       .subscribe
       .collect { case Message(`roomId`, event: (Event | ActionRequest)) => event }
       .map {
-        case PlayerJoined(player, room)                 => ToPlayer.PlayerJoined(player, room)
-        case PlayerLeft(player, room)                   => ToPlayer.PlayerLeft(player, room)
-        case GameStarted(gameType)                      => ToPlayer.GameStarted(gameType)
-        case DeckShuffled(_)                            => ToPlayer.DeckShuffled
-        case CardDealt(player, card) if player == me.id => ToPlayer.CardDealt(player, Some(card))
-        case CardDealt(player, _)                       => ToPlayer.CardDealt(player, None)
-        case TrumpRevealed(trump)                       => ToPlayer.TrumpRevealed(trump)
-        case CardPlayed(player, card)                   => ToPlayer.CardPlayed(player, card)
-        case TrickCompleted(player)                     => ToPlayer.TrickCompleted(player)
-        case PointsCount(playerIds, points)             => ToPlayer.PointsCount(playerIds, points)
-        case TotalPointsCount(playerIds, points)        => ToPlayer.TotalPointsCount(playerIds, points)
-        case MatchCompleted(winners)                    => ToPlayer.MatchCompleted(winners)
-        case MatchDraw                                  => ToPlayer.MatchDraw
-        case MatchAborted                               => ToPlayer.MatchAborted
-        case GameCompleted(winners)                     => ToPlayer.GameCompleted(winners)
-        case GameAborted                                => ToPlayer.GameAborted
-        case ActionRequest(player, action)              => ToPlayer.ActionRequest(player, action)
+        case PlayerJoined(player, room)                     => ToPlayer.PlayerJoined(player, room)
+        case PlayerLeft(player, room)                       => ToPlayer.PlayerLeft(player, room)
+        case GameStarted(gameType)                          => ToPlayer.GameStarted(gameType)
+        case DeckShuffled(_)                                => ToPlayer.DeckShuffled
+        case CardDealt(player, card, _) if player == me.id  => ToPlayer.CardDealt(player, Some(card))
+        case CardDealt(player, card, Face.Up)               => ToPlayer.CardDealt(player, Some(card))
+        case CardDealt(player, _, _)                        => ToPlayer.CardDealt(player, None)
+        case TrumpRevealed(trump)                           => ToPlayer.TrumpRevealed(trump)
+        case CardPlayed(player, card)                       => ToPlayer.CardPlayed(player, card)
+        case TrickCompleted(player)                         => ToPlayer.TrickCompleted(player)
+        case PointsCount(playerIds, points)                 => ToPlayer.PointsCount(playerIds, points)
+        case TotalPointsCount(playerIds, points)            => ToPlayer.TotalPointsCount(playerIds, points)
+        case MatchCompleted(winners)                        => ToPlayer.MatchCompleted(winners)
+        case MatchDraw                                      => ToPlayer.MatchDraw
+        case MatchAborted                                   => ToPlayer.MatchAborted
+        case GameCompleted(winners)                         => ToPlayer.GameCompleted(winners)
+        case GameAborted                                    => ToPlayer.GameAborted
+        case ActionRequest(player, action)                  => ToPlayer.ActionRequest(player, action)
       }
 
   private def toModel(me: Player)(eventAndSeed: (FromPlayer, Int)): Command =

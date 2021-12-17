@@ -211,9 +211,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),   // 1/3
       mediumDelay,
 
-      CardDealt(player2.id, Card(Cinque, Bastoni)),
+      CardDealt(player2.id, Card(Cinque, Bastoni), Face.Up),
       shortDelay,
-      CardDealt(player1.id, Card(Sei, Coppe)),
+      CardDealt(player1.id, Card(Sei, Coppe), Face.Up),
       ActionRequest(player2.id, Action.PlayCard),
 
       CardPlayed(player2.id, Card(Sei, Bastoni)),
@@ -223,9 +223,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),   // 1/3
       mediumDelay,
 
-      CardDealt(player1.id, Card(Cavallo, Denari)),
+      CardDealt(player1.id, Card(Cavallo, Denari), Face.Up),
       shortDelay,
-      CardDealt(player2.id, Card(Cavallo, Bastoni)),
+      CardDealt(player2.id, Card(Cavallo, Bastoni), Face.Up),
       ActionRequest(player1.id, Action.PlayCard),
 
       CardPlayed(player1.id, Card(Sette, Denari)),
@@ -235,9 +235,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player2.id),   // 2/3
       mediumDelay,
 
-      CardDealt(player2.id, Card(Due, Coppe)),
+      CardDealt(player2.id, Card(Due, Coppe), Face.Up),
       shortDelay,
-      CardDealt(player1.id, Card(Fante, Denari)),
+      CardDealt(player1.id, Card(Fante, Denari), Face.Up),
       ActionRequest(player2.id, Action.PlayCard),
 
       CardPlayed(player2.id, Card(Cinque, Bastoni)),
@@ -247,9 +247,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),   // 2/3
       mediumDelay,
 
-      CardDealt(player1.id, Card(Cavallo, Spade)),
+      CardDealt(player1.id, Card(Cavallo, Spade), Face.Up),
       shortDelay,
-      CardDealt(player2.id, Card(Quattro, Bastoni)),
+      CardDealt(player2.id, Card(Quattro, Bastoni), Face.Up),
       ActionRequest(player1.id, Action.PlayCard),
 
       CardPlayed(player1.id, Card(Cavallo, Denari)),
@@ -259,9 +259,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),   // 1
       mediumDelay,
 
-      CardDealt(player1.id, Card(Re, Coppe)),
+      CardDealt(player1.id, Card(Re, Coppe), Face.Up),
       shortDelay,
-      CardDealt(player2.id, Card(Quattro, Coppe)),
+      CardDealt(player2.id, Card(Quattro, Coppe), Face.Up),
       ActionRequest(player1.id, Action.PlayCard),
 
       CardPlayed(player1.id, Card(Fante, Denari)),
@@ -271,9 +271,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),   // 1 + 1/3
       mediumDelay,
 
-      CardDealt(player1.id, Card(Asso, Denari)),
+      CardDealt(player1.id, Card(Asso, Denari), Face.Up),
       shortDelay,
-      CardDealt(player2.id, Card(Sette, Spade)),
+      CardDealt(player2.id, Card(Sette, Spade), Face.Up),
       ActionRequest(player1.id, Action.PlayCard),
 
       CardPlayed(player1.id, Card(Asso, Denari)),
@@ -283,9 +283,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),   // 2 + 1/3
       mediumDelay,
 
-      CardDealt(player1.id, Card(Cinque, Denari)),
+      CardDealt(player1.id, Card(Cinque, Denari), Face.Up),
       shortDelay,
-      CardDealt(player2.id, Card(Sette, Coppe)),
+      CardDealt(player2.id, Card(Sette, Coppe), Face.Up),
       ActionRequest(player1.id, Action.PlayCard),
 
       CardPlayed(player1.id, Card(Cinque, Denari)),
@@ -295,9 +295,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),   // 2 + 1/3
       mediumDelay,
 
-      CardDealt(player1.id, Card(Re, Spade)),
+      CardDealt(player1.id, Card(Re, Spade), Face.Up),
       shortDelay,
-      CardDealt(player2.id, Card(Sei, Spade)),
+      CardDealt(player2.id, Card(Sei, Spade), Face.Up),
       ActionRequest(player1.id, Action.PlayCard),
 
       CardPlayed(player1.id, Card(Tre, Coppe)),
@@ -307,9 +307,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),   // 2 + 2/3
       mediumDelay,
 
-      CardDealt(player1.id, Card(Quattro, Denari)),
+      CardDealt(player1.id, Card(Quattro, Denari), Face.Up),
       shortDelay,
-      CardDealt(player2.id, Card(Tre, Bastoni)),
+      CardDealt(player2.id, Card(Tre, Bastoni), Face.Up),
       ActionRequest(player1.id, Action.PlayCard),
 
       CardPlayed(player1.id, Card(Quattro, Denari)),
@@ -319,9 +319,9 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       TrickCompleted(player1.id),   // 2 + 2/3
       mediumDelay,
 
-      CardDealt(player1.id, Card(Due, Spade)),
+      CardDealt(player1.id, Card(Due, Spade), Face.Up),
       shortDelay,
-      CardDealt(player2.id, Card(Cavallo, Coppe)),
+      CardDealt(player2.id, Card(Cavallo, Coppe), Face.Up),
       ActionRequest(player1.id, Action.PlayCard),
 
       CardPlayed(player1.id, Card(Due, Denari)),
