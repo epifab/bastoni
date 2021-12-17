@@ -3,7 +3,9 @@ package bastoni.domain.logic
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
-import cats.catsInstancesForId
+import bastoni.domain.repos.RoomRepo
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -18,8 +20,12 @@ class LobbySpec extends AnyFreeSpec with Matchers:
   val player2 = Player(PlayerId.newId, "Caio")
   val player3 = Player(PlayerId.newId, "Sempronio")
 
-  private val lobby: fs2.Stream[cats.Id, Message] => fs2.Stream[cats.Id, Message] =
-    Lobby[cats.Id](2, messageId, 123)
+  private def lobby(input: fs2.Stream[IO, Message]): fs2.Stream[IO, Message] =
+    for {
+      repo <- fs2.Stream.eval(RoomRepo.inMemory[IO])
+      lobby = Lobby(2, IO.pure(messageId), IO.pure(123), repo)
+      output <- lobby(input)
+    } yield output
 
   "Rooms can be joined and left" in {
     val commands = fs2.Stream(
@@ -29,7 +35,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
       Message(messageId, roomId1, LeaveRoom(player2)),
     )
 
-    lobby(commands).compile.toList shouldBe List(
+    lobby(commands).compile.toList.unsafeRunSync() shouldBe List(
       Message(messageId, roomId1, PlayerJoined(player1, Room(roomId1, List(Some(player1), None)))),
       Message(messageId, roomId1, PlayerJoined(player2, Room(roomId1, List(Some(player1), Some(player2))))),
       Message(messageId, roomId1, PlayerLeft(player1, Room(roomId1, List(None, Some(player2))))),
@@ -44,7 +50,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
       Message(messageId, roomId1, JoinRoom(player3))
     )
 
-    lobby(commands).compile.toList shouldBe List(
+    lobby(commands).compile.toList.unsafeRunSync() shouldBe List(
       Message(messageId, roomId1, PlayerJoined(player1, Room(roomId1, List(Some(player1), None)))),
       Message(messageId, roomId1, PlayerJoined(player2, Room(roomId1, List(Some(player1), Some(player2))))),
     )
@@ -57,7 +63,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
       Message(messageId, roomId2, JoinRoom(player1)),
     )
 
-    lobby(commands).compile.toList shouldBe List(
+    lobby(commands).compile.toList.unsafeRunSync() shouldBe List(
       Message(messageId, roomId1, PlayerJoined(player1, Room(roomId1, List(Some(player1), None)))),
       Message(messageId, roomId1, PlayerJoined(player2, Room(roomId1, List(Some(player1), Some(player2))))),
       Message(messageId, roomId2, PlayerJoined(player1, Room(roomId2, List(Some(player1), None))))
@@ -70,7 +76,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
       Message(messageId, roomId2, LeaveRoom(player1)),  // will be ignored as room2 doesn't exist
     )
 
-    lobby(commands).compile.toList shouldBe List(
+    lobby(commands).compile.toList.unsafeRunSync() shouldBe List(
       Message(messageId, roomId1, PlayerJoined(player1, Room(roomId1, List(Some(player1), None)))),
     )
   }
@@ -81,7 +87,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
       Message(messageId, roomId1, JoinRoom(player1)), // will be ignored
     )
 
-    lobby(commands).compile.toList shouldBe List(
+    lobby(commands).compile.toList.unsafeRunSync() shouldBe List(
       Message(messageId, roomId1, PlayerJoined(player1, Room(roomId1, List(Some(player1), None)))),
     )
   }
@@ -93,7 +99,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
       Message(messageId, roomId1, LeaveRoom(player1)), // will be ignored
     )
 
-    lobby(commands).compile.toList shouldBe List(
+    lobby(commands).compile.toList.unsafeRunSync() shouldBe List(
       Message(messageId, roomId1, PlayerJoined(player1, Room(roomId1, List(Some(player1), None)))),
       Message(messageId, roomId1, PlayerLeft(player1, Room(roomId1, List(None, None)))),
     )
@@ -105,7 +111,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
       Message(messageId, roomId1, PlayCard(player1.id, Card(Rank.Sette, Suit.Denari))) // will be ignored
     )
 
-    lobby(commands).compile.toList shouldBe List(
+    lobby(commands).compile.toList.unsafeRunSync() shouldBe List(
       Message(messageId, roomId1, PlayerJoined(player1, Room(roomId1, List(Some(player1), None))))
     )
   }
@@ -117,7 +123,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
         Message(messageId, roomId1, ActivateRoom(player1, GameType.Briscola))
       )
 
-      lobby(commands).compile.toList shouldBe List(
+      lobby(commands).compile.toList.unsafeRunSync() shouldBe List(
         Message(messageId, roomId1, PlayerJoined(player1, Room(roomId1, List(Some(player1), None)))),
       )
     }
@@ -129,7 +135,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
         Message(messageId, roomId1, ActivateRoom(player1, GameType.Briscola))
       )
 
-      lobby(commands).compile.toList shouldBe List(
+      lobby(commands).compile.toList.unsafeRunSync() shouldBe List(
         Message(messageId, roomId1, PlayerJoined(player1, Room(roomId1, List(Some(player1), None)))),
         Message(messageId, roomId1, PlayerJoined(player2, Room(roomId1, List(Some(player1), Some(player2))))),
         Message(messageId, roomId1, StartGame(Room(roomId1, List(Some(player1), Some(player2))), GameType.Briscola)),

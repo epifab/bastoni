@@ -56,7 +56,7 @@ object GameService:
     for {
       subscriber <- fs2.Stream.resource(messageBus.subscribeAwait)
       oldMessages = messageRepo.inFlight
-      newMessages = subscriber.through(apply(Async[F].delay(MessageId.newId), gameRepo, messageRepo))
+      newMessages = subscriber.through(GameService(Async[F].delay(MessageId.newId), gameRepo, messageRepo))
       event <- (oldMessages ++ newMessages).evalMap {
         case Delayed(message, delay) => messageBus.publish1(message).delayBy(delayDuration(delay)).start.void
         case message: Message        => messageBus.publish1(message)

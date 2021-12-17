@@ -116,21 +116,22 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     val oldMessage = CardPlayed(player2.id, player2Card).toMessage(room1.id)
 
     val (events, gameRooms, messages) = (for {
-      repo <- InMemoryJsonGameServiceRepo[IO]
-      _ <- repo.set(room1.id, stateMachine)
-      _ <- repo.flying(oldMessage)
+      gameRepo <- JsonRepos.gameRepo
+      messageRepo <- JsonRepos.messageRepo
+      _ <- gameRepo.set(room1.id, stateMachine)
+      _ <- messageRepo.flying(oldMessage)
       bus <- MessageBus.inMemory[IO]
       events <- (for {
         subscription <- fs2.Stream.resource(bus.subscribeAwait)
         event <- subscription.concurrently(bus.run)
-          .concurrently(GameService.run[IO](bus, repo, repo, _ => 2.millis))
+          .concurrently(GameService.run[IO](bus, gameRepo, messageRepo, _ => 2.millis))
           .concurrently(GameBus(bus).publish(player1, room1.id, fs2.Stream(FromPlayer.PlayCard(player1Card)).delayBy(100.millis)))
           .collect { case Message(_, _, event: Event) => event }
           .takeThrough(!_.isInstanceOf[Event.GameCompleted])
           .interruptAfter(1.second)
       } yield event).compile.toList
-      gameRoom <- repo.get(room1.id)
-      messages <- repo.inFlight.compile.toList
+      gameRoom <- gameRepo.get(room1.id)
+      messages <- messageRepo.inFlight.compile.toList
     } yield (events, gameRoom, messages)).unsafeRunSync()
 
     events shouldBe List(
@@ -155,15 +156,16 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
 
     val events = (for {
       bus <- MessageBus.inMemory[IO]
-      repo <- InMemoryJsonGameServiceRepo[IO]
-      _ <- repo.flying(message1)
-      _ <- repo.flying(message2)
-      _ <- repo.flying(message3)
+      gameRepo <- JsonRepos.gameRepo
+      messageRepo <- JsonRepos.messageRepo
+      _ <- messageRepo.flying(message1)
+      _ <- messageRepo.flying(message2)
+      _ <- messageRepo.flying(message3)
       events <- (for {
         subscription <- fs2.Stream.resource(bus.subscribeAwait)
         message <- subscription
           .concurrently(bus.run)
-          .concurrently(GameService.run[IO](bus, repo, repo, {
+          .concurrently(GameService.run[IO](bus, gameRepo, messageRepo, {
             case Delay.Short => 10.milli
             case Delay.Medium => 20.millis
             case Delay.Long => 30.millis

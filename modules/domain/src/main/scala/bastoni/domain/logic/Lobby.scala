@@ -3,6 +3,7 @@ package bastoni.domain.logic
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
+import bastoni.domain.repos.RoomRepo
 import cats.Monad
 import cats.effect.Sync
 import cats.syntax.all.*
@@ -10,55 +11,44 @@ import cats.syntax.all.*
 import scala.util.Random
 
 object Lobby:
-  def apply[F[_]: Monad](roomSize: Int, newId: F[MessageId], seed: F[Int])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
+  def apply[F[_]: Monad](roomSize: Int, newId: F[MessageId], seed: F[Int], repo: RoomRepo[F])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
     messages
-      .evalScan[F, (Map[RoomId, Room], Option[Message])](Map.empty -> None) {
-        case ((lobby, _), Message(_, roomId, JoinRoom(player))) =>
+      .evalMap {
+        case Message(_, roomId, JoinRoom(player)) =>
           for {
             s <- seed
             id <- newId
-            results = lobby
-              .getOrElse(roomId, Room(roomId, roomSize))
-              .join(player, Random(s))
-              .fold(
-                _ => lobby -> None,
-                { newRoom =>
-                  val newLobby = lobby + (roomId -> newRoom)
-                  newLobby -> Some(Message(id, roomId, PlayerJoined(player, newRoom)))
-                }
-              )
-          } yield results
+            room <- repo.get(roomId).map(_.getOrElse(Room(roomId, roomSize)))
+            result = room.join(player, Random(s))
+            _ <- result.traverse(newRoom => repo.set(roomId, newRoom))
+            event = result.toOption.map(newRoom => Message(id, roomId, PlayerJoined(player, newRoom)))
+          } yield event
 
-        case ((lobby, _), Message(_, roomId, LeaveRoom(player))) =>
+        case Message(_, roomId, LeaveRoom(player)) =>
           for {
             id <- newId
-            results = lobby
-              .getOrElse(roomId, Room(roomId, roomSize))
-              .leave(player)
-              .fold(
-                _ => lobby -> None,
-                { newRoom =>
-                  val newLobby = if (newRoom.isEmpty) lobby - roomId else lobby + (roomId -> newRoom)
-                  newLobby -> Some(Message(id, roomId, PlayerLeft(player, newRoom)))
-                }
-              )
-          } yield results
+            room <- repo.get(roomId).map(_.getOrElse(Room(roomId, roomSize)))
+            result = room.leave(player)
+            _ <- result.traverse {
+              case emptyRoom if emptyRoom.isEmpty => repo.remove(roomId)
+              case newRoom => repo.set(roomId, newRoom)
+            }
+            event = result.toOption.map(newRoom => Message(id, roomId, PlayerLeft(player, newRoom)))
+          } yield event
 
-        case ((lobby, _), Message(_, roomId, ActivateRoom(player, gameType))) =>
+        case Message(_, roomId, ActivateRoom(player, gameType)) =>
           for {
             id <- newId
-            done = lobby.getOrElse(roomId, Room(roomId, roomSize)) match
-              case room if room.contains(player) && room.players.size > 1 =>
-                lobby -> Some(Message(id, roomId, StartGame(room, gameType)))
-              case _ => lobby -> None
-          } yield done
+            room <- repo.get(roomId).map(_.getOrElse(Room(roomId, roomSize)))
+            event: Option[Message] = Option.when(room.contains(player) && room.players.size > 1)(Message(id, roomId, StartGame(room, gameType)))
+          } yield event
 
-        case ((lobby, _), _) => Monad[F].pure(lobby -> None)
+        case _ => Monad[F].pure(None)
       }
-      .collect { case (_, Some(message)) => message }
+      .collect { case Some(message) => message }
 
-  def run[F[_]: Sync](messageBus: MessageBus[F]): fs2.Stream[F, Unit] =
+  def run[F[_]: Sync](messageBus: MessageBus[F], repo: RoomRepo[F]): fs2.Stream[F, Unit] =
     messageBus
       .subscribe
-      .through(apply(4, Sync[F].delay(MessageId.newId), Sync[F].delay(Random.nextInt())))
+      .through(Lobby(roomSize = 4, Sync[F].delay(MessageId.newId), Sync[F].delay(Random.nextInt()), repo))
       .through(messageBus.publish)
