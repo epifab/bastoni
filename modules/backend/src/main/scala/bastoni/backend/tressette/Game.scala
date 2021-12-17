@@ -50,22 +50,34 @@ object Game:
     case (MatchState.DealRound(player :: Nil, done, 0, deck), Continue) =>
       deck.dealOrDie { (card, tail) =>
         val players = done :+ player.draw(card)
-        MatchState.PlayRound(players, Nil, tail) -> List(CardDealt(player.id, card, Face.Down), ActionRequest(players.head.id, Action.PlayCard))
+        MatchState.PlayRound(players, Nil, tail) ->
+          List(CardDealt(player.id, card, Face.Player), ActionRequest(players.head.id, Action.PlayCard))
       }
 
     case (MatchState.DealRound(player :: Nil, done, remaining, deck), Continue) =>
-      deck.dealOrDie { (card, tail) => MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card, Face.Down), Continue.shortly) }
+      deck.dealOrDie { (card, tail) =>
+        MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) ->
+          List(CardDealt(player.id, card, Face.Player), Continue.shortly)
+      }
 
     case (MatchState.DealRound(player :: todo, done, remaining, deck), Continue) =>
-      deck.dealOrDie { (card, tail) => MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card, Face.Down), Continue.shortly) }
+      deck.dealOrDie { (card, tail) =>
+        MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) ->
+          List(CardDealt(player.id, card, Face.Player), Continue.shortly)
+      }
 
     case (MatchState.DrawRound(player :: Nil, done, deck), Continue) =>
       deck.dealOrDie { (card, tail) =>
         val players = done :+ player.draw(card)
-        MatchState.PlayRound(players, Nil, tail) -> List(CardDealt(player.id, card, Face.Up), ActionRequest(players.head.id, Action.PlayCard)) }
+        MatchState.PlayRound(players, Nil, tail) ->
+          List(CardDealt(player.id, card, Face.Up), ActionRequest(players.head.id, Action.PlayCard))
+      }
 
     case (MatchState.DrawRound(player :: todo, done, deck), Continue) =>
-      deck.dealOrDie { (card, tail) => MatchState.DrawRound(todo, done :+ player.draw(card), tail) -> List(CardDealt(player.id, card, Face.Up), Continue.shortly) }
+      deck.dealOrDie { (card, tail) =>
+        MatchState.DrawRound(todo, done :+ player.draw(card), tail) ->
+          List(CardDealt(player.id, card, Face.Up), Continue.shortly)
+      }
 
     case (MatchState.PlayRound(player :: Nil, (firstDone, trump) :: done, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card, trump) =>
       // last player of the trick

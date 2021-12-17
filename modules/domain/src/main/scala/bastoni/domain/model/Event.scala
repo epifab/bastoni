@@ -7,7 +7,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
 
 enum Face:
-  case Up, Down
+  case Player, Up, Down
 
 object Face:
   given Encoder[Face] = Encoder[String].contramap(_.toString)
@@ -18,7 +18,7 @@ object Event:
   case class  PlayerLeft(player: Player, room: Room) extends Event
   case class  GameStarted(gameType: GameType) extends Event
   case class  DeckShuffled(seed: Int) extends Event
-  case class  CardDealt(playerId: PlayerId, card: Card, face: Face = Face.Down) extends Event
+  case class  CardDealt(playerId: PlayerId, card: Card, face: Face) extends Event
   case class  TrumpRevealed(card: Card) extends Event
   case class  CardPlayed(playerId: PlayerId, card: Card) extends Event
   case class  TrickCompleted(winnerId: PlayerId) extends Event

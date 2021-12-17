@@ -58,30 +58,48 @@ object Game:
       }
 
     case (MatchState.DealRound(player :: Nil, done, 0, deck), Continue) =>
-      deck.dealOrDie { (card, tail) => MatchState.WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card), Continue.later) }
+      deck.dealOrDie { (card, tail) =>
+        MatchState.WillDealTrump(done :+ player.draw(card), tail) ->
+          List(CardDealt(player.id, card, Face.Player), Continue.later)
+      }
 
     case (MatchState.DealRound(player :: Nil, done, remaining, deck), Continue) =>
-      deck.dealOrDie { (card, tail) => MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
+      deck.dealOrDie { (card, tail) =>
+        MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) ->
+          List(CardDealt(player.id, card, Face.Player), Continue.shortly)
+      }
 
     case (MatchState.DealRound(player :: todo, done, remaining, deck), Continue) =>
-      deck.dealOrDie { (card, tail) => MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
+      deck.dealOrDie { (card, tail) =>
+        MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) ->
+          List(CardDealt(player.id, card, Face.Player), Continue.shortly)
+      }
 
     case (MatchState.WillDealTrump(players, deck), Continue) =>
-      deck.dealOrDie { (card, tail) => MatchState.PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card), ActionRequest(players.head.id, Action.PlayCard)) }
+      deck.dealOrDie { (card, tail) =>
+        MatchState.PlayRound(players, Nil, tail :+ card, card) ->
+          List(TrumpRevealed(card), ActionRequest(players.head.id, Action.PlayCard))
+      }
 
     case (MatchState.DrawRound(player :: Nil, done, deck, trump), Continue) =>
       deck.dealOrDie { (card, tail) =>
         val players = done :+ player.draw(card)
-        MatchState.PlayRound(players, Nil, tail, trump) -> List(CardDealt(player.id, card), ActionRequest(players.head.id, Action.PlayCard)) }
+        MatchState.PlayRound(players, Nil, tail, trump) ->
+          List(CardDealt(player.id, card, Face.Player), ActionRequest(players.head.id, Action.PlayCard))
+      }
 
     case (MatchState.DrawRound(player :: todo, done, deck, trump), Continue) =>
-      deck.dealOrDie { (card, tail) => MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card), Continue.shortly) }
+      deck.dealOrDie { (card, tail) =>
+        MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) ->
+          List(CardDealt(player.id, card, Face.Player), Continue.shortly)
+      }
 
     case (MatchState.PlayRound(player :: Nil, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
       MatchState.WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), Continue.later)
 
     case (MatchState.PlayRound(player :: next :: players, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-      MatchState.PlayRound(next :: players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), ActionRequest(next.id, Action.PlayCard))
+      MatchState.PlayRound(next :: players, done :+ player.play(card), deck, trump) ->
+        List(CardPlayed(player.id, card), ActionRequest(next.id, Action.PlayCard))
 
     case (MatchState.WillCompleteTrick(players, deck, trump), Continue) =>
       val updatedPlayers = completeTrick(players, trump)
