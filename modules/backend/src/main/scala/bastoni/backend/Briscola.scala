@@ -7,13 +7,19 @@ import scala.util.Random
 
 object Briscola:
 
-  sealed trait Match
+  // State machine model
+  sealed trait MatchState
 
-  case class  Ready(players: List[GamePlayer]) extends Match
-  case object Terminated extends Match
-  case class  DealRound(todo: List[MatchPlayer], done: List[MatchPlayer], remaining: Int, deck: List[Card]) extends Match
-  case class  DrawRound(todo: List[MatchPlayer], done: List[MatchPlayer], deck: List[Card], trump: Card) extends Match
-  case class  PlayRound(todo: List[MatchPlayer], done: List[(MatchPlayer, Card)], deck: List[Card], trump: Card) extends Match
+  case class  Ready(players: List[GamePlayer]) extends MatchState
+  case class  DealRound(todo: List[MatchPlayer], done: List[MatchPlayer], remaining: Int, deck: List[Card]) extends MatchState
+  case class  WillDealTrump(players: List[MatchPlayer], deck: List[Card]) extends MatchState
+  case class  DrawRound(todo: List[MatchPlayer], done: List[MatchPlayer], deck: List[Card], trump: Card) extends MatchState
+  case class  PlayRound(todo: List[MatchPlayer], done: List[(MatchPlayer, Card)], deck: List[Card], trump: Card) extends MatchState
+  case class  WillCompleteTrick(players: List[(MatchPlayer, Card)], deck: List[Card], trump: Card) extends MatchState
+  case class  WillCompleteMatch(players: List[MatchPlayer], trump: Card) extends MatchState
+  case object Terminated extends MatchState
+
+  object EmptyDeckException extends RuntimeException("The deck was empty")
 
   extension(card: Card)
     def points: Int = card.rank match
@@ -31,10 +37,10 @@ object Briscola:
     def points: Int = player.collected.foldRight(0)(_.points + _)
 
   extension(deck: List[Card])
-    def deal(f: (Card, List[Card]) => (Match, List[Event])): (Match, List[Event]) =
+    def deal(f: (Card, List[Card]) => (MatchState, List[Event])): (MatchState, List[Event]) =
       deck match
         case card :: restOfTheDeck => f(card, restOfTheDeck)
-        case Nil => Terminated -> List(EmptyDeckError, GameAborted)
+        case _ => throw EmptyDeckException
 
   extension(players: List[MatchPlayer])
     def winners: List[MatchPlayer] =
@@ -71,7 +77,10 @@ object Briscola:
   def apply[F[_]](room: Room, messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
     messages
       .collect[Event | Command] { case Message(roomId, message) if roomId == room.id => message }
-      .scan[(Match, List[Event])](Ready(room.players.map(p => GamePlayer(p, 0))) -> Nil) {
+      .scan[(MatchState, List[Event])](Ready(room.players.map(p => GamePlayer(p, 0))) -> Nil) {
+
+        case (_, _: PlayerLeft) =>
+          Terminated -> List(GameAborted)
 
         case ((Ready(players), _), ShuffleDeck(seed)) =>
           val shuffledDeck = new Random(seed).shuffle(Deck.instance)
@@ -80,13 +89,7 @@ object Briscola:
             List(DeckShuffled(seed))
 
         case ((DealRound(player :: Nil, done, 0, deck), _), DrawCard(p)) if player.is(p) =>
-          deck.deal {
-            case (card, trump :: tail) =>
-              PlayRound(done :+ player.draw(card), Nil, tail :+ trump, trump) ->
-                List(CardDealt(player.id, card), TrumpRevealed(trump))
-            case _ =>
-              Terminated -> List(EmptyDeckError)
-          }
+          deck.deal { (card, tail) => WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card)) }
 
         case ((DealRound(player :: Nil, done, remaining, deck), _), DrawCard(p)) if player.is(p) =>
           deck.deal { (card, tail) => DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card)) }
@@ -94,44 +97,47 @@ object Briscola:
         case ((DealRound(player :: todo, done, remaining, deck), _), DrawCard(p)) if player.is(p) =>
           deck.deal { (card, tail) => DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card)) }
 
+        case ((WillDealTrump(players, deck), _), Continue) =>
+          deck.deal { (card, tail) => PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card)) }
+
         case ((DrawRound(player :: Nil, done, deck, trump), _), DrawCard(p)) if player.is(p) =>
           deck.deal { (card, tail) => PlayRound(done :+ player.draw(card), Nil, tail, trump) -> List(CardDealt(player.id, card)) }
 
         case ((DrawRound(player :: todo, done, deck, trump), _), DrawCard(p)) if player.is(p) =>
           deck.deal { (card, tail) => DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card)) }
 
-        case ((PlayRound(player :: Nil, done, Nil, trump), _), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-          val updatedPlayers = completeTrick(done :+ player.play(card), trump)
-
-          val events = List(
-            CardPlayed(player.id, card),
-            TrickWinner(updatedPlayers.head.id)
-          )
-
-          if (player.hand.size > 1) {
-            PlayRound(updatedPlayers, Nil, Nil, trump) -> events
-          }
-          else {
-            val finalEvents = updatedPlayers.map(p => PointsCount(p.id, p.points)) :+ (updatedPlayers.winners match {
-              case List(winner) => MatchWinner(winner.id)
-              case best => MatchDraw(best.map(_.id))
-            })
-
-            Ready(updatedPlayers.map(_.gamePlayer)) -> (events ++ finalEvents)
-          }
-
         case ((PlayRound(player :: Nil, done, deck, trump), _), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-          val updatedPlayers = completeTrick(done :+ player.play(card), trump)
-
-          DrawRound(updatedPlayers, Nil, deck, trump) -> List(
-            CardPlayed(player.id, card),
-            TrickWinner(updatedPlayers.head.id)
-          )
+          WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card))
 
         case ((PlayRound(player :: players, done, deck, trump), _), PlayCard(p, card)) if player.is(p) && player.has(card) =>
           PlayRound(players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card))
 
-        case ((m, _), _) => m -> Nil
+        case ((WillCompleteTrick(players, deck, trump), _), Continue) =>
+          val updatedPlayers = completeTrick(players, trump)
+          val winner = updatedPlayers.head
 
+          val state =
+            if (deck.isEmpty && winner.hand.isEmpty) WillCompleteMatch(updatedPlayers, trump)
+            else if (deck.isEmpty) PlayRound(updatedPlayers, Nil, Nil, trump)
+            else DrawRound(updatedPlayers, Nil, deck, trump)
+
+          state -> List(TrickWinner(winner.id))
+
+        case ((WillCompleteMatch(players, trump), _), Continue) =>
+          val matchWinner = players.winners match
+            case winner :: Nil => Some(winner)
+            case _ => None
+
+          val events = players.map(p => PointsCount(p.id, p.points)) :+ matchWinner.fold(MatchDraw)(p => MatchWinner(p.id))
+
+          val state = Ready(players.map {
+            case player if matchWinner.contains(player) => player.gamePlayer.win
+            case player => player.gamePlayer
+          })
+
+          state -> events
+
+        case ((m, _), _) => m -> Nil
       }
+      .takeThrough { case ((state, _)) => state != Terminated }
       .flatMap { case (_, events) => fs2.Stream.iterable[F, Event](events).map(Message(room.id, _)) }

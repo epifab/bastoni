@@ -26,100 +26,122 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
         DrawCard(player2),
         DrawCard(player1),
         DrawCard(player2),
+        Continue,
 
         PlayCard(player1, Card(Due, Bastoni)),
         PlayCard(player2, Card(Quattro, Spade)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
         PlayCard(player1, Card(Sei, Denari)),
         PlayCard(player2, Card(Re, Denari)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player1),
         PlayCard(player2, Card(Cinque, Spade)),
         PlayCard(player1, Card(Tre, Spade)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
         PlayCard(player1, Card(Sette, Denari)),
         PlayCard(player2, Card(Sei, Bastoni)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
         PlayCard(player1, Card(Fante, Bastoni)),
         PlayCard(player2, Card(Due, Denari)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
         PlayCard(player1, Card(Tre, Denari)),
         PlayCard(player2, Card(Asso, Coppe)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player1),
         PlayCard(player2, Card(Sette, Bastoni)),
         PlayCard(player1, Card(Asso, Bastoni)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
         PlayCard(player1, Card(Fante, Spade)),
         PlayCard(player2, Card(Asso, Spade)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player1),
         PlayCard(player2, Card(Cinque, Bastoni)),
         PlayCard(player1, Card(Cavallo, Denari)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player1),
         PlayCard(player2, Card(Re, Bastoni)),
         PlayCard(player1, Card(Due, Coppe)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
         PlayCard(player1, Card(Fante, Denari)),
         PlayCard(player2, Card(Cavallo, Bastoni)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
         PlayCard(player1, Card(Quattro, Bastoni)),
         PlayCard(player2, Card(Cavallo, Spade)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
         PlayCard(player1, Card(Quattro, Coppe)),
         PlayCard(player2, Card(Sei, Coppe)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player1),
         PlayCard(player2, Card(Sette, Spade)),
         PlayCard(player1, Card(Cinque, Denari)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player1),
         PlayCard(player2, Card(Sette, Coppe)),
         PlayCard(player1, Card(Re, Spade)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player1),
         PlayCard(player2, Card(Sei, Spade)),
         PlayCard(player1, Card(Quattro, Denari)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player1),
         PlayCard(player2, Card(Tre, Bastoni)),
         PlayCard(player1, Card(Fante, Coppe)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
         PlayCard(player1, Card(Due, Spade)),
         PlayCard(player2, Card(Asso, Denari)),
+        Continue,
 
         PlayCard(player1, Card(Cavallo, Coppe)),
         PlayCard(player2, Card(Re, Coppe)),
+        Continue,
 
         PlayCard(player2, Card(Cinque, Coppe)),
         PlayCard(player1, Card(Tre, Coppe)),
+        Continue,
+        Continue,
 
       ).map(Message(roomId, _))
 
@@ -272,5 +294,20 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       Message(room.id, DeckShuffled(10)),
       Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
       Message(room.id, CardDealt(player2.id, Card(Asso, Spade))),
+    )
+  }
+
+  "Game is aborted if a player leaves" in {
+    val input = fs2.Stream(
+      Message(room.id, ShuffleDeck(10)),
+      Message(room.id, DrawCard(player1)),
+      Message(room.id, PlayerLeft(player1, Room(room.id, List(player2)))),
+      Message(room.id, DrawCard(player2)), // too late, game was aborted
+    )
+
+    Briscola[fs2.Pure](room, input).compile.toList shouldBe List(
+      Message(room.id, DeckShuffled(10)),
+      Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
+      Message(room.id, GameAborted)
     )
   }

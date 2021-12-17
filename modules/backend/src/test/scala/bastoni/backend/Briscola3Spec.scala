@@ -29,10 +29,12 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         DrawCard(player1),
         DrawCard(player2),
         DrawCard(player3),
+        Continue, // reveal the trump
 
         PlayCard(player1, Card(Quattro, Spade)),
         PlayCard(player2, Card(Asso, Spade)),
         PlayCard(player3, Card(Cinque, Spade)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player3),
@@ -40,6 +42,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player2, Card(Sei, Denari)),
         PlayCard(player3, Card(Sette, Denari)),
         PlayCard(player1, Card(Cinque, Coppe)),
+        Continue,
 
         DrawCard(player3),
         DrawCard(player1),
@@ -47,6 +50,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player3, Card(Fante, Bastoni)),
         PlayCard(player1, Card(Due, Denari)),
         PlayCard(player2, Card(Fante, Spade)),
+        Continue,
 
         DrawCard(player3),
         DrawCard(player1),
@@ -54,6 +58,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player3, Card(Re, Denari)),
         PlayCard(player1, Card(Due, Bastoni)),
         PlayCard(player2, Card(Tre, Spade)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
@@ -61,6 +66,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player1, Card(Fante, Coppe)),
         PlayCard(player2, Card(Cinque, Bastoni)),
         PlayCard(player3, Card(Sei, Coppe)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player3),
@@ -68,6 +74,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player2, Card(Cavallo, Denari)),
         PlayCard(player3, Card(Tre, Denari)),
         PlayCard(player1, Card(Sette, Bastoni)),
+        Continue,
 
         DrawCard(player1),
         DrawCard(player2),
@@ -75,6 +82,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player1, Card(Cavallo, Spade)),
         PlayCard(player2, Card(Quattro, Bastoni)),
         PlayCard(player3, Card(Cavallo, Bastoni)),
+        Continue,
 
         DrawCard(player3),
         DrawCard(player1),
@@ -82,6 +90,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player3, Card(Quattro, Coppe)),
         PlayCard(player1, Card(Asso, Coppe)),
         PlayCard(player2, Card(Asso, Bastoni)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player3),
@@ -89,6 +98,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player2, Card(Cinque, Denari)),
         PlayCard(player3, Card(Sette, Coppe)),
         PlayCard(player1, Card(Re, Spade)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player3),
@@ -96,6 +106,7 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player2, Card(Sei, Spade)),
         PlayCard(player3, Card(Quattro, Denari)),
         PlayCard(player1, Card(Fante, Denari)),
+        Continue,
 
         DrawCard(player2),
         DrawCard(player3),
@@ -103,14 +114,18 @@ class Briscola3Spec extends AnyFreeSpec with Matchers:
         PlayCard(player2, Card(Due, Spade)),
         PlayCard(player3, Card(Cavallo, Coppe)),
         PlayCard(player1, Card(Sei, Bastoni)),
+        Continue,
 
         PlayCard(player1, Card(Asso, Denari)),
         PlayCard(player2, Card(Sette, Spade)),
         PlayCard(player3, Card(Re, Bastoni)),
+        Continue,
 
         PlayCard(player3, Card(Re, Coppe)),
         PlayCard(player1, Card(Tre, Bastoni)),
         PlayCard(player2, Card(Tre, Coppe)),
+        Continue,
+        Continue,
       ).map(Message(roomId, _))
 
     Briscola[fs2.Pure](room, input).map(_.message).compile.toList shouldBe List(
