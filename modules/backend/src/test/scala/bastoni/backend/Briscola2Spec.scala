@@ -150,7 +150,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
       ).map(Message(roomId, _))
 
-    Briscola[fs2.Pure](room, input).map(_.message).compile.toList shouldBe List(
+    Briscola.playMatch[fs2.Pure](room, input).map(_.message).compile.toList shouldBe List(
       DeckShuffled(10),
 
       CardDealt(player1.id, Card(Due, Bastoni)),
@@ -276,9 +276,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Tre, Coppe)),
       TrickWinner(player1.id),  // 68
 
-      PointsCount(player1.id, 68),
-      PointsCount(player2.id, 52),
-      MatchWinner(player1.id)
+      PointsCount(List(player1.id), 68),
+      PointsCount(List(player2.id), 52),
+      MatchWinners(List(player1.id))
     )
   }
 
@@ -299,7 +299,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       Message(RoomId.newId, PlayCard(player1.id, Card(Due, Bastoni))), // ignored (different room)
     )
 
-    Briscola[fs2.Pure](room, input).compile.toList shouldBe List(
+    Briscola.playMatch[fs2.Pure](room, input).compile.toList shouldBe List(
       Message(room.id, DeckShuffled(10)),
       Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
       Message(room.id, CardDealt(player2.id, Card(Asso, Spade))),
@@ -319,9 +319,9 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       Message(room.id, drawCard), // too late, game was aborted
     )
 
-    Briscola[fs2.Pure](room, input).compile.toList shouldBe List(
+    Briscola.playMatch[fs2.Pure](room, input).compile.toList shouldBe List(
       Message(room.id, DeckShuffled(10)),
       Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
-      Message(room.id, GameAborted)
+      Message(room.id, MatchAborted)
     )
   }

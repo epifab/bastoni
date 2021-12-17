@@ -42,15 +42,6 @@ object Briscola:
         case card :: restOfTheDeck => f(card, restOfTheDeck)
         case _ => throw EmptyDeckException
 
-  extension(players: List[MatchPlayer])
-    def winners: List[MatchPlayer] =
-      players.foldLeft[List[MatchPlayer]](Nil) {
-        case (Nil, player) => List(player)
-        case (winner :: _, player) if player.points > winner.points => List(player)
-        case (winner :: winners, player) if player.points == winner.points => winner :: (winners :+ player)
-        case (winners, _) => winners
-      }
-
   extension[T](xs: List[T])
     def slideUntil(f: T => Boolean): List[T] =
       (LazyList.from(xs) ++ LazyList.from(xs))
@@ -74,19 +65,31 @@ object Briscola:
     val winner: MatchPlayer = trickWinner(None, players).collect(players.map(_(1)).toSet)
     winner :: players.map(_(0)).slideUntil(_.is(winner.player)).tail
 
-  def apply[F[_]](room: Room, messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
+  def playMatch[F[_]](room: Room, messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
     messages
-      .collect[Event | Command] { case Message(roomId, message) if roomId == room.id => message }
+      .collect { case Message(roomId, message) if roomId == room.id => message }
+
       .scan[(MatchState, List[Event])](Ready(room.players.map(p => GamePlayer(p, 0))) -> Nil) {
 
         case (_, _: PlayerLeft) =>
-          Terminated -> List(GameAborted)
+          Terminated -> List(MatchAborted)
 
         case ((Ready(players), _), ShuffleDeck(seed)) =>
           val shuffledDeck = new Random(seed).shuffle(Deck.instance)
-          val strippedDeck = if (room.players.size == 3) shuffledDeck.filterNot(_ == Card(Rank.Due, Suit.Coppe)) else shuffledDeck
-          DealRound(players.map(MatchPlayer(_, Set.empty, Set.empty)), Nil, 2, strippedDeck) ->
-            List(DeckShuffled(seed))
+
+          val deck =
+            if (room.players.size == 3) Some(shuffledDeck.filterNot(_ == Card(Rank.Due, Suit.Coppe)))
+            else if (room.players.size == 2 || room.players.size == 4) Some(shuffledDeck)
+            else None // 1 or 5+ players not supported
+
+          deck.fold(Terminated -> List(MatchAborted)) { deck =>
+            DealRound(
+              players.map(MatchPlayer(_, Set.empty, Set.empty)),
+              Nil,
+              2,
+              deck
+            ) -> List(DeckShuffled(seed))
+          }
 
         case ((DealRound(player :: Nil, done, 0, deck), _), Continue) =>
           deck.deal { (card, tail) => WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card)) }
@@ -124,18 +127,19 @@ object Briscola:
           state -> List(TrickWinner(winner.id))
 
         case ((WillCompleteMatch(players, trump), _), Continue) =>
-          val matchWinner = players.winners match
-            case winner :: Nil => Some(winner)
+          val teams = players match
+            case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
+            case ps => ps.map(List(_))
+
+          val pointsCount = teams.map(players => PointsCount(players.map(_.id), players.foldRight(0)(_.points + _)))
+
+          val winners = pointsCount.sortBy(-_.points) match
+            case PointsCount(winners, wp) :: PointsCount(losers, lp) :: _ if wp > lp => Some(winners)
             case _ => None
 
-          val events = players.map(p => PointsCount(p.id, p.points)) :+ matchWinner.fold(MatchDraw)(p => MatchWinner(p.id))
+          val events = pointsCount :+ winners.fold(MatchDraw)(MatchWinners(_))
 
-          val state = Ready(players.map {
-            case player if matchWinner.contains(player) => player.gamePlayer.win
-            case player => player.gamePlayer
-          })
-
-          state -> events
+          Terminated -> events
 
         case ((m, _), _) => m -> Nil
       }
