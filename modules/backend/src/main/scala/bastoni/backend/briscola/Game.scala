@@ -53,31 +53,31 @@ object Game:
           Nil,
           2,
           deck
-        ) -> List(DeckShuffled(seed), Continue.delayed)
+        ) -> List(DeckShuffled(seed), Continue.later)
       }
 
     case (MatchState.DealRound(player :: Nil, done, 0, deck), Continue) =>
-      deck.deal { (card, tail) => MatchState.WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card), Continue.delayed) }
+      deck.dealOrDie { (card, tail) => MatchState.WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card), Continue.later) }
 
     case (MatchState.DealRound(player :: Nil, done, remaining, deck), Continue) =>
-      deck.deal { (card, tail) => MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
+      deck.dealOrDie { (card, tail) => MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
 
     case (MatchState.DealRound(player :: todo, done, remaining, deck), Continue) =>
-      deck.deal { (card, tail) => MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
+      deck.dealOrDie { (card, tail) => MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
 
     case (MatchState.WillDealTrump(players, deck), Continue) =>
-      deck.deal { (card, tail) => MatchState.PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card), ActionRequest(players.head.id, Action.PlayCard)) }
+      deck.dealOrDie { (card, tail) => MatchState.PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card), ActionRequest(players.head.id, Action.PlayCard)) }
 
     case (MatchState.DrawRound(player :: Nil, done, deck, trump), Continue) =>
-      deck.deal { (card, tail) =>
+      deck.dealOrDie { (card, tail) =>
         val players = done :+ player.draw(card)
         MatchState.PlayRound(players, Nil, tail, trump) -> List(CardDealt(player.id, card), ActionRequest(players.head.id, Action.PlayCard)) }
 
     case (MatchState.DrawRound(player :: todo, done, deck, trump), Continue) =>
-      deck.deal { (card, tail) => MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card), Continue.shortly) }
+      deck.dealOrDie { (card, tail) => MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card), Continue.shortly) }
 
     case (MatchState.PlayRound(player :: Nil, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-      MatchState.WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), Continue.delayed)
+      MatchState.WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), Continue.later)
 
     case (MatchState.PlayRound(player :: next :: players, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
       MatchState.PlayRound(next :: players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), ActionRequest(next.id, Action.PlayCard))
@@ -87,9 +87,9 @@ object Game:
       val winner = updatedPlayers.head
 
       val (state, command: (Command | DelayedCommand)) =
-        if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers, trump) -> Continue.veryDelayed
+        if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers, trump) -> Continue.muchLater
         else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil, trump) -> ActionRequest(updatedPlayers.head.id, Action.PlayCard)
-        else MatchState.DrawRound(updatedPlayers, Nil, deck, trump) -> Continue.delayed
+        else MatchState.DrawRound(updatedPlayers, Nil, deck, trump) -> Continue.later
 
       state -> (TrickCompleted(winner.id) :: command :: Nil)
 
@@ -155,19 +155,6 @@ object Game:
 
   extension(player: MatchPlayer)
     def points: Int = player.collected.foldRight(0)(_.points + _)
-
-  extension(deck: List[Card])
-    def deal[T](f: (Card, List[Card]) => T): T =
-      deck match
-        case card :: restOfTheDeck => f(card, restOfTheDeck)
-        case _ => throw new RuntimeException("The deck was empty")
-
-  extension[T](xs: List[T])
-    def slideUntil(f: T => Boolean): List[T] =
-      (LazyList.from(xs) ++ LazyList.from(xs))
-        .dropWhile(!f(_))
-        .take(xs.size)
-        .toList
 
   private def completeTrick(players: List[(MatchPlayer, Card)], trump: Card): List[MatchPlayer] =
     @tailrec

@@ -1,4 +1,5 @@
 package bastoni.backend
+package briscola
 
 import bastoni.backend
 import bastoni.backend.briscola.Game

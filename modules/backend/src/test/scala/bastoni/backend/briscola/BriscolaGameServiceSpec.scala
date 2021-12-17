@@ -1,4 +1,5 @@
 package bastoni.backend
+package briscola
 
 import bastoni.domain.model.*
 import bastoni.domain.model.Event.*
@@ -8,7 +9,7 @@ import bastoni.domain.model.Suit.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class GameServiceSpec extends AnyFreeSpec with Matchers:
+class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
 
   val player1 = Player(PlayerId.newId, "Tizio")
   val player2 = Player(PlayerId.newId, "Caio")
@@ -51,7 +52,7 @@ class GameServiceSpec extends AnyFreeSpec with Matchers:
 
     val inputStream =
       fs2.Stream(
-        Message(room.id, StartGame(room, GameType.Briscola)), 
+        Message(room.id, StartGame(room, GameType.Briscola)),
         Message(room.id, GameStarted(GameType.Briscola))
       ) ++
       Briscola3Spec.input(room.id, player1, player2, player3) ++

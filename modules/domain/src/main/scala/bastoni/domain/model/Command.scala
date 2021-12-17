@@ -13,6 +13,7 @@ object Command:
 
   enum Action:
     case PlayCard
+    case PlayCardOf(suit: Suit)
     case ShuffleDeck
 
   case class  ActionRequest(playerId: PlayerId, action: Action) extends Command

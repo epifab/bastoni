@@ -12,7 +12,7 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration.DurationInt
 
-object DumbPlayer:
+object DumbBriscolaPlayer:
   def apply(me: Player, roomId: RoomId, gameBus: GameBus[IO]): fs2.Stream[IO, Unit] =
     gameBus.publish(me, roomId, fs2.Stream(JoinRoom) ++
       gameBus
@@ -42,13 +42,13 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
   val roomId = RoomId.newId
   val messageBus: IO[MessageBus[IO]] = MessageBus.inMemory[IO]
 
-  "Three players can play an entire game" in {
+  "Three players can play an entire briscola game" in {
     val result: Option[Event] = (for {
       bus <- messageBus
       gameBus = GameBus(bus)
-      playStream1 = DumbPlayer(player1, roomId, gameBus)
-      playStream2 = DumbPlayer(player2, roomId, gameBus)
-      playStream3 = DumbPlayer(player3, roomId, gameBus)
+      playStream1 = DumbBriscolaPlayer(player1, roomId, gameBus)
+      playStream2 = DumbBriscolaPlayer(player2, roomId, gameBus)
+      playStream3 = DumbBriscolaPlayer(player3, roomId, gameBus)
       logEvents = bus.subscribe.evalMap { case Message(_, event) => IO(println(event)) }
       activateStream = gameBus.publish(
         player1,

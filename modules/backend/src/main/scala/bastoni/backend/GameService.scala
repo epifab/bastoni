@@ -23,8 +23,8 @@ case class DelayedMessage(message: Message, delay: Delay)
 
 extension (command: Command)
   def shortly: DelayedCommand = DelayedCommand(command, Delay.Short)
-  def delayed: DelayedCommand = DelayedCommand(command, Delay.Medium)
-  def veryDelayed: DelayedCommand = DelayedCommand(command, Delay.Long)
+  def later: DelayedCommand = DelayedCommand(command, Delay.Medium)
+  def muchLater: DelayedCommand = DelayedCommand(command, Delay.Long)
 
 extension (message: Command | DelayedCommand | Event)
   def toMessage(roomId: RoomId): Message | DelayedMessage = message match
