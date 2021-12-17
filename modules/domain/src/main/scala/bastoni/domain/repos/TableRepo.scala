@@ -6,4 +6,4 @@ import cats.effect.Concurrent
 type TableRepo[F[_]] = KeyValueRepo[F, RoomId, Table]
 
 object TableRepo:
-  def inMemory[F[_]: Concurrent] = KeyValueRepo.inMemory
+  def inMemory[F[_]: Concurrent]: F[TableRepo[F]] = KeyValueRepo.inMemory

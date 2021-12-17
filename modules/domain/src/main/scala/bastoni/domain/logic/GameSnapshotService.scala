@@ -20,7 +20,7 @@ trait GamePublisher[F[_]]:
 
 object GameSnapshotService:
 
-  def runner[F[_]: Monad](messageBus: MessageBus[F], tableBus: TableBus[F], tableRepo: TableRepo[F]): ServiceRunner[F] =
+  def runner[F[_]: Monad](messageBus: MessageBus[F], snapshotBus: SnapshotBus[F], tableRepo: TableRepo[F]): ServiceRunner[F] =
     messageBus.subscribeAwait.map { subscription =>
       subscription
         .evalMap {
@@ -33,13 +33,13 @@ object GameSnapshotService:
             } yield Option.when(hasUpdate)(roomId -> updatedTable)
         }
         .collect { case Some(update) => update }
-        .through(tableBus.publish)
+        .through(snapshotBus.publish)
     }
 
-  def subscriber[F[_]](tableBus: TableBus[F]): GameSubscriber[F] =
+  def subscriber[F[_]](snapshotBus: SnapshotBus[F]): GameSubscriber[F] =
     new GameSubscriber[F] {
       override def subscribe(me: Player, roomId: RoomId): fs2.Stream[F, ToPlayer] =
-        tableBus.subscribe.collect { case (`roomId`, Some(table)) => ToPlayer.Snapshot(TableView(me, table)) }
+        snapshotBus.subscribe.collect { case (`roomId`, Some(table)) => ToPlayer.Snapshot(TableView(me, table)) }
     }
 
   def publisher[F[_]](

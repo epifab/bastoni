@@ -3,7 +3,7 @@ package bastoni.domain.model
 import io.circe.{Encoder, Decoder}
 import io.circe.generic.semiauto.{deriveEncoder, deriveDecoder}
 
-case class GamePlayer(player: Player, points: Int):
+case class GamePlayer(player: Player, points: Int, dealer: Boolean = false):
   val id: PlayerId = player.id
   def is(p: Player): Boolean = p.id == id
   def is(p: PlayerId): Boolean = p == id

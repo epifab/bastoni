@@ -99,13 +99,19 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
         )
 
       case Event.MatchCompleted(winnerIds, matchPoints, gamePoints) =>
+        extension (points: List[PointsCount])
+          def pointsFor(player: GamePlayer): Option[Int] =
+            points.find(_.playerIds.exists(player.is)).map(_.points)
+
         copy(
           seats = seats.map(seat => seat.copy(
             player = seat.player.map {
               case active: SittingIn =>
-                val playerGamePoints = gamePoints.find(_.playerIds.exists(active.player.is)).map(_.points).getOrElse(active.player.points)
-                val playerMatchPoints = matchPoints.find(_.playerIds.exists(active.player.is)).map(_.points).getOrElse(0)
-                EndOfMatchPlayer(active.player.copy(points = playerGamePoints), playerMatchPoints, winnerIds.exists(active.player.is))
+                EndOfMatchPlayer(
+                  player = active.player.copy(points = gamePoints.pointsFor(active.player).getOrElse(active.player.points)),
+                  points = matchPoints.pointsFor(active.player).getOrElse(0),
+                  winner = winnerIds.exists(active.player.is)
+                )
               case whatever => whatever
             },
             hand = Nil,
@@ -137,11 +143,22 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
           deck = Nil
         )
 
+      case Command.ActionRequest(playerId, Action.ShuffleDeck) =>
+        copy(
+          seats = seats.map {
+            case seat@ Seat(Some(waiting: SittingIn), _, _, _) if waiting.playerId == playerId =>
+              seat.copy(player = Some(waiting.act(Action.ShuffleDeck).mapPlayer(_.copy(dealer = true))))
+            case seat@ Seat(Some(sittingIn: SittingIn), _, _, _) =>
+              seat.copy(player = Some(sittingIn.mapPlayer(_.copy(dealer = false))))
+            case whatever => whatever
+          }
+        )
+
       case Command.ActionRequest(playerId, action) =>
         copy(
           seats = seats.map {
-            case Seat(Some(waiting: SittingIn), hand, collected, played) if waiting.playerId == playerId =>
-              Seat(Some(waiting.act(action)), hand, collected, played)
+            case seat@ Seat(Some(waiting: SittingIn), _, _, _) if waiting.playerId == playerId =>
+              seat.copy(player = Some(waiting.act(action)))
             case whatever => whatever
           }
         )

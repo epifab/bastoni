@@ -29,14 +29,14 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
   ): Event = {
     (for {
       messageBus <- fs2.Stream.eval(MessageBus.inMemory[IO])
-      tableBus <- fs2.Stream.eval(TableBus.inMemory[IO])
+      snapshotBus <- fs2.Stream.eval(SnapshotBus.inMemory[IO])
       gameRepo <- fs2.Stream.eval(JsonRepos.gameRepo)
       roomRepo <- fs2.Stream.eval(JsonRepos.roomRepo)
       tableRepo <- fs2.Stream.eval(JsonRepos.tableRepo)
       messageRepo <- fs2.Stream.eval(JsonRepos.messageRepo)
 
       gamePub = GameSnapshotService.publisher(messageBus)
-      gameSub = GameSnapshotService.subscriber(tableBus)
+      gameSub = GameSnapshotService.subscriber(snapshotBus)
 
       dumbPlayer1 = player1.dumb(gameSub, gamePub)
       dumbPlayer2 = player2.dumb(gameSub, gamePub)
@@ -56,14 +56,14 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
         else GameService.runner(messageBus, gameRepo, messageRepo, _ => 2.millis)
       )
 
-      gameSnapshotRunner <- fs2.Stream.resource(GameSnapshotService.runner(messageBus, tableBus, tableRepo))
+      gameSnapshotRunner <- fs2.Stream.resource(GameSnapshotService.runner(messageBus, snapshotBus, tableRepo))
 
       lobbyRunner <- fs2.Stream.resource(Lobby.runner(messageBus, roomRepo))
 
       lastMessage <-
         messageBus.subscribe
           .concurrently(messageBus.run)
-          .concurrently(tableBus.run)
+          .concurrently(snapshotBus.run)
           .concurrently(gameServiceRunner)
           .concurrently(gameSnapshotRunner)
           .concurrently(lobbyRunner)

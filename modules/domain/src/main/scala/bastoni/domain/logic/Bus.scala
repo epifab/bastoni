@@ -42,7 +42,7 @@ object MessageBus:
   def inMemory[F[_]: Concurrent]: F[MessageBus[F]] = Fs2Bus.apply
 
 
-type TableBus[F[_]] = Bus[F, (RoomId, Option[Table])]
+type SnapshotBus[F[_]] = Bus[F, (RoomId, Option[Table])]
 
-object TableBus:
-  def inMemory[F[_]: Concurrent]: F[TableBus[F]] = Fs2Bus.apply
+object SnapshotBus:
+  def inMemory[F[_]: Concurrent]: F[SnapshotBus[F]] = Fs2Bus.apply

@@ -14,22 +14,22 @@ case class SittingOut(player: Player) extends PlayerState:
 sealed trait SittingIn extends PlayerState:
   def player: GamePlayer
   def playerId: PlayerId = player.id
-  def map(f: GamePlayer => GamePlayer): SittingIn
+  def mapPlayer(f: GamePlayer => GamePlayer): SittingIn
   def sitOut: SittingOut = SittingOut(player.player)
   def act(action: Action): ActingPlayer = ActingPlayer(player, action)
 
 case class WaitingPlayer(player: GamePlayer) extends SittingIn:
-  def map(f: GamePlayer => GamePlayer): WaitingPlayer  = copy(player = f(player))
+  def mapPlayer(f: GamePlayer => GamePlayer): WaitingPlayer  = copy(player = f(player))
 
 case class ActingPlayer(player: GamePlayer, action: Action) extends SittingIn:
-  def map(f: GamePlayer => GamePlayer): ActingPlayer  = copy(player = f(player))
+  def mapPlayer(f: GamePlayer => GamePlayer): ActingPlayer  = copy(player = f(player))
   def done: WaitingPlayer = WaitingPlayer(player)
 
 case class EndOfMatchPlayer(player: GamePlayer, points: Int, winner: Boolean) extends SittingIn:
-  def map(f: GamePlayer => GamePlayer): EndOfMatchPlayer  = copy(player = f(player))
+  def mapPlayer(f: GamePlayer => GamePlayer): EndOfMatchPlayer  = copy(player = f(player))
 
 case class EndOfGamePlayer(player: GamePlayer, winner: Boolean) extends SittingIn:
-  def map(f: GamePlayer => GamePlayer): EndOfGamePlayer = copy(player = f(player))
+  def mapPlayer(f: GamePlayer => GamePlayer): EndOfGamePlayer = copy(player = f(player))
 
 
 object PlayerState:
