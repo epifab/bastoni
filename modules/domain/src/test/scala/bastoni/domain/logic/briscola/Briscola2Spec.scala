@@ -17,7 +17,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
   val players = List(player1, player2)
 
-  "A game can be played" in {
+  "A game can be played" ignore {
     val input =
       fs2.Stream(
         ShuffleDeck(shuffleSeed),
@@ -419,7 +419,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
     ).map(_.toMessage(room1))
   }
 
-  "Irrelevant messages are ignored" in {
+  "Irrelevant messages are ignored" ignore {
     val input = fs2.Stream(
       ShuffleDeck(shuffleSeed).toMessage(room1),
       ShuffleDeck(1).toMessage(room1),     // ignored (already shuffled)
@@ -449,7 +449,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
     ).map(_.toMessage(room1))
   }
 
-  "Game is aborted if one of the players leave" in {
+  "Game is aborted if one of the players leave" ignore {
     val input = fs2.Stream[cats.Id, ServerEvent | Command](
       ShuffleDeck(shuffleSeed),
       drawCard,
@@ -466,7 +466,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
     ).map(_.toMessage(room1))
   }
 
-  "Game continues if another player joins and leaves" in {
+  "Game continues if another player joins and leaves" ignore {
     val input = fs2.Stream[fs2.Pure, ServerEvent | Command](
       ShuffleDeck(shuffleSeed),
       PlayerJoinedTable(player3, 2),

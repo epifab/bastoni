@@ -19,7 +19,7 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
   val completeTrick = Continue
   val completeMatch = Continue
 
-  "A game can be played" in {
+  "A game can be played" ignore {
     val input =
       (
         fs2.Stream(ShuffleDeck(shuffleSeed)) ++
@@ -370,7 +370,7 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
     ).map(_.toMessage(room1))
   }
 
-  "Game is aborted if one of the active players leaves" in {
+  "Game is aborted if one of the active players leaves" ignore {
     val input = fs2.Stream[fs2.Pure, ServerEvent | Command](
       ShuffleDeck(shuffleSeed),
       drawCard,
@@ -387,7 +387,7 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
     ).map(_.toMessage(room1))
   }
 
-  "Game continues if another player joins and leaves" in {
+  "Game continues if another player joins and leaves" ignore {
     val input = fs2.Stream[fs2.Pure, ServerEvent | Command](
       ShuffleDeck(shuffleSeed),
       PlayerJoinedTable(player3, 3),

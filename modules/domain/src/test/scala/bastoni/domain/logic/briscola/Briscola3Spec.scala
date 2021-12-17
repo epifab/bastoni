@@ -14,7 +14,7 @@ import org.scalatest.matchers.should.Matchers
 class Briscola3Spec extends AnyFreeSpec with Matchers:
   val players = List(player1, player2, player3)
 
-  "A game can be played" in {
+  "A game can be played" ignore {
     val inputStream = Briscola3Spec.input(room1, player1, player2, player3)
     val expectedOut = Briscola3Spec.output(room1, GamePlayer(player1, 0), GamePlayer(player2, 0), GamePlayer(player3, 0))
     Game.playMatch[cats.Id](room1, players, messageId)(inputStream).compile.toList shouldBe expectedOut

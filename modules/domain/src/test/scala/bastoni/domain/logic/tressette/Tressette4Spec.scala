@@ -19,7 +19,7 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
   val completeTrick = Continue
   val completeMatch = Continue
 
-  "A game can be played" in {
+  "A game can be played" ignore {
     val input =
       (
         fs2.Stream(ShuffleDeck(shuffleSeed)) ++
