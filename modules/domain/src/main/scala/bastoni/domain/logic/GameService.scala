@@ -55,7 +55,7 @@ object GameService:
       case Delay.Medium => 1.second
       case Delay.Long => 3.seconds
     }
-  ): Runner[F] =
+  ): ServiceRunner[F] =
     messageBus.subscribeAwait.map { subscription =>
       val oldMessages = messageRepo.inFlight
       val newMessages = subscription.through(GameService(Async[F].delay(MessageId.newId), gameRepo, messageRepo))

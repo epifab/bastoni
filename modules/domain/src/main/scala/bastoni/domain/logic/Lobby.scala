@@ -47,7 +47,7 @@ object Lobby:
       }
       .collect { case Some(message) => message }
 
-  def runner[F[_]: Sync](messageBus: MessageBus[F], repo: RoomRepo[F]): Runner[F] =
+  def runner[F[_]: Sync](messageBus: MessageBus[F], repo: RoomRepo[F]): ServiceRunner[F] =
     messageBus.subscribeAwait.map { subscriber =>
       subscriber
         .through(Lobby(roomSize = 4, Sync[F].delay(MessageId.newId), Sync[F].delay(Random.nextInt()), repo))

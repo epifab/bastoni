@@ -18,9 +18,9 @@ trait GameSubscriber[F[_]]:
 trait GamePublisher[F[_]]:
   def publish(me: Player, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
 
-object GameBus:
+object GameSnapshotService:
 
-  def runner[F[_]: Monad](messageBus: MessageBus[F], tableBus: TableBus[F], tableRepo: TableRepo[F]): Runner[F] =
+  def runner[F[_]: Monad](messageBus: MessageBus[F], tableBus: TableBus[F], tableRepo: TableRepo[F]): ServiceRunner[F] =
     messageBus.subscribeAwait.map { subscription =>
       subscription
         .evalMap {

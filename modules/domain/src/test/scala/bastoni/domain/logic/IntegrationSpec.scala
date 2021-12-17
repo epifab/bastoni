@@ -35,8 +35,8 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
       tableRepo <- fs2.Stream.eval(JsonRepos.tableRepo)
       messageRepo <- fs2.Stream.eval(JsonRepos.messageRepo)
 
-      gamePub = GameBus.publisher(messageBus)
-      gameSub = GameBus.subscriber(tableBus)
+      gamePub = GameSnapshotService.publisher(messageBus)
+      gameSub = GameSnapshotService.subscriber(tableBus)
 
       dumbPlayer1 = player1.dumb(gameSub, gamePub)
       dumbPlayer2 = player2.dumb(gameSub, gamePub)
@@ -56,7 +56,7 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
         else GameService.runner(messageBus, gameRepo, messageRepo, _ => 2.millis)
       )
 
-      gameBusRunner <- fs2.Stream.resource(GameBus.runner(messageBus, tableBus, tableRepo))
+      gameSnapshotRunner <- fs2.Stream.resource(GameSnapshotService.runner(messageBus, tableBus, tableRepo))
 
       lobbyRunner <- fs2.Stream.resource(Lobby.runner(messageBus, roomRepo))
 
@@ -65,7 +65,7 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
           .concurrently(messageBus.run)
           .concurrently(tableBus.run)
           .concurrently(gameServiceRunner)
-          .concurrently(gameBusRunner)
+          .concurrently(gameSnapshotRunner)
           .concurrently(lobbyRunner)
           .concurrently(activateStream)
           .concurrently(playStreams)

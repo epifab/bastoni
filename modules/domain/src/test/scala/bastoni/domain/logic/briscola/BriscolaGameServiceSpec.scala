@@ -2,13 +2,13 @@ package bastoni.domain.logic
 package briscola
 
 import bastoni.domain.logic.Fixtures.*
-import bastoni.domain.logic.GameBus
-import bastoni.domain.repos.{GameRepo, MessageRepo}
+import bastoni.domain.logic.GameSnapshotService
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
+import bastoni.domain.repos.{GameRepo, MessageRepo}
 import bastoni.domain.view.FromPlayer
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
@@ -136,7 +136,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
           .concurrently(gameServiceRunner)
           .concurrently(
             fs2.Stream(FromPlayer.PlayCard(player1Card)).delayBy[IO](100.millis)
-              .through(GameBus.publisher(messageBus).publish(player1, room1.id))
+              .through(GameSnapshotService.publisher(messageBus).publish(player1, room1.id))
           )
           .collect { case Message(_, _, event: Event) => event }
           .interruptAfter(300.millis)
