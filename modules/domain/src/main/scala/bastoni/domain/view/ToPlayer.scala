@@ -1,8 +1,9 @@
 package bastoni.domain.view
 
-import bastoni.domain.model.PlayerTableView
+import bastoni.domain.model.{PlayerEvent, TablePlayerView}
 
 sealed trait ToPlayer
 
 object ToPlayer:
-  case class Snapshot(table: PlayerTableView) extends ToPlayer
+  case class Snapshot(table: TablePlayerView) extends ToPlayer
+  case class GameEvent(event: PlayerEvent) extends ToPlayer

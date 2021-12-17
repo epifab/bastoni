@@ -27,21 +27,15 @@ object GameService:
 
   def apply[F[_]: Concurrent](newId: F[MessageId], gameRepo: GameRepo[F], messageRepo: MessageRepo[F])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
     messages
-      .evalMap { case Message(id, roomId, message) =>
+      .evalMap { case Message(id, roomId, data) =>
         for {
-          currentStateMachine <- gameRepo.get(roomId)
-          (updatedStateMachine, messagesData) = (currentStateMachine, message) match {
-            case (None, StartGame(room, gameType)) => Some(GameStateMachineFactory(gameType)(room)) -> List(GameStarted(gameType))
-            case (Some(state), event) => state(event)
-            case (None, _) => None -> Nil
-          }
-
+          context <- gameRepo.get(roomId)
+          (newContext, messagesData) = context.getOrElse(GameContext.build(4)).apply(data)
           messages <- messagesData.toMessages(roomId, newId)
-
           // the remaining operations should be done atomically to guarantee consistency
           _ <- messageRepo.landed(id)
           _ <- messages.traverse(messageRepo.flying)
-          _ <- updatedStateMachine.fold(gameRepo.remove(roomId))(gameRepo.set(roomId, _))
+          _ <- newContext.fold(gameRepo.remove(roomId))(gameRepo.set(roomId, _))
         } yield messages
       }
       .flatMap(fs2.Stream.iterable)

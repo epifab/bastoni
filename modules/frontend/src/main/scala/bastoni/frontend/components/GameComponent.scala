@@ -16,14 +16,14 @@ import scala.concurrent.duration.DurationInt
 val GameComponent =
   ScalaComponent
     .builder[Unit]
-    .initialState[Option[PlayerTableView]](None)
+    .initialState[Option[TablePlayerView]](None)
     .renderBackend[GameComponentBackend]
     .componentDidMount(_.backend.start)
     .build
 
 
-class GameComponentBackend($: BackendScope[Unit, Option[PlayerTableView]]):
-  def render(table: Option[PlayerTableView]) = table match
+class GameComponentBackend($: BackendScope[Unit, Option[TablePlayerView]]):
+  def render(table: Option[TablePlayerView]) = table match
     case Some(table) => <.div(^.className := "game", TableComponent(table))
     case None => <.div("Waiting...")
 
@@ -31,19 +31,24 @@ class GameComponentBackend($: BackendScope[Unit, Option[PlayerTableView]]):
     val program: IO[Unit] = (for {
       backend <- fs2.Stream.resource(Services.inMemory[IO])
       (pub, sub, runner) = backend
-      room = RoomId.newId
+      roomId = RoomId.newId
 
       me = Player(PlayerId.newId, "ME")
-      p1 = DumbPlayer(Player(PlayerId.newId, "Tizio"), room, sub, pub, pause = 1.second)
-      p2 = DumbPlayer(Player(PlayerId.newId, "Caio"), room, sub, pub, pause = 1.second)
-      p3 = DumbPlayer(Player(PlayerId.newId, "Sempronio"), room, sub, pub, pause = 1.second)
-      p4 = DumbPlayer(me, room, sub, pub, pause = 1.second)
+      p1 = DumbPlayer(Player(PlayerId.newId, "Tizio"), roomId, sub, pub, pause = 1.second)
+      p2 = DumbPlayer(Player(PlayerId.newId, "Caio"), roomId, sub, pub, pause = 1.second)
+      p3 = DumbPlayer(Player(PlayerId.newId, "Sempronio"), roomId, sub, pub, pause = 1.second)
+      p4 = DumbPlayer(me, roomId, sub, pub, pause = 1.second)
 
-      tables <- sub.subscribe(me, room).map { case ToPlayer.Snapshot(table) => table }
+      tables <- sub.subscribe(me, roomId)
+        .fold[Option[TablePlayerView]](None) {
+          case (_, ToPlayer.Snapshot(table)) => Some(table)
+          case (oldTable, ToPlayer.GameEvent(event)) => oldTable.map(_.update(event))
+        }
+        .collect { case Some(table) => table }
         .evalMap(table => IO($.setState(Some(table)).runNow()))
         .concurrently(runner)
         .concurrently(p1).concurrently(p2).concurrently(p3).concurrently(p4)
-        .concurrently(pub.publish(me, room)(fs2.Stream[IO, FromPlayer](FromPlayer.ActivateRoom(GameType.Briscola)).delayBy(2.seconds)))
+        .concurrently(pub.publish(me, roomId)(fs2.Stream[IO, FromPlayer](FromPlayer.StartGame(GameType.Briscola)).delayBy(2.seconds)))
     } yield tables).compile.drain
 
     Callback(program.unsafeRunAsync {

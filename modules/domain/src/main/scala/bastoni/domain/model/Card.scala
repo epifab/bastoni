@@ -48,6 +48,11 @@ case class CardPlayerView(card: Option[Card]) extends CardView:
 
 case class CardServerView(card: Card, face: Face) extends CardView:
   override def value: Option[Card] = Some(card)
+  def toPlayerView(me: PlayerId, context: Option[PlayerId]) = face match {
+    case Face.Up => CardPlayerView(Some(card))
+    case Face.Down => CardPlayerView(None)
+    case _ => CardPlayerView(Option.when(context.contains(me))(card))
+  }
 
 object CardPlayerView:
   given Decoder[CardPlayerView] = Decoder[Option[Card]].map(CardPlayerView(_))

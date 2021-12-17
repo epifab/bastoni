@@ -14,12 +14,12 @@ import org.scalatest.matchers.should.Matchers
 class Briscola4Spec extends AnyFreeSpec with Matchers:
 
   val roomId = RoomId.newId
-  val room = Room.cosy(roomId, player1, player2, player3, player4)
+  val players = List(player1, player2, player3, player4)
 
   "A game can be played" in {
     val inputStream = Briscola4Spec.input(roomId, player1, player2, player3, player4)
     val expectedOut = Briscola4Spec.output(roomId, player1, player2, player3, player4)
-    Game.playMatch[cats.Id](room, messageId)(inputStream).compile.toList shouldBe expectedOut
+    Game.playMatch[cats.Id](roomId, players, messageId)(inputStream).compile.toList shouldBe expectedOut
   }
 
 object Briscola4Spec:

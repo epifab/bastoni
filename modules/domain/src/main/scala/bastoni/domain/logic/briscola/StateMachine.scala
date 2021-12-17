@@ -16,5 +16,5 @@ case class StateMachine(state: GameState) extends GameStateMachine:
 
 
 object StateMachine extends GameStateMachineFactory:
-  override def apply(room: Room): StateMachine = new StateMachine(GameState(room.players))
+  override def apply(table: TableServerView): StateMachine = new StateMachine(GameState(table.players))
   override def decode(json: ACursor): Either[DecodingFailure, StateMachine] = Decoder[GameState].tryDecode(json).map(new StateMachine(_))

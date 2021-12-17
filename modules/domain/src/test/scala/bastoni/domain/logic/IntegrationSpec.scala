@@ -29,14 +29,11 @@ class IntegrationSpec extends AsyncIOFreeSpec:
   ): IO[Event] = {
     (for {
       messageBus <- fs2.Stream.eval(MessageBus.inMemory[IO])
-      snapshotBus <- fs2.Stream.eval(SnapshotBus.inMemory[IO])
       gameRepo <- fs2.Stream.eval(JsonRepos.gameRepo)
-      roomRepo <- fs2.Stream.eval(JsonRepos.roomRepo)
-      tableRepo <- fs2.Stream.eval(JsonRepos.tableRepo)
       messageRepo <- fs2.Stream.eval(JsonRepos.messageRepo)
 
-      gamePub = GameSnapshotService.publisher(messageBus)
-      gameSub = GameSnapshotService.subscriber(snapshotBus)
+      gamePub = GamePubSub.publisher(messageBus)
+      gameSub = GamePubSub.subscriber(messageBus)
 
       dumbPlayer1 = player1.dumb(gameSub, gamePub)
       dumbPlayer2 = player2.dumb(gameSub, gamePub)
@@ -48,7 +45,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
         case 3 => dumbPlayer1.concurrently(dumbPlayer2).concurrently(dumbPlayer3)
         case 4 => dumbPlayer1.concurrently(dumbPlayer2).concurrently(dumbPlayer3).concurrently(dumbPlayer4)
 
-      activateStream = (fs2.Stream(ActivateRoom(gameType)).delayBy[IO](500.millis) ++ extraMessages)
+      activateStream = (fs2.Stream(StartGame(gameType)).delayBy[IO](500.millis) ++ extraMessages)
         .through(gamePub.publish(player1, roomId))
 
       gameServiceRunner <- fs2.Stream.resource(
@@ -56,17 +53,11 @@ class IntegrationSpec extends AsyncIOFreeSpec:
         else GameService.runner(messageBus, gameRepo, messageRepo, _ => 2.millis)
       )
 
-      gameSnapshotRunner <- fs2.Stream.resource(GameSnapshotService.runner(messageBus, snapshotBus, tableRepo))
-
-      lobbyRunner <- fs2.Stream.resource(Lobby.runner(messageBus, roomRepo))
-
       lastMessage <-
-        messageBus.subscribe
+        messageBus
+          .subscribe
           .concurrently(messageBus.run)
-          .concurrently(snapshotBus.run)
           .concurrently(gameServiceRunner)
-          .concurrently(gameSnapshotRunner)
-          .concurrently(lobbyRunner)
           .concurrently(activateStream)
           .concurrently(playStreams)
           // .evalTap(message => IO(println(message.data.getClass.getSimpleName)))
@@ -104,6 +95,6 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       4,
       GameType.Tressette,
       realSpeed = true,
-      extraMessages = fs2.Stream.awakeEvery[IO](2.seconds).map(_ => LeaveRoom)
+      extraMessages = fs2.Stream.awakeEvery[IO](2.seconds).map(_ => LeaveTable)
     ).asserting(_ shouldBe Event.GameAborted)
   }

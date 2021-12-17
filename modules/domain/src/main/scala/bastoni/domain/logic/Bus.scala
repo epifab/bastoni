@@ -40,9 +40,3 @@ type MessageBus[F[_]] = Bus[F, Message]
 
 object MessageBus:
   def inMemory[F[_]: Concurrent]: F[MessageBus[F]] = Fs2Bus.apply
-
-
-type SnapshotBus[F[_]] = Bus[F, (RoomId, Option[TableServerView])]
-
-object SnapshotBus:
-  def inMemory[F[_]: Concurrent]: F[SnapshotBus[F]] = Fs2Bus.apply

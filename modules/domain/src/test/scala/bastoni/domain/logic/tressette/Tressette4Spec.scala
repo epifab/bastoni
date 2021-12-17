@@ -14,7 +14,7 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
   import Fixtures.*
 
   val roomId = RoomId.newId
-  val room = Room.cosy(roomId, player1, player2, player3, player4)
+  val players = List(player1, player2, player3, player4)
 
   val drawCard      = Continue
   val completeTrick = Continue
@@ -90,7 +90,7 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
 
       ).map(Message(messageId, roomId, _))
 
-    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),

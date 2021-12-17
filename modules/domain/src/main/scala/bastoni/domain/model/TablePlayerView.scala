@@ -1,15 +1,15 @@
 package bastoni.domain.model
 
-case class PlayerTableView(
+case class TablePlayerView(
   override val seats: List[Seat[CardPlayerView]],
   override val deck: List[CardPlayerView],
   override val active: Boolean
 ) extends Table[CardPlayerView]:
 
-  override type TableView = PlayerTableView
+  override type TableView = TablePlayerView
 
-  override protected def updateWith(seats: List[Seat[CardPlayerView]] = this.seats, deck: List[CardPlayerView] = this.deck, active: Boolean = this.active): PlayerTableView =
-    PlayerTableView(seats, deck, active)
+  override protected def updateWith(seats: List[Seat[CardPlayerView]] = this.seats, deck: List[CardPlayerView] = this.deck, active: Boolean = this.active): TablePlayerView =
+    TablePlayerView(seats, deck, active)
 
   override protected def toC(card: CardServerView): CardPlayerView = CardPlayerView(card.face match {
     case Face.Up => Some(card.card)
@@ -28,7 +28,7 @@ case class PlayerTableView(
     if (cards.exists(_.card.contains(card))) cards.removeFirst(_.card.contains(card))
     else cards.removeFirst(_.card.isEmpty)
 
-  def update(event: PlayerEvent): PlayerTableView = event match {
+  def update(event: PlayerEvent): TablePlayerView = event match {
     case Event.DeckShuffledPlayerPOV(numberOfCards) =>
       updateWith(
         seats = seats.map {

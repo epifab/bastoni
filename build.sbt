@@ -5,7 +5,6 @@ Global / version := "SNAPSHOT"
 Global / scalaVersion := "3.1.0"
 Global / jsEnv := new NodeJSEnv(NodeJSEnv.Config().withArgs(List("--dns-result-order=ipv4first")))
 Global / scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage)
-Global / fork := true
 
 val catsCoreVersion = "2.6.1"
 val catsEffectVersion = "3.3.0"
@@ -107,5 +106,7 @@ lazy val backend = (project in file("modules/backend"))
     Assets / pipelineStages := Seq(scalaJSPipeline),
     Assets / WebKeys.packagePrefix := "assets/",
     Assets / managedResources += (frontend / Compile / packageJSDependencies).value,
-    Runtime / managedClasspath += (Assets / packageBin).value
+    Runtime / managedClasspath += (Assets / packageBin).value,
+
+    fork := true
   )

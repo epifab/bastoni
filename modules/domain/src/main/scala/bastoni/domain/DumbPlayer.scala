@@ -2,7 +2,7 @@ package bastoni.domain
 
 import bastoni.domain.logic.{GamePublisher, GameSubscriber}
 import bastoni.domain.model.*
-import bastoni.domain.view.FromPlayer.{JoinRoom, PlayCard, ShuffleDeck}
+import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.ToPlayer
 import cats.effect.syntax.temporal.*
 import cats.effect.{Sync, Temporal}
@@ -13,10 +13,15 @@ import scala.util.chaining.*
 object DumbPlayer:
   def apply[F[_]: Sync: Temporal](me: Player, roomId: RoomId, subscriber: GameSubscriber[F], publisher: GamePublisher[F], pause: FiniteDuration = 0.millis): fs2.Stream[F, Unit] =
     val actions =
-      fs2.Stream(JoinRoom) ++ subscriber
+      fs2.Stream(Connect, JoinTable) ++ subscriber
         .subscribe(me, roomId)
-        .map { case ToPlayer.Snapshot(table) =>
-          table.seatFor(me) match {
+        .scan(Option.empty[TablePlayerView]) {
+          case (_, ToPlayer.Snapshot(table)) => Some(table)
+          case (table, ToPlayer.GameEvent(event)) => table.map(_.update(event))
+        }
+        .collect { case Some(table) => table }
+        .map(
+          _.seatFor(me) match {
             case Some(PlayerSeat(ActingPlayer(_, Action.PlayCard), hand, _, _)) =>
               Some(PlayCard(hand.flatMap(_.card).headOption.getOrElse(throw new IllegalStateException("No cards in hand"))))
 
@@ -28,7 +33,7 @@ object DumbPlayer:
 
             case _ => None
           }
-        }
+        )
         .collect { case Some(event) => event }
         .evalMap { event => Sync[F].pure(event).delayBy(pause) }
 

@@ -32,58 +32,54 @@ case class TableServerView(
 
     case event: Event.CardDealtServerPOV => cardDealtUpdate(event)
 
+    case Event.Snapshot(table) => table
+
     case event: PublicEvent => publicEventUpdate(event)
   }
 
-  extension (state: CardServerView)
-    def toPlayerView(me: Player, player: Option[PlayerState]): CardPlayerView = state match {
-      case CardServerView(card, Face.Up) => CardPlayerView(Some(card))
-      case CardServerView(card, Face.Down) => CardPlayerView(None)
-      case CardServerView(card, Face.Player) => CardPlayerView(Option.when(player.exists(_.playerId == me.id))(card))
-    }
-
-  def toPlayerView(me: Player): PlayerTableView =
-    PlayerTableView(
+  def toPlayerView(me: Player): TablePlayerView =
+    TablePlayerView(
       seats = seats.map {
         case Seat(player, hand, collected, played) =>
           Seat[CardPlayerView](
             player = player,
-            hand = hand.map(_.toPlayerView(me, player)),
-            collected = collected.map(_.toPlayerView(me, player)),
-            played = played.map(_.toPlayerView(me, player))
+            hand = hand.map(_.toPlayerView(me.id, player.map(_.playerId))),
+            collected = collected.map(_.toPlayerView(me.id, player.map(_.playerId))),
+            played = played.map(_.toPlayerView(me.id, player.map(_.playerId)))
           )
       },
-      deck = deck.map(_.toPlayerView(me, None)),
+      deck = deck.map(_.toPlayerView(me.id, None)),
       active = active
     )
 
-  val indexedSeats = seats.zipWithIndex
   val players: List[Player] = seats.collect { case Seat(Some(player), _, _, _) => player.player }
   val size: Int = seats.size
   val isFull: Boolean = seats.forall(_.player.isDefined)
   val isEmpty: Boolean = seats.forall(_.player.isEmpty)
+  val nonEmpty: Boolean = seats.exists(_.player.isDefined)
 
-  def contains(p: Player): Boolean = seatIndexFor(p).isDefined
+  def contains(p: Player): Boolean = contains(p.id)
+  def contains(p: PlayerId): Boolean = seatIndexFor(p).isDefined
 
-  def seatIndexFor(p: Player): Option[Int] = indexedSeats
-    .collectFirst { case (Seat(Some(player), _, _, _), index) if player.playerId == p.id => index }
+  def seatIndexFor(p: Player): Option[Int] = seatIndexFor(p.id)
+  def seatIndexFor(id: PlayerId): Option[Int] = indexedSeats.collectFirst { case (Seat(Some(player), _, _, _), index) if player.playerId == id => index }
 
-  def join(p: Player, seed: Int): Either[TableError, TableServerView] =
+  def join(p: Player, seed: Int): Either[TableError, (TableServerView, Int)] =
     if (contains(p)) Left(TableError.DuplicatePlayer) else {
       new Random(seed)
         .shuffle(indexedSeats)
         .collectFirst { case (Seat(None, _, _, _), index) => index }
-        .fold[Either[TableError, TableServerView]](Left(TableError.FullTable)) { targetIndex =>
+        .fold[Either[TableError, (TableServerView, Int)]](Left(TableError.FullTable)) { targetIndex =>
           Right(updateWith(
             seats = indexedSeats.map {
               case (oldSeat, index) if index == targetIndex => oldSeat.copy(player = Some(SittingOut(p)))
               case (seat, _) => seat
             }
-          ))
+          ) -> targetIndex)
         }
     }
 
-  def leave(p: Player): Either[TableError, TableServerView] =
+  def leave(p: Player): Either[TableError, (TableServerView, Int)] =
     seatIndexFor(p) match
       case Some(targetIndex) =>
         Right(copy(
@@ -91,6 +87,6 @@ case class TableServerView(
             case (oldSeat, index) if index == targetIndex => oldSeat.copy(player = None)
             case (seat, _) => seat
           }
-        ))
+        ) -> targetIndex)
 
       case None => Left(TableError.PlayerNotFound)

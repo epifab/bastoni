@@ -16,7 +16,7 @@ import org.scalatest.matchers.should.Matchers
 class Briscola2Spec extends AnyFreeSpec with Matchers:
 
   val roomId = RoomId.newId
-  val room = Room(roomId, List(Some(player1), None, Some(player2)))
+  val players = List(player1, player2)
 
   val drawCard      = Continue
   val revealTrump   = Continue
@@ -153,7 +153,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
       ).map(_.toMessage(roomId))
 
-    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
@@ -395,22 +395,22 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
   "Irrelevant messages are ignored" in {
     val input = fs2.Stream(
-      ShuffleDeck(shuffleSeed).toMessage(room.id),
-      ShuffleDeck(1).toMessage(room.id),     // ignored (already shuffled)
-      drawCard.toMessage(room.id),
-      drawCard.toMessage(room.id),
-      drawCard.toMessage(room.id),
-      drawCard.toMessage(room.id),
-      drawCard.toMessage(room.id),
-      drawCard.toMessage(room.id),
-      revealTrump.toMessage(room.id),
-      Continue.toMessage(room.id),                                      // ignored, waiting for a player to play
-      PlayCard(player2.id, Card(Asso, Spade)).toMessage(room.id),       // ignored (not your turn)
-      PlayCard(player1.id, Card(Asso, Spade)).toMessage(room.id),       // ignored (not your card)
+      ShuffleDeck(shuffleSeed).toMessage(roomId),
+      ShuffleDeck(1).toMessage(roomId),     // ignored (already shuffled)
+      drawCard.toMessage(roomId),
+      drawCard.toMessage(roomId),
+      drawCard.toMessage(roomId),
+      drawCard.toMessage(roomId),
+      drawCard.toMessage(roomId),
+      drawCard.toMessage(roomId),
+      revealTrump.toMessage(roomId),
+      Continue.toMessage(roomId),                                      // ignored, waiting for a player to play
+      PlayCard(player2.id, Card(Asso, Spade)).toMessage(roomId),       // ignored (not your turn)
+      PlayCard(player1.id, Card(Asso, Spade)).toMessage(roomId),       // ignored (not your card)
       PlayCard(player1.id, Card(Due, Bastoni)).toMessage(RoomId.newId), // ignored (different room)
     )
 
-    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
@@ -427,38 +427,38 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       mediumDelay,
       TrumpRevealed(Card(Cinque, Coppe)),
       ActionRequested(player1.id, Action.PlayCard)
-    ).map(_.toMessage(room.id))
+    ).map(_.toMessage(roomId))
   }
 
   "Game is aborted if one of the players leave" in {
     val input = fs2.Stream[cats.Id, ServerEvent | Command](
       ShuffleDeck(shuffleSeed),
       drawCard,
-      PlayerLeft(player1, Room(room.id, List(None, Some(player2), None))),
+      PlayerLeftTable(player1, 1),
       drawCard, // too late, game was aborted
-    ).map(_.toMessage(room.id))
+    ).map(_.toMessage(roomId))
 
-    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
       shortDelay,
       MatchAborted
-    ).map(_.toMessage(room.id))
+    ).map(_.toMessage(roomId))
   }
 
   "Game continues if another player joins and leaves" in {
     val input = fs2.Stream[fs2.Pure, ServerEvent | Command](
       ShuffleDeck(shuffleSeed),
-      PlayerJoined(player3, Room(room.id, List(Some(player1), Some(player3), Some(player2)))),
-      PlayerLeft(player3, Room(room.id, List(Some(player1), None, Some(player2)))),
+      PlayerJoinedTable(player3, 2),
+      PlayerLeftTable(player3, 2),
       drawCard,
-    ).map(_.toMessage(room.id))
+    ).map(_.toMessage(roomId))
 
-    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](roomId, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
       shortDelay
-    ).map(_.toMessage(room.id))
+    ).map(_.toMessage(roomId))
   }

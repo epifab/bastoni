@@ -21,6 +21,7 @@ object Fixtures:
   val player2 = Player(PlayerId.newId, "Caio")
   val player3 = Player(PlayerId.newId, "Sempronio")
   val player4 = Player(PlayerId.newId, "Giuda")
+  val player5 = Player(PlayerId.newId, "Ultimo")
 
   val messageId: MessageId = MessageId.newId
 
@@ -71,3 +72,13 @@ object Fixtures:
     Card(Due, Spade),
     Card(Cavallo, Coppe)
   )
+
+  val joinSeed = 4099
+
+//  val seed =
+//    fs2.Stream.range(0, 10000)
+//      .map(i => i -> scala.util.Random(i).shuffle(List(1, 2, 3, 4)))
+//      .find { case (i, l) => l == List(4, 3, 2, 1) }
+//      .take(1)
+//      .compile
+//      .lastOrError

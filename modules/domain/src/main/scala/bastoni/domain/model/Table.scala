@@ -25,6 +25,8 @@ trait Table[C <: CardView]:
   def deck: List[C]
   def active: Boolean
 
+  lazy val indexedSeats = seats.zipWithIndex
+
   protected def toC(card: CardServerView): C
   protected def removeCard(cards: List[C], card: Card): List[C]
 
@@ -32,19 +34,19 @@ trait Table[C <: CardView]:
 
   protected def publicEventUpdate(message: PublicEvent): TableView =
     message match
-      case Event.PlayerJoined(player, room) =>
+      case Event.PlayerJoinedTable(player, targetIndex) =>
         updateWith(
-          seats = seats.zip(room.seats).map {
-            case (seat, Some(targetPlayer)) if targetPlayer.id == player.id => seat.copy(Some(SittingOut(player)))
+          seats = indexedSeats.map {
+            case (seat, index) if targetIndex == index => seat.copy(Some(SittingOut(player)))
             case (whatever, _) => whatever
           }
         )
 
-      case Event.PlayerLeft(player, room) =>
+      case Event.PlayerLeftTable(player, targetIndex) =>
         updateWith(
-          seats = seats.map {
-            case seat if seat.player.exists(_.playerId == player.id) => seat.copy(player = None)
-            case whatever => whatever
+          seats = indexedSeats.map {
+            case (seat, index) if index == targetIndex => seat.copy(player = None)
+            case (whatever, _) => whatever
           }
         )
 
@@ -177,25 +179,4 @@ trait Table[C <: CardView]:
 
 object Table:
   given serverTableViewCodec: Codec[TableServerView] = deriveCodec
-  given playerTableViewCodec: Codec[PlayerTableView] = deriveCodec
-
-  def apply(message: ServerEvent): Option[TableServerView] =
-    val room = message match {
-      case event: Event.RoomEvent => Some(event.room)
-      case _ => None
-    }
-
-    room.map { room =>
-      TableServerView(
-        seats = room.seats.map(seat =>
-          Seat(
-            seat.map(SittingOut(_)),
-            hand = Nil,
-            collected = Nil,
-            played = Nil
-          )
-        ),
-        deck = Nil,
-        active = false
-      )
-    }
+  given playerTableViewCodec: Codec[TablePlayerView] = deriveCodec
