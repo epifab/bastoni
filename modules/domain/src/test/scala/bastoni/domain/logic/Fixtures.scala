@@ -21,7 +21,6 @@ object Fixtures:
   val player4 = Player(PlayerId.newId, "Giuda")
 
   val messageId: MessageId = MessageId.newId
-  val messageIds: fs2.Stream[fs2.Pure, MessageId] = fs2.Stream.constant(messageId)
 
   val shortDelay: Delayed[Command] = Delayed(Continue, Delay.Short)
   val mediumDelay: Delayed[Command] = Delayed(Continue, Delay.Medium)

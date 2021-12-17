@@ -7,6 +7,7 @@ import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
+import cats.catsInstancesForId
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -18,7 +19,7 @@ class Briscola4Spec extends AnyFreeSpec with Matchers:
   "A game can be played" in {
     val inputStream = Briscola4Spec.input(roomId, player1, player2, player3, player4)
     val expectedOut = Briscola4Spec.output(roomId, player1, player2, player3, player4)
-    Game.playMatch[fs2.Pure](room, messageIds)(inputStream).compile.toList shouldBe expectedOut
+    Game.playMatch[cats.Id](room, messageId)(inputStream).compile.toList shouldBe expectedOut
   }
 
 object Briscola4Spec:

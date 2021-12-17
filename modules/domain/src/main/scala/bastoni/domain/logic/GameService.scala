@@ -13,19 +13,9 @@ import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 
 import scala.concurrent.duration.*
 
-extension (messages: List[Command | Delayed[Command] | Event])
-  def toMessages[F[_]](roomId: RoomId, messageIds: fs2.Stream[F, MessageId]): fs2.Stream[F, Message | Delayed[Message]] =
-    fs2.Stream
-      .iterable(messages)
-      .zip(messageIds)
-      .map {
-        case (event: Event, id) => Message(id, roomId, event)
-        case (command: Command, id) => Message(id, roomId, command)
-        case (Delayed(command: Command, delay), id) => Delayed(Message(id, roomId, command), delay)
-      }
-
+extension (data: List[Command | Delayed[Command] | Event])
   def toMessages[F[_]: Applicative](roomId: RoomId, newId: F[MessageId]): F[List[Message | Delayed[Message]]] =
-    messages
+    data
       .traverse {
         case event: Event                     => newId.map(id => Message(id, roomId, event))
         case command: Command                 => newId.map(id => Message(id, roomId, command))

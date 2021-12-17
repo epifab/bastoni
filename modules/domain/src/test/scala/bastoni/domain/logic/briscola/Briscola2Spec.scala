@@ -9,6 +9,7 @@ import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
+import cats.catsInstancesForId
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -152,7 +153,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
       ).map(_.toMessage(roomId))
 
-    Game.playMatch[fs2.Pure](room, messageIds)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
@@ -401,7 +402,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       PlayCard(player1.id, Card(Due, Bastoni)).toMessage(RoomId.newId), // ignored (different room)
     )
 
-    Game.playMatch[fs2.Pure](room, messageIds)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
@@ -422,14 +423,14 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
   }
 
   "Game is aborted if one of the players leave" in {
-    val input = fs2.Stream[fs2.Pure, Command | Event](
+    val input = fs2.Stream[cats.Id, Command | Event](
       ShuffleDeck(10),
       drawCard,
       PlayerLeft(player1, Room(room.id, List(None, Some(player2), None))),
       drawCard, // too late, game was aborted
     ).map(_.toMessage(room.id))
 
-    Game.playMatch[fs2.Pure](room, messageIds)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
@@ -446,7 +447,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       drawCard,
     ).map(_.toMessage(room.id))
 
-    Game.playMatch[fs2.Pure](room, messageIds)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),

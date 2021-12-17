@@ -4,24 +4,25 @@ package tressette
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
+import cats.Applicative
 
 import scala.annotation.tailrec
 import scala.util.Random
 
 object Game:
-  def playMatch[F[_]](room: Room, messageIds: fs2.Stream[F, MessageId])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
-    playStream(room, MatchState(room.players), playMatchStep, s => s.isInstanceOf[MatchState.Terminated], messages, messageIds)
+  def playMatch[F[_]: Applicative](room: Room, newId: F[MessageId])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
+    playStream(room, MatchState(room.players), playMatchStep, s => s.isInstanceOf[MatchState.Terminated], messages, newId)
 
-  def playGame[F[_]](room: Room, messageIds: fs2.Stream[F, MessageId])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
-    playStream(room, GameState(room.players), playGameStep, s => s == GameState.Terminated, messages, messageIds)
+  def playGame[F[_]: Applicative](room: Room, newId: F[MessageId])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
+    playStream(room, GameState(room.players), playGameStep, s => s == GameState.Terminated, messages, newId)
 
-  private def playStream[F[_], State](
+  private def playStream[F[_]: Applicative, State](
     room: Room,
     initialState: State,
     handler: (State, Event | Command) => (State, List[Event | Command | Delayed[Command]]),
     isFinal: State => Boolean,
     messages: fs2.Stream[F, Message],
-    messageIds: fs2.Stream[F, MessageId]
+    newId: F[MessageId]
   ): fs2.Stream[F, Message | Delayed[Message]] =
     messages
       .collect { case Message(_, roomId, message) if roomId == room.id => message }
@@ -29,7 +30,7 @@ object Game:
         case ((state, _), message) => handler(state, message)
       }
       .takeThrough { case ((state, _)) => !isFinal(state) }
-      .flatMap { case (_, events) => events.toMessages(room.id, messageIds) }
+      .flatMap { case (_, events) => fs2.Stream.evalSeq(events.toMessages(room.id, newId)) }
 
   private[tressette] val playMatchStep: (MatchState, Command | Event) => (MatchState, List[Event | Command | Delayed[Command]]) = {
 

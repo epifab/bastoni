@@ -6,6 +6,7 @@ import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
+import cats.catsInstancesForId
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -130,7 +131,7 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
 
       ).map(Message(messageId, roomId, _))
 
-    Game.playMatch[fs2.Pure](room, fs2.Stream.constant(messageId))(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
@@ -402,7 +403,7 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       drawCard, // too late, game was aborted
     ).map(_.toMessage(room.id))
 
-    Game.playMatch[fs2.Pure](room, messageIds)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
@@ -419,7 +420,7 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       drawCard,
     ).map(_.toMessage(room.id))
 
-    Game.playMatch[fs2.Pure](room, messageIds)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
+    Game.playMatch[cats.Id](room, messageId)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
       DeckShuffled(10),
       mediumDelay,
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
