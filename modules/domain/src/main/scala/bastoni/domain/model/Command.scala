@@ -27,6 +27,7 @@ object Command:
       case "ShuffleDeck" => Right(ShuffleDeck)
     })
 
+  // case object Observe extends Command
   case class  JoinRoom(player: Player) extends Command
   case class  LeaveRoom(player: Player) extends Command
   case class  ActivateRoom(player: Player, gameType: GameType) extends Command
@@ -37,6 +38,7 @@ object Command:
   case object Continue extends Command
 
   given Encoder[Command] = Encoder.instance {
+    // case Observe            => Json.obj("type" -> "Observe".asJson)
     case obj: JoinRoom      => deriveEncoder[JoinRoom].mapJsonObject(_.add("type", "JoinRoom".asJson))(obj)
     case obj: LeaveRoom     => deriveEncoder[LeaveRoom].mapJsonObject(_.add("type", "LeaveRoom".asJson))(obj)
     case obj: ActivateRoom  => deriveEncoder[ActivateRoom].mapJsonObject(_.add("type", "ActivateRoom".asJson))(obj)
@@ -48,6 +50,7 @@ object Command:
   }
 
   given Decoder[Command] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
+    // case "Observe"       => Right(Observe)
     case "JoinRoom"      => deriveDecoder[JoinRoom](obj)
     case "LeaveRoom"     => deriveDecoder[LeaveRoom](obj)
     case "ActivateRoom"  => deriveDecoder[ActivateRoom](obj)

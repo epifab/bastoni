@@ -122,19 +122,22 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     )
 
     val gameContext = new GameContext(
-      List(
-        Seat(None, Nil, Nil, Nil),
-        Seat(Some(ActingPlayer(gamePlayer1)), List(CardState(player1Card, Face.Player)), player1Collected.map(card => CardState(card, Face.Down)), Nil),
-        Seat(None, Nil, Nil, Nil),
-        Seat(Some(WatingPlayer(gamePlayer2)), Nil, Nil, List(CardState(player2Card, Face.Up)))
+      Table(
+        seats = List(
+          Seat(None, Nil, Nil, Nil),
+          Seat(Some(ActingPlayer(gamePlayer1)), List(CardState(player1Card, Face.Player)), player1Collected.map(card => CardState(card, Face.Down)), Nil),
+          Seat(None, Nil, Nil, Nil),
+          Seat(Some(WatingPlayer(gamePlayer2)), Nil, Nil, List(CardState(player2Card, Face.Up)))
+        ),
+        deck = Nil,
+        active = true
       ),
-      deck = Nil,
       stateMachine = Some(stateMachine)
     )
 
     val oldMessage = CardPlayed(player2.id, player2Card).toMessage(room1.id)
 
-    val (events, finalGameRoom, messages) = (for {
+    val (events, actualContext, messages) = (for {
       gameRepo <- JsonRepos.gameRepo
       messageRepo <- JsonRepos.messageRepo
       _ <- gameRepo.set(room1.id, gameContext)
@@ -148,9 +151,9 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
           .collect { case Message(_, _, event: Event) => event }
           .interruptAfter(300.millis)
       } yield event).compile.toList
-      gameRoom <- gameRepo.get(room1.id)
+      context <- gameRepo.get(room1.id)
       messages <- messageRepo.inFlight.compile.toList
-    } yield (events, gameRoom, messages)).unsafeRunSync()
+    } yield (events, context, messages)).unsafeRunSync()
 
     events shouldBe List(
       oldMessage.data,
@@ -170,14 +173,17 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       GameCompleted(List(player1.id))
     )
 
-    finalGameRoom shouldBe Some(new GameContext(
-      seats = List(
-        Seat(None, Nil, Nil, Nil),
-        Seat(Some(EndOfGamePlayer(gamePlayer1.win, winner = true)), Nil, Nil, Nil),
-        Seat(None, Nil, Nil, Nil),
-        Seat(Some(EndOfGamePlayer(gamePlayer2, winner = false)), Nil, Nil, Nil)
+    actualContext shouldBe Some(new GameContext(
+      Table(
+        seats = List(
+          Seat(None, Nil, Nil, Nil),
+          Seat(Some(EndOfGamePlayer(gamePlayer1.win, winner = true)), Nil, Nil, Nil),
+          Seat(None, Nil, Nil, Nil),
+          Seat(Some(EndOfGamePlayer(gamePlayer2, winner = false)), Nil, Nil, Nil)
+        ),
+        deck = Nil,
+        active = false
       ),
-      deck = Nil,
       stateMachine = None
     ))
     messages shouldBe Nil

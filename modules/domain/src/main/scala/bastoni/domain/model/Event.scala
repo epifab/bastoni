@@ -21,6 +21,7 @@ object Event:
   case class   PlayerLeft(player: Player, room: Room) extends RoomEvent
 
   sealed trait GameEvent extends Event
+  // case class   Snapshot(table: Table) extends GameEvent
   case class   GameStarted(gameType: GameType) extends GameEvent
   case class   DeckShuffled(cards: List[Card]) extends GameEvent
   case class   CardDealt(playerId: PlayerId, card: Card, face: Face) extends GameEvent
@@ -33,6 +34,7 @@ object Event:
   case object  GameAborted extends GameEvent
 
   given Encoder[Event] = Encoder.instance {
+    // case obj: Snapshot         => deriveEncoder[Snapshot].mapJsonObject(_.add("type", "Snapshot".asJson))(obj)
     case obj: PlayerJoined     => deriveEncoder[PlayerJoined].mapJsonObject(_.add("type", "PlayerJoined".asJson))(obj)
     case obj: PlayerLeft       => deriveEncoder[PlayerLeft].mapJsonObject(_.add("type", "PlayerLeft".asJson))(obj)
     case obj: GameStarted      => deriveEncoder[GameStarted].mapJsonObject(_.add("type", "GameStarted".asJson))(obj)
@@ -48,6 +50,7 @@ object Event:
   }
 
   given Decoder[Event] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
+    // case "Snapshot"         => deriveDecoder[Snapshot](obj)
     case "PlayerJoined"     => deriveDecoder[PlayerJoined](obj)
     case "PlayerLeft"       => deriveDecoder[PlayerLeft](obj)
     case "GameStarted"      => deriveDecoder[GameStarted](obj)

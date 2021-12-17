@@ -28,22 +28,29 @@ object GameService:
     messages
       .evalMap { case Message(id, roomId, data) =>
         for {
-          existingRoom <- gameRepo.get(roomId)
-          (newGameRoom, messagesData) = existingRoom.map(_.update(data)).orElse(GameContext.build(data)) match {
+          context <- gameRepo.get(roomId)
+          (updatedContext, messagesData) = context.map(_.update(data)).orElse(GameContext.build(data)) match {
             case None => None -> Nil
-            case Some(room) =>
-              val (stateMachine, messagesData) = (room.stateMachine, data) match {
+            case Some(context) =>
+              val (stateMachine, messagesData) = (context.stateMachine, data) match {
                 case (None, StartGame(room, gameType)) => Some(GameStateMachineFactory(gameType)(room)) -> List(GameStarted(gameType))
                 case (Some(state), event) => state(event)
                 case (None, _) => None -> Nil
               }
-              Some(room.withStateMachine(stateMachine)) -> messagesData
+              Some(context.withStateMachine(stateMachine)) -> messagesData
           }
+
           messages <- messagesData.toMessages(roomId, newId)
+
+//          messages <- ((for {
+//            table <- updatedContext.map(_.table)
+//            snapshot <- Option.when(data == Observe)(Snapshot(table))
+//          } yield snapshot).toList ++ messagesData).toMessages(roomId, newId)
+
           // the remaining operations should be done atomically to guarantee consistency
           _ <- messageRepo.landed(id)
           _ <- messages.traverse(messageRepo.flying)
-          _ <- newGameRoom.fold(gameRepo.remove(roomId))(gameRepo.set(roomId, _))
+          _ <- updatedContext.fold(gameRepo.remove(roomId))(gameRepo.set(roomId, _))
         } yield messages
       }
       .flatMap(fs2.Stream.iterable)

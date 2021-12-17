@@ -5,32 +5,41 @@ import bastoni.domain.model.*
 import bastoni.domain.model.Command.Continue
 import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.ToPlayer.*
-import bastoni.domain.view.{FromPlayer, ToPlayer}
+import bastoni.domain.view.{FromPlayer, TableView, ToPlayer}
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration.DurationInt
+import scala.util.chaining.*
 
 object DumbPlayer:
   def apply[F[_]](me: Player, roomId: RoomId, gameBus: GameBus[F]): fs2.Stream[F, Unit] =
     gameBus.publish(me, roomId, fs2.Stream(JoinRoom) ++
       gameBus
         .subscribe(me, roomId)
-        .zipWithScan(Option.empty[MatchPlayer]) {
-          case (None, GameStarted(_)) =>
-            Some(MatchPlayer(GamePlayer(me, 0), Set.empty, Set.empty))
-          case (Some(player), CardDealt(playerId, Some(card))) if player.is(playerId) =>
-            Some(player.draw(card))
-          case (Some(player), CardPlayed(playerId, card)) if player.is(playerId) =>
-            Some(player.play(card)._1)
-          case (whatever, _) => whatever
-        }
+        .through(TableView.stream)
         .collect {
-          case (ActionRequest(playerId, Command.Action.PlayCard), Some(player)) if player.is(playerId) => PlayCard(player.hand.head)
-          case (ActionRequest(playerId, Command.Action.PlayCardOf(suit)), Some(player)) if player.is(playerId) => PlayCard(player.hand.find(_.suit == suit).getOrElse(player.hand.head))
-          case (ActionRequest(playerId, Command.Action.ShuffleDeck), Some(player)) if player.is(playerId) => ShuffleDeck
+          case (ActionRequest(playerId, Command.Action.PlayCard), table) if me.id == playerId =>
+            PlayCard(
+              table
+                .seatFor(me).getOrElse(throw new IllegalStateException(s"I'm not at this table"))
+                .hand.flatten.headOption
+                .getOrElse(throw new IllegalStateException("No cards in hand"))
+            )
+
+          case (ActionRequest(playerId, Command.Action.PlayCardOf(suit)), table) if me.id == playerId =>
+            PlayCard(
+              table
+                .seatFor(me).getOrElse(throw new IllegalStateException(s"I'm not at this table"))
+                .hand.flatten
+                .pipe(hand => hand.find(_.suit == suit).orElse(hand.headOption))
+                .getOrElse(throw new IllegalStateException("No cards in hand"))
+            )
+
+          case (ActionRequest(playerId, Command.Action.ShuffleDeck), table) if me.id == playerId =>
+            ShuffleDeck
         }
     )
 
@@ -80,7 +89,7 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
         .concurrently(activateStream)
         .concurrently(playStreams)
         .take(1)
-        .interruptAfter(1.minute)
+        .interruptAfter(5.seconds)
         .compile
         .lastOrError
     } yield lastMessage).unsafeRunSync()
