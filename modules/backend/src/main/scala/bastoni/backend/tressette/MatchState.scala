@@ -1,6 +1,7 @@
 package bastoni.backend.tressette
 
 import bastoni.domain.model.*
+import bastoni.domain.model.Event.PointsCount
 
 sealed trait MatchState
 
@@ -15,5 +16,5 @@ object MatchState:
   case class   WillCompleteTrick(players: List[(MatchPlayer, Card)], deck: List[Card]) extends MatchState
   case class   WillComplete(players: List[MatchPlayer]) extends MatchState
   sealed trait Terminated extends MatchState
-  case class   Completed(winners: List[PlayerId]) extends Terminated
+  case class   Completed(points: List[PointsCount]) extends Terminated
   case object  Aborted extends Terminated

@@ -4,7 +4,7 @@ import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
-import cats.effect.IO
+import cats.effect.Sync
 
 class GameBus[F[_]](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int]):
 
@@ -23,6 +23,7 @@ class GameBus[F[_]](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int]):
         case CardPlayed(player, card)                   => ToPlayer.CardPlayed(player, card)
         case TrickCompleted(player)                     => ToPlayer.TrickCompleted(player)
         case PointsCount(playerIds, points)             => ToPlayer.PointsCount(playerIds, points)
+        case TotalPointsCount(playerIds, points)        => ToPlayer.TotalPointsCount(playerIds, points)
         case MatchCompleted(winners)                    => ToPlayer.MatchCompleted(winners)
         case MatchDraw                                  => ToPlayer.MatchDraw
         case MatchAborted                               => ToPlayer.MatchAborted
@@ -48,5 +49,5 @@ class GameBus[F[_]](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int]):
 
 
 object GameBus:
-  def apply(bus: MessageBus[IO]): GameBus[IO] =
-    new GameBus(bus, fs2.Stream.repeatEval(IO(scala.util.Random.nextInt())))
+  def apply[F[_]: Sync](bus: MessageBus[F]): GameBus[F] =
+    new GameBus(bus, fs2.Stream.repeatEval(Sync[F].delay(scala.util.Random.nextInt())))

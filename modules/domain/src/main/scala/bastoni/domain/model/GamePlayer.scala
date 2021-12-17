@@ -6,3 +6,4 @@ case class GamePlayer(player: Player, points: Int):
   def is(p: PlayerId): Boolean = p == id
 
   def win: GamePlayer = copy(points = points + 1)
+  def win(additionalPoints: Int): GamePlayer = copy(points = points + additionalPoints)

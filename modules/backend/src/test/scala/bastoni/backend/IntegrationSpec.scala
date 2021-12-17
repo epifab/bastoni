@@ -2,9 +2,9 @@ package bastoni.backend
 
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.Continue
-import bastoni.domain.view.{FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.ToPlayer.*
+import bastoni.domain.view.{FromPlayer, ToPlayer}
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.scalatest.freespec.AnyFreeSpec
@@ -12,8 +12,8 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration.DurationInt
 
-object DumbBriscolaPlayer:
-  def apply(me: Player, roomId: RoomId, gameBus: GameBus[IO]): fs2.Stream[IO, Unit] =
+object DumbPlayer:
+  def apply[F[_]](me: Player, roomId: RoomId, gameBus: GameBus[F]): fs2.Stream[F, Unit] =
     gameBus.publish(me, roomId, fs2.Stream(JoinRoom) ++
       gameBus
         .subscribe(me, roomId)
@@ -28,6 +28,7 @@ object DumbBriscolaPlayer:
         }
         .collect {
           case (ActionRequest(playerId, Command.Action.PlayCard), Some(player)) if player.is(playerId) => PlayCard(player.hand.head)
+          case (ActionRequest(playerId, Command.Action.PlayCardOf(suit)), Some(player)) if player.is(playerId) => PlayCard(player.hand.find(_.suit == suit).getOrElse(player.hand.head))
           case (ActionRequest(playerId, Command.Action.ShuffleDeck), Some(player)) if player.is(playerId) => ShuffleDeck
         }
     )
@@ -38,41 +39,80 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
   val player1 = Player(PlayerId.newId, "Tizio")
   val player2 = Player(PlayerId.newId, "Caio")
   val player3 = Player(PlayerId.newId, "Sempronio")
+  val player4 = Player(PlayerId.newId, "Giuda")
+
+  extension (player: Player)
+    def dumb[F[_]](gameBus: GameBus[F]): fs2.Stream[F, Unit] = DumbPlayer(player, roomId, gameBus)
 
   val roomId = RoomId.newId
-  val messageBus: IO[MessageBus[IO]] = MessageBus.inMemory[IO]
 
-  "Three players can play an entire briscola game" in {
-    val result: Option[Event] = (for {
-      bus <- messageBus
+  def playGame(
+    numberOfPlayers: 2 | 3 | 4,
+    gameType: GameType,
+    realSpeed: Boolean = false,
+    extraMessages: fs2.Stream[IO, FromPlayer] = fs2.Stream.empty
+  ): Event = {
+    (for {
+      bus <- MessageBus.inMemory[IO]
       gameBus = GameBus(bus)
-      playStream1 = DumbBriscolaPlayer(player1, roomId, gameBus)
-      playStream2 = DumbBriscolaPlayer(player2, roomId, gameBus)
-      playStream3 = DumbBriscolaPlayer(player3, roomId, gameBus)
-      logEvents = bus.subscribe.evalMap { case Message(_, event) => IO(println(event)) }
+
+      twoPlayers = player1.dumb(gameBus).concurrently(player2.dumb(gameBus))
+      threePlayers = twoPlayers.concurrently(player3.dumb(gameBus))
+      fourPlayers = threePlayers.concurrently(player4.dumb(gameBus))
+
+      playStreams = numberOfPlayers match
+        case 2 => twoPlayers
+        case 3 => threePlayers
+        case 4 => fourPlayers
+
       activateStream = gameBus.publish(
         player1,
         roomId,
-        fs2.Stream(ActivateRoom(GameType.Briscola)).delayBy[IO](500.millis)
+        fs2.Stream(ActivateRoom(gameType)).delayBy[IO](500.millis) ++ extraMessages
       )
       lastMessage <-
         bus.subscribe.collect[Event] {
           case Message(`roomId`, e: Event.GameCompleted) => e
           case Message(`roomId`, Event.GameAborted) => Event.GameAborted
         }
-        .take(1)
         .concurrently(bus.run)
-        .concurrently(GameService.run(bus, _ => 5.millis))
+        .concurrently(if (realSpeed) GameService.run(bus) else GameService.run(bus, _ => 2.millis))
         .concurrently(Lobby.run(bus))
         .concurrently(activateStream)
-        .concurrently(playStream1)
-        .concurrently(playStream2)
-        .concurrently(playStream3)
-        .concurrently(logEvents)
+        .concurrently(playStreams)
+        .concurrently(bus.subscribe.evalTap(e => IO(println(e))))
+        .take(1)
         .interruptAfter(1.minute)
         .compile
-        .last
+        .lastOrError
     } yield lastMessage).unsafeRunSync()
+  }
 
-    result shouldBe a[Some[Event.GameCompleted]]
+  "Two players can play an entire briscola game" in {
+    playGame(2, GameType.Briscola) shouldBe a[Event.GameCompleted]
+  }
+
+  "Three players can play an entire briscola game" in {
+    playGame(3, GameType.Briscola) shouldBe a[Event.GameCompleted]
+  }
+
+  "Four players can play an entire briscola game" in {
+    playGame(4, GameType.Briscola) shouldBe a[Event.GameCompleted]
+  }
+
+  "Two players can play an entire tressette game" in {
+    playGame(2, GameType.Tressette) shouldBe a[Event.GameCompleted]
+  }
+
+  "Four players can play an entire tressette game" in {
+    playGame(4, GameType.Tressette) shouldBe a[Event.GameCompleted]
+  }
+
+  "Aborting a game" in {
+    playGame(
+      4,
+      GameType.Tressette,
+      realSpeed = true,
+      extraMessages = fs2.Stream.awakeEvery[IO](2.seconds).map(_ => LeaveRoom)
+    ) shouldBe Event.GameAborted
   }

@@ -43,7 +43,8 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       DelayedMessage(Message(room1.id, Continue), Delay.Short),
       Message(room2.id, CardDealt(player2.id, Card(Due, Bastoni))),
       DelayedMessage(Message(room2.id, Continue), Delay.Short),
-      Message(room1.id, MatchAborted)
+      Message(room1.id, MatchAborted),
+      Message(room1.id, GameAborted),
     )
   }
 

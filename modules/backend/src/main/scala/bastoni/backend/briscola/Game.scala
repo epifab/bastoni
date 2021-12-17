@@ -124,15 +124,17 @@ object Game:
           def ready(shiftedRound: List[GamePlayer], rounds: Int) =
             GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), rounds) -> (events :+ ActionRequest(shiftedRound.last.id, Action.ShuffleDeck))
 
+          val teamSize = if (players.size == 4) 2 else 1
+          
           if (rounds == 0) {
             val winners = newPlayers.groupMap(_.points)(_.id).maxBy(_._1)._2
-            if (winners.size == players.size) ready(newPlayers.tail :+ newPlayers.head, 0)
+            if (winners.size > teamSize) ready(newPlayers.tail :+ newPlayers.head, 0)
             else GameState.Terminated -> (events :+ GameCompleted(winners))
           }
           else ready(newPlayers.tail :+ newPlayers.head, rounds - 1)
 
         case (MatchState.Aborted, events) =>
-          GameState.Terminated -> events
+          GameState.Terminated -> (events :+ GameAborted)
 
         case (newMatchState, events) =>
           GameState.InProgress(players, newMatchState, rounds) -> events

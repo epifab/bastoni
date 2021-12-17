@@ -12,6 +12,9 @@ object Game:
   def playMatch[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | DelayedMessage] =
     playStream(room, MatchState(room.players), playMatchStep, s => s.isInstanceOf[MatchState.Terminated], messages)
 
+  def playGame[F[_]](room: Room)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | DelayedMessage] =
+    playStream(room, GameState(room.players), playGameStep, s => s == GameState.Terminated, messages)
+
   private def playStream[F[_], State](
     room: Room,
     initialState: State,
@@ -94,7 +97,7 @@ object Game:
       // The last trick is called "rete" (net) which will add a point to the final score
       val rete = players.head.id
 
-      val pointsCount = teams.map(players =>
+      val pointsCount: List[PointsCount] = teams.map(players =>
         PointsCount(
           playerIds = players.map(_.id),
           points = (players.foldRight(0)(_.points + _) / 3) + (if (players.exists(_.id == rete)) 1 else 0)
@@ -104,9 +107,38 @@ object Game:
       // it's not possible to draw so maxBy is good enough
       val winners: List[PlayerId] = pointsCount.maxBy(_.points).playerIds
 
-      MatchState.Completed(winners) -> (pointsCount :+ MatchCompleted(winners))
+      MatchState.Completed(pointsCount) -> (pointsCount :+ MatchCompleted(winners))
 
     case (m, _) => m -> Nil
+  }
+
+  private[tressette] val playGameStep: (GameState, Command | Event) => (GameState, List[Event | Command | DelayedCommand]) = {
+
+    case (GameState.InProgress(players, matchState, pointsToWin), message) =>
+      playMatchStep(matchState, message) match
+        case (MatchState.Completed(pointsCount), events) =>
+          val newPlayers: List[GamePlayer] = players.map(player => player.win(pointsCount.find(_.playerIds.exists(player.is)).fold(0)(_.points)))
+          val allEvents = events ++ newPlayers.groupBy(_.points).map { case (points, players) => TotalPointsCount(players.map(_.id), points) }
+
+          def ready(shiftedRound: List[GamePlayer], pointsToWin: Int) =
+            GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), pointsToWin) -> (allEvents :+ ActionRequest(shiftedRound.last.id, Action.ShuffleDeck))
+
+          val teamSize = if (players.size == 4) 2 else 1
+
+          val winners: List[GamePlayer] = newPlayers.groupBy(_.points).maxBy(_._1)._2
+          val winnerPoints = winners.head.points
+
+          if (winnerPoints < pointsToWin || winners.size > teamSize) ready(newPlayers.tail :+ newPlayers.head, pointsToWin)
+          else GameState.Terminated -> (allEvents :+ GameCompleted(winners.map(_.id)))
+
+        case (MatchState.Aborted, events) =>
+          GameState.Terminated -> (events :+ GameAborted)
+
+        case (newMatchState, events) =>
+          GameState.InProgress(players, newMatchState, pointsToWin) -> events
+
+    case (state, _) => state -> Nil
+
   }
 
   extension(card: Card)

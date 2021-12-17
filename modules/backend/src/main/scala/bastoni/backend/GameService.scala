@@ -38,8 +38,8 @@ object GameService:
   def apply[F[_]](messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | DelayedMessage] =
     messages
       .scan[(Map[RoomId, GameStateMachine], List[Message | DelayedMessage])](Map.empty -> Nil) {
-        case ((stateMachines, _), Message(roomId, StartGame(room, GameType.Briscola))) if !stateMachines.contains(roomId) =>
-          (stateMachines + (roomId -> briscola.StateMachine(room.players))) -> List(Message(roomId, GameStarted(GameType.Briscola)))
+        case ((stateMachines, _), Message(roomId, StartGame(room, gameType))) if !stateMachines.contains(roomId) =>
+          (stateMachines + (roomId -> stateMachineFor(room.players, gameType))) -> List(Message(roomId, GameStarted(gameType)))
 
         case ((stateMachines, _), Message(roomId, message)) =>
           stateMachines.get(roomId).fold(stateMachines -> Nil) { stateMachine =>
@@ -51,6 +51,11 @@ object GameService:
           }
       }
       .flatMap { case (_, messages) => fs2.Stream.iterable(messages) }
+
+  def stateMachineFor(players: List[Player], gameType: GameType): GameStateMachine =
+    gameType match
+      case GameType.Briscola => briscola.StateMachine(players)
+      case GameType.Tressette => tressette.StateMachine(players)
 
   def run(messageBus: MessageBus[IO], delayDuration: Delay => FiniteDuration = Delay.defaultDuration): fs2.Stream[IO, Unit] =
     messageBus
