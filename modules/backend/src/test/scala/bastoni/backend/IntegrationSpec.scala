@@ -1,7 +1,8 @@
 package bastoni.backend
 
-import bastoni.domain.model.{Card, GameType, Player, PlayerId, Rank, Room, RoomId, Suit}
-import bastoni.domain.view.{ActivateRoom, CardDealt, DeckShuffled, JoinRoom, PlayerJoined, ShuffleDeck}
+import bastoni.domain.model.*
+import bastoni.domain.view.FromPlayer.*
+import bastoni.domain.view.ToPlayer.*
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.scalatest.freespec.AnyFreeSpec

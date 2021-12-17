@@ -1,6 +1,8 @@
 package bastoni.backend
 
 import bastoni.domain.model.*
+import bastoni.domain.model.Event.*
+import bastoni.domain.model.Command.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
 import org.scalatest.freespec.AnyFreeSpec

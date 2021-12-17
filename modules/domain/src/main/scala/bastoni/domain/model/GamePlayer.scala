@@ -1,6 +1,4 @@
-package bastoni.backend
-
-import bastoni.domain.model.{Player, PlayerId}
+package bastoni.domain.model
 
 case class GamePlayer(player: Player, points: Int):
   val id: PlayerId = player.id

@@ -2,6 +2,8 @@ package bastoni.backend
 
 import bastoni.backend.briscola
 import bastoni.domain.model.*
+import bastoni.domain.model.Event.*
+import bastoni.domain.model.Command.*
 import cats.effect.IO
 
 import scala.concurrent.duration.*

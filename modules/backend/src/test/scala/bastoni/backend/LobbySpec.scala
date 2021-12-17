@@ -1,6 +1,8 @@
 package bastoni.backend
 
 import bastoni.domain.model.*
+import bastoni.domain.model.Event.*
+import bastoni.domain.model.Command.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 

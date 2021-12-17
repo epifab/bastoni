@@ -2,6 +2,8 @@ package bastoni.backend
 package briscola
 
 import bastoni.domain.model.*
+import bastoni.domain.model.Event.*
+import bastoni.domain.model.Command.*
 
 import scala.annotation.tailrec
 import scala.util.Random

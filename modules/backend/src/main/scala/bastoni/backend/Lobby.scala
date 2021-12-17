@@ -1,6 +1,8 @@
 package bastoni.backend
 
 import bastoni.domain.model.*
+import bastoni.domain.model.Event.*
+import bastoni.domain.model.Command.*
 
 object Lobby:
 

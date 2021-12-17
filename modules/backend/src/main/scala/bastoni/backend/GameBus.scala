@@ -1,46 +1,45 @@
 package bastoni.backend
 
-import bastoni.domain.view.FromPlayer
-import bastoni.domain.{model, view}
+import bastoni.domain.view.{FromPlayer, ToPlayer}
+import bastoni.domain.model.*
+import bastoni.domain.model.Command.*
+import bastoni.domain.model.Event.*
 
 class GameBus[F[_]](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int]):
 
-  def subscribe(me: model.Player, roomId: model.RoomId): fs2.Stream[F, view.ToPlayer] =
+  def subscribe(me: Player, roomId: RoomId): fs2.Stream[F, ToPlayer] =
     messageBus
       .subscribe
-      .collect { case model.Message(`roomId`, event: (model.Event | model.ActionRequest)) => event }
+      .collect { case Message(`roomId`, event: (Event | ActionRequest)) => event }
       .map {
-        case model.PlayerJoined(player, room)                 => view.PlayerJoined(player, room)
-        case model.PlayerLeft(player, room)                   => view.PlayerLeft(player, room)
-        case model.DeckShuffled(_)                            => view.DeckShuffled
-        case model.CardDealt(player, card) if player == me.id => view.CardDealt(player, Some(card))
-        case model.CardDealt(player, _)                       => view.CardDealt(player, None)
-        case model.TrumpRevealed(trump)                       => view.TrumpRevealed(trump)
-        case model.CardPlayed(player, card)                   => view.CardPlayed(player, card)
-        case model.TrickCompleted(player)                     => view.TrickCompleted(player)
-        case model.PointsCount(playerIds, points)             => view.PointsCount(playerIds, points)
-        case model.MatchCompleted(winners)                    => view.MatchCompleted(winners)
-        case model.MatchDraw                                  => view.MatchDraw
-        case model.MatchAborted                               => view.MatchAborted
-        case model.GameCompleted(winners)                     => view.GameCompleted(winners)
-        case model.GameAborted                                => view.GameAborted
-        case model.ActionRequest(player)                      => view.ActionRequest(player)
+        case PlayerJoined(player, room)                 => ToPlayer.PlayerJoined(player, room)
+        case PlayerLeft(player, room)                   => ToPlayer.PlayerLeft(player, room)
+        case DeckShuffled(_)                            => ToPlayer.DeckShuffled
+        case CardDealt(player, card) if player == me.id => ToPlayer.CardDealt(player, Some(card))
+        case CardDealt(player, _)                       => ToPlayer.CardDealt(player, None)
+        case TrumpRevealed(trump)                       => ToPlayer.TrumpRevealed(trump)
+        case CardPlayed(player, card)                   => ToPlayer.CardPlayed(player, card)
+        case TrickCompleted(player)                     => ToPlayer.TrickCompleted(player)
+        case PointsCount(playerIds, points)             => ToPlayer.PointsCount(playerIds, points)
+        case MatchCompleted(winners)                    => ToPlayer.MatchCompleted(winners)
+        case MatchDraw                                  => ToPlayer.MatchDraw
+        case MatchAborted                               => ToPlayer.MatchAborted
+        case GameCompleted(winners)                     => ToPlayer.GameCompleted(winners)
+        case GameAborted                                => ToPlayer.GameAborted
+        case ActionRequest(player)                      => ToPlayer.ActionRequest(player)
       }
 
-  private def toModel(event: view.FromPlayer): model.Command =
-    event match
-      case (view.JoinRoom, _)               => model.JoinRoom(me)
-      case (view.LeaveRoom, _)              => model.LeaveRoom(me)
-      case (view.ActivateRoom(gameType), _) => model.ActivateRoom(me, gameType)
-      case (view.ShuffleDeck, seed)         => model.ShuffleDeck(seed)
-      case (view.PlayCard(card), _)         => model.PlayCard(me.id, card)
+  private def toModel(me: Player)(eventAndSeed: (FromPlayer, Int)): Command =
+    eventAndSeed match
+      case (FromPlayer.JoinRoom, _)               => JoinRoom(me)
+      case (FromPlayer.LeaveRoom, _)              => LeaveRoom(me)
+      case (FromPlayer.ActivateRoom(gameType), _) => ActivateRoom(me, gameType)
+      case (FromPlayer.ShuffleDeck, seed)         => ShuffleDeck(seed)
+      case (FromPlayer.PlayCard(card), _)         => PlayCard(me.id, card)
 
-  def publish(me: model.Player, roomId: model.RoomId, events: fs2.Stream[F, view.FromPlayer]): fs2.Stream[F, Unit] =
+  def publish(me: Player, roomId: RoomId, events: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
     events
       .zip(seeds)
-      .map(toModel)
-      .map(model.Message(roomId, _))
+      .map(toModel(me))
+      .map(Message(roomId, _))
       .through(messageBus.publish)
-
-  def publish1(me: model.Player, roomId: model.RoomId, event: view.FromPlayer): F[Unit] =
-    messageBus.publish1(Message(roomId, toModel(event)))

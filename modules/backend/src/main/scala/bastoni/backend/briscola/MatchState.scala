@@ -1,7 +1,6 @@
 package bastoni.backend.briscola
 
-import bastoni.backend.{GamePlayer, MatchPlayer}
-import bastoni.domain.model.{Card, Player, PlayerId}
+import bastoni.domain.model.*
 
 sealed trait MatchState
 
