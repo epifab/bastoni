@@ -8,9 +8,9 @@ import io.circe.parser.parse
 
 class JsonSpec extends AnyFreeSpec with Matchers:
 
-  "Encoding of match players" in {
-    val player = MatchPlayer(
-      GamePlayer(Player(PlayerId.newId, "John"), 15),
+  "Encoding of players" in {
+    val player = Player(
+      MatchPlayer(User(UserId.newId, "John"), 15),
       List(Card(Rank.Asso, Suit.Denari), Card(Rank.Sette, Suit.Denari)),
       Nil
     )
@@ -30,23 +30,23 @@ class JsonSpec extends AnyFreeSpec with Matchers:
     ).getOrElse(fail("Invalid json"))
 
     player.asJson shouldBe expectedJson
-    expectedJson.as[MatchPlayer] shouldBe Right(player)
+    expectedJson.as[Player] shouldBe Right(player)
   }
 
-  "Encoding of game players" in {
-    val gamePlayer = GamePlayer(Player(PlayerId.newId, "John"), 15)
+  "Encoding of match players" in {
+    val player = MatchPlayer(User(UserId.newId, "John"), 15)
 
     val expectedJson = parse(
       s"""
          |{
-         |  "id": "${gamePlayer.id}",
+         |  "id": "${player.id}",
          |  "name": "John",
          |  "points": 15
          |}""".stripMargin
     ).getOrElse(fail("Invalid json"))
 
-    gamePlayer.asJson shouldBe expectedJson
-    expectedJson.as[GamePlayer] shouldBe Right(gamePlayer)
+    player.asJson shouldBe expectedJson
+    expectedJson.as[MatchPlayer] shouldBe Right(player)
   }
 
   "Server events are encoded / decoded with a discriminant property" - {

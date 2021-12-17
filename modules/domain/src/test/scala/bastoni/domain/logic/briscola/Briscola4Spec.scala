@@ -13,16 +13,16 @@ import org.scalatest.matchers.should.Matchers
 
 class Briscola4Spec extends AnyFreeSpec with Matchers:
 
-  val players = List(player1, player2, player3, player4)
+  val players = List(user1, user2, user3, user4)
 
   "A game can be played" ignore {
-    val inputStream = Briscola4Spec.input(room1, player1, player2, player3, player4)
-    val expectedOut = Briscola4Spec.output(room1, player1, player2, player3, player4)
-    Game.playMatch[cats.Id](room1, players, messageId)(inputStream).compile.toList shouldBe expectedOut
+    val inputStream = Briscola4Spec.input(room1, user1, user2, user3, user4)
+    val expectedOut = Briscola4Spec.output(room1, user1, user2, user3, user4)
+    Game.playGame[cats.Id](room1, players, messageId)(inputStream).compile.toList shouldBe expectedOut
   }
 
 object Briscola4Spec:
-  def input(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
+  def input(roomId: RoomId, player1: User, player2: User, player3: User, player4: User) =
     fs2.Stream(
       ShuffleDeck(shuffleSeed),
 
@@ -132,7 +132,7 @@ object Briscola4Spec:
 
     ).map(_.toMessage(roomId))
 
-  def output(roomId: RoomId, player1: Player, player2: Player, player3: Player, player4: Player) =
+  def output(roomId: RoomId, player1: User, player2: User, player3: User, player4: User) =
     List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
@@ -355,13 +355,13 @@ object Briscola4Spec:
       TrickCompleted(player2.id),  // 33 + 27 = 60
 
       longDelay,
-      MatchCompleted(
+      GameCompleted(
         winnerIds = Nil,
-        matchPoints = List(
+        points = List(
           PointsCount(List(player2.id, player4.id), 60),
           PointsCount(List(player3.id, player1.id), 60)
         ),
-        gamePoints = List(
+        matchPoints = List(
           PointsCount(List(player2.id, player4.id), 0),
           PointsCount(List(player3.id, player1.id), 0)
         )

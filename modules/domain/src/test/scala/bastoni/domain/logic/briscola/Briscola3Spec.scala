@@ -12,17 +12,17 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 class Briscola3Spec extends AnyFreeSpec with Matchers:
-  val players = List(player1, player2, player3)
+  val players = List(user1, user2, user3)
 
   "A game can be played" ignore {
-    val inputStream = Briscola3Spec.input(room1, player1, player2, player3)
-    val expectedOut = Briscola3Spec.output(room1, GamePlayer(player1, 0), GamePlayer(player2, 0), GamePlayer(player3, 0))
-    Game.playMatch[cats.Id](room1, players, messageId)(inputStream).compile.toList shouldBe expectedOut
+    val inputStream = Briscola3Spec.input(room1, user1, user2, user3)
+    val expectedOut = Briscola3Spec.output(room1, MatchPlayer(user1, 0), MatchPlayer(user2, 0), MatchPlayer(user3, 0))
+    Game.playGame[cats.Id](room1, players, messageId)(inputStream).compile.toList shouldBe expectedOut
   }
 
 object Briscola3Spec:
 
-  def input(roomId: RoomId, player1: Player, player2: Player, player3: Player): fs2.Stream[fs2.Pure, Message] =
+  def input(roomId: RoomId, player1: User, player2: User, player3: User): fs2.Stream[fs2.Pure, Message] =
     fs2.Stream(
       ShuffleDeck(shuffleSeed),
 
@@ -134,7 +134,7 @@ object Briscola3Spec:
       completeMatch,
     ).map(_.toMessage(roomId))
 
-  def output(roomId: RoomId, player1: GamePlayer, player2: GamePlayer, player3: GamePlayer): List[Message | Delayed[Message]] =
+  def output(roomId: RoomId, player1: MatchPlayer, player2: MatchPlayer, player3: MatchPlayer): List[Message | Delayed[Message]] =
     List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck.filterNot(_ == Card(Due, Coppe))),
 
@@ -365,14 +365,14 @@ object Briscola3Spec:
       TrickCompleted(player1.id),  // 24
 
       longDelay,
-      MatchCompleted(
+      GameCompleted(
         winnerIds = List(player1.id),
-        matchPoints = List(
+        points = List(
           PointsCount(List(player1.id), 54),
           PointsCount(List(player2.id), 41),
           PointsCount(List(player3.id), 25),
         ),
-        gamePoints = List(
+        matchPoints = List(
           PointsCount(List(player1.id), player1.points + 1),
           PointsCount(List(player2.id), player2.points),
           PointsCount(List(player3.id), player3.points)

@@ -10,7 +10,7 @@ sealed trait ServerEvent extends Event
 sealed trait PlayerEvent extends Event
 sealed trait PublicEvent extends ServerEvent with PlayerEvent
 
-case class PointsCount(playerIds: List[PlayerId], points: Int)
+case class PointsCount(playerIds: List[UserId], points: Int)
 
 object PointsCount:
   given Encoder[PointsCount] = deriveEncoder
@@ -19,33 +19,33 @@ object PointsCount:
 
 object Event:
   // Public events
-  case class  PlayerJoinedTable(player: Player, seat: Int) extends PublicEvent
-  case class  PlayerLeftTable(player: Player, seat: Int) extends PublicEvent
+  case class  PlayerJoinedTable(user: User, seat: Int) extends PublicEvent
+  case class  PlayerLeftTable(user: User, seat: Int) extends PublicEvent
   case class  GameStarted(gameType: GameType) extends PublicEvent
   case class  TrumpRevealed(card: Card) extends PublicEvent
   case class  BoardCardsDealt(cards: List[Card]) extends PublicEvent
-  case class  CardPlayed(playerId: PlayerId, card: Card) extends PublicEvent
-  case class  CardsTaken(playerId: PlayerId, played: Card, taken: List[Card], extraPoint: Boolean) extends PublicEvent
-  case class  ActionRequested(playerId: PlayerId, action: Action, timeout: Option[Timeout.Active] = None) extends PublicEvent
-  case class  TimedOut(playerId: PlayerId, action: Action) extends PublicEvent
-  case class  TrickCompleted(winnerId: PlayerId) extends PublicEvent
-  case class  MatchCompleted(winnerIds: List[PlayerId], matchPoints: List[PointsCount], gamePoints: List[PointsCount]) extends PublicEvent
-  case class  GameCompleted(winnerIds: List[PlayerId]) extends PublicEvent
-  case object MatchAborted extends PublicEvent
+  case class  CardPlayed(playerId: UserId, card: Card) extends PublicEvent
+  case class  CardsTaken(playerId: UserId, played: Card, taken: List[Card], extraPoint: Boolean) extends PublicEvent
+  case class  ActionRequested(playerId: UserId, action: Action, timeout: Option[Timeout.Active] = None) extends PublicEvent
+  case class  TimedOut(playerId: UserId, action: Action) extends PublicEvent
+  case class  TrickCompleted(winnerId: UserId) extends PublicEvent
+  case class  GameCompleted(winnerIds: List[UserId], points: List[PointsCount], matchPoints: List[PointsCount]) extends PublicEvent
+  case class  MatchCompleted(winnerIds: List[UserId]) extends PublicEvent
   case object GameAborted extends PublicEvent
+  case object MatchAborted extends PublicEvent
 
   sealed trait CardsDealt[C <: CardView]:
-    def playerId: PlayerId
+    def playerId: UserId
     def cards: List[C]
 
-  case class CardsDealtServerView(playerId: PlayerId, cards: List[CardServerView]) extends CardsDealt[CardServerView] with ServerEvent
-  case class CardsDealtPlayerView(playerId: PlayerId, cards: List[CardPlayerView]) extends CardsDealt[CardPlayerView] with PlayerEvent
+  case class CardsDealtServerView(playerId: UserId, cards: List[CardServerView]) extends CardsDealt[CardServerView] with ServerEvent
+  case class CardsDealtPlayerView(playerId: UserId, cards: List[CardPlayerView]) extends CardsDealt[CardPlayerView] with PlayerEvent
 
   object CardsDealt:
-    def apply(playerId: PlayerId, cards: List[Card], facing: Direction): CardsDealtServerView =
+    def apply(playerId: UserId, cards: List[Card], facing: Direction): CardsDealtServerView =
       CardsDealtServerView(playerId, cards.map(card => CardServerView(card, facing)))
 
-    def apply(playerId: PlayerId, cards: List[Option[Card]]): CardsDealtPlayerView =
+    def apply(playerId: UserId, cards: List[Option[Card]]): CardsDealtPlayerView =
       CardsDealtPlayerView(playerId, cards.map(CardPlayerView(_)))
 
   sealed trait DeckShuffled
@@ -72,10 +72,10 @@ object Event:
     case obj: CardPlayed        => deriveEncoder[CardPlayed].mapJsonObject(_.add("type", "CardPlayed".asJson))(obj)
     case obj: CardsTaken        => deriveEncoder[CardsTaken].mapJsonObject(_.add("type", "CardsTaken".asJson))(obj)
     case obj: TrickCompleted    => deriveEncoder[TrickCompleted].mapJsonObject(_.add("type", "TrickCompleted".asJson))(obj)
-    case obj: MatchCompleted    => deriveEncoder[MatchCompleted].mapJsonObject(_.add("type", "MatchCompleted".asJson))(obj)
     case obj: GameCompleted     => deriveEncoder[GameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson))(obj)
-    case MatchAborted           => Json.obj("type" -> "MatchAborted".asJson)
+    case obj: MatchCompleted    => deriveEncoder[MatchCompleted].mapJsonObject(_.add("type", "MatchCompleted".asJson))(obj)
     case GameAborted            => Json.obj("type" -> "GameAborted".asJson)
+    case MatchAborted           => Json.obj("type" -> "MatchAborted".asJson)
   }
 
   given serverEventEncoder: Encoder[ServerEvent] = Encoder.instance {
@@ -102,10 +102,10 @@ object Event:
     case "CardPlayed"        => deriveDecoder[CardPlayed](obj)
     case "CardsTaken"        => deriveDecoder[CardsTaken](obj)
     case "TrickCompleted"    => deriveDecoder[TrickCompleted](obj)
-    case "MatchCompleted"    => deriveDecoder[MatchCompleted](obj)
     case "GameCompleted"     => deriveDecoder[GameCompleted](obj)
-    case "MatchAborted"      => Right(MatchAborted)
+    case "MatchCompleted"    => deriveDecoder[MatchCompleted](obj)
     case "GameAborted"       => Right(GameAborted)
+    case "MatchAborted"      => Right(MatchAborted)
   })
 
   given serverEventDecoder: Decoder[ServerEvent] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {

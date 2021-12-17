@@ -1,6 +1,6 @@
 package bastoni.domain.view
 
-import bastoni.domain.model.{Card, GameType, PlayerId}
+import bastoni.domain.model.{Card, GameType}
 
 sealed trait FromPlayer
 

@@ -13,7 +13,7 @@ import org.scalatest.matchers.should.Matchers
 class Tressette2Spec extends AnyFreeSpec with Matchers:
   import Fixtures.*
 
-  val players = List(player1, player2)
+  val players = List(user1, user2)
 
   val drawCards      = Continue
   val completeTrick = Continue
@@ -25,104 +25,104 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
         fs2.Stream(ShuffleDeck(shuffleSeed)) ++
         fs2.Stream(drawCards).repeatN(20) ++
         fs2.Stream(
-          PlayCard(player1.id, Card(Sei, Denari)),
-          PlayCard(player2.id, Card(Re, Denari)),
+          PlayCard(user1.id, Card(Sei, Denari)),
+          PlayCard(user2.id, Card(Re, Denari)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player2.id, Card(Sei, Bastoni)),
-          PlayCard(player1.id, Card(Re, Bastoni)),
+          PlayCard(user2.id, Card(Sei, Bastoni)),
+          PlayCard(user1.id, Card(Re, Bastoni)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player1.id, Card(Sette, Denari)),
-          PlayCard(player2.id, Card(Tre, Denari)),
+          PlayCard(user1.id, Card(Sette, Denari)),
+          PlayCard(user2.id, Card(Tre, Denari)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player2.id, Card(Cinque, Bastoni)),
-          PlayCard(player1.id, Card(Due, Bastoni)),
+          PlayCard(user2.id, Card(Cinque, Bastoni)),
+          PlayCard(user1.id, Card(Due, Bastoni)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player1.id, Card(Cavallo, Denari)),
-          PlayCard(player2.id, Card(Sette, Bastoni)),
+          PlayCard(user1.id, Card(Cavallo, Denari)),
+          PlayCard(user2.id, Card(Sette, Bastoni)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player1.id, Card(Fante, Denari)),
-          PlayCard(player2.id, Card(Quattro, Bastoni)),
+          PlayCard(user1.id, Card(Fante, Denari)),
+          PlayCard(user2.id, Card(Quattro, Bastoni)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player1.id, Card(Asso, Denari)),
-          PlayCard(player2.id, Card(Sette, Spade)),
+          PlayCard(user1.id, Card(Asso, Denari)),
+          PlayCard(user2.id, Card(Sette, Spade)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player1.id, Card(Cinque, Denari)),
-          PlayCard(player2.id, Card(Sette, Coppe)),
+          PlayCard(user1.id, Card(Cinque, Denari)),
+          PlayCard(user2.id, Card(Sette, Coppe)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player1.id, Card(Tre, Coppe)),
-          PlayCard(player2.id, Card(Quattro, Coppe)),
+          PlayCard(user1.id, Card(Tre, Coppe)),
+          PlayCard(user2.id, Card(Quattro, Coppe)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player1.id, Card(Quattro, Denari)),
-          PlayCard(player2.id, Card(Quattro, Spade)),
+          PlayCard(user1.id, Card(Quattro, Denari)),
+          PlayCard(user2.id, Card(Quattro, Spade)),
           completeTrick,
 
           drawCards,
           drawCards,
-          PlayCard(player1.id, Card(Due, Denari)),
-          PlayCard(player2.id, Card(Sei, Spade)),
+          PlayCard(user1.id, Card(Due, Denari)),
+          PlayCard(user2.id, Card(Sei, Spade)),
           completeTrick,
 
-          PlayCard(player1.id, Card(Due, Spade)),
-          PlayCard(player2.id, Card(Asso, Spade)),
+          PlayCard(user1.id, Card(Due, Spade)),
+          PlayCard(user2.id, Card(Asso, Spade)),
           completeTrick,
 
-          PlayCard(player1.id, Card(Re, Spade)),
-          PlayCard(player2.id, Card(Fante, Spade)),
+          PlayCard(user1.id, Card(Re, Spade)),
+          PlayCard(user2.id, Card(Fante, Spade)),
           completeTrick,
 
-          PlayCard(player1.id, Card(Tre, Spade)),
-          PlayCard(player2.id, Card(Fante, Coppe)),
+          PlayCard(user1.id, Card(Tre, Spade)),
+          PlayCard(user2.id, Card(Fante, Coppe)),
           completeTrick,
 
-          PlayCard(player1.id, Card(Cinque, Coppe)),
-          PlayCard(player2.id, Card(Cavallo, Coppe)),
+          PlayCard(user1.id, Card(Cinque, Coppe)),
+          PlayCard(user2.id, Card(Cavallo, Coppe)),
           completeTrick,
 
-          PlayCard(player2.id, Card(Tre, Bastoni)),
-          PlayCard(player1.id, Card(Cinque, Spade)),
+          PlayCard(user2.id, Card(Tre, Bastoni)),
+          PlayCard(user1.id, Card(Cinque, Spade)),
           completeTrick,
 
-          PlayCard(player2.id, Card(Asso, Bastoni)),
-          PlayCard(player1.id, Card(Sei, Coppe)),
+          PlayCard(user2.id, Card(Asso, Bastoni)),
+          PlayCard(user1.id, Card(Sei, Coppe)),
           completeTrick,
 
-          PlayCard(player2.id, Card(Cavallo, Bastoni)),
-          PlayCard(player1.id, Card(Re, Coppe)),
+          PlayCard(user2.id, Card(Cavallo, Bastoni)),
+          PlayCard(user1.id, Card(Re, Coppe)),
           completeTrick,
 
-          PlayCard(player2.id, Card(Fante, Bastoni)),
-          PlayCard(player1.id, Card(Cavallo, Spade)),
+          PlayCard(user2.id, Card(Fante, Bastoni)),
+          PlayCard(user1.id, Card(Cavallo, Spade)),
           completeTrick,
 
-          PlayCard(player2.id, Card(Due, Coppe)),
-          PlayCard(player1.id, Card(Asso, Coppe)),
+          PlayCard(user2.id, Card(Due, Coppe)),
+          PlayCard(user1.id, Card(Asso, Coppe)),
           completeTrick,
 
           completeMatch
@@ -130,17 +130,17 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
 
       ).map(Message(messageId, room1, _))
 
-    Game.playMatch[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playGame[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
-      CardsDealt(player1.id, List(Card(Due, Bastoni), Card(Asso, Spade), Card(Sette, Denari), Card(Quattro, Spade), Card(Sei, Denari)), Direction.Player),
+      CardsDealt(user1.id, List(Card(Due, Bastoni), Card(Asso, Spade), Card(Sette, Denari), Card(Quattro, Spade), Card(Sei, Denari)), Direction.Player),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Re, Denari), Card(Cinque, Coppe), Card(Asso, Bastoni), Card(Cinque, Spade), Card(Sei, Bastoni)), Direction.Player),
+      CardsDealt(user2.id, List(Card(Re, Denari), Card(Cinque, Coppe), Card(Asso, Bastoni), Card(Cinque, Spade), Card(Sei, Bastoni)), Direction.Player),
       shortDelay,
-      CardsDealt(player1.id, List(Card(Tre, Spade), Card(Tre, Denari), Card(Asso, Coppe), Card(Fante, Bastoni), Card(Due, Denari)), Direction.Player),
+      CardsDealt(user1.id, List(Card(Tre, Spade), Card(Tre, Denari), Card(Asso, Coppe), Card(Fante, Bastoni), Card(Due, Denari)), Direction.Player),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Fante, Spade), Card(Re, Bastoni), Card(Sette, Bastoni), Card(Tre, Coppe), Card(Fante, Coppe)), Direction.Player),
-      ActionRequested(player1.id, Action.PlayCard),
+      CardsDealt(user2.id, List(Card(Fante, Spade), Card(Re, Bastoni), Card(Sette, Bastoni), Card(Tre, Coppe), Card(Fante, Coppe)), Direction.Player),
+      ActionRequested(user1.id, Action.PlayCard),
 
       // player1
       //  Due, Bastoni
@@ -166,205 +166,205 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
       //  Sette, Bastoni
       //  Fante, Coppe
 
-      CardPlayed(player1.id, Card(Sei, Denari)),
-      ActionRequested(player2.id, Action.PlayCardOf(Denari)),
-      CardPlayed(player2.id, Card(Re, Denari)),
+      CardPlayed(user1.id, Card(Sei, Denari)),
+      ActionRequested(user2.id, Action.PlayCardOf(Denari)),
+      CardPlayed(user2.id, Card(Re, Denari)),
       mediumDelay,
-      TrickCompleted(player2.id),   // 1/3
+      TrickCompleted(user2.id),   // 1/3
       mediumDelay,
 
-      CardsDealt(player2.id, List(Card(Cinque, Bastoni)), Direction.Up),
+      CardsDealt(user2.id, List(Card(Cinque, Bastoni)), Direction.Up),
       shortDelay,
-      CardsDealt(player1.id, List(Card(Sei, Coppe)), Direction.Up),
-      ActionRequested(player2.id, Action.PlayCard),
+      CardsDealt(user1.id, List(Card(Sei, Coppe)), Direction.Up),
+      ActionRequested(user2.id, Action.PlayCard),
 
-      CardPlayed(player2.id, Card(Sei, Bastoni)),
-      ActionRequested(player1.id, Action.PlayCardOf(Bastoni)),
-      CardPlayed(player1.id, Card(Re, Bastoni)),
+      CardPlayed(user2.id, Card(Sei, Bastoni)),
+      ActionRequested(user1.id, Action.PlayCardOf(Bastoni)),
+      CardPlayed(user1.id, Card(Re, Bastoni)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 1/3
+      TrickCompleted(user1.id),   // 1/3
       mediumDelay,
 
-      CardsDealt(player1.id, List(Card(Cavallo, Denari)), Direction.Up),
+      CardsDealt(user1.id, List(Card(Cavallo, Denari)), Direction.Up),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Cavallo, Bastoni)), Direction.Up),
-      ActionRequested(player1.id, Action.PlayCard),
+      CardsDealt(user2.id, List(Card(Cavallo, Bastoni)), Direction.Up),
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Sette, Denari)),
-      ActionRequested(player2.id, Action.PlayCardOf(Denari)),
-      CardPlayed(player2.id, Card(Tre, Denari)),
+      CardPlayed(user1.id, Card(Sette, Denari)),
+      ActionRequested(user2.id, Action.PlayCardOf(Denari)),
+      CardPlayed(user2.id, Card(Tre, Denari)),
       mediumDelay,
-      TrickCompleted(player2.id),   // 2/3
+      TrickCompleted(user2.id),   // 2/3
       mediumDelay,
 
-      CardsDealt(player2.id, List(Card(Due, Coppe)), Direction.Up),
+      CardsDealt(user2.id, List(Card(Due, Coppe)), Direction.Up),
       shortDelay,
-      CardsDealt(player1.id, List(Card(Fante, Denari)), Direction.Up),
-      ActionRequested(player2.id, Action.PlayCard),
+      CardsDealt(user1.id, List(Card(Fante, Denari)), Direction.Up),
+      ActionRequested(user2.id, Action.PlayCard),
 
-      CardPlayed(player2.id, Card(Cinque, Bastoni)),
-      ActionRequested(player1.id, Action.PlayCardOf(Bastoni)),
-      CardPlayed(player1.id, Card(Due, Bastoni)),
+      CardPlayed(user2.id, Card(Cinque, Bastoni)),
+      ActionRequested(user1.id, Action.PlayCardOf(Bastoni)),
+      CardPlayed(user1.id, Card(Due, Bastoni)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 2/3
+      TrickCompleted(user1.id),   // 2/3
       mediumDelay,
 
-      CardsDealt(player1.id, List(Card(Cavallo, Spade)), Direction.Up),
+      CardsDealt(user1.id, List(Card(Cavallo, Spade)), Direction.Up),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Quattro, Bastoni)), Direction.Up),
-      ActionRequested(player1.id, Action.PlayCard),
+      CardsDealt(user2.id, List(Card(Quattro, Bastoni)), Direction.Up),
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Cavallo, Denari)),
-      ActionRequested(player2.id, Action.PlayCardOf(Denari)),
-      CardPlayed(player2.id, Card(Sette, Bastoni)),
+      CardPlayed(user1.id, Card(Cavallo, Denari)),
+      ActionRequested(user2.id, Action.PlayCardOf(Denari)),
+      CardPlayed(user2.id, Card(Sette, Bastoni)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 1
+      TrickCompleted(user1.id),   // 1
       mediumDelay,
 
-      CardsDealt(player1.id, List(Card(Re, Coppe)), Direction.Up),
+      CardsDealt(user1.id, List(Card(Re, Coppe)), Direction.Up),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Quattro, Coppe)), Direction.Up),
-      ActionRequested(player1.id, Action.PlayCard),
+      CardsDealt(user2.id, List(Card(Quattro, Coppe)), Direction.Up),
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Fante, Denari)),
-      ActionRequested(player2.id, Action.PlayCardOf(Denari)),
-      CardPlayed(player2.id, Card(Quattro, Bastoni)),
+      CardPlayed(user1.id, Card(Fante, Denari)),
+      ActionRequested(user2.id, Action.PlayCardOf(Denari)),
+      CardPlayed(user2.id, Card(Quattro, Bastoni)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 1 + 1/3
+      TrickCompleted(user1.id),   // 1 + 1/3
       mediumDelay,
 
-      CardsDealt(player1.id, List(Card(Asso, Denari)), Direction.Up),
+      CardsDealt(user1.id, List(Card(Asso, Denari)), Direction.Up),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Sette, Spade)), Direction.Up),
-      ActionRequested(player1.id, Action.PlayCard),
+      CardsDealt(user2.id, List(Card(Sette, Spade)), Direction.Up),
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Asso, Denari)),
-      ActionRequested(player2.id, Action.PlayCardOf(Denari)),
-      CardPlayed(player2.id, Card(Sette, Spade)),
+      CardPlayed(user1.id, Card(Asso, Denari)),
+      ActionRequested(user2.id, Action.PlayCardOf(Denari)),
+      CardPlayed(user2.id, Card(Sette, Spade)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 2 + 1/3
+      TrickCompleted(user1.id),   // 2 + 1/3
       mediumDelay,
 
-      CardsDealt(player1.id, List(Card(Cinque, Denari)), Direction.Up),
+      CardsDealt(user1.id, List(Card(Cinque, Denari)), Direction.Up),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Sette, Coppe)), Direction.Up),
-      ActionRequested(player1.id, Action.PlayCard),
+      CardsDealt(user2.id, List(Card(Sette, Coppe)), Direction.Up),
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Cinque, Denari)),
-      ActionRequested(player2.id, Action.PlayCardOf(Denari)),
-      CardPlayed(player2.id, Card(Sette, Coppe)),
+      CardPlayed(user1.id, Card(Cinque, Denari)),
+      ActionRequested(user2.id, Action.PlayCardOf(Denari)),
+      CardPlayed(user2.id, Card(Sette, Coppe)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 2 + 1/3
+      TrickCompleted(user1.id),   // 2 + 1/3
       mediumDelay,
 
-      CardsDealt(player1.id, List(Card(Re, Spade)), Direction.Up),
+      CardsDealt(user1.id, List(Card(Re, Spade)), Direction.Up),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Sei, Spade)), Direction.Up),
-      ActionRequested(player1.id, Action.PlayCard),
+      CardsDealt(user2.id, List(Card(Sei, Spade)), Direction.Up),
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Tre, Coppe)),
-      ActionRequested(player2.id, Action.PlayCardOf(Coppe)),
-      CardPlayed(player2.id, Card(Quattro, Coppe)),
+      CardPlayed(user1.id, Card(Tre, Coppe)),
+      ActionRequested(user2.id, Action.PlayCardOf(Coppe)),
+      CardPlayed(user2.id, Card(Quattro, Coppe)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 2 + 2/3
+      TrickCompleted(user1.id),   // 2 + 2/3
       mediumDelay,
 
-      CardsDealt(player1.id, List(Card(Quattro, Denari)), Direction.Up),
+      CardsDealt(user1.id, List(Card(Quattro, Denari)), Direction.Up),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Tre, Bastoni)), Direction.Up),
-      ActionRequested(player1.id, Action.PlayCard),
+      CardsDealt(user2.id, List(Card(Tre, Bastoni)), Direction.Up),
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Quattro, Denari)),
-      ActionRequested(player2.id, Action.PlayCardOf(Denari)),
-      CardPlayed(player2.id, Card(Quattro, Spade)),
+      CardPlayed(user1.id, Card(Quattro, Denari)),
+      ActionRequested(user2.id, Action.PlayCardOf(Denari)),
+      CardPlayed(user2.id, Card(Quattro, Spade)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 2 + 2/3
+      TrickCompleted(user1.id),   // 2 + 2/3
       mediumDelay,
 
-      CardsDealt(player1.id, List(Card(Due, Spade)), Direction.Up),
+      CardsDealt(user1.id, List(Card(Due, Spade)), Direction.Up),
       shortDelay,
-      CardsDealt(player2.id, List(Card(Cavallo, Coppe)), Direction.Up),
-      ActionRequested(player1.id, Action.PlayCard),
+      CardsDealt(user2.id, List(Card(Cavallo, Coppe)), Direction.Up),
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Due, Denari)),
-      ActionRequested(player2.id, Action.PlayCardOf(Denari)),
-      CardPlayed(player2.id, Card(Sei, Spade)),
+      CardPlayed(user1.id, Card(Due, Denari)),
+      ActionRequested(user2.id, Action.PlayCardOf(Denari)),
+      CardPlayed(user2.id, Card(Sei, Spade)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 3
-      ActionRequested(player1.id, Action.PlayCard),
+      TrickCompleted(user1.id),   // 3
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Due, Spade)),
-      ActionRequested(player2.id, Action.PlayCardOf(Spade)),
-      CardPlayed(player2.id, Card(Asso, Spade)),
+      CardPlayed(user1.id, Card(Due, Spade)),
+      ActionRequested(user2.id, Action.PlayCardOf(Spade)),
+      CardPlayed(user2.id, Card(Asso, Spade)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 4 + 1/3
-      ActionRequested(player1.id, Action.PlayCard),
+      TrickCompleted(user1.id),   // 4 + 1/3
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Re, Spade)),
-      ActionRequested(player2.id, Action.PlayCardOf(Spade)),
-      CardPlayed(player2.id, Card(Fante, Spade)),
+      CardPlayed(user1.id, Card(Re, Spade)),
+      ActionRequested(user2.id, Action.PlayCardOf(Spade)),
+      CardPlayed(user2.id, Card(Fante, Spade)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 4 + 2/3
-      ActionRequested(player1.id, Action.PlayCard),
+      TrickCompleted(user1.id),   // 4 + 2/3
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Tre, Spade)),
-      ActionRequested(player2.id, Action.PlayCardOf(Spade)),
-      CardPlayed(player2.id, Card(Fante, Coppe)),
+      CardPlayed(user1.id, Card(Tre, Spade)),
+      ActionRequested(user2.id, Action.PlayCardOf(Spade)),
+      CardPlayed(user2.id, Card(Fante, Coppe)),
       mediumDelay,
-      TrickCompleted(player1.id),   // 5 + 1/3
-      ActionRequested(player1.id, Action.PlayCard),
+      TrickCompleted(user1.id),   // 5 + 1/3
+      ActionRequested(user1.id, Action.PlayCard),
 
-      CardPlayed(player1.id, Card(Cinque, Coppe)),
-      ActionRequested(player2.id, Action.PlayCardOf(Coppe)),
-      CardPlayed(player2.id, Card(Cavallo, Coppe)),
+      CardPlayed(user1.id, Card(Cinque, Coppe)),
+      ActionRequested(user2.id, Action.PlayCardOf(Coppe)),
+      CardPlayed(user2.id, Card(Cavallo, Coppe)),
       mediumDelay,
-      TrickCompleted(player2.id),   // 1
-      ActionRequested(player2.id, Action.PlayCard),
+      TrickCompleted(user2.id),   // 1
+      ActionRequested(user2.id, Action.PlayCard),
 
-      CardPlayed(player2.id, Card(Tre, Bastoni)),
-      ActionRequested(player1.id, Action.PlayCardOf(Bastoni)),
-      CardPlayed(player1.id, Card(Cinque, Spade)),
+      CardPlayed(user2.id, Card(Tre, Bastoni)),
+      ActionRequested(user1.id, Action.PlayCardOf(Bastoni)),
+      CardPlayed(user1.id, Card(Cinque, Spade)),
       mediumDelay,
-      TrickCompleted(player2.id),   // 1 + 1/3
-      ActionRequested(player2.id, Action.PlayCard),
+      TrickCompleted(user2.id),   // 1 + 1/3
+      ActionRequested(user2.id, Action.PlayCard),
 
-      CardPlayed(player2.id, Card(Asso, Bastoni)),
-      ActionRequested(player1.id, Action.PlayCardOf(Bastoni)),
-      CardPlayed(player1.id, Card(Sei, Coppe)),
+      CardPlayed(user2.id, Card(Asso, Bastoni)),
+      ActionRequested(user1.id, Action.PlayCardOf(Bastoni)),
+      CardPlayed(user1.id, Card(Sei, Coppe)),
       mediumDelay,
-      TrickCompleted(player2.id),   // 2 + 1/3
-      ActionRequested(player2.id, Action.PlayCard),
+      TrickCompleted(user2.id),   // 2 + 1/3
+      ActionRequested(user2.id, Action.PlayCard),
 
-      CardPlayed(player2.id, Card(Cavallo, Bastoni)),
-      ActionRequested(player1.id, Action.PlayCardOf(Bastoni)),
-      CardPlayed(player1.id, Card(Re, Coppe)),
+      CardPlayed(user2.id, Card(Cavallo, Bastoni)),
+      ActionRequested(user1.id, Action.PlayCardOf(Bastoni)),
+      CardPlayed(user1.id, Card(Re, Coppe)),
       mediumDelay,
-      TrickCompleted(player2.id),   // 3
-      ActionRequested(player2.id, Action.PlayCard),
+      TrickCompleted(user2.id),   // 3
+      ActionRequested(user2.id, Action.PlayCard),
 
-      CardPlayed(player2.id, Card(Fante, Bastoni)),
-      ActionRequested(player1.id, Action.PlayCardOf(Bastoni)),
-      CardPlayed(player1.id, Card(Cavallo, Spade)),
+      CardPlayed(user2.id, Card(Fante, Bastoni)),
+      ActionRequested(user1.id, Action.PlayCardOf(Bastoni)),
+      CardPlayed(user1.id, Card(Cavallo, Spade)),
       mediumDelay,
-      TrickCompleted(player2.id),   // 3 + 2/3
-      ActionRequested(player2.id, Action.PlayCard),
+      TrickCompleted(user2.id),   // 3 + 2/3
+      ActionRequested(user2.id, Action.PlayCard),
 
-      CardPlayed(player2.id, Card(Due, Coppe)),
-      ActionRequested(player1.id, Action.PlayCardOf(Coppe)),
-      CardPlayed(player1.id, Card(Asso, Coppe)),
+      CardPlayed(user2.id, Card(Due, Coppe)),
+      ActionRequested(user1.id, Action.PlayCardOf(Coppe)),
+      CardPlayed(user1.id, Card(Asso, Coppe)),
       mediumDelay,
-      TrickCompleted(player2.id),   // 5
+      TrickCompleted(user2.id),   // 5
 
       longDelay,
-      MatchCompleted(
-        winnerIds = List(player2.id),
-        matchPoints = List(
-          PointsCount(List(player2.id), 6),
-          PointsCount(List(player1.id), 5)
+      GameCompleted(
+        winnerIds = List(user2.id),
+        points = List(
+          PointsCount(List(user2.id), 6),
+          PointsCount(List(user1.id), 5)
         ),
-        gamePoints = List(
-          PointsCount(List(player2.id), 6),
-          PointsCount(List(player1.id), 5)
+        matchPoints = List(
+          PointsCount(List(user2.id), 6),
+          PointsCount(List(user1.id), 5)
         )
       )
     ).map(_.toMessage(room1))
@@ -374,31 +374,31 @@ class Tressette2Spec extends AnyFreeSpec with Matchers:
     val input = fs2.Stream[fs2.Pure, ServerEvent | Command](
       ShuffleDeck(shuffleSeed),
       drawCards,
-      PlayerLeftTable(player1, 1),
+      PlayerLeftTable(user1, 1),
       drawCards, // too late, game was aborted
     ).map(_.toMessage(room1))
 
-    Game.playMatch[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playGame[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
-      CardsDealt(player1.id, List(Card(Due, Bastoni)), Direction.Player),
+      CardsDealt(user1.id, List(Card(Due, Bastoni)), Direction.Player),
       shortDelay,
-      MatchAborted
+      GameAborted
     ).map(_.toMessage(room1))
   }
 
   "Game continues if another player joins and leaves" ignore {
     val input = fs2.Stream[fs2.Pure, ServerEvent | Command](
       ShuffleDeck(shuffleSeed),
-      PlayerJoinedTable(player3, 3),
-      PlayerLeftTable(player3, 3),
+      PlayerJoinedTable(user3, 3),
+      PlayerLeftTable(user3, 3),
       drawCards,
     ).map(_.toMessage(room1))
 
-    Game.playMatch[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
+    Game.playGame[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[ServerEvent | Command | Delayed[Command]](
       DeckShuffled(shuffledDeck),
       mediumDelay,
-      CardsDealt(player1.id, List(Card(Due, Bastoni)), Direction.Player),
+      CardsDealt(user1.id, List(Card(Due, Bastoni)), Direction.Player),
       shortDelay
     ).map(_.toMessage(room1))
   }

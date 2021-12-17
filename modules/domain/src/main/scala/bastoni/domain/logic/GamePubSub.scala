@@ -12,16 +12,16 @@ import cats.syntax.all.*
 import scala.util.Random
 
 trait GameSubscriber[F[_]]:
-  def subscribe(me: Player, roomId: RoomId): fs2.Stream[F, ToPlayer]
+  def subscribe(me: User, roomId: RoomId): fs2.Stream[F, ToPlayer]
 
 trait GamePublisher[F[_]]:
-  def publish(me: Player, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
+  def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
 
 object GamePubSub:
 
   def subscriber[F[_]](messageBus: MessageBus[F]): GameSubscriber[F] =
     new GameSubscriber[F] {
-      override def subscribe(me: Player, roomId: RoomId): fs2.Stream[F, ToPlayer] =
+      override def subscribe(me: User, roomId: RoomId): fs2.Stream[F, ToPlayer] =
         messageBus
           .subscribe
           .collect { case Message(_, `roomId`, event: Event) => event }
@@ -38,7 +38,7 @@ object GamePubSub:
     seeds: fs2.Stream[F, Int],
     messageIds: fs2.Stream[F, MessageId]
   ): GamePublisher[F] = new GamePublisher[F] {
-    override def publish(me: Player, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
+    override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
       input
         .zip(seeds)
         .map(buildCommand(me))
@@ -54,7 +54,7 @@ object GamePubSub:
       fs2.Stream.repeatEval(Sync[F].delay(MessageId.newId))
     )
 
-  private def buildCommand(me: Player)(eventAndSeed: (FromPlayer, Int)): Command =
+  private def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Command =
     eventAndSeed match
       case (FromPlayer.Connect, _)             => Connect
       case (FromPlayer.JoinTable, seed)        => JoinTable(me, seed)

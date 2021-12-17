@@ -4,31 +4,28 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
 
-sealed trait PlayerState:
-  def player: Player
-  def playerId: PlayerId = player.id
+sealed trait PlayerState extends User
 
-case class SittingOut(override val player: Player) extends PlayerState:
-  def sitIn: WaitingPlayer = WaitingPlayer(GamePlayer(player, points = 0))
+case class SittingOut(user: User) extends PlayerState with User(user.id, user.name):
+  def sitIn: WaitingPlayer = WaitingPlayer(MatchPlayer(user, points = 0))
 
-sealed trait SittingIn(val gamePlayer: GamePlayer) extends PlayerState:
-  override val player: Player = gamePlayer.basePlayer
-  def mapPlayer(f: GamePlayer => GamePlayer): SittingIn
-  def sitOut: SittingOut = SittingOut(gamePlayer.basePlayer)
-  def act(action: Action, timeout: Option[Timeout]): ActingPlayer = ActingPlayer(gamePlayer, action, timeout)
+sealed abstract class SittingIn(val player: MatchPlayer) extends PlayerState with User(player.id, player.name):
+  def mapPlayer(f: MatchPlayer => MatchPlayer): SittingIn
+  def sitOut: SittingOut = SittingOut(player.basePlayer)
+  def act(action: Action, timeout: Option[Timeout]): ActingPlayer = ActingPlayer(player, action, timeout)
 
-case class WaitingPlayer(override val gamePlayer: GamePlayer) extends SittingIn(gamePlayer):
-  def mapPlayer(f: GamePlayer => GamePlayer): WaitingPlayer  = copy(gamePlayer = f(gamePlayer))
+case class WaitingPlayer(override val player: MatchPlayer) extends SittingIn(player):
+  def mapPlayer(f: MatchPlayer => MatchPlayer): WaitingPlayer  = copy(player = f(player))
 
-case class ActingPlayer(override val gamePlayer: GamePlayer, action: Action, timeout: Option[Timeout]) extends SittingIn(gamePlayer):
-  def mapPlayer(f: GamePlayer => GamePlayer): ActingPlayer  = copy(gamePlayer = f(gamePlayer))
-  def done: WaitingPlayer = WaitingPlayer(gamePlayer)
+case class ActingPlayer(override val player: MatchPlayer, action: Action, timeout: Option[Timeout]) extends SittingIn(player):
+  def mapPlayer(f: MatchPlayer => MatchPlayer): ActingPlayer  = copy(player = f(player))
+  def done: WaitingPlayer = WaitingPlayer(player)
 
-case class EndOfMatchPlayer(override val gamePlayer: GamePlayer, points: Int, winner: Boolean) extends SittingIn(gamePlayer):
-  def mapPlayer(f: GamePlayer => GamePlayer): EndOfMatchPlayer  = copy(gamePlayer = f(gamePlayer))
+case class EndOfGamePlayer(override val player: MatchPlayer, points: Int, winner: Boolean) extends SittingIn(player):
+  def mapPlayer(f: MatchPlayer => MatchPlayer): EndOfGamePlayer  = copy(player = f(player))
 
-case class EndOfGamePlayer(override val gamePlayer: GamePlayer, winner: Boolean) extends SittingIn(gamePlayer):
-  def mapPlayer(f: GamePlayer => GamePlayer): EndOfGamePlayer = copy(gamePlayer = f(gamePlayer))
+case class EndOfMatchPlayer(override val player: MatchPlayer, winner: Boolean) extends SittingIn(player):
+  def mapPlayer(f: MatchPlayer => MatchPlayer): EndOfMatchPlayer = copy(player = f(player))
 
 
 object PlayerState:
@@ -37,14 +34,14 @@ object PlayerState:
     case obj: SittingOut       => deriveEncoder[SittingOut].mapJsonObject(_.add("type", "SittingOut".asJson))(obj)
     case obj: WaitingPlayer    => deriveEncoder[WaitingPlayer].mapJsonObject(_.add("type", "WaitingPlayer".asJson))(obj)
     case obj: ActingPlayer     => deriveEncoder[ActingPlayer].mapJsonObject(_.add("type", "ActingPlayer".asJson))(obj)
-    case obj: EndOfMatchPlayer => deriveEncoder[EndOfMatchPlayer].mapJsonObject(_.add("type", "EndOfMatchPlayer".asJson))(obj)
-    case obj: EndOfGamePlayer  => deriveEncoder[EndOfGamePlayer].mapJsonObject(_.add("type", "EndOfGamePlayer".asJson))(obj)
+    case obj: EndOfGamePlayer => deriveEncoder[EndOfGamePlayer].mapJsonObject(_.add("type", "EndOfMatchPlayer".asJson))(obj)
+    case obj: EndOfMatchPlayer  => deriveEncoder[EndOfMatchPlayer].mapJsonObject(_.add("type", "EndOfGamePlayer".asJson))(obj)
   }
 
   given Decoder[PlayerState] = Decoder.instance { cursor => cursor.downField("type").as[String].flatMap {
     case "SittingOut"       => deriveDecoder[SittingOut].tryDecode(cursor)
     case "WaitingPlayer"    => deriveDecoder[WaitingPlayer].tryDecode(cursor)
     case "ActingPlayer"     => deriveDecoder[ActingPlayer].tryDecode(cursor)
-    case "EndOfMatchPlayer" => deriveDecoder[EndOfMatchPlayer].tryDecode(cursor)
-    case "EndOfGamePlayer"  => deriveDecoder[EndOfGamePlayer].tryDecode(cursor)
+    case "EndOfMatchPlayer" => deriveDecoder[EndOfGamePlayer].tryDecode(cursor)
+    case "EndOfGamePlayer"  => deriveDecoder[EndOfMatchPlayer].tryDecode(cursor)
   }}

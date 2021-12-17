@@ -11,7 +11,7 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.chaining.*
 
 object DumbPlayer:
-  def apply[F[_]: Sync: Temporal](me: Player, roomId: RoomId, subscriber: GameSubscriber[F], publisher: GamePublisher[F], pause: FiniteDuration = 0.millis): fs2.Stream[F, Unit] =
+  def apply[F[_]: Sync: Temporal](me: User, roomId: RoomId, subscriber: GameSubscriber[F], publisher: GamePublisher[F], pause: FiniteDuration = 0.millis): fs2.Stream[F, Unit] =
     val actions =
       fs2.Stream(Connect, JoinTable) ++ subscriber
         .subscribe(me, roomId)

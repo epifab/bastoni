@@ -1,7 +1,7 @@
 package bastoni.domain.logic.generic
 
-import bastoni.domain.logic.briscola.MatchState
-import bastoni.domain.logic.briscola.MatchState.{Aborted, PlayRound, WaitingForPlayer}
+import bastoni.domain.logic.briscola.GameState
+import bastoni.domain.logic.briscola.GameState.{Aborted, PlayRound, WaitingForPlayer}
 import bastoni.domain.model.*
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder

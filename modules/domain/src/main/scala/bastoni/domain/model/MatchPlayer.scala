@@ -3,40 +3,25 @@ package bastoni.domain.model
 import io.circe.{Encoder, Decoder}
 import io.circe.generic.semiauto.{deriveEncoder, deriveDecoder}
 
-case class MatchPlayer(gamePlayer: GamePlayer, hand: List[Card], taken: List[Card], extraPoints: Int = 0) extends Player(gamePlayer.id, gamePlayer.name):
-  def has(card: Card): Boolean = hand.contains(card)
-  def draw(card: Card) = copy(hand = card :: hand)
-  def draw(cards: List[Card]) = copy(hand = cards ++ hand)
-  def addExtraPoints(points: Int): MatchPlayer = copy(extraPoints = extraPoints + points)
+case class MatchPlayer(basePlayer: User, points: Int, dealer: Boolean = false) extends User(basePlayer.id, basePlayer.name):
+  def win: MatchPlayer = copy(points = points + 1)
+  def win(additionalPoints: Int): MatchPlayer = copy(points = points + additionalPoints)
 
-  def play(card: Card): MatchPlayer =
-    assert(has(card), "Players can't play cards that they don't own")
-    copy(hand = hand.filterNot(_ == card))
-
-  def take(cards: List[Card]): MatchPlayer =
-    assert(!cards.exists(taken.contains), "Players can't take cards that were previously taken")
-    copy(taken = taken ++ cards)
 
 object MatchPlayer:
-  private case class MatchPlayerView(id: PlayerId, name: String, points: Int, hand: List[Card], taken: List[Card])
+  private case class GamePlayerView(id: UserId, name: String, points: Int)
 
-  given Encoder[MatchPlayer] = deriveEncoder[MatchPlayerView].contramap[MatchPlayer](matchPlayer =>
-    MatchPlayerView(
-      matchPlayer.id,
-      matchPlayer.name,
-      matchPlayer.gamePlayer.points,
-      matchPlayer.hand,
-      matchPlayer.taken
+  given Encoder[MatchPlayer] = deriveEncoder[GamePlayerView].contramap(player =>
+    GamePlayerView(
+      player.id,
+      player.name,
+      player.points
     )
   )
 
-  given Decoder[MatchPlayer] = deriveDecoder[MatchPlayerView].map(matchPlayer =>
+  given Decoder[MatchPlayer] = deriveDecoder[GamePlayerView].map(player =>
     MatchPlayer(
-      GamePlayer(
-        Player(matchPlayer.id, matchPlayer.name),
-        matchPlayer.points
-      ),
-      matchPlayer.hand,
-      matchPlayer.taken
+      User(player.id, player.name),
+      player.points
     )
   )

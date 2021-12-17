@@ -1,26 +1,42 @@
 package bastoni.domain.model
 
-import java.util.UUID
-import scala.util.Try
-import io.circe.{Codec, Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
+import io.circe.{Encoder, Decoder}
+import io.circe.generic.semiauto.{deriveEncoder, deriveDecoder}
 
-opaque type PlayerId = UUID
+case class Player(matchPlayer: MatchPlayer, hand: List[Card], taken: List[Card], extraPoints: Int = 0) extends User(matchPlayer.id, matchPlayer.name):
+  def has(card: Card): Boolean = hand.contains(card)
+  def draw(card: Card) = copy(hand = card :: hand)
+  def draw(cards: List[Card]) = copy(hand = cards ++ hand)
+  def addExtraPoints(points: Int): Player = copy(extraPoints = extraPoints + points)
 
-object PlayerId:
-  def newId: PlayerId = UUID.randomUUID()
-  def tryParse(s: String): Option[PlayerId] = Try(unsafeParse(s)).toOption
-  def unsafeParse(s: String): PlayerId = UUID.fromString(s)
-  given Encoder[PlayerId] = Encoder[String].contramap(_.toString)
-  given Decoder[PlayerId] = Decoder[String].emap(tryParse(_).toRight("Not a valid ID"))
+  def play(card: Card): Player =
+    assert(has(card), "Players can't play cards that they don't own")
+    copy(hand = hand.filterNot(_ == card))
 
-trait Player(val id: PlayerId, val name: String):
-  def is(other: Player): Boolean = other.id == id
-  def is(other: PlayerId): Boolean = other == id
-
-case class BasePlayer(override val id: PlayerId, override val name: String) extends Player(id, name)
+  def take(cards: List[Card]): Player =
+    assert(!cards.exists(taken.contains), "Players can't take cards that were previously taken")
+    copy(taken = taken ++ cards)
 
 object Player:
-  def apply(id: PlayerId, name: String): Player = BasePlayer(id, name)
-  given Encoder[Player] = deriveEncoder[BasePlayer].contramap[Player](player => BasePlayer(player.id, player.name))
-  given Decoder[Player] = deriveDecoder[BasePlayer].map[Player](identity)
+  private case class EncodablePlayer(id: UserId, name: String, points: Int, hand: List[Card], taken: List[Card])
+
+  given Encoder[Player] = deriveEncoder[EncodablePlayer].contramap[Player](player =>
+    EncodablePlayer(
+      player.id,
+      player.name,
+      player.matchPlayer.points,
+      player.hand,
+      player.taken
+    )
+  )
+
+  given Decoder[Player] = deriveDecoder[EncodablePlayer].map(player =>
+    Player(
+      MatchPlayer(
+        User(player.id, player.name),
+        player.points
+      ),
+      player.hand,
+      player.taken
+    )
+  )

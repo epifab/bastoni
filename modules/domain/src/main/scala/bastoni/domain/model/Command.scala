@@ -10,12 +10,12 @@ sealed trait Command
 object Command:
 
   case object Connect extends Command
-  case class  JoinTable(player: Player, seed: Int) extends Command
-  case class  LeaveTable(player: Player) extends Command
-  case class  StartGame(player: PlayerId, gameType: GameType) extends Command
+  case class  JoinTable(user: User, seed: Int) extends Command
+  case class  LeaveTable(user: User) extends Command
+  case class  StartGame(playerId: UserId, gameType: GameType) extends Command
   case class  ShuffleDeck(seed: Int) extends Command
-  case class  PlayCard(player: PlayerId, card: Card) extends Command
-  case class  TakeCards(player: PlayerId, played: Card, taken: List[Card]) extends Command
+  case class  PlayCard(playerId: UserId, card: Card) extends Command
+  case class  TakeCards(playerId: UserId, played: Card, taken: List[Card]) extends Command
   case object Continue extends Command
   case class  Tick(ref: Int) extends Command
 
