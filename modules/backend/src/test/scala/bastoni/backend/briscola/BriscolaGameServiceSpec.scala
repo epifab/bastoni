@@ -103,7 +103,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
 
     val oldMessage = CardPlayed(player2.id, player2Card).toMessage(room1.id)
 
-    val events = (for {
+    val (events, (newStapshot, undeliveredEvents)) = (for {
       repo <- InMemoryGameServiceRepo[IO]
       _ <- repo.setSnapshot(snapshot, Map(oldMessage.messageId -> oldMessage))
       bus <- MessageBus.inMemory[IO]
@@ -116,7 +116,8 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
           .takeThrough(!_.isInstanceOf[Event.GameCompleted])
           .interruptAfter(1.second)
       } yield event).compile.toList
-    } yield events).unsafeRunSync()
+      snapshot <- repo.getSnapshot
+    } yield (events, snapshot)).unsafeRunSync()
 
     events shouldBe List(
       oldMessage.message,
@@ -127,4 +128,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       MatchCompleted(List(player1.id)),
       GameCompleted(List(player1.id))
     )
+
+    newStapshot shouldBe Map.empty        // when a game completes, the state machine goes away
+    undeliveredEvents shouldBe Map.empty  // all outstanding events are expected to have been fully processed
   }
