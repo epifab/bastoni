@@ -37,7 +37,6 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
           roomId,
           fs2.Stream(JoinRoom, ActivateRoom(GameType.Briscola)) ++ fs2.Stream(ShuffleDeck).delayBy(50.millis)
         ).delayBy(100.millis))
-        .evalTap { message => IO(println(s"Received $message")) }
         .compile
         .toList
     } yield message

@@ -61,10 +61,12 @@ object Game:
       deck.deal { (card, tail) => MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card), Continue.shortly) }
 
     case (MatchState.WillDealTrump(players, deck), Continue) =>
-      deck.deal { (card, tail) => MatchState.PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card)) }
+      deck.deal { (card, tail) => MatchState.PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card), ActionRequest(players.head.id)) }
 
     case (MatchState.DrawRound(player :: Nil, done, deck, trump), Continue) =>
-      deck.deal { (card, tail) => MatchState.PlayRound(done :+ player.draw(card), Nil, tail, trump) -> List(CardDealt(player.id, card)) }
+      deck.deal { (card, tail) =>
+        val players = done :+ player.draw(card)
+        MatchState.PlayRound(players, Nil, tail, trump) -> List(CardDealt(player.id, card), ActionRequest(players.head.id)) }
 
     case (MatchState.DrawRound(player :: todo, done, deck, trump), Continue) =>
       deck.deal { (card, tail) => MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card), Continue.shortly) }
@@ -72,19 +74,19 @@ object Game:
     case (MatchState.PlayRound(player :: Nil, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
       MatchState.WillCompleteTrick(done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), Continue.delayed)
 
-    case (MatchState.PlayRound(player :: players, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
-      MatchState.PlayRound(players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card))
+    case (MatchState.PlayRound(player :: next :: players, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
+      MatchState.PlayRound(next :: players, done :+ player.play(card), deck, trump) -> List(CardPlayed(player.id, card), ActionRequest(next.id))
 
     case (MatchState.WillCompleteTrick(players, deck, trump), Continue) =>
       val updatedPlayers = completeTrick(players, trump)
       val winner = updatedPlayers.head
 
-      val (state, delay) =
-        if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers, trump) -> Some(Continue.veryDelayed)
-        else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil, trump) -> None
-        else MatchState.DrawRound(updatedPlayers, Nil, deck, trump) -> Some(Continue.delayed)
+      val (state, command: (Command | DelayedCommand)) =
+        if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers, trump) -> Continue.veryDelayed
+        else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil, trump) -> ActionRequest(updatedPlayers.head.id)
+        else MatchState.DrawRound(updatedPlayers, Nil, deck, trump) -> Continue.delayed
 
-      state -> (TrickCompleted(winner.id) :: delay.toList)
+      state -> (TrickCompleted(winner.id) :: command :: Nil)
 
     case (MatchState.WillComplete(players, trump), Continue) =>
       val teams = players match
