@@ -14,12 +14,12 @@ object MessageId:
   given Encoder[MessageId] = Encoder[String].contramap(_.toString)
   given Decoder[MessageId] = Decoder[String].emap(parse(_).toRight("Not a valid ID"))
 
-case class Message(id: MessageId, roomId: RoomId, data: Command | Event)
+case class Message(id: MessageId, roomId: RoomId, data: ServerEvent | Command)
 
 object Message:
 
-  given Encoder[Event | Command] = Encoder.instance {
-    case message: Event =>
+  given Encoder[ServerEvent | Command] = Encoder.instance {
+    case message: ServerEvent =>
       Json.obj(
         "type" -> "Event".asJson,
         "data" -> message.asJson
@@ -31,10 +31,10 @@ object Message:
       )
   }
 
-  given dataDecoder: Decoder[Event | Command] = Decoder.instance(obj =>
+  given dataDecoder: Decoder[ServerEvent | Command] = Decoder.instance(obj =>
     for {
       t <- obj.downField("type").as[String]
-      d <- if (t == "Event") obj.downField("data").as[Event] else obj.downField("data").as[Command]
+      d <- if (t == "Event") obj.downField("data").as[ServerEvent] else obj.downField("data").as[Command]
     } yield d
   )
 

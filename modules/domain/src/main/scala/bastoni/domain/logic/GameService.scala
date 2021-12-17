@@ -14,11 +14,11 @@ import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 
 import scala.concurrent.duration.*
 
-extension (data: List[Command | Delayed[Command] | Event])
+extension (data: List[Command | Delayed[Command] | ServerEvent])
   def toMessages[F[_]: Applicative](roomId: RoomId, newId: F[MessageId]): F[List[Message | Delayed[Message]]] =
     data
       .traverse {
-        case event: Event                     => newId.map(id => Message(id, roomId, event))
+        case event: ServerEvent               => newId.map(id => Message(id, roomId, event))
         case command: Command                 => newId.map(id => Message(id, roomId, command))
         case Delayed(command: Command, delay) => newId.map(id => Delayed(Message(id, roomId, command), delay))
       }

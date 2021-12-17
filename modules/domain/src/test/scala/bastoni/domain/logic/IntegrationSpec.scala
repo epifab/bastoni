@@ -6,7 +6,7 @@ import bastoni.domain.model.*
 import bastoni.domain.model.Command.Continue
 import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.ToPlayer.*
-import bastoni.domain.view.{FromPlayer, TableView, ToPlayer}
+import bastoni.domain.view.{FromPlayer, ToPlayer}
 import cats.effect.syntax.all.*
 import cats.effect.{IO, Sync}
 

@@ -3,7 +3,7 @@ package bastoni.domain.logic
 import bastoni.domain.model.*
 import cats.Monad
 import cats.effect.std.Queue
-import cats.effect.{Resource, Concurrent, Sync}
+import cats.effect.{Concurrent, Resource, Sync}
 import cats.syntax.flatMap.toFlatMapOps
 import cats.syntax.functor.toFunctorOps
 import fs2.concurrent.Topic
@@ -42,7 +42,7 @@ object MessageBus:
   def inMemory[F[_]: Concurrent]: F[MessageBus[F]] = Fs2Bus.apply
 
 
-type SnapshotBus[F[_]] = Bus[F, (RoomId, Option[Table])]
+type SnapshotBus[F[_]] = Bus[F, (RoomId, Option[ServerTableView])]
 
 object SnapshotBus:
   def inMemory[F[_]: Concurrent]: F[SnapshotBus[F]] = Fs2Bus.apply

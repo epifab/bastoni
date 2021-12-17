@@ -15,7 +15,6 @@ object Command:
   case class  StartGame(room: Room, gameType: GameType) extends Command
   case class  ShuffleDeck(seed: Int) extends Command
   case class  PlayCard(player: PlayerId, card: Card) extends Command
-  case class  ActionRequest(playerId: PlayerId, action: Action) extends Command
   case object Continue extends Command
 
   given Encoder[Command] = Encoder.instance {
@@ -25,7 +24,6 @@ object Command:
     case obj: StartGame     => deriveEncoder[StartGame].mapJsonObject(_.add("type", "StartGame".asJson))(obj)
     case obj: ShuffleDeck   => deriveEncoder[ShuffleDeck].mapJsonObject(_.add("type", "ShuffleDeck".asJson))(obj)
     case obj: PlayCard      => deriveEncoder[PlayCard].mapJsonObject(_.add("type", "PlayCard".asJson))(obj)
-    case obj: ActionRequest => deriveEncoder[ActionRequest].mapJsonObject(_.add("type", "ActionRequest".asJson))(obj)
     case Continue           => Json.obj("type" -> "Continue".asJson)
   }
 
@@ -36,6 +34,5 @@ object Command:
     case "StartGame"     => deriveDecoder[StartGame](obj)
     case "ShuffleDeck"   => deriveDecoder[ShuffleDeck](obj)
     case "PlayCard"      => deriveDecoder[PlayCard](obj)
-    case "ActionRequest" => deriveDecoder[ActionRequest](obj)
     case "Continue"      => Right(Continue)
   })

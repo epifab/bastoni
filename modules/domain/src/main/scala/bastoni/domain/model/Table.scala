@@ -3,22 +3,35 @@ package bastoni.domain.model
 import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec
 
-case class Seat(
+case class Seat[C <: CardView](
   player: Option[PlayerState],
-  hand: List[CardState],
-  collected: List[CardState],
-  played: List[CardState]
+  hand: List[C],
+  collected: List[C],
+  played: List[C]
 )
 
 object Seat:
-  given Codec[Seat] = deriveCodec
+  given playerView: Codec[Seat[PlayerCardView]] = deriveCodec
+  given serverView: Codec[Seat[ServerCardView]] = deriveCodec
 
-case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
+case class PlayerSeat[C <: CardView](player: PlayerState, hand: List[C], collected: List[C], played: List[C])
 
-  def update(message: Event | Command): Table =
+sealed trait Table[C <: CardView]:
+  type TableView
+
+  def seats: List[Seat[C]]
+  def deck: List[C]
+  def active: Boolean
+
+  protected def toC(card: ServerCardView): C
+  protected def removeCard(cards: List[C], card: Card): List[C]
+
+  protected def updateWith(seats: List[Seat[C]] = this.seats, deck: List[C] = this.deck, active: Boolean = active): TableView
+
+  protected def publicEventUpdate(message: PublicEvent): TableView =
     message match
       case Event.PlayerJoined(player, room) =>
-        copy(
+        updateWith(
           seats = seats.zip(room.seats).map {
             case (seat, Some(targetPlayer)) if targetPlayer.id == player.id => seat.copy(Some(SittingOut(player)))
             case (whatever, _) => whatever
@@ -26,7 +39,7 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
         )
 
       case Event.PlayerLeft(player, room) =>
-        copy(
+        updateWith(
           seats = seats.map {
             case seat if seat.player.exists(_.playerId == player.id) => seat.copy(player = None)
             case whatever => whatever
@@ -34,7 +47,7 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
         )
 
       case Event.GameStarted(_) =>
-        copy(
+        updateWith(
           seats = seats.map {
             case seat@ Seat(Some(sittingOut: SittingOut), _, _, _) => seat.copy(player = Some(sittingOut.sitIn))
             case whatever => whatever
@@ -42,52 +55,29 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
           active = true
         )
 
-      case Event.DeckShuffled(deck) =>
-        copy(
-          seats = seats.map {
-            case seat@ Seat(Some(acting@ ActingPlayer(targetPlayer, Action.ShuffleDeck)), _, _, _) =>
-              seat.copy(player = Some(acting.done))
-            case whatever => whatever
-          },
-          deck = deck.map(card => CardState(card, Face.Down))
-        )
-
       case Event.TrumpRevealed(card) =>
-        copy(
+        updateWith(
           deck = deck match {
-            case head :: tail if head.card == card => tail :+ CardState(card, Face.Up)
-            case whatever => whatever
-          }
-        )
-
-      case Event.CardDealt(playerId, card, face) =>
-        copy(
-          seats = seats.map {
-            case seat if seat.player.exists(_.playerId == playerId) && deck.headOption.exists(_.card == card) =>
-              seat.copy(hand = CardState(card, face) :: seat.hand)
-            case whatever => whatever
-          },
-          deck = deck match {
-            case head :: tail if head.card == card => tail
+            case head :: tail => tail :+ toC(ServerCardView(card, Face.Up))
             case whatever => whatever
           }
         )
 
       case Event.CardPlayed(playerId, card) =>
-        copy(
+        updateWith(
           seats = seats.map {
             case seat@ Seat(Some(acting: ActingPlayer), _, _, _) if acting.playerId == playerId =>
               seat.copy(
                 player = Some(acting.done),
-                hand = seat.hand.filterNot(_.card == card),
-                played = CardState(card, Face.Up) :: seat.played
+                hand = removeCard(seat.hand, card),
+                played = toC(ServerCardView(card, Face.Up)) :: seat.played
               )
             case whatever => whatever
           }
         )
 
       case Event.TrickCompleted(winnerId) =>
-        copy(
+        updateWith(
           seats = seats.map {
             case seat if seat.player.exists(_.playerId == winnerId) =>
               seat.copy(
@@ -103,7 +93,7 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
           def pointsFor(player: GamePlayer): Option[Int] =
             points.find(_.playerIds.exists(player.is)).map(_.points)
 
-        copy(
+        updateWith(
           seats = seats.map(seat => seat.copy(
             player = seat.player.map {
               case active: SittingIn =>
@@ -122,7 +112,7 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
         )
 
       case Event.GameCompleted(winnerIds) =>
-        copy(
+        updateWith(
           seats = seats.map {
             case seat@ Seat(Some(active: SittingIn), _, _, _) =>
               seat.copy(player = Some(EndOfGamePlayer(active.player, winner = winnerIds.contains(active.player.id))))
@@ -133,7 +123,7 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
         )
 
       case Event.MatchAborted | Event.GameAborted =>
-        copy(
+        updateWith(
           seats = seats.map {
             case Seat(Some(player: SittingIn), _, _, _) =>
               Seat(Some(player.sitOut), Nil, Nil, Nil)
@@ -143,8 +133,8 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
           deck = Nil
         )
 
-      case Command.ActionRequest(playerId, Action.ShuffleDeck) =>
-        copy(
+      case Event.ActionRequested(playerId, Action.ShuffleDeck) =>
+        updateWith(
           seats = seats.map {
             case seat@ Seat(Some(waiting: SittingIn), _, _, _) if waiting.playerId == playerId =>
               seat.copy(player = Some(waiting.act(Action.ShuffleDeck).mapPlayer(_.copy(dealer = true))))
@@ -154,8 +144,8 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
           }
         )
 
-      case Command.ActionRequest(playerId, action) =>
-        copy(
+      case Event.ActionRequested(playerId, action) =>
+        updateWith(
           seats = seats.map {
             case seat@ Seat(Some(waiting: SittingIn), _, _, _) if waiting.playerId == playerId =>
               seat.copy(player = Some(waiting.act(action)))
@@ -163,21 +153,136 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
           }
         )
 
-      case _: Command => this
+  protected def cardDealtUpdate(event: Event.CardDealt[C]): TableView =
+    updateWith(
+      seats = seats.map {
+        case seat if seat.player.exists(_.playerId == event.playerId) =>
+          seat.copy(hand = event.card :: seat.hand)
+        case whatever => whatever
+      },
+      deck = deck match {
+        case head :: tail => tail
+        case whatever => whatever
+      }
+    )
+
+  def seatFor(player: Player): Option[PlayerSeat[C]] =
+    seats.collectFirst {
+      case Seat(Some(p), hand, collected, played) if p.playerId == player.id =>
+        PlayerSeat(p, hand, collected, played)
+    }
+
+
+case class ServerTableView(
+  override val seats: List[Seat[ServerCardView]],
+  override val deck: List[ServerCardView],
+  override val active: Boolean
+) extends Table[ServerCardView]:
+
+  override type TableView = ServerTableView
+
+  override protected def updateWith(seats: List[Seat[ServerCardView]] = this.seats, deck: List[ServerCardView] = this.deck, active: Boolean = this.active): ServerTableView =
+    ServerTableView(seats, deck, active)
+
+  override protected def toC(card: ServerCardView): ServerCardView = card
+  override protected def removeCard(cards: List[ServerCardView], card: Card): List[ServerCardView] = cards.filterNot(_.card == card)
+
+  def update(event: ServerEvent): ServerTableView = event match {
+    case Event.DeckShuffledServerPOV(deck) =>
+      updateWith(
+        seats = seats.map {
+          case seat@ Seat(Some(acting@ ActingPlayer(targetPlayer, Action.ShuffleDeck)), _, _, _) =>
+            seat.copy(player = Some(acting.done))
+          case whatever => whatever
+        },
+        deck = deck.map(card => ServerCardView(card, Face.Down))
+      )
+
+    case event: Event.CardDealtServerPOV => cardDealtUpdate(event)
+
+    case event: PublicEvent => publicEventUpdate(event)
+  }
+
+  extension (state: ServerCardView)
+    def toPlayerView(me: Player, player: Option[PlayerState]): PlayerCardView = state match {
+      case ServerCardView(card, Face.Up) => PlayerCardView(Some(card))
+      case ServerCardView(card, Face.Down) => PlayerCardView(None)
+      case ServerCardView(card, Face.Player) => PlayerCardView(Option.when(player.exists(_.playerId == me.id))(card))
+    }
+
+  def toPlayerView(me: Player): PlayerTableView =
+    PlayerTableView(
+      seats = seats.map {
+        case Seat(player, hand, collected, played) =>
+          Seat[PlayerCardView](
+            player = player,
+            hand = hand.map(_.toPlayerView(me, player)),
+            collected = collected.map(_.toPlayerView(me, player)),
+            played = played.map(_.toPlayerView(me, player))
+          )
+      },
+      deck = deck.map(_.toPlayerView(me, None)),
+      active = active
+    )
+
+
+case class PlayerTableView(
+  override val seats: List[Seat[PlayerCardView]],
+  override val deck: List[PlayerCardView],
+  override val active: Boolean
+) extends Table[PlayerCardView]:
+
+  override type TableView = PlayerTableView
+
+  override protected def updateWith(seats: List[Seat[PlayerCardView]] = this.seats, deck: List[PlayerCardView] = this.deck, active: Boolean = this.active): PlayerTableView =
+    PlayerTableView(seats, deck, active)
+
+  override protected def toC(card: ServerCardView): PlayerCardView = PlayerCardView(card.face match {
+    case Face.Up => Some(card.card)
+    case _ => None
+  })
+
+  extension[T](list: List[T])
+    def removeFirst(cond: T => Boolean): List[T] =
+      list match {
+        case head :: tail if cond(head) => tail
+        case head :: tail => head :: tail.removeFirst(cond)
+        case Nil => Nil
+      }
+
+  override protected def removeCard(cards: List[PlayerCardView], card: Card): List[PlayerCardView] =
+    if (cards.exists(_.card.contains(card))) cards.removeFirst(_.card.contains(card))
+    else cards.removeFirst(_.card.isEmpty)
+
+  def update(event: PlayerEvent): PlayerTableView = event match {
+    case Event.DeckShuffledPlayerPOV(numberOfCards) =>
+      updateWith(
+        seats = seats.map {
+          case seat@Seat(Some(acting@ActingPlayer(targetPlayer, Action.ShuffleDeck)), _, _, _) =>
+            seat.copy(player = Some(acting.done))
+          case whatever => whatever
+        },
+        deck = List.fill(numberOfCards)(PlayerCardView(None))
+      )
+
+    case event: Event.CardDealtPlayerPOV => cardDealtUpdate(event)
+
+    case event: PublicEvent => publicEventUpdate(event)
+  }
 
 
 object Table:
-  given Codec[Table] = deriveCodec
+  given serverTableViewCodec: Codec[ServerTableView] = deriveCodec
+  given playerTableViewCodec: Codec[PlayerTableView] = deriveCodec
 
-  def apply(message: Event | Command): Option[Table] =
+  def apply(message: ServerEvent): Option[ServerTableView] =
     val room = message match {
       case event: Event.RoomEvent => Some(event.room)
-      case command: Command.StartGame => Some(command.room)
       case _ => None
     }
 
     room.map { room =>
-      Table(
+      ServerTableView(
         seats = room.seats.map(seat =>
           Seat(
             seat.map(SittingOut(_)),

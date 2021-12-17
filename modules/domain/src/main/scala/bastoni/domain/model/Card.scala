@@ -39,10 +39,22 @@ object Face:
   given Encoder[Face] = Encoder[String].contramap(_.toString)
   given Decoder[Face] = Decoder[String].map(Face.valueOf)
 
-case class CardState(card: Card, face: Face)
 
-object CardState:
-  given Codec[CardState] = deriveCodec
+sealed trait CardView:
+  def value: Option[Card]
+
+case class PlayerCardView(card: Option[Card]) extends CardView:
+  override def value: Option[Card] = card
+
+case class ServerCardView(card: Card, face: Face) extends CardView:
+  override def value: Option[Card] = Some(card)
+
+object PlayerCardView:
+  given Decoder[PlayerCardView] = Decoder[Option[Card]].map(PlayerCardView(_))
+  given Encoder[PlayerCardView] = Encoder[Option[Card]].contramap(_.card)
+
+object ServerCardView:
+  given Codec[ServerCardView] = deriveCodec
 
 object Deck:
   val instance: List[Card] = (for {

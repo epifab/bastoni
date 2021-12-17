@@ -4,7 +4,7 @@ import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.repos.TableRepo
-import bastoni.domain.view.{FromPlayer, TableView, ToPlayer}
+import bastoni.domain.view.{FromPlayer, ToPlayer}
 import cats.Monad
 import cats.effect.syntax.all.*
 import cats.effect.{Resource, Sync}
@@ -27,7 +27,10 @@ object GameSnapshotService:
           case Message(_, roomId, data) =>
             for {
               existingTable <- tableRepo.get(roomId)
-              updatedTable = existingTable.map(_.update(data)).orElse(Table(data))
+              updatedTable = data match {
+                case event: ServerEvent => existingTable.map(_.update(event)).orElse(Table(event))
+                case command: Command => existingTable
+              }
               _ <- updatedTable.fold(tableRepo.remove(roomId))(tableRepo.set(roomId, _))
               hasUpdate = existingTable != updatedTable
             } yield Option.when(hasUpdate)(roomId -> updatedTable)
@@ -39,7 +42,7 @@ object GameSnapshotService:
   def subscriber[F[_]](snapshotBus: SnapshotBus[F]): GameSubscriber[F] =
     new GameSubscriber[F] {
       override def subscribe(me: Player, roomId: RoomId): fs2.Stream[F, ToPlayer] =
-        snapshotBus.subscribe.collect { case (`roomId`, Some(table)) => ToPlayer.Snapshot(TableView(me, table)) }
+        snapshotBus.subscribe.collect { case (`roomId`, Some(table)) => ToPlayer.Snapshot(table.toPlayerView(me)) }
     }
 
   def publisher[F[_]](

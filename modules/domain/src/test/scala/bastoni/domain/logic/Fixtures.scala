@@ -5,14 +5,14 @@ import bastoni.domain.model.Command.Continue
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
 
-extension (message: Event | Command)
+extension (message: ServerEvent | Command)
   def toMessage(roomId: RoomId): Message =
     Message(Fixtures.messageId, roomId, message)
 
-extension (message: Event | Command | Delayed[Command])
+extension (message: ServerEvent | Command | Delayed[Command])
   def toMessage(roomId: RoomId): Message | Delayed[Message] =
     message match
-      case event: Event => event.toMessage(roomId)
+      case event: ServerEvent => event.toMessage(roomId)
       case command: Command => command.toMessage(roomId)
       case Delayed(command: Command, delay) => Delayed(command.toMessage(roomId), delay)
 

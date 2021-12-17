@@ -3,7 +3,7 @@ package bastoni.domain
 import bastoni.domain.logic.{GamePublisher, GameSubscriber}
 import bastoni.domain.model.*
 import bastoni.domain.view.FromPlayer.{JoinRoom, PlayCard, ShuffleDeck}
-import bastoni.domain.view.{PlayerSeat, ToPlayer}
+import bastoni.domain.view.ToPlayer
 import cats.effect.syntax.temporal.*
 import cats.effect.{Sync, Temporal}
 
@@ -18,10 +18,10 @@ object DumbPlayer:
         .map { case ToPlayer.Snapshot(table) =>
           table.seatFor(me) match {
             case Some(PlayerSeat(ActingPlayer(_, Action.PlayCard), hand, _, _)) =>
-              Some(PlayCard(hand.flatten.headOption.getOrElse(throw new IllegalStateException("No cards in hand"))))
+              Some(PlayCard(hand.flatMap(_.card).headOption.getOrElse(throw new IllegalStateException("No cards in hand"))))
 
             case Some(PlayerSeat(ActingPlayer(_, Action.PlayCardOf(suit)), hand, _, _)) =>
-              Some(PlayCard(hand.flatten.pipe(hand => hand.find(_.suit == suit).orElse(hand.headOption)).getOrElse(throw new IllegalStateException("No cards in hand"))))
+              Some(PlayCard(hand.flatMap(_.card).pipe(hand => hand.find(_.suit == suit).orElse(hand.headOption)).getOrElse(throw new IllegalStateException("No cards in hand"))))
 
             case Some(PlayerSeat(ActingPlayer(_, Action.ShuffleDeck), _, _, _)) =>
               Some(ShuffleDeck)

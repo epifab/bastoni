@@ -19,26 +19,26 @@ object Game:
   private def playStream[F[_]: Applicative, State](
     room: Room,
     initialState: State,
-    handler: (State, Event | Command) => (State, List[Event | Command | Delayed[Command]]),
+    handler: (State, ServerEvent | Command) => (State, List[ServerEvent | Command | Delayed[Command]]),
     isFinal: State => Boolean,
     messages: fs2.Stream[F, Message],
     newId: F[MessageId]
   ): fs2.Stream[F, Message | Delayed[Message]] =
     messages
       .collect { case Message(_, roomId, message) if roomId == room.id => message }
-      .scan[(State, List[Event | Command | Delayed[Command]])](initialState -> Nil) {
+      .scan[(State, List[ServerEvent | Command | Delayed[Command]])](initialState -> Nil) {
         case ((state, _), message) => handler(state, message)
       }
       .takeThrough { case ((state, _)) => !isFinal(state) }
       .flatMap { case (_, events) => fs2.Stream.evalSeq(events.toMessages(room.id, newId)) }
 
-  private[tressette] val playMatchStep: (MatchState, Command | Event) => (MatchState, List[Event | Command | Delayed[Command]]) = {
+  private[tressette] val playMatchStep: (MatchState, ServerEvent | Command) => (MatchState, List[ServerEvent | Command | Delayed[Command]]) = {
 
     case (active: MatchState.Active, PlayerLeft(player, _)) if active.activePlayers.exists(_.is(player)) =>
       MatchState.Aborted -> List(MatchAborted)
 
     case (MatchState.Ready(players), GameStarted(_)) =>
-      MatchState.Ready(players) -> List(ActionRequest(players.last.id, Action.ShuffleDeck))
+      MatchState.Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck))
 
     case (MatchState.Ready(players), ShuffleDeck(seed)) =>
       val deck = new Random(seed).shuffle(Deck.instance)
@@ -53,7 +53,7 @@ object Game:
       deck.dealOrDie { (card, tail) =>
         val players = done :+ player.draw(card)
         MatchState.PlayRound(players, Nil, tail) ->
-          List(CardDealt(player.id, card, Face.Player), ActionRequest(players.head.id, Action.PlayCard))
+          List(CardDealt(player.id, card, Face.Player), ActionRequested(players.head.id, Action.PlayCard))
       }
 
     case (MatchState.DealRound(player :: Nil, done, remaining, deck), Continue) =>
@@ -72,7 +72,7 @@ object Game:
       deck.dealOrDie { (card, tail) =>
         val players = done :+ player.draw(card)
         MatchState.PlayRound(players, Nil, tail) ->
-          List(CardDealt(player.id, card, Face.Up), ActionRequest(players.head.id, Action.PlayCard))
+          List(CardDealt(player.id, card, Face.Up), ActionRequested(players.head.id, Action.PlayCard))
       }
 
     case (MatchState.DrawRound(player :: todo, done, deck), Continue) =>
@@ -87,19 +87,19 @@ object Game:
 
     case (MatchState.PlayRound(player :: next :: players, Nil, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card) =>
       // first player of the trick (can play any card)
-      MatchState.PlayRound(next :: players, player.play(card) :: Nil, deck) -> List(CardPlayed(player.id, card), ActionRequest(next.id, Action.PlayCardOf(card.suit)))
+      MatchState.PlayRound(next :: players, player.play(card) :: Nil, deck) -> List(CardPlayed(player.id, card), ActionRequested(next.id, Action.PlayCardOf(card.suit)))
 
     case (MatchState.PlayRound(player :: next :: players, (firstDone, trump) :: done, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card, trump) =>
       // middle player of the trick
-      MatchState.PlayRound(next :: players, (firstDone, trump) :: (done :+ player.play(card)), deck) -> List(CardPlayed(player.id, card), ActionRequest(next.id, Action.PlayCardOf(trump.suit)))
+      MatchState.PlayRound(next :: players, (firstDone, trump) :: (done :+ player.play(card)), deck) -> List(CardPlayed(player.id, card), ActionRequested(next.id, Action.PlayCardOf(trump.suit)))
 
     case (MatchState.WillCompleteTrick(players, deck), Continue) =>
       val updatedPlayers: List[MatchPlayer] = completeTrick(players)
       val winner = updatedPlayers.head
 
-      val (state, command: (Command | Delayed[Command])) =
+      val (state, command: (ServerEvent | Command | Delayed[Command])) =
         if (deck.isEmpty && winner.hand.isEmpty) MatchState.WillComplete(updatedPlayers) -> Continue.muchLater
-        else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil) -> ActionRequest(updatedPlayers.head.id, Action.PlayCard)
+        else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil) -> ActionRequested(updatedPlayers.head.id, Action.PlayCard)
         else MatchState.DrawRound(updatedPlayers, Nil, deck) -> Continue.later
 
       state -> (TrickCompleted(winner.id) :: command :: Nil)
@@ -138,14 +138,14 @@ object Game:
     case (m, _) => m -> Nil
   }
 
-  private[tressette] val playGameStep: (GameState, Command | Event) => (GameState, List[Event | Command | Delayed[Command]]) = {
+  private[tressette] val playGameStep: (GameState, ServerEvent | Command) => (GameState, List[ServerEvent | Command | Delayed[Command]]) = {
 
     case (GameState.InProgress(players, matchState, pointsToWin), message) =>
       playMatchStep(matchState, message) match
         case (MatchState.Completed(players), events) =>
 
           def ready(shiftedRound: List[GamePlayer], pointsToWin: Int) =
-            GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), pointsToWin) -> (events :+ ActionRequest(shiftedRound.last.id, Action.ShuffleDeck))
+            GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), pointsToWin) -> (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck))
 
           val teamSize = if (players.size == 4) 2 else 1
 

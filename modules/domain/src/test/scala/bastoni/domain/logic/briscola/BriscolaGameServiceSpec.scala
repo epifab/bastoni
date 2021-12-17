@@ -72,18 +72,18 @@ class BriscolaGameServiceSpec extends AsyncIOFreeSpec:
 
     val outputStream =
       GameStarted(GameType.Briscola).toMessage(room.id) ::
-      (ActionRequest(player3.id, Action.ShuffleDeck).toMessage(room.id) ::
+      (ActionRequested(player3.id, Action.ShuffleDeck).toMessage(room.id) ::
       Briscola3Spec.output(room.id, GamePlayer(player1, 0), GamePlayer(player2, 0), GamePlayer(player3, 0))) ++
       (
-        ActionRequest(player1.id, Action.ShuffleDeck).toMessage(room.id) ::
+        ActionRequested(player1.id, Action.ShuffleDeck).toMessage(room.id) ::
         Briscola3Spec.output(room.id, GamePlayer(player2, 0), GamePlayer(player3, 0), GamePlayer(player1, 1))
       ) ++
       (
-        ActionRequest(player2.id, Action.ShuffleDeck).toMessage(room.id) ::
+        ActionRequested(player2.id, Action.ShuffleDeck).toMessage(room.id) ::
         Briscola3Spec.output(room.id, GamePlayer(player3, 0), GamePlayer(player1, 1), GamePlayer(player2, 1))
       ) ++
       (
-        ActionRequest(player3.id, Action.ShuffleDeck).toMessage(room.id) ::
+        ActionRequested(player3.id, Action.ShuffleDeck).toMessage(room.id) ::
         Briscola3Spec.output(room.id, GamePlayer(player1, 1), GamePlayer(player2, 1), GamePlayer(player3, 1))
       ) ++
       List(GameCompleted(List(player1.id)).toMessage(room.id))

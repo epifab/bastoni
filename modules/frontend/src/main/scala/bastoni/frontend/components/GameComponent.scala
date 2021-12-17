@@ -3,7 +3,7 @@ package bastoni.frontend.components
 import bastoni.domain.DumbPlayer
 import bastoni.domain.logic.Services
 import bastoni.domain.model.*
-import bastoni.domain.view.{FromPlayer, SeatView, TableView, ToPlayer}
+import bastoni.domain.view.{FromPlayer, ToPlayer}
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import japgolly.scalajs.react.*
@@ -16,14 +16,14 @@ import scala.concurrent.duration.DurationInt
 val GameComponent =
   ScalaComponent
     .builder[Unit]
-    .initialState[Option[TableView]](None)
+    .initialState[Option[PlayerTableView]](None)
     .renderBackend[GameComponentBackend]
     .componentDidMount(_.backend.start)
     .build
 
 
-class GameComponentBackend($: BackendScope[Unit, Option[TableView]]):
-  def render(table: Option[TableView]) = table match
+class GameComponentBackend($: BackendScope[Unit, Option[PlayerTableView]]):
+  def render(table: Option[PlayerTableView]) = table match
     case Some(table) => <.div(^.className := "game", TableComponent(table))
     case None => <.div("Waiting...")
 

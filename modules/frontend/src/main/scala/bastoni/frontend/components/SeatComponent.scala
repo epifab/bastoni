@@ -1,13 +1,12 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.*
-import bastoni.domain.view.SeatView
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.html_<^.*
 
 val SeatComponent =
   ScalaComponent
-    .builder[(SeatView, Int)]
+    .builder[(Seat[PlayerCardView], Int)]
     .noBackend
     .render_P { case (seat, index) =>
       <.div(^.className := s"seat seat-$index",

@@ -1,13 +1,12 @@
 package bastoni.frontend.components
 
-import bastoni.domain.model.*
-import bastoni.domain.view.TableView
+import bastoni.domain.model.{PlayerTableView, *}
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.html_<^.*
 
 val TableComponent =
   ScalaComponent
-    .builder[TableView]
+    .builder[PlayerTableView]
     .noBackend
     .render_P { table =>
       <.div(^.className := "table",

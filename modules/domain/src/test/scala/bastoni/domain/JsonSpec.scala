@@ -49,21 +49,21 @@ class JsonSpec extends AnyFreeSpec with Matchers:
     expectedJson.as[GamePlayer] shouldBe Right(gamePlayer)
   }
 
-  "Events are encoded / decoded with a discriminant property" - {
+  "Server events are encoded / decoded with a discriminant property" - {
     "case class" in {
       val expectedJson = parse("""{"type": "DeckShuffled", "cards": [["Asso","Denari"],["Due","Coppe"]]}""").getOrElse(fail("Invalid json"))
-      val event: Event = Event.DeckShuffled(List(Card(Rank.Asso, Suit.Denari), Card(Rank.Due, Suit.Coppe)))
+      val event: ServerEvent = Event.DeckShuffled(List(Card(Rank.Asso, Suit.Denari), Card(Rank.Due, Suit.Coppe)))
 
       event.asJson shouldBe expectedJson
-      expectedJson.as[Event] shouldBe Right(event)
+      expectedJson.as[ServerEvent] shouldBe Right(event)
     }
 
     "case object" in {
       val expectedJson = parse("""{"type": "MatchAborted"}""").getOrElse(fail("Invalid json"))
-      val event: Event = Event.MatchAborted
+      val event: ServerEvent = Event.MatchAborted
 
       event.asJson shouldBe expectedJson
-      expectedJson.as[Event] shouldBe Right(event)
+      expectedJson.as[ServerEvent] shouldBe Right(event)
     }
   }
 
@@ -71,15 +71,6 @@ class JsonSpec extends AnyFreeSpec with Matchers:
     "case class" in {
       val expectedJson = parse("""{"type": "ShuffleDeck", "seed": 15}""").getOrElse(fail("Invalid json"))
       val command: Command = Command.ShuffleDeck(15)
-
-      command.asJson shouldBe expectedJson
-      expectedJson.as[Command] shouldBe Right(command)
-    }
-
-    "action request" in {
-      val playerId = PlayerId.newId
-      val expectedJson = parse(s"""{"type": "ActionRequest", "playerId": "$playerId", "action": {"type": "PlayCardOf", "suit": "Denari"}}""").getOrElse(fail("Invalid json"))
-      val command: Command = Command.ActionRequest(playerId, Action.PlayCardOf(Suit.Denari))
 
       command.asJson shouldBe expectedJson
       expectedJson.as[Command] shouldBe Right(command)
