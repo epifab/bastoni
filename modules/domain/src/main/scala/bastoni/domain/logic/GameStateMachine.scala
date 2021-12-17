@@ -17,7 +17,7 @@ object GameStateMachineFactory:
       case GameType.Tressette => tressette.StateMachine
 
 
-trait GameStateMachine extends ((ServerEvent | Command) => (Option[GameStateMachine], List[ServerEvent | Command | Delayed[Command]])):
+trait GameStateMachine extends StateMachine[GameStateMachine]:
   def gameType: GameType
   def encoded: Json
 

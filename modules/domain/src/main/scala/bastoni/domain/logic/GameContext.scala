@@ -5,9 +5,9 @@ import bastoni.domain.model.Event.*
 import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec
 
-case class GameContext(table: TableServerView, stateMachine: Option[GameStateMachine]):
+case class GameContext(table: TableServerView, stateMachine: Option[GameStateMachine]) extends StateMachine[GameContext]:
 
-  def apply(message: ServerEvent | Command): (Option[GameContext], List[ServerEvent | Command | Delayed[Command]]) =
+  override def apply(message: ServerEvent | Command): (Option[GameContext], List[ServerEvent | Command | Delayed[Command]]) =
 
     val (updatedTable, tableEvents) = message match {
       case Command.Connect =>
