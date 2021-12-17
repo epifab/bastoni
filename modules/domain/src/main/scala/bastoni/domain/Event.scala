@@ -15,3 +15,5 @@ case class  PointsCount(playerIds: List[PlayerId], points: Int) extends Event
 case class  MatchWinners(playerIds: List[PlayerId]) extends Event
 case object MatchDraw extends Event
 case object MatchAborted extends Event
+case class  GameWinners(playerIds: List[PlayerId]) extends Event
+case object GameAborted extends Event

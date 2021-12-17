@@ -1,5 +1,6 @@
 package bastoni.backend
 
+import bastoni.backend.briscola.Game
 import bastoni.domain.*
 import bastoni.domain.Rank.{Sei, Sette, Tre, *}
 import bastoni.domain.Suit.*
@@ -130,7 +131,7 @@ class Briscola4Spec extends AnyFreeSpec with Matchers:
 
     ).map(Message(room.id, _))
 
-    Briscola.playMatch[fs2.Pure](room)(input).map(_.message).compile.toList shouldBe List(
+    Game.playMatch[fs2.Pure](room)(input).map(_.message).compile.toList shouldBe List(
       DeckShuffled(10),
 
       CardDealt(player1.id, Card(Due, Bastoni)),
