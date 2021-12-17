@@ -27,6 +27,7 @@ object WebHtmlRoute:
               <title>Controbuio</title>
               <link rel="stylesheet" href={s"/static/styles.css?v=$appVersion"} />
               <link rel="shortcut icon" href={s"/static/denari.svg?v=$appVersion"} type="image/svg+xml" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             </head>
             <body>
               <h1>Controbuio</h1>

@@ -2,3 +2,60 @@ body {
     background: black;
     color: white;
 }
+
+.cards {
+    text-align: center;
+}
+
+.card {
+    margin: 0 3px;
+    width: 90px;
+    height: 148px;
+    border-radius: 5px;
+    background-image: url('/static/carte/retro.jpg');
+    display: inline-block;
+}
+
+.card.denari.asso { background-image: url('/static/carte/denari/01.jpg') }
+.card.denari.due { background-image: url('/static/carte/denari/02.jpg') }
+.card.denari.tre { background-image: url('/static/carte/denari/03.jpg') }
+.card.denari.quattro { background-image: url('/static/carte/denari/04.jpg') }
+.card.denari.cinque { background-image: url('/static/carte/denari/05.jpg') }
+.card.denari.sei { background-image: url('/static/carte/denari/06.jpg') }
+.card.denari.sette { background-image: url('/static/carte/denari/07.jpg') }
+.card.denari.fante { background-image: url('/static/carte/denari/08.jpg') }
+.card.denari.cavallo { background-image: url('/static/carte/denari/09.jpg') }
+.card.denari.re { background-image: url('/static/carte/denari/10.jpg') }
+
+.card.coppe.asso { background-image: url('/static/carte/coppe/01.jpg') }
+.card.coppe.due { background-image: url('/static/carte/coppe/02.jpg') }
+.card.coppe.tre { background-image: url('/static/carte/coppe/03.jpg') }
+.card.coppe.quattro { background-image: url('/static/carte/coppe/04.jpg') }
+.card.coppe.cinque { background-image: url('/static/carte/coppe/05.jpg') }
+.card.coppe.sei { background-image: url('/static/carte/coppe/06.jpg') }
+.card.coppe.sette { background-image: url('/static/carte/coppe/07.jpg') }
+.card.coppe.fante { background-image: url('/static/carte/coppe/08.jpg') }
+.card.coppe.cavallo { background-image: url('/static/carte/coppe/09.jpg') }
+.card.coppe.re { background-image: url('/static/carte/coppe/10.jpg') }
+
+.card.spade.asso { background-image: url('/static/carte/spade/01.jpg') }
+.card.spade.due { background-image: url('/static/carte/spade/02.jpg') }
+.card.spade.tre { background-image: url('/static/carte/spade/03.jpg') }
+.card.spade.quattro { background-image: url('/static/carte/spade/04.jpg') }
+.card.spade.cinque { background-image: url('/static/carte/spade/05.jpg') }
+.card.spade.sei { background-image: url('/static/carte/spade/06.jpg') }
+.card.spade.sette { background-image: url('/static/carte/spade/07.jpg') }
+.card.spade.fante { background-image: url('/static/carte/spade/08.jpg') }
+.card.spade.cavallo { background-image: url('/static/carte/spade/09.jpg') }
+.card.spade.re { background-image: url('/static/carte/spade/10.jpg') }
+
+.card.bastoni.asso { background-image: url('/static/carte/bastoni/01.jpg') }
+.card.bastoni.due { background-image: url('/static/carte/bastoni/02.jpg') }
+.card.bastoni.tre { background-image: url('/static/carte/bastoni/03.jpg') }
+.card.bastoni.quattro { background-image: url('/static/carte/bastoni/04.jpg') }
+.card.bastoni.cinque { background-image: url('/static/carte/bastoni/05.jpg') }
+.card.bastoni.sei { background-image: url('/static/carte/bastoni/06.jpg') }
+.card.bastoni.sette { background-image: url('/static/carte/bastoni/07.jpg') }
+.card.bastoni.fante { background-image: url('/static/carte/bastoni/08.jpg') }
+.card.bastoni.cavallo { background-image: url('/static/carte/bastoni/09.jpg') }
+.card.bastoni.re { background-image: url('/static/carte/bastoni/10.jpg') }

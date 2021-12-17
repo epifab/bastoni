@@ -9,10 +9,10 @@ val CardComponent =
     .builder[Option[Card]]
     .noBackend
     .render_P {
-      case None => <.span(^.className := "card back", "[?]")
-      case Some(card) => <.span(^.className := s"card rank-${card.rank} suit-${card.rank}", s"[${card.rank} ${card.suit}]")
+      case None => <.span(^.className := "card")
+      case Some(card) => <.span(^.className := s"card ${card.rank.toString.toLowerCase} ${card.suit.toString.toLowerCase}")
     }
     .build
 
 def CardsComponent(cards: List[CardPlayerView]) =
-  if (cards.isEmpty) <.span("No cards") else cards.map(c => CardComponent(c.card)).toTagMod
+  <.div(^.className := "cards", cards.map(c => CardComponent(c.card)).toTagMod)
