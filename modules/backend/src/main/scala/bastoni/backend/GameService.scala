@@ -2,8 +2,9 @@ package bastoni.backend
 
 import bastoni.backend.briscola
 import bastoni.domain.model.*
-import bastoni.domain.model.Event.*
 import bastoni.domain.model.Command.*
+import bastoni.domain.model.Event.*
+import cats.Functor
 import cats.effect.IO
 
 import scala.concurrent.duration.*
@@ -21,21 +22,36 @@ object Delay:
 case class DelayedCommand(command: Command, delay: Delay)
 case class DelayedMessage(message: Message, delay: Delay)
 
-extension (command: Command)
-  def shortly: DelayedCommand = DelayedCommand(command, Delay.Short)
-  def later: DelayedCommand = DelayedCommand(command, Delay.Medium)
-  def muchLater: DelayedCommand = DelayedCommand(command, Delay.Long)
-
 extension (message: Command | DelayedCommand | Event)
   def toMessage(roomId: RoomId): Message | DelayedMessage = message match
     case DelayedCommand(command, delay) => DelayedMessage(Message(roomId, command), delay)
     case command: Command => Message(roomId, command)
     case event: Event => Message(roomId, event)
 
+extension (command: Command)
+  def shortly: DelayedCommand = DelayedCommand(command, Delay.Short)
+  def later: DelayedCommand = DelayedCommand(command, Delay.Medium)
+  def muchLater: DelayedCommand = DelayedCommand(command, Delay.Long)
+
 trait GameStateMachine extends ((Event | Command) => (Option[GameStateMachine], List[Command | DelayedCommand | Event]))
 
 object GameService:
+
   def apply[F[_]](messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | DelayedMessage] =
+    runStateMachines(messages)
+      .flatMap { case (_, messages) => fs2.Stream.iterable(messages) }
+
+  def apply[F[_]: Functor](messages: fs2.Stream[F, Message], gameServiceRepo: GameServiceRepo[F]): fs2.Stream[F, Message | DelayedMessage] =
+    fs2.Stream.eval(gameServiceRepo.getSnapshot).flatMap { initialState =>
+      runStateMachines(messages, initialState)
+        .evalTap { case (stateMachines, _) => gameServiceRepo.setSnapshot(stateMachines) }
+        .flatMap { case (_, messages) => fs2.Stream.iterable(messages) }
+    }
+
+  private def runStateMachines[F[_]](
+    messages: fs2.Stream[F, Message],
+    initialState: Map[RoomId, GameStateMachine] = Map.empty
+  ): fs2.Stream[F, (Map[RoomId, GameStateMachine], List[Message | DelayedMessage])] =
     messages
       .scan[(Map[RoomId, GameStateMachine], List[Message | DelayedMessage])](Map.empty -> Nil) {
         case ((stateMachines, _), Message(roomId, StartGame(room, gameType))) if !stateMachines.contains(roomId) =>
@@ -50,7 +66,6 @@ object GameService:
                 (stateMachines - roomId) -> events.map(_.toMessage(roomId))
           }
       }
-      .flatMap { case (_, messages) => fs2.Stream.iterable(messages) }
 
   def stateMachineFor(players: List[Player], gameType: GameType): GameStateMachine =
     gameType match
