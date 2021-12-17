@@ -5,7 +5,6 @@ sealed trait Event
 case class  PlayerJoined(player: Player, room: Room) extends Event
 case class  PlayerLeft(player: Player, room: Room) extends Event
 
-case class  StartGame(room: Room, gameType: GameType) extends Event
 case class  DeckShuffled(seed: Int) extends Event
 case class  CardDealt(playerId: PlayerId, card: Card) extends Event
 case class  TrumpRevealed(card: Card) extends Event

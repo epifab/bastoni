@@ -13,9 +13,9 @@ object Lobby:
     def leave(p: Player): Room =
       room.copy(players = room.players.filterNot(_ == p))
 
-  def apply[F[_]](roomMaxSize: Int)(messages: fs2.Stream[F, Message]): fs2.Stream[F, MessageOut] =
+  def apply[F[_]](roomMaxSize: Int)(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message] =
     messages
-      .scan[(Map[RoomId, Room], Option[(RoomId, Event)])](Map.empty -> None) {
+      .scan[(Map[RoomId, Room], Option[(RoomId, Event | Command)])](Map.empty -> None) {
         case ((lobby, _), Message(roomId, JoinRoom(player))) =>
           lobby.getOrElse(roomId, Room(roomId, Nil)) match
             case room if room.players.size < roomMaxSize && !room.contains(player) =>
@@ -39,4 +39,4 @@ object Lobby:
 
         case ((lobby, _), _) => lobby -> None
       }
-      .collect { case (room, Some((roomId, event))) => MessageOut(roomId, event) }
+      .collect { case (room, Some((roomId, event))) => Message(roomId, event) }

@@ -13,7 +13,7 @@ class LobbySpec extends AnyFreeSpec with Matchers:
   val player2 = Player(PlayerId.newId, "Caio")
   val player3 = Player(PlayerId.newId, "Sempronio")
 
-  private val lobby: fs2.Stream[fs2.Pure, Message] => fs2.Stream[fs2.Pure, MessageOut] =
+  private val lobby: fs2.Stream[fs2.Pure, Message] => fs2.Stream[fs2.Pure, Message] =
     Lobby[fs2.Pure](2)
 
   "Rooms can be joined and left" in {
