@@ -17,14 +17,14 @@ extension (message: ServerEvent | Command | Delayed[Command])
       case Delayed(command: Command, delay) => Delayed(command.toMessage(roomId), delay)
 
 object Fixtures:
-  val room1 = RoomId.unsafeParse("DA97C007-DE93-415E-8705-DD2E1911A651")
-  val room2 = RoomId.unsafeParse("14260D31-75C7-4AC5-B03E-4AFFF99BAF16")
+  val room1: RoomId = RoomId.unsafeParse("DA97C007-DE93-415E-8705-DD2E1911A651")
+  val room2: RoomId = RoomId.unsafeParse("14260D31-75C7-4AC5-B03E-4AFFF99BAF16")
 
-  val user1 = User(UserId.unsafeParse("6517FC2F-6FED-4169-8C77-17D21492D450"), "Tizio")
-  val user2 = User(UserId.unsafeParse("DC5D9B78-E403-4431-B6F2-92C31D397DB9"), "Caio")
-  val user3 = User(UserId.unsafeParse("FFDBB2B6-C66C-49B6-9C2A-B0DB61FCD1A3"), "Sempronio")
-  val user4 = User(UserId.unsafeParse("1AB05667-7571-40D4-9108-A2C211E308A6"), "Giuda")
-  val user5 = User(UserId.unsafeParse("46CC23E1-751C-4976-9CAF-7A7678297104"), "Ultimo")
+  val user1: User = User(UserId.unsafeParse("6517FC2F-6FED-4169-8C77-17D21492D450"), "Tizio")
+  val user2: User = User(UserId.unsafeParse("DC5D9B78-E403-4431-B6F2-92C31D397DB9"), "Caio")
+  val user3: User = User(UserId.unsafeParse("FFDBB2B6-C66C-49B6-9C2A-B0DB61FCD1A3"), "Sempronio")
+  val user4: User = User(UserId.unsafeParse("1AB05667-7571-40D4-9108-A2C211E308A6"), "Giuda")
+  val user5: User = User(UserId.unsafeParse("46CC23E1-751C-4976-9CAF-7A7678297104"), "Ultimo")
 
   val messageId: MessageId = MessageId.unsafeParse("1FA083E5-802E-476A-B17D-48C81D637B51")
 

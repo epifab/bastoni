@@ -206,11 +206,13 @@ trait Table[C <: CardView]:
       deck = deck.drop(event.cards.size)
     )
 
-  def seatFor(user: User): Option[PlayerSeat[C]] =
+  def seatFor(userId: UserId): Option[PlayerSeat[C]] =
     seats.collectFirst {
-      case Seat(Some(player), hand, taken, played) if player.is(user) =>
+      case Seat(Some(player), hand, taken, played) if player.is(userId) =>
         PlayerSeat(player, hand, taken, played)
     }
+
+  def seatFor(user: User): Option[PlayerSeat[C]] = seatFor(user.id)
 
 
 object Table:

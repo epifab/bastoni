@@ -5,8 +5,8 @@ import io.circe.generic.semiauto.{deriveEncoder, deriveDecoder}
 
 case class Player(matchPlayer: MatchPlayer, hand: List[Card], taken: List[Card], extraPoints: Int = 0) extends User(matchPlayer.id, matchPlayer.name):
   def has(card: Card): Boolean = hand.contains(card)
-  def draw(card: Card) = copy(hand = card :: hand)
-  def draw(cards: List[Card]) = copy(hand = cards ++ hand)
+  def draw(card: Card): Player = copy(hand = card :: hand)
+  def draw(cards: List[Card]): Player = copy(hand = cards ++ hand)
   def addExtraPoints(points: Int): Player = copy(extraPoints = extraPoints + points)
 
   def play(card: Card): Player =

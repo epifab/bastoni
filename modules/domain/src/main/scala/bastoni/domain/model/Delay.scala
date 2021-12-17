@@ -1,7 +1,7 @@
 package bastoni.domain.model
 
-import io.circe.{Decoder, Encoder, Codec}
-import io.circe.generic.semiauto.deriveCodec
+import io.circe.{Codec, Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
 enum Delay:
   case Short, Medium, Long, Tick
@@ -24,12 +24,22 @@ extension (command: Command)
 type PotentiallyDelayed[T] = T | Delayed[T]
 
 object PotentiallyDelayed:
-  given decoder[T](using Decoder[T]): Decoder[T | Delayed[T]] = Decoder[(T, Option[Delay])].map {
-    case (t, Some(delay)) => Delayed(t, delay)
-    case (t, None)        => t
+  case class Delayable[T](item: T, delay: Option[Delay])
+
+  given dc[T](using Decoder[T]): Decoder[Delayable[T]] = deriveDecoder
+  given ec[T](using Encoder[T]): Encoder[Delayable[T]] = deriveEncoder
+
+  given decoder[T](using Decoder[T]): Decoder[T | Delayed[T]] = Decoder[Delayable[T]].map {
+    case Delayable(t, Some(delay)) => Delayed(t, delay)
+    case Delayable(t, None)        => t
   }
 
-  given messageEncoder: Encoder[Message | Delayed[Message]] = Encoder[(Message, Option[Delay])].contramap {
-    case Delayed(t: Message, delay) => t -> Some(delay)
-    case t: Message                 => t -> None
+  given messageEncoder: Encoder[Message | Delayed[Message]] = Encoder[Delayable[Message]].contramap {
+    case Delayed(t: Message, delay) => Delayable(t, Some(delay))
+    case t: Message                 => Delayable(t, None)
+  }
+
+  given commandEncoder: Encoder[Command | Delayed[Command]] = Encoder[Delayable[Command]].contramap {
+    case Delayed(t: Command, delay) => Delayable(t, Some(delay))
+    case t: Command                 => Delayable(t, None)
   }

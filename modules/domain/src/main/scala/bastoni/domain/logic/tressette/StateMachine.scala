@@ -7,7 +7,7 @@ import io.circe.{ACursor, Encoder, Decoder, DecodingFailure, Json}
 
 case class StateMachine(state: MatchState) extends GameStateMachine:
   override def apply(message: ServerEvent | Command): (Option[StateMachine], List[ServerEvent | Command | Delayed[Command]]) =
-    Game.playMatchStep(state, message) match
+    Game.playStep(state, message) match
       case (MatchState.Terminated, events) => None -> events
       case (state, events) => Some(new StateMachine(state)) -> events
 

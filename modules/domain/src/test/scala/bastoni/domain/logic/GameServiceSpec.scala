@@ -2,7 +2,6 @@ package bastoni.domain.logic
 
 import bastoni.domain.AsyncIOFreeSpec
 import bastoni.domain.logic.Fixtures.*
-import bastoni.domain.logic.briscola.Briscola3Spec
 import bastoni.domain.logic.{GameContext, GamePubSub}
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
@@ -166,24 +165,6 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       GameAborted.toMessage(room1Id),
       MatchAborted.toMessage(room1Id),
     ))
-  }
-
-  "A complete game can be played" ignore {
-    val inputStream =
-      fs2.Stream[fs2.Pure, ServerEvent | Command](
-        JoinTable(user3, joinSeed),
-        JoinTable(user2, joinSeed),
-        JoinTable(user1, joinSeed),
-        StartGame(user1.id, GameType.Briscola),
-        GameStarted(GameType.Briscola)
-      ).map(_.toMessage(room1Id)) ++
-      Briscola3Spec.input(room1Id, user1, user2, user3) ++
-      Briscola3Spec.input(room1Id, user2, user3, user1) ++
-      Briscola3Spec.input(room1Id, user3, user1, user2) ++
-      Briscola3Spec.input(room1Id, user1, user2, user3) ++
-      fs2.Stream(Continue.toMessage(room1Id))
-
-    gameService(inputStream).asserting(_.last shouldBe MatchCompleted(List(user1.id)).toMessage(room1Id))
   }
 
   "A pre-existing game can be resumed and completed" in {

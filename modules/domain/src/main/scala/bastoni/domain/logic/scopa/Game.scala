@@ -6,54 +6,34 @@ import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
-import bastoni.domain.model.Suit.{Denari, *}
+import bastoni.domain.model.Suit.*
 import cats.Applicative
 
 import scala.annotation.tailrec
 import scala.util.Random
 
-object Game:
+object Game extends GameLogic[MatchState]:
 
-  def playGame[F[_]: Applicative](roomId: RoomId, players: List[User], newId: F[MessageId])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
-    playStream(roomId, GameState(players), playGameStep, s => s.isInstanceOf[GameState.Terminated], messages, newId)
+  override def initialState(users: List[User]): MatchState = MatchState(users)
+  override def isFinal(state: MatchState): Boolean = state == MatchState.Terminated
 
-  def playMatch[F[_]: Applicative](roomId: RoomId, players: List[User], newId: F[MessageId])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
-    playStream(roomId, MatchState(players), playMatchStep, s => s == MatchState.Terminated, messages, newId)
-
-  private def playStream[F[_]: Applicative, State](
-    targetRoomId: RoomId,
-    initialState: State,
-    handler: (State, StateMachineInput) => (State, List[StateMachineOutput]),
-    isFinal: State => Boolean,
-    messages: fs2.Stream[F, Message],
-    newId: F[MessageId]
-  ): fs2.Stream[F, Message | Delayed[Message]] =
-    messages
-      .collect { case Message(_, roomId, message) if roomId == targetRoomId => message }
-      .scan[(State, List[StateMachineOutput])](initialState -> Nil) {
-        case ((state, _), message) => handler(state, message)
-      }
-      .takeThrough { case ((state, _)) => !isFinal(state) }
-      .flatMap { case (_, events) => fs2.Stream.evalSeq(events.toMessages(targetRoomId, newId)) }
-
-  private val uneventful: List[StateMachineOutput] = Nil
-
-  private def withTiemout(state: GameState.PlayRound, request: ActionRequested, before: List[StateMachineOutput] = Nil): (GameState.Active, List[StateMachineOutput]) =
+  private def withTimeout(state: GameState.PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (GameState.Active, List[StateMachineOutput]) =
+    val request = ActionRequested(player, action, Some(Timeout.Max))
     val newState = GameState.WaitingForPlayer(Timer.ref[GameState](state), Timeout.Max, request, state)
     newState -> (before ++ List(request, newState.nextTick))
 
-  private[scopa] val playGameStep: (GameState, StateMachineInput) => (GameState, List[StateMachineOutput]) =
+  val playGameStep: (GameState, StateMachineInput) => (GameState, List[StateMachineOutput]) =
     (state, event) =>
       playGameStepPF match
         case partialFunction if partialFunction.isDefinedAt(state -> event) => partialFunction(state -> event)
         case _ => state -> uneventful
 
-  private val playGameStepPF: PartialFunction[(GameState, StateMachineInput), (GameState, List[StateMachineOutput])] = {
+  val playGameStepPF: PartialFunction[(GameState, StateMachineInput), (GameState, List[StateMachineOutput])] = {
     case (active: GameState.Active, PlayerLeftTable(player, _)) if active.activePlayers.exists(_.is(player)) =>
       GameState.Aborted -> List(GameAborted)
 
     case (GameState.Ready(players), GameStarted(_)) =>
-      GameState.Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck))
+      GameState.Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
 
     case (GameState.Ready(matchPlayers), ShuffleDeck(seed)) =>
       val shuffledDeck = new Random(seed).shuffle(Deck.instance)
@@ -81,9 +61,10 @@ object Game:
         val players = done :+ player.draw(cards)
 
         if (tail.isEmpty)
-          withTiemout(
+          withTimeout(
             GameState.PlayRound(players, tail, board = Nil),
-            ActionRequested(done.head.id, Action.TakeCards, Some(Timeout.Max)),
+            done.head.id,
+            Action.TakeCards,
             List(cardsDealt)
           )
         else GameState.Deal5Round(players, tail) -> List(cardsDealt, Continue.later)
@@ -91,9 +72,10 @@ object Game:
 
     case (GameState.WillDealBoardCards(players, deck), Continue) =>
       deck.dealOrDie(4) { (boardCards, tail) =>
-        withTiemout(
+        withTimeout(
           state = GameState.PlayRound(players, tail, boardCards),
-          request = ActionRequested(players.head.id, Action.TakeCards, Some(Timeout.Max)),
+          player = players.head.id,
+          action = Action.TakeCards,
           before = List(BoardCardsDealt(boardCards))
         )
       }
@@ -101,9 +83,10 @@ object Game:
     case (GameState.DrawRound(player :: Nil, done, deck, board), Continue) =>
       deck.dealOrDie(3) { (cards, tail) =>
         val players = done :+ player.draw(cards)
-        withTiemout(
+        withTimeout(
           state = GameState.PlayRound(players, tail, board),
-          request = ActionRequested(players.head.id, Action.TakeCards, Some(Timeout.Max)),
+          player = players.head.id,
+          action = Action.TakeCards,
           before = List(CardsDealt(player.id, cards, Direction.Player))
         )
       }
@@ -181,10 +164,11 @@ object Game:
       val updatedPlayers = (nextPlayer :: others) :+ updatedPlayer
 
       if (nextPlayer.hand.nonEmpty) {
-        withTiemout(
+        withTimeout(
           GameState.PlayRound(updatedPlayers, deck, updatedBoard),
-          ActionRequested(nextPlayer.id, Action.TakeCards, Some(Timeout.Max)),
-          List(event)
+          player = nextPlayer.id,
+          action = Action.TakeCards,
+          before = List(event)
         )
       }
       else if (deck.nonEmpty) GameState.DrawRound(updatedPlayers, Nil, deck, updatedBoard) -> List(event, Continue.later)
@@ -211,13 +195,14 @@ object Game:
       GameState.Completed(updatedPlayers) -> List(ScopaGameCompleted(scores, matchScores))
   }
 
-  private[scopa] val playMatchStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
+  override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
 
     case (MatchState.InProgress(players, gameState, pointsToWin), message) =>
       playGameStep(gameState, message) match
         case (GameState.Completed(players), events) =>
           def ready(shiftedRound: List[MatchPlayer], pointsToWin: Int) =
-            MatchState.InProgress(shiftedRound, GameState.Ready(shiftedRound), pointsToWin) -> (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck))
+            MatchState.InProgress(shiftedRound, GameState.Ready(shiftedRound), pointsToWin) ->
+              (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck, timeout = None))
 
           val teamSize = if (players.size == 4) 2 else 1
 
@@ -238,7 +223,7 @@ object Game:
   }
 
   def legalPlay(board: List[Card], played: Card, taken: List[Card]): Boolean =
-    takeCombinations(board, played).exists(_ == taken.toSet)
+    takeCombinations(board, played).contains(taken.toSet)
 
   def takeCombinations(board: List[Card], toPlay: Card): Iterator[Set[Card]] =
     if (board.exists(_.rank == toPlay.rank)) board.iterator.filter(_.rank == toPlay.rank).map(Set(_))

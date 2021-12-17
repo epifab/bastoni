@@ -29,10 +29,9 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       TakeCards(user2.id, Card(Re, Denari), Nil),
       dealCards,
       dealCards,
+    )
 
-    ).map(_.toMessage(room1))
-
-    Game.playGame[cats.Id](room1, players, messageId)(input).compile.toList shouldBe List[StateMachineOutput](
+    Game.playStream[cats.Id](players)(input).compile.toList shouldBe List[StateMachineOutput](
       DeckShuffled(shuffledDeck),
 
       Continue.later,
@@ -73,7 +72,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
 
       ActionRequested(user1.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(1793470367),
-    ).map(_.toMessage(room1))
+    )
   }
 
   "Players cannot take two cards if they can take one only" in {
