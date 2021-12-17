@@ -58,7 +58,7 @@ class GameServiceSpec extends AnyFreeSpec with Matchers:
       Briscola3Spec.output(room.id, player2, player3, player1) ++
       Briscola3Spec.output(room.id, player3, player1, player2) ++
       Briscola3Spec.output(room.id, player1, player2, player3) ++
-      List(Message(room.id, GameWinners(List(player1.id))))
+      List(Message(room.id, GameCompleted(List(player1.id))))
 
     GameService(inputStream).compile.toList shouldBe outputStream
   }

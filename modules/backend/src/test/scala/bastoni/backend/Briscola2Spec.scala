@@ -12,7 +12,6 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
 
   val player1 = Player(PlayerId.newId, "Tizio")
   val player2 = Player(PlayerId.newId, "Caio")
-  val player3 = Player(PlayerId.newId, "Sempronio")
 
   val roomId = RoomId.newId
   val room = Room(roomId, List(player1, player2))
@@ -176,7 +175,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Due, Bastoni)),
       CardPlayed(player2.id, Card(Quattro, Spade)),
       mediumDelay,
-      TrickWinner(player1.id),  // 0
+      TrickCompleted(player1.id),  // 0
 
       mediumDelay,
       CardDealt(player1.id, Card(Asso, Bastoni)),     // Sette Denari, Sei Denari, Asso Bastoni
@@ -185,7 +184,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Sei, Denari)),
       CardPlayed(player2.id, Card(Re, Denari)),
       mediumDelay,
-      TrickWinner(player2.id),  // 4
+      TrickCompleted(player2.id),  // 4
 
       mediumDelay,
       CardDealt(player2.id, Card(Sei, Bastoni)),      // Asso Spade, Cinque Spade, Sei Bastoni
@@ -194,7 +193,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player2.id, Card(Cinque, Spade)),
       CardPlayed(player1.id, Card(Tre, Spade)),
       mediumDelay,
-      TrickWinner(player1.id),  // 10
+      TrickCompleted(player1.id),  // 10
 
       mediumDelay,
       CardDealt(player1.id, Card(Tre, Denari)),       // Sette Denari, Asso Bastoni, Tre Denari
@@ -203,7 +202,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Sette, Denari)),
       CardPlayed(player2.id, Card(Sei, Bastoni)),
       mediumDelay,
-      TrickWinner(player1.id),  // 10
+      TrickCompleted(player1.id),  // 10
 
       mediumDelay,
       CardDealt(player1.id, Card(Fante, Bastoni)),    // Asso Bastoni, Tre Denari, Fante Bastoni
@@ -212,7 +211,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Fante, Bastoni)),
       CardPlayed(player2.id, Card(Due, Denari)),
       mediumDelay,
-      TrickWinner(player1.id),  // 12
+      TrickCompleted(player1.id),  // 12
 
       mediumDelay,
       CardDealt(player1.id, Card(Fante, Spade)),      // Asso Bastoni, Tre Denari, Fante Spade
@@ -221,7 +220,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Tre, Denari)),
       CardPlayed(player2.id, Card(Asso, Coppe)),
       mediumDelay,
-      TrickWinner(player2.id),  // 25
+      TrickCompleted(player2.id),  // 25
 
       mediumDelay,
       CardDealt(player2.id, Card(Sette, Bastoni)),    // Asso Spade, Re Bastoni, Sette Bastoni
@@ -230,7 +229,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player2.id, Card(Sette, Bastoni)),
       CardPlayed(player1.id, Card(Asso, Bastoni)),
       mediumDelay,
-      TrickWinner(player1.id),  // 23
+      TrickCompleted(player1.id),  // 23
 
       mediumDelay,
       CardDealt(player1.id, Card(Fante, Coppe)),      // Fante Spade, Tre Coppe, Fante Coppe
@@ -239,7 +238,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Fante, Spade)),
       CardPlayed(player2.id, Card(Asso, Spade)),
       mediumDelay,
-      TrickWinner(player2.id),  // 38
+      TrickCompleted(player2.id),  // 38
 
       mediumDelay,
       CardDealt(player2.id, Card(Sei, Coppe)),        // Re Bastoni, Cinque Bastoni, Sei Coppe
@@ -248,7 +247,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player2.id, Card(Cinque, Bastoni)),
       CardPlayed(player1.id, Card(Cavallo, Denari)),
       mediumDelay,
-      TrickWinner(player2.id),  // 41
+      TrickCompleted(player2.id),  // 41
 
       mediumDelay,
       CardDealt(player2.id, Card(Cavallo, Bastoni)),  // Re Bastoni, Sei Coppe, Cavallo Bastoni
@@ -257,7 +256,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player2.id, Card(Re, Bastoni)),
       CardPlayed(player1.id, Card(Due, Coppe)),
       mediumDelay,
-      TrickWinner(player1.id),  // 27
+      TrickCompleted(player1.id),  // 27
 
       mediumDelay,
       CardDealt(player1.id, Card(Fante, Denari)),     // Tre Coppe, Fante Coppe, Fante Denari
@@ -266,7 +265,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Fante, Denari)),
       CardPlayed(player2.id, Card(Cavallo, Bastoni)),
       mediumDelay,
-      TrickWinner(player1.id),  // 32
+      TrickCompleted(player1.id),  // 32
 
       mediumDelay,
       CardDealt(player1.id, Card(Quattro, Bastoni)), // Tre Coppe, Fante Coppe, Quattro Bastoni
@@ -275,7 +274,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Quattro, Bastoni)),
       CardPlayed(player2.id, Card(Cavallo, Spade)),
       mediumDelay,
-      TrickWinner(player1.id),  // 35
+      TrickCompleted(player1.id),  // 35
 
       mediumDelay,
       CardDealt(player1.id, Card(Quattro, Coppe)),   // Tre Coppe, Fante Coppe, Quattro Coppe
@@ -284,7 +283,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Quattro, Coppe)),
       CardPlayed(player2.id, Card(Sei, Coppe)),
       mediumDelay,
-      TrickWinner(player2.id),  // 41
+      TrickCompleted(player2.id),  // 41
 
       mediumDelay,
       CardDealt(player2.id, Card(Sette, Spade)),    // Re Coppe, Asso Denari, Sette Spade
@@ -293,7 +292,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player2.id, Card(Sette, Spade)),
       CardPlayed(player1.id, Card(Cinque, Denari)),
       mediumDelay,
-      TrickWinner(player2.id),  // 41
+      TrickCompleted(player2.id),  // 41
 
       mediumDelay,
       CardDealt(player2.id, Card(Sette, Coppe)),    // Re Coppe, Asso Denari, Sette Coppe
@@ -302,7 +301,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player2.id, Card(Sette, Coppe)),
       CardPlayed(player1.id, Card(Re, Spade)),
       mediumDelay,
-      TrickWinner(player2.id),  // 45
+      TrickCompleted(player2.id),  // 45
 
       mediumDelay,
       CardDealt(player2.id, Card(Sei, Spade)),      // Re Coppe, Asso Denari, Sei Spade
@@ -311,7 +310,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player2.id, Card(Sei, Spade)),
       CardPlayed(player1.id, Card(Quattro, Denari)),
       mediumDelay,
-      TrickWinner(player2.id),  // 45
+      TrickCompleted(player2.id),  // 45
 
       mediumDelay,
       CardDealt(player2.id, Card(Tre, Bastoni)),    // Re Coppe, Asso Denari, Tre Bastoni
@@ -320,7 +319,7 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player2.id, Card(Tre, Bastoni)),
       CardPlayed(player1.id, Card(Fante, Coppe)),
       mediumDelay,
-      TrickWinner(player1.id),  // 47
+      TrickCompleted(player1.id),  // 47
 
       mediumDelay,
       CardDealt(player1.id, Card(Cavallo, Coppe)),  // Tre Coppe, Due Spade, Cavallo Coppe
@@ -329,22 +328,22 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardPlayed(player1.id, Card(Due, Spade)),
       CardPlayed(player2.id, Card(Asso, Denari)),
       mediumDelay,
-      TrickWinner(player1.id),  // 58
+      TrickCompleted(player1.id),  // 58
 
       CardPlayed(player1.id, Card(Cavallo, Coppe)),
       CardPlayed(player2.id, Card(Re, Coppe)),
       mediumDelay,
-      TrickWinner(player2.id),  // 52
+      TrickCompleted(player2.id),  // 52
 
       CardPlayed(player2.id, Card(Cinque, Coppe)),
       CardPlayed(player1.id, Card(Tre, Coppe)),
       mediumDelay,
-      TrickWinner(player1.id),  // 68
+      TrickCompleted(player1.id),  // 68
 
       longDelay,
       PointsCount(List(player1.id), 68),
       PointsCount(List(player2.id), 52),
-      MatchWinners(List(player1.id))
+      MatchCompleted(List(player1.id))
     ).map(_.toMessage(roomId))
   }
 

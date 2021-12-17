@@ -84,7 +84,7 @@ object Game:
         else if (deck.isEmpty) MatchState.PlayRound(updatedPlayers, Nil, Nil, trump) -> None
         else MatchState.DrawRound(updatedPlayers, Nil, deck, trump) -> Some(Continue.delayed)
 
-      state -> (TrickWinner(winner.id) :: delay.toList)
+      state -> (TrickCompleted(winner.id) :: delay.toList)
 
     case (MatchState.WillComplete(players, trump), Continue) =>
       val teams = players match
@@ -97,7 +97,7 @@ object Game:
         case PointsCount(winners, wp) :: PointsCount(losers, lp) :: _ if wp > lp => Some(winners)
         case _ => None
 
-      val events = pointsCount :+ winners.fold(MatchDraw)(MatchWinners(_))
+      val events = pointsCount :+ winners.fold(MatchDraw)(MatchCompleted(_))
 
       MatchState.Completed(winners.getOrElse(Nil)) -> events
 
@@ -119,7 +119,7 @@ object Game:
               val shiftedRound = newPlayers.tail :+ newPlayers.head
               GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), 0) -> events
             else
-              GameState.Terminated -> (events :+ GameWinners(winners))
+              GameState.Terminated -> (events :+ GameCompleted(winners))
           else
             val shiftedRound = newPlayers.tail :+ newPlayers.head
             GameState.InProgress(shiftedRound, MatchState.Ready(shiftedRound), rounds - 1) -> events

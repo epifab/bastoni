@@ -45,8 +45,11 @@ object GameService:
       }
       .flatMap { case (_, messages) => fs2.Stream.iterable(messages) }
 
-  def run(messageBus: MessageBus[IO]): IO[Unit] =
-    apply(messageBus.subscribe).evalTap {
-      case DelayedMessage(message, delay) => messageBus.publish1(message).delayBy(delay.duration).start
-      case message: Message => messageBus.publish1(message)
-    }.compile.drain
+  def run(messageBus: MessageBus[IO]): fs2.Stream[IO, Unit] =
+    messageBus
+      .subscribe
+      .through(apply)
+      .evalTap {
+        case DelayedMessage(message, delay) => messageBus.publish1(message).delayBy(delay.duration).start
+        case message: Message => messageBus.publish1(message)
+      }.map(_ => ())

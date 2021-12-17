@@ -181,7 +181,7 @@ object Briscola4Spec:
       CardPlayed(player3.id, Card(Sette, Denari)),
       CardPlayed(player4.id, Card(Asso, Bastoni)),
       mediumDelay,
-      TrickWinner(player4.id),  // 11
+      TrickCompleted(player4.id),  // 11
 
       mediumDelay,
       CardDealt(player4.id, Card(Fante, Bastoni)),  // Quattro Spade, Tre Denari, Fante Bastoni
@@ -196,7 +196,7 @@ object Briscola4Spec:
       CardPlayed(player2.id, Card(Fante, Spade)),
       CardPlayed(player3.id, Card(Re, Bastoni)),
       mediumDelay,
-      TrickWinner(player3.id),  // 8
+      TrickCompleted(player3.id),  // 8
 
       mediumDelay,
       CardDealt(player3.id, Card(Sette, Bastoni)),  // Cinque Coppe, Tre Spade, Sette Bastoni
@@ -211,7 +211,7 @@ object Briscola4Spec:
       CardPlayed(player1.id, Card(Sei, Denari)),
       CardPlayed(player2.id, Card(Cinque, Bastoni)),
       mediumDelay,
-      TrickWinner(player3.id),  // 0 + 8 = 8
+      TrickCompleted(player3.id),  // 0 + 8 = 8
 
       mediumDelay,
       CardDealt(player3.id, Card(Sei, Coppe)),        // Cinque Coppe, Tre Spade, Sei Coppe
@@ -226,7 +226,7 @@ object Briscola4Spec:
       CardPlayed(player1.id, Card(Cavallo, Bastoni)),
       CardPlayed(player2.id, Card(Re, Denari)),
       mediumDelay,
-      TrickWinner(player3.id),  // 10 + 8 = 18
+      TrickCompleted(player3.id),  // 10 + 8 = 18
 
       mediumDelay,
       CardDealt(player3.id, Card(Fante, Denari)),     // Cinque Coppe, Tre Spade, Fante Denari
@@ -241,7 +241,7 @@ object Briscola4Spec:
       CardPlayed(player1.id, Card(Quattro, Bastoni)),
       CardPlayed(player2.id, Card(Re, Coppe)),
       mediumDelay,
-      TrickWinner(player2.id),  // 16 + 11 = 27
+      TrickCompleted(player2.id),  // 16 + 11 = 27
 
       mediumDelay,
       CardDealt(player2.id, Card(Quattro, Coppe)),  // Asso Spade, Due Coppe, Quattro Coppe
@@ -256,7 +256,7 @@ object Briscola4Spec:
       CardPlayed(player4.id, Card(Sette, Spade)),
       CardPlayed(player1.id, Card(Cinque, Spade)),
       mediumDelay,
-      TrickWinner(player3.id),  // 0 + 18 = 18
+      TrickCompleted(player3.id),  // 0 + 18 = 18
 
       mediumDelay,
       CardDealt(player3.id, Card(Sette, Coppe)),    // Tre Spade, Asso Denari, Sette Coppe
@@ -271,7 +271,7 @@ object Briscola4Spec:
       CardPlayed(player1.id, Card(Sei, Spade)),
       CardPlayed(player2.id, Card(Quattro, Denari)),
       mediumDelay,
-      TrickWinner(player3.id),  // 3 + 18 = 21
+      TrickCompleted(player3.id),  // 3 + 18 = 21
 
       mediumDelay,
       CardDealt(player3.id, Card(Tre, Bastoni)),      // Tre Spade, Asso Denari, Tre Bastoni
@@ -287,21 +287,21 @@ object Briscola4Spec:
       CardPlayed(player1.id, Card(Cavallo, Coppe)),    // Fante Coppe, Cinque Denari, ***
       CardPlayed(player2.id, Card(Quattro, Coppe)),    // Asso Spade, ***, Asso Coppe
       mediumDelay,
-      TrickWinner(player1.id),  // 17 + 21 = 38
+      TrickCompleted(player1.id),  // 17 + 21 = 38
 
       CardPlayed(player1.id, Card(Cinque, Denari)),    // Fante Coppe, ***, ***
       CardPlayed(player2.id, Card(Asso, Spade)),       // ***, ***, Asso Coppe
       CardPlayed(player3.id, Card(Asso, Denari)),      // Tre Spade, ***, ***
       CardPlayed(player4.id, Card(Due, Spade)),        // Tre Coppe, ***, ***
       mediumDelay,
-      TrickWinner(player3.id),  // 22 + 38 = 60
+      TrickCompleted(player3.id),  // 22 + 38 = 60
 
       CardPlayed(player3.id, Card(Tre, Spade)),
       CardPlayed(player4.id, Card(Tre, Coppe)),
       CardPlayed(player1.id, Card(Fante, Coppe)),
       CardPlayed(player2.id, Card(Asso, Coppe)),
       mediumDelay,
-      TrickWinner(player2.id),  // 33 + 27 = 60
+      TrickCompleted(player2.id),  // 33 + 27 = 60
 
       longDelay,
       PointsCount(List(player2.id, player4.id), 60),

@@ -40,3 +40,9 @@ object Lobby:
         case ((lobby, _), _) => lobby -> None
       }
       .collect { case (room, Some((roomId, event))) => Message(roomId, event) }
+
+  def run[F[_]](messageBus: MessageBus[F]): fs2.Stream[F, Unit] =
+    messageBus
+      .subscribe
+      .through(apply(4))
+      .through(messageBus.publish)
