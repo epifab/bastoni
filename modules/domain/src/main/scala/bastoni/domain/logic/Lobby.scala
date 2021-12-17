@@ -47,8 +47,9 @@ object Lobby:
       }
       .collect { case Some(message) => message }
 
-  def run[F[_]: Sync](messageBus: MessageBus[F], repo: RoomRepo[F]): fs2.Stream[F, Unit] =
-    messageBus
-      .subscribe
-      .through(Lobby(roomSize = 4, Sync[F].delay(MessageId.newId), Sync[F].delay(Random.nextInt()), repo))
-      .through(messageBus.publish)
+  def runner[F[_]: Sync](messageBus: MessageBus[F], repo: RoomRepo[F]): Runner[F] =
+    messageBus.subscribeAwait.map { subscriber =>
+      subscriber
+        .through(Lobby(roomSize = 4, Sync[F].delay(MessageId.newId), Sync[F].delay(Random.nextInt()), repo))
+        .through(messageBus.publish)
+    }

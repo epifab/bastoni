@@ -7,7 +7,7 @@ import bastoni.domain.model.Event.*
 import bastoni.domain.repos.{GameRepo, MessageRepo}
 import cats.Applicative
 import cats.effect.syntax.all.*
-import cats.effect.{Async, Concurrent}
+import cats.effect.{Async, Concurrent, Resource}
 import cats.syntax.all.*
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, DecodingFailure, Encoder, Json}
@@ -24,38 +24,29 @@ extension (data: List[Command | Delayed[Command] | Event])
       }
 
 object GameService:
+
   def apply[F[_]: Concurrent](newId: F[MessageId], gameRepo: GameRepo[F], messageRepo: MessageRepo[F])(messages: fs2.Stream[F, Message]): fs2.Stream[F, Message | Delayed[Message]] =
     messages
-      .evalMap { case Message(id, roomId, data) =>
+      .evalMap { case Message(id, roomId, message) =>
         for {
-          context <- gameRepo.get(roomId)
-          (updatedContext, messagesData) = context.map(_.update(data)).orElse(GameContext.build(data)) match {
-            case None => None -> Nil
-            case Some(context) =>
-              val (stateMachine, messagesData) = (context.stateMachine, data) match {
-                case (None, StartGame(room, gameType)) => Some(GameStateMachineFactory(gameType)(room)) -> List(GameStarted(gameType))
-                case (Some(state), event) => state(event)
-                case (None, _) => None -> Nil
-              }
-              Some(context.withStateMachine(stateMachine)) -> messagesData
+          currentStateMachine <- gameRepo.get(roomId)
+          (updatedStateMachine, messagesData) = (currentStateMachine, message) match {
+            case (None, StartGame(room, gameType)) => Some(GameStateMachineFactory(gameType)(room)) -> List(GameStarted(gameType))
+            case (Some(state), event) => state(event)
+            case (None, _) => None -> Nil
           }
 
           messages <- messagesData.toMessages(roomId, newId)
 
-//          messages <- ((for {
-//            table <- updatedContext.map(_.table)
-//            snapshot <- Option.when(data == Observe)(Snapshot(table))
-//          } yield snapshot).toList ++ messagesData).toMessages(roomId, newId)
-
           // the remaining operations should be done atomically to guarantee consistency
           _ <- messageRepo.landed(id)
           _ <- messages.traverse(messageRepo.flying)
-          _ <- updatedContext.fold(gameRepo.remove(roomId))(gameRepo.set(roomId, _))
+          _ <- updatedStateMachine.fold(gameRepo.remove(roomId))(gameRepo.set(roomId, _))
         } yield messages
       }
       .flatMap(fs2.Stream.iterable)
 
-  def run[F[_]: Async](
+  def runner[F[_]: Async](
     messageBus: MessageBus[F],
     gameRepo: GameRepo[F],
     messageRepo: MessageRepo[F],
@@ -64,14 +55,13 @@ object GameService:
       case Delay.Medium => 1.second
       case Delay.Long => 3.seconds
     }
-  ): fs2.Stream[F, Unit] =
-    for {
-      subscriber <- fs2.Stream.resource(messageBus.subscribeAwait)
-      oldMessages = messageRepo.inFlight
-      newMessages = subscriber.through(GameService(Async[F].delay(MessageId.newId), gameRepo, messageRepo))
-      event <- (oldMessages ++ newMessages).evalMap {
+  ): Runner[F] =
+    messageBus.subscribeAwait.map { subscription =>
+      val oldMessages = messageRepo.inFlight
+      val newMessages = subscription.through(GameService(Async[F].delay(MessageId.newId), gameRepo, messageRepo))
+
+      (oldMessages ++ newMessages).evalMap {
         case Delayed(message, delay) => messageBus.publish1(message).delayBy(delayDuration(delay)).start.void
         case message: Message        => messageBus.publish1(message)
       }
-    } yield ()
-
+    }

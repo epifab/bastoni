@@ -121,39 +121,29 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       )
     )
 
-    val gameContext = new GameContext(
-      Table(
-        seats = List(
-          Seat(None, Nil, Nil, Nil),
-          Seat(Some(ActingPlayer(gamePlayer1)), List(CardState(player1Card, Face.Player)), player1Collected.map(card => CardState(card, Face.Down)), Nil),
-          Seat(None, Nil, Nil, Nil),
-          Seat(Some(WatingPlayer(gamePlayer2)), Nil, Nil, List(CardState(player2Card, Face.Up)))
-        ),
-        deck = Nil,
-        active = true
-      ),
-      stateMachine = Some(stateMachine)
-    )
-
     val oldMessage = CardPlayed(player2.id, player2Card).toMessage(room1.id)
 
-    val (events, actualContext, messages) = (for {
+    val (events, actualStateMachine, messages) = (for {
       gameRepo <- JsonRepos.gameRepo
       messageRepo <- JsonRepos.messageRepo
-      _ <- gameRepo.set(room1.id, gameContext)
+      _ <- gameRepo.set(room1.id, stateMachine)
       _ <- messageRepo.flying(oldMessage)
-      bus <- MessageBus.inMemory[IO]
+      messageBus <- MessageBus.inMemory[IO]
       events <- (for {
-        subscription <- fs2.Stream.resource(bus.subscribeAwait)
-        event <- subscription.concurrently(bus.run)
-          .concurrently(GameService.run[IO](bus, gameRepo, messageRepo, _ => 2.millis))
-          .concurrently(GameBus(bus).publish(player1, room1.id, fs2.Stream(FromPlayer.PlayCard(player1Card)).delayBy(100.millis)))
+        subscription <- fs2.Stream.resource(messageBus.subscribeAwait)
+        gameServiceRunner <- fs2.Stream.resource(GameService.runner[IO](messageBus, gameRepo, messageRepo, _ => 2.millis))
+        event <- subscription.concurrently(messageBus.run)
+          .concurrently(gameServiceRunner)
+          .concurrently(
+            fs2.Stream(FromPlayer.PlayCard(player1Card)).delayBy[IO](100.millis)
+              .through(GameBus.publisher(messageBus).publish(player1, room1.id))
+          )
           .collect { case Message(_, _, event: Event) => event }
           .interruptAfter(300.millis)
       } yield event).compile.toList
-      context <- gameRepo.get(room1.id)
+      newStateMachine <- gameRepo.get(room1.id)
       messages <- messageRepo.inFlight.compile.toList
-    } yield (events, context, messages)).unsafeRunSync()
+    } yield (events, newStateMachine, messages)).unsafeRunSync()
 
     events shouldBe List(
       oldMessage.data,
@@ -173,19 +163,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       GameCompleted(List(player1.id))
     )
 
-    actualContext shouldBe Some(new GameContext(
-      Table(
-        seats = List(
-          Seat(None, Nil, Nil, Nil),
-          Seat(Some(EndOfGamePlayer(gamePlayer1.win, winner = true)), Nil, Nil, Nil),
-          Seat(None, Nil, Nil, Nil),
-          Seat(Some(EndOfGamePlayer(gamePlayer2, winner = false)), Nil, Nil, Nil)
-        ),
-        deck = Nil,
-        active = false
-      ),
-      stateMachine = None
-    ))
+    actualStateMachine shouldBe None
     messages shouldBe Nil
   }
 
@@ -203,14 +181,17 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       _ <- messageRepo.flying(message2)
       _ <- messageRepo.flying(message3)
       events <- (for {
-        subscription <- fs2.Stream.resource(bus.subscribeAwait)
-        message <- subscription
-          .concurrently(bus.run)
-          .concurrently(GameService.run[IO](bus, gameRepo, messageRepo, {
+        gameServiceRunner <- fs2.Stream.resource(
+          GameService.runner[IO](bus, gameRepo, messageRepo, {
             case Delay.Short => 10.milli
             case Delay.Medium => 20.millis
             case Delay.Long => 30.millis
-          }))
+          })
+        )
+        subscription <- fs2.Stream.resource(bus.subscribeAwait)
+        message <- subscription
+          .concurrently(bus.run)
+          .concurrently(gameServiceRunner)
           .interruptAfter(100.millis)
       } yield message).compile.toList
     } yield events).unsafeRunSync()

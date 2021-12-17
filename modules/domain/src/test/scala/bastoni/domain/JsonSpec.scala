@@ -79,7 +79,7 @@ class JsonSpec extends AnyFreeSpec with Matchers:
     "action request" in {
       val playerId = PlayerId.newId
       val expectedJson = parse(s"""{"type": "ActionRequest", "playerId": "$playerId", "action": {"type": "PlayCardOf", "suit": "Denari"}}""").getOrElse(fail("Invalid json"))
-      val command: Command = Command.ActionRequest(playerId, Command.Action.PlayCardOf(Suit.Denari))
+      val command: Command = Command.ActionRequest(playerId, Action.PlayCardOf(Suit.Denari))
 
       command.asJson shouldBe expectedJson
       expectedJson.as[Command] shouldBe Right(command)

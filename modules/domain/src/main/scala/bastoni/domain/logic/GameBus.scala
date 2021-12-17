@@ -3,58 +3,70 @@ package bastoni.domain.logic
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
+import bastoni.domain.repos.TableRepo
 import bastoni.domain.view.{FromPlayer, TableView, ToPlayer}
-import cats.effect.Sync
+import cats.Monad
 import cats.effect.syntax.all.*
+import cats.effect.{Resource, Sync}
+import cats.syntax.all.*
 
-class GameBus[F[_]: Sync](messageBus: MessageBus[F], seeds: fs2.Stream[F, Int], messageIds: fs2.Stream[F, MessageId]):
+import scala.util.Random
 
-  def subscribe(me: Player, roomId: RoomId): fs2.Stream[F, ToPlayer] =
-    for {
-      subscription <- fs2.Stream.resource(messageBus.subscribeAwait)
-      // _ <- publish(me, roomId, fs2.Stream(FromPlayer.Observe))
-      message <- subscription.collect { case Message(_, `roomId`, event: (Event | ActionRequest)) => event }
-    } yield (message match {
-      // case Snapshot(table)                                  => ToPlayer.Snapshot(TableView(me, table))
-      case PlayerJoined(player, room)                       => ToPlayer.PlayerJoined(player, room)
-      case PlayerLeft(player, room)                         => ToPlayer.PlayerLeft(player, room)
-      case GameStarted(gameType)                            => ToPlayer.GameStarted(gameType)
-      case DeckShuffled(cards)                              => ToPlayer.DeckShuffled(cards.size)
-      case CardDealt(player, card, _) if player == me.id    => ToPlayer.CardDealt(player, Some(card))
-      case CardDealt(player, card, Face.Up)                 => ToPlayer.CardDealt(player, Some(card))
-      case CardDealt(player, _, _)                          => ToPlayer.CardDealt(player, None)
-      case TrumpRevealed(trump)                             => ToPlayer.TrumpRevealed(trump)
-      case CardPlayed(player, card)                         => ToPlayer.CardPlayed(player, card)
-      case TrickCompleted(player)                           => ToPlayer.TrickCompleted(player)
-      case MatchCompleted(winners, matchPoints, gamePoints) => ToPlayer.MatchCompleted(winners, matchPoints, gamePoints)
-      case MatchAborted                                     => ToPlayer.MatchAborted
-      case GameCompleted(winners)                           => ToPlayer.GameCompleted(winners)
-      case GameAborted                                      => ToPlayer.GameAborted
-      case ActionRequest(player, action)                    => ToPlayer.ActionRequest(player, action)
-    })
+trait GameSubscriber[F[_]]:
+  def subscribe(me: Player, roomId: RoomId): fs2.Stream[F, ToPlayer]
 
-  private def toModel(me: Player)(eventAndSeed: (FromPlayer, Int)): Command =
+trait GamePublisher[F[_]]:
+  def publish(me: Player, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
+
+object GameBus:
+
+  def runner[F[_]: Monad](messageBus: MessageBus[F], tableBus: TableBus[F], tableRepo: TableRepo[F]): Runner[F] =
+    messageBus.subscribeAwait.map { subscription =>
+      subscription
+        .evalMap {
+          case Message(_, roomId, data) =>
+            for {
+              existingTable <- tableRepo.get(roomId)
+              updatedTable = existingTable.map(_.update(data)).orElse(Table(data))
+              _ <- updatedTable.fold(tableRepo.remove(roomId))(tableRepo.set(roomId, _))
+              hasUpdate = existingTable != updatedTable
+            } yield Option.when(hasUpdate)(roomId -> updatedTable)
+        }
+        .collect { case Some(update) => update }
+        .through(tableBus.publish)
+    }
+
+  def subscriber[F[_]](tableBus: TableBus[F]): GameSubscriber[F] =
+    new GameSubscriber[F] {
+      override def subscribe(me: Player, roomId: RoomId): fs2.Stream[F, ToPlayer] =
+        tableBus.subscribe.collect { case (`roomId`, Some(table)) => ToPlayer.Snapshot(TableView(me, table)) }
+    }
+
+  def publisher[F[_]](
+    messageBus: MessageBus[F],
+    seeds: fs2.Stream[F, Int],
+    messageIds: fs2.Stream[F, MessageId]
+  ): GamePublisher[F] = new GamePublisher[F] {
+    override def publish(me: Player, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
+      input
+        .zip(seeds)
+        .map(buildCommand(me))
+        .zip(messageIds)
+        .map { case (message, id) => Message(id, roomId, message) }
+        .through(messageBus.publish)
+  }
+
+  def publisher[F[_]: Sync](messageBus: MessageBus[F]): GamePublisher[F] =
+    publisher(
+      messageBus,
+      fs2.Stream.repeatEval(Sync[F].delay(Random.nextInt())),
+      fs2.Stream.repeatEval(Sync[F].delay(MessageId.newId))
+    )
+
+  private def buildCommand(me: Player)(eventAndSeed: (FromPlayer, Int)): Command =
     eventAndSeed match
       case (FromPlayer.JoinRoom, _)               => JoinRoom(me)
       case (FromPlayer.LeaveRoom, _)              => LeaveRoom(me)
-      // case (FromPlayer.Observe, _)                => Observe
       case (FromPlayer.ActivateRoom(gameType), _) => ActivateRoom(me, gameType)
       case (FromPlayer.ShuffleDeck, seed)         => ShuffleDeck(seed)
       case (FromPlayer.PlayCard(card), _)         => PlayCard(me.id, card)
-
-  def publish(me: Player, roomId: RoomId, events: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
-    events
-      .zip(seeds)
-      .map(toModel(me))
-      .zip(messageIds)
-      .map { case (message, id) => Message(id, roomId, message) }
-      .through(messageBus.publish)
-
-
-object GameBus:
-  def apply[F[_]: Sync](bus: MessageBus[F]): GameBus[F] =
-    new GameBus(
-      bus,
-      fs2.Stream.repeatEval(Sync[F].delay(scala.util.Random.nextInt())),
-      fs2.Stream.repeatEval(Sync[F].delay(MessageId.newId))
-    )

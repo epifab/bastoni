@@ -6,48 +6,18 @@ import bastoni.domain.model.Command.Continue
 import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.ToPlayer.*
 import bastoni.domain.view.{FromPlayer, TableView, ToPlayer}
-import cats.effect.IO
+import cats.effect.syntax.all.*
 import cats.effect.unsafe.implicits.global
+import cats.effect.{IO, Sync}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration.DurationInt
-import scala.util.chaining.*
-
-object DumbPlayer:
-  def apply[F[_]](me: Player, roomId: RoomId, gameBus: GameBus[F]): fs2.Stream[F, Unit] =
-    gameBus.publish(me, roomId, fs2.Stream(JoinRoom) ++
-      gameBus
-        .subscribe(me, roomId)
-        .through(TableView.stream)
-        .collect {
-          case (ActionRequest(playerId, Command.Action.PlayCard), table) if me.id == playerId =>
-            PlayCard(
-              table
-                .seatFor(me).getOrElse(throw new IllegalStateException(s"I'm not at this table"))
-                .hand.flatten.headOption
-                .getOrElse(throw new IllegalStateException("No cards in hand"))
-            )
-
-          case (ActionRequest(playerId, Command.Action.PlayCardOf(suit)), table) if me.id == playerId =>
-            PlayCard(
-              table
-                .seatFor(me).getOrElse(throw new IllegalStateException(s"I'm not at this table"))
-                .hand.flatten
-                .pipe(hand => hand.find(_.suit == suit).orElse(hand.headOption))
-                .getOrElse(throw new IllegalStateException("No cards in hand"))
-            )
-
-          case (ActionRequest(playerId, Command.Action.ShuffleDeck), table) if me.id == playerId =>
-            ShuffleDeck
-        }
-    )
-
 
 class IntegrationSpec extends AnyFreeSpec with Matchers:
 
   extension (player: Player)
-    def dumb[F[_]](gameBus: GameBus[F]): fs2.Stream[F, Unit] = DumbPlayer(player, roomId, gameBus)
+    def dumb[F[_]: Sync](sub: GameSubscriber[F], pub: GamePublisher[F]): fs2.Stream[F, Unit] = DumbPlayer(player, roomId, sub, pub)
 
   val roomId = RoomId.newId
 
@@ -58,41 +28,55 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
     extraMessages: fs2.Stream[IO, FromPlayer] = fs2.Stream.empty
   ): Event = {
     (for {
-      bus <- MessageBus.inMemory[IO]
-      gameRepo <- JsonRepos.gameRepo
-      roomRepo <- JsonRepos.roomRepo
-      messageRepo <- JsonRepos.messageRepo
-      gameBus = GameBus(bus)
+      messageBus <- fs2.Stream.eval(MessageBus.inMemory[IO])
+      tableBus <- fs2.Stream.eval(TableBus.inMemory[IO])
+      gameRepo <- fs2.Stream.eval(JsonRepos.gameRepo)
+      roomRepo <- fs2.Stream.eval(JsonRepos.roomRepo)
+      tableRepo <- fs2.Stream.eval(JsonRepos.tableRepo)
+      messageRepo <- fs2.Stream.eval(JsonRepos.messageRepo)
 
-      twoPlayers = player1.dumb(gameBus).concurrently(player2.dumb(gameBus))
-      threePlayers = twoPlayers.concurrently(player3.dumb(gameBus))
-      fourPlayers = threePlayers.concurrently(player4.dumb(gameBus))
+      gamePub = GameBus.publisher(messageBus)
+      gameSub = GameBus.subscriber(tableBus)
+
+      dumbPlayer1 = player1.dumb(gameSub, gamePub)
+      dumbPlayer2 = player2.dumb(gameSub, gamePub)
+      dumbPlayer3 = player3.dumb(gameSub, gamePub)
+      dumbPlayer4 = player4.dumb(gameSub, gamePub)
 
       playStreams = numberOfPlayers match
-        case 2 => twoPlayers
-        case 3 => threePlayers
-        case 4 => fourPlayers
+        case 2 => dumbPlayer1.concurrently(dumbPlayer2)
+        case 3 => dumbPlayer1.concurrently(dumbPlayer2).concurrently(dumbPlayer3)
+        case 4 => dumbPlayer1.concurrently(dumbPlayer2).concurrently(dumbPlayer3).concurrently(dumbPlayer4)
 
-      activateStream = gameBus.publish(
-        player1,
-        roomId,
-        fs2.Stream(ActivateRoom(gameType)).delayBy[IO](500.millis) ++ extraMessages
+      activateStream = (fs2.Stream(ActivateRoom(gameType)).delayBy[IO](500.millis) ++ extraMessages)
+        .through(gamePub.publish(player1, roomId))
+
+      gameServiceRunner <- fs2.Stream.resource(
+        if (realSpeed) GameService.runner(messageBus, gameRepo, messageRepo)
+        else GameService.runner(messageBus, gameRepo, messageRepo, _ => 2.millis)
       )
+
+      gameBusRunner <- fs2.Stream.resource(GameBus.runner(messageBus, tableBus, tableRepo))
+
+      lobbyRunner <- fs2.Stream.resource(Lobby.runner(messageBus, roomRepo))
+
       lastMessage <-
-        bus.subscribe.collect[Event] {
-          case Message(_, `roomId`, e: Event.GameCompleted) => e
-          case Message(_, `roomId`, Event.GameAborted) => Event.GameAborted
-        }
-        .concurrently(bus.run)
-        .concurrently(if (realSpeed) GameService.run(bus, gameRepo, messageRepo) else GameService.run(bus, gameRepo, messageRepo, _ => 2.millis))
-        .concurrently(Lobby.run(bus, roomRepo))
-        .concurrently(activateStream)
-        .concurrently(playStreams)
-        .take(1)
-        .interruptAfter(5.seconds)
-        .compile
-        .lastOrError
-    } yield lastMessage).unsafeRunSync()
+        messageBus.subscribe
+          .concurrently(messageBus.run)
+          .concurrently(tableBus.run)
+          .concurrently(gameServiceRunner)
+          .concurrently(gameBusRunner)
+          .concurrently(lobbyRunner)
+          .concurrently(activateStream)
+          .concurrently(playStreams)
+          .evalTap(message => IO(println(message.data.getClass.getSimpleName)))
+          .collect[Event] {
+            case Message(_, `roomId`, e: Event.GameCompleted) => e
+            case Message(_, `roomId`, Event.GameAborted) => Event.GameAborted
+          }
+          .take(1)
+          .interruptAfter(3.seconds)
+    } yield lastMessage).compile.lastOrError.unsafeRunSync()
   }
 
   "Two players can play an entire briscola game" in {

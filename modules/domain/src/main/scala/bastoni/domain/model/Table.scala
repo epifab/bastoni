@@ -1,6 +1,5 @@
 package bastoni.domain.model
 
-// import bastoni.domain.view.ToPlayer.Snapshot
 import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec
 
@@ -35,13 +34,19 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
         )
 
       case Event.GameStarted(_) =>
-        copy(active = true)
+        copy(
+          seats = seats.map {
+            case seat@ Seat(Some(sittingOut: SittingOut), _, _, _) => seat.copy(player = Some(sittingOut.sitIn))
+            case whatever => whatever
+          },
+          active = true
+        )
 
       case Event.DeckShuffled(deck) =>
         copy(
           seats = seats.map {
-            case (Seat(Some(SittingOut(p)), _, _, _)) => Seat(Some(WatingPlayer(GamePlayer(p, 0))), Nil, Nil, Nil)
-            case (Seat(Some(p: SittingIn), _, _, _)) => Seat(Some(WatingPlayer(p.player)), Nil, Nil, Nil)
+            case seat@ Seat(Some(acting@ ActingPlayer(targetPlayer, Action.ShuffleDeck)), _, _, _) =>
+              seat.copy(player = Some(acting.done))
             case whatever => whatever
           },
           deck = deck.map(card => CardState(card, Face.Down))
@@ -71,8 +76,9 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
       case Event.CardPlayed(playerId, card) =>
         copy(
           seats = seats.map {
-            case seat if seat.player.exists(_.playerId == playerId) && seat.hand.exists(_.card == card) =>
+            case seat@ Seat(Some(acting: ActingPlayer), _, _, _) if acting.playerId == playerId =>
               seat.copy(
+                player = Some(acting.done),
                 hand = seat.hand.filterNot(_.card == card),
                 played = CardState(card, Face.Up) :: seat.played
               )
@@ -101,7 +107,10 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
                 val playerMatchPoints = matchPoints.find(_.playerIds.exists(active.player.is)).map(_.points).getOrElse(0)
                 EndOfMatchPlayer(active.player.copy(points = playerGamePoints), playerMatchPoints, winnerIds.exists(active.player.is))
               case whatever => whatever
-            }
+            },
+            hand = Nil,
+            collected = Nil,
+            played = Nil
           )),
           deck = Nil
         )
@@ -109,10 +118,9 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
       case Event.GameCompleted(winnerIds) =>
         copy(
           seats = seats.map {
-            case Seat(Some(active: SittingIn), _, _, _) =>
-              Seat(Some(EndOfGamePlayer(active.player, winner = winnerIds.contains(active.player.id))), Nil, Nil, Nil)
-            case Seat(whatever, _, _, _) =>
-              Seat(whatever, Nil, Nil, Nil)
+            case seat@ Seat(Some(active: SittingIn), _, _, _) =>
+              seat.copy(player = Some(EndOfGamePlayer(active.player, winner = winnerIds.contains(active.player.id))))
+            case whatever => whatever
           },
           deck = Nil,
           active = false
@@ -121,27 +129,47 @@ case class Table(seats: List[Seat], deck: List[CardState], active: Boolean):
       case Event.MatchAborted | Event.GameAborted =>
         copy(
           seats = seats.map {
-            case Seat(Some(p: SittingIn), _, _, _) =>
-              Seat(Some(SittingOut(p.player.player)), Nil, Nil, Nil)
+            case Seat(Some(player: SittingIn), _, _, _) =>
+              Seat(Some(player.sitOut), Nil, Nil, Nil)
             case Seat(whatever, _, _, _) =>
               Seat(whatever, Nil, Nil, Nil)
           },
           deck = Nil
         )
 
-      case Command.ActionRequest(playerId, _) =>
+      case Command.ActionRequest(playerId, action) =>
         copy(
           seats = seats.map {
-            case Seat(Some(WatingPlayer(player)), hand, collected, played) if player.id == playerId =>
-              Seat(Some(ActingPlayer(player)), hand, collected, played)
+            case Seat(Some(waiting: SittingIn), hand, collected, played) if waiting.playerId == playerId =>
+              Seat(Some(waiting.act(action)), hand, collected, played)
             case whatever => whatever
           }
         )
-
-      // case Event.Snapshot(_) => this
 
       case _: Command => this
 
 
 object Table:
   given Codec[Table] = deriveCodec
+
+  def apply(message: Event | Command): Option[Table] =
+    val room = message match {
+      case event: Event.RoomEvent => Some(event.room)
+      case command: Command.StartGame => Some(command.room)
+      case _ => None
+    }
+
+    room.map { room =>
+      Table(
+        seats = room.seats.map(seat =>
+          Seat(
+            seat.map(SittingOut(_)),
+            hand = Nil,
+            collected = Nil,
+            played = Nil
+          )
+        ),
+        deck = Nil,
+        active = false
+      )
+    }

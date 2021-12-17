@@ -2,7 +2,7 @@ package bastoni.domain.logic
 
 import bastoni.domain.model.*
 import bastoni.domain.model.PotentiallyDelayed.{decoder, messageEncoder}
-import bastoni.domain.repos.{GameRepo, MessageRepo, RoomRepo, KeyValueRepo}
+import bastoni.domain.repos.*
 import cats.effect.syntax.all.*
 import cats.effect.{Concurrent, IO, Ref}
 import cats.syntax.all.*
@@ -46,6 +46,7 @@ class JsonMessageRepo[F[_]: Concurrent](messages: Ref[F, Map[MessageId, Json]]) 
 
 
 object JsonRepos:
-  val gameRepo: IO[GameRepo[IO]] = Ref.of[IO, Map[RoomId, Json]](Map.empty).map(new JsonKeyValueRepo[IO, RoomId, GameContext](_))
+  val gameRepo: IO[GameRepo[IO]] = Ref.of[IO, Map[RoomId, Json]](Map.empty).map(new JsonKeyValueRepo[IO, RoomId, GameStateMachine](_))
   val roomRepo: IO[RoomRepo[IO]] = Ref.of[IO, Map[RoomId, Json]](Map.empty).map(new JsonKeyValueRepo[IO, RoomId, Room](_))
+  val tableRepo: IO[TableRepo[IO]] = Ref.of[IO, Map[RoomId, Json]](Map.empty).map(new JsonKeyValueRepo[IO, RoomId, Table](_))
   val messageRepo: IO[MessageRepo[IO]] = Ref.of[IO, Map[MessageId, Json]](Map.empty).map(new JsonMessageRepo[IO](_))
