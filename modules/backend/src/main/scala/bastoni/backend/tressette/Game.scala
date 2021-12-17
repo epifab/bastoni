@@ -33,7 +33,7 @@ object Game:
 
   private[tressette] val playMatchStep: (MatchState, Command | Event) => (MatchState, List[Event | Command | Delayed[Command]]) = {
 
-    case (_, _: PlayerLeft) =>
+    case (active: MatchState.Active, PlayerLeft(player, _)) if active.activePlayers.exists(_.is(player)) =>
       MatchState.Aborted -> List(MatchAborted)
 
     case (MatchState.Ready(players), GameStarted(_)) =>

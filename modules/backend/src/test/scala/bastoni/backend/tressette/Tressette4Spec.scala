@@ -13,7 +13,7 @@ class Tressette4Spec extends AnyFreeSpec with Matchers:
   import Fixtures.*
 
   val roomId = RoomId.newId
-  val room = Room(roomId, List(player1, player2, player3, player4))
+  val room = Room.cosy(roomId, player1, player2, player3, player4)
 
   val drawCard      = Continue
   val completeTrick = Continue

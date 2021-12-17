@@ -18,8 +18,8 @@ import scala.concurrent.duration.DurationInt
 
 class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
 
-  val room1 = Room(RoomId.newId, List(player1, player2))
-  val room2 = Room(RoomId.newId, List(player2, player3))
+  val room1 = Room.cosy(RoomId.newId, player1, player2)
+  val room2 = Room.cosy(RoomId.newId, player2, player3)
 
   "Two simultaneous briscola matches can be played" in {
     val input = fs2.Stream(
@@ -30,7 +30,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       ShuffleDeck(10).toMessage(room2.id),
       Continue.toMessage(room1.id),
       Continue.toMessage(room2.id),
-      PlayerLeft(player1, Room(room1.id, List(player2))).toMessage(room1.id),
+      PlayerLeft(player1, Room(room1.id, List(None, Some(player2)))).toMessage(room1.id),
     )
 
     InMemoryGameServiceRepo[IO].flatMap(repo => GameService[IO](IO(messageId), repo)(input).compile.toList).unsafeRunSync() shouldBe List(
@@ -52,7 +52,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
   }
 
   "A complete game can be played" in {
-    val room = Room(RoomId.newId, List(player1, player2, player3))
+    val room = Room(RoomId.newId, List(Some(player1), Some(player2), Some(player3), None))
 
     val inputStream =
       fs2.Stream(

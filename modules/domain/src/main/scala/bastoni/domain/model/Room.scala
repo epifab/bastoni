@@ -1,9 +1,8 @@
 package bastoni.domain.model
 
 import java.util.UUID
-import scala.util.Try
-
-import io.circe.{Codec, Encoder, Decoder}
+import scala.util.{Random, Try}
+import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.deriveCodec
 
 opaque type RoomId = UUID
@@ -14,7 +13,50 @@ object RoomId:
   given Encoder[RoomId] = Encoder[String].contramap(_.toString)
   given Decoder[RoomId] = Decoder[String].emap(parse(_).toRight("Not a valid ID"))
 
-case class Room(id: RoomId, players: List[Player])
+enum RoomError:
+  case FullRoom, PlayerNotFound, DuplicatePlayer
+
+case class Room(id: RoomId, seats: List[Option[Player]]):
+  lazy val players: List[Player] = seats.collect { case Some(player) => player }
+  lazy val indexedSeats = seats.zipWithIndex
+
+  def isEmpty: Boolean = seats.forall(_.isEmpty)
+
+  def contains(p: Player): Boolean = seatFor(p).isDefined
+
+  def seatFor(p: Player): Option[Int] =
+    indexedSeats.collectFirst { case (Some(player), index) if player.id == p.id => index }
+
+  def join(p: Player, random: Random): Either[RoomError, Room] =
+    if (contains(p)) Left(RoomError.DuplicatePlayer) else {
+      random
+        .shuffle(indexedSeats)
+        .collectFirst { case (None, index) => index }
+        .fold[Either[RoomError, Room]](Left(RoomError.FullRoom)) { targetIndex =>
+          Right(copy(
+            seats = indexedSeats.map {
+              case (_, index) if index == targetIndex => Some(p)
+              case (seat, _) => seat
+            }
+          ))
+        }
+    }
+
+  def leave(p: Player): Either[RoomError, Room] =
+    seatFor(p) match
+      case Some(targetIndex) =>
+        Right(copy(
+          seats = indexedSeats.map {
+            case (_, index) if index == targetIndex => None
+            case (seat, _) => seat
+          }
+        ))
+
+      case None => Left(RoomError.PlayerNotFound)
+
 
 object Room:
   given Codec[Room] = deriveCodec
+
+  def apply(id: RoomId, seats: Int): Room = Room(id, List.fill(seats)(None))
+  def cosy(id: RoomId, players: Player*): Room = Room(id, players.view.map(Some(_)).toList)

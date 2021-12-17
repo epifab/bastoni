@@ -15,7 +15,7 @@ import org.scalatest.matchers.should.Matchers
 class Briscola2Spec extends AnyFreeSpec with Matchers:
 
   val roomId = RoomId.newId
-  val room = Room(roomId, List(player1, player2))
+  val room = Room(roomId, List(Some(player1), None, Some(player2)))
 
   val drawCard      = Continue
   val revealTrump   = Continue
@@ -421,11 +421,11 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
     ).map(_.toMessage(room.id))
   }
 
-  "Game is aborted if a player leaves" in {
+  "Game is aborted if one of the players leave" in {
     val input = fs2.Stream[fs2.Pure, Command | Event](
       ShuffleDeck(10),
       drawCard,
-      PlayerLeft(player1, Room(room.id, List(player2))),
+      PlayerLeft(player1, Room(room.id, List(None, Some(player2), None))),
       drawCard, // too late, game was aborted
     ).map(_.toMessage(room.id))
 
@@ -435,5 +435,21 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
       CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
       shortDelay,
       MatchAborted
+    ).map(_.toMessage(room.id))
+  }
+
+  "Game continues if another player joins and leaves" in {
+    val input = fs2.Stream[fs2.Pure, Command | Event](
+      ShuffleDeck(10),
+      PlayerJoined(player3, Room(room.id, List(Some(player1), Some(player3), Some(player2)))),
+      PlayerLeft(player3, Room(room.id, List(Some(player1), None, Some(player2)))),
+      drawCard,
+    ).map(_.toMessage(room.id))
+
+    Game.playMatch[fs2.Pure](room, messageIds)(input).compile.toList shouldBe List[Event | Command | Delayed[Command]](
+      DeckShuffled(10),
+      mediumDelay,
+      CardDealt(player1.id, Card(Due, Bastoni), Face.Player),
+      shortDelay
     ).map(_.toMessage(room.id))
   }
