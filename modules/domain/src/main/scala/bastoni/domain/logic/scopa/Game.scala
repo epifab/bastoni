@@ -186,69 +186,13 @@ object Game:
       else GameState.WillComplete(updatedPlayers) -> List(event, Continue.muchLater)
 
     case (GameState.WillComplete(players), Continue) =>
+      val teams = players match
+        case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
+        case _ => players.map(List(_))
+
+      val scores = ScopaScore(teams)
       ???
   }
-
-  sealed trait Score(val points: Int)
-
-  object Score:
-    case class  Primiera(cards: List[Card], value: Int) extends Score(1)
-    case object SetteBello extends Score(1)
-    case class  NCarte(count: Int) extends Score(1)
-    case class  NDenari(count: Int) extends Score(1)
-    case class  Scope(count: Int) extends Score(count)
-
-    object Primiera:
-      def valueOf(rank: Rank): Int = rank match
-        case Sette => 21
-        case Sei => 18
-        case Asso => 16
-        case Cinque => 15
-        case Quattro => 14
-        case Tre => 13
-        case Due => 12
-        case Re | Cavallo | Fante => 10
-
-      def apply(cards: List[Card]): Option[Primiera] =
-        val groupedBySuit: Map[Suit, List[Card]] = cards.groupBy(_.suit)
-
-        def bestCard(cards: List[Card]): (Card, Int) =
-          cards.map(card => card -> valueOf(card.rank)).maxBy(_._2)
-
-        def primiera(groupedBySuit: List[List[Card]]): Primiera =
-          val bestCards = groupedBySuit.map(bestCard)
-          Primiera(bestCards.map(_._1), bestCards.map(_._2).sum)
-
-        for {
-          denari <- groupedBySuit.get(Denari)
-          spade <- groupedBySuit.get(Spade)
-          coppe <- groupedBySuit.get(Coppe)
-          bastoni <- groupedBySuit.get(Bastoni)
-        } yield primiera(List(denari, spade, coppe, bastoni))
-
-    def calculate(teams: List[List[Player]]): List[ScopaPointsCount] =
-      val teamWithCards: Map[List[Player], List[Card]] = teams.map(team => team -> team.flatMap(_.taken)).toMap
-
-      val (teamCarte, carte) = teamWithCards.view.mapValues(_.size).mapValues(NCarte(_)).maxBy(_._2.count)
-      val (teamDenari, denari) = teamWithCards.view.mapValues(_.filter(_.rank == Denari).size).mapValues(NDenari(_)).maxBy(_._2.count)
-      val maybePrimiera = teamWithCards.flatMap { case (team, cards) => Primiera(cards).map(team -> _) }.maxByOption(_._2.value)
-      val teamSettebello = teamWithCards.collectFirst { case (team, cards) if cards.contains(Card(Sette, Denari)) => team }
-
-      teams.map(team =>
-        new ScopaPointsCount(
-          team.map(_.id),
-          List(
-            Option.when(team == teamCarte)(carte),
-            Option.when(team == teamDenari)(denari),
-            maybePrimiera.collect { case (teamPrimiera, primiera) if teamPrimiera == team => primiera },
-            Option.when(teamSettebello.contains(team))(Score.SetteBello),
-            Some(Score.Scope(team.map(_.extraPoints).sum)).filter(_.count > 0)
-          ).flatten
-        )
-      )
-
-  case class ScopaPointsCount(players: List[UserId], scores: List[Score]):
-    val points: Int = scores.map(_.points).sum
 
   private[scopa] val playMatchStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
 
