@@ -103,7 +103,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
     val oldMessage = CardPlayed(player2.id, player2Card).toMessage(room1.id)
 
     val (events, gameRooms, messages) = (for {
-      repo <- InMemoryGameServiceRepo[IO]
+      repo <- InMemoryJsonGameServiceRepo[IO]
       _ <- repo.set(room1.id, stateMachine)
       _ <- repo.flying(oldMessage)
       bus <- MessageBus.inMemory[IO]
@@ -116,9 +116,9 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
           .takeThrough(!_.isInstanceOf[Event.GameCompleted])
           .interruptAfter(1.second)
       } yield event).compile.toList
-      gameRooms <- repo.gameRooms.get
-      messages <- repo.messages.get
-    } yield (events, gameRooms, messages)).unsafeRunSync()
+      gameRoom <- repo.get(room1.id)
+      messages <- repo.inFlight.compile.toList
+    } yield (events, gameRoom, messages)).unsafeRunSync()
 
     events shouldBe List(
       oldMessage.data,
@@ -130,8 +130,8 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
       GameCompleted(List(player1.id))
     )
 
-    gameRooms shouldBe Map.empty  // when a game completes, the state machine goes away
-    messages shouldBe Map.empty   // all outstanding events are expected to have been fully processed
+    gameRooms shouldBe None  // when a game completes, the state machine goes away
+    messages shouldBe Nil    // all outstanding events are expected to have been fully processed
   }
 
   "Future undelivered events will still be sent" in {
@@ -142,7 +142,7 @@ class BriscolaGameServiceSpec extends AnyFreeSpec with Matchers:
 
     val events = (for {
       bus <- MessageBus.inMemory[IO]
-      repo <- InMemoryGameServiceRepo[IO]
+      repo <- InMemoryJsonGameServiceRepo[IO]
       _ <- repo.flying(message1)
       _ <- repo.flying(message2)
       _ <- repo.flying(message3)

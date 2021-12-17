@@ -1,6 +1,6 @@
 package bastoni.backend
 
-import bastoni.domain.model.{Message, MessageId, RoomId}
+import bastoni.domain.model.{Delayed, Message, MessageId, RoomId}
 
 trait GameServiceRepo[F[_]]:
   def get(roomId: RoomId): F[Option[GameStateMachine]]

@@ -50,7 +50,7 @@ class IntegrationSpec extends AnyFreeSpec with Matchers:
   ): Event = {
     (for {
       bus <- MessageBus.inMemory[IO]
-      repo <- InMemoryGameServiceRepo[IO]
+      repo <- InMemoryJsonGameServiceRepo[IO]
       gameBus = GameBus(bus)
 
       twoPlayers = player1.dumb(gameBus).concurrently(player2.dumb(gameBus))

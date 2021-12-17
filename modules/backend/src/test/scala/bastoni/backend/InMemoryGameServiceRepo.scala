@@ -1,6 +1,6 @@
 package bastoni.backend
 
-import bastoni.domain.model.{Message, MessageId, RoomId}
+import bastoni.domain.model.{Delayed, Message, MessageId, RoomId}
 import cats.effect.{Concurrent, Ref}
 import cats.syntax.all.*
 
