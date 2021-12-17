@@ -139,12 +139,14 @@ object Game extends GameLogic[MatchState]:
 
   override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
 
-    case (MatchState.InProgress(players, game, rounds), message) =>
+    case (MatchState.InProgress(matchPlayers, game, rounds), message) =>
       playGameStep(game, message) match
         case (GameState.Completed(players), events) =>
 
-          def ready(shiftedRound: List[MatchPlayer], rounds: Int) =
-            MatchState.InProgress(shiftedRound, GameState.Ready(shiftedRound), rounds) -> (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck, timeout = None))
+          def ready(updatedPlayers: List[MatchPlayer], rounds: Int) =
+            val shiftedRound = updatedPlayers.slideUntil(_.is(matchPlayers.tail.head))
+            MatchState.InProgress(shiftedRound, GameState.Ready(shiftedRound), rounds) ->
+              (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck, timeout = None))
 
           val teamSize = if (players.size == 4) 2 else 1
 
@@ -160,7 +162,7 @@ object Game extends GameLogic[MatchState]:
           MatchState.Terminated -> (events :+ MatchAborted)
 
         case (newGameState, events) =>
-          MatchState.InProgress(players, newGameState, rounds) -> events
+          MatchState.InProgress(matchPlayers, newGameState, rounds) -> events
 
     case (state, _) => state -> uneventful
 

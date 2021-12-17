@@ -2817,7 +2817,7 @@
       "supertype" : "Event"
     },
     {
-      "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
+      "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "type" : "ShuffleDeck"
       },
