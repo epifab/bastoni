@@ -11,16 +11,19 @@ enum Rank(val value: Int):
   case Cinque extends Rank(5)
   case Sei extends Rank(6)
   case Sette extends Rank(7)
-  case Donna extends Rank(8)
-  case Fante extends Rank(9)
+  case Fante extends Rank(8)
+  case Cavallo extends Rank(9)
   case Re extends Rank(10)
 
-case class Card(suit: Suit, rank: Rank)
+case class Card(rank: Rank, suit: Suit)
 
-type Deck = Set[Card]
+type Deck = List[Card]
 
 object Deck:
-  val instance: Set[Card] = (for {
-    suit <- Suit.values
+  val instance: List[Card] = (for {
     rank <- Rank.values
-  } yield Card(suit, rank)).toSet
+    suit <- Suit.values
+  } yield Card(rank, suit)).toList
+
+
+@main def run(): Unit = new scala.util.Random(10).shuffle(Deck.instance).foreach(println)
