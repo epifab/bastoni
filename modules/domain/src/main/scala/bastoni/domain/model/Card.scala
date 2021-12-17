@@ -1,4 +1,4 @@
-package bastoni.domain
+package bastoni.domain.model
 
 enum Suit:
   case Denari, Coppe, Spade, Bastoni
@@ -17,13 +17,8 @@ enum Rank(val value: Int):
 
 case class Card(rank: Rank, suit: Suit)
 
-type Deck = List[Card]
-
 object Deck:
   val instance: List[Card] = (for {
     rank <- Rank.values
     suit <- Suit.values
   } yield Card(rank, suit)).toList
-
-
-@main def run(): Unit = new scala.util.Random(10).shuffle(Deck.instance).foreach(println)

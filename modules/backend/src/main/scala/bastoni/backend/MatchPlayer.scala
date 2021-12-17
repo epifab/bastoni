@@ -1,6 +1,6 @@
 package bastoni.backend
 
-import bastoni.domain.{Card, Player, PlayerId}
+import bastoni.domain.model.{Card, Player, PlayerId}
 
 case class MatchPlayer(gamePlayer: GamePlayer, hand: Set[Card], collected: Set[Card]):
   def player: Player = gamePlayer.player

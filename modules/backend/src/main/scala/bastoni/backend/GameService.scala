@@ -1,10 +1,15 @@
 package bastoni.backend
 
 import bastoni.backend.briscola
-import bastoni.domain.*
+import bastoni.domain.model.*
+import cats.effect.IO
 
-enum Delay:
-  case Short, Medium, Long
+import scala.concurrent.duration.*
+
+enum Delay(val duration: FiniteDuration):
+  case Short extends Delay(500.millis)
+  case Medium extends Delay(1.second)
+  case Long extends Delay(3.seconds)
 
 case class DelayedCommand(command: Command, delay: Delay)
 case class DelayedMessage(message: Message, delay: Delay)
@@ -39,3 +44,9 @@ object GameService:
           }
       }
       .flatMap { case (_, messages) => fs2.Stream.iterable(messages) }
+
+  def run(messageBus: MessageBus[IO]): IO[Unit] =
+    apply(messageBus.subscribe).evalTap {
+      case DelayedMessage(message, delay) => messageBus.publish1(message).delayBy(delay.duration).start
+      case message: Message => messageBus.publish1(message)
+    }.compile.drain

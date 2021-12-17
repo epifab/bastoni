@@ -1,4 +1,4 @@
-package bastoni.domain
+package bastoni.domain.model
 
 enum GameType:
   case Briscola

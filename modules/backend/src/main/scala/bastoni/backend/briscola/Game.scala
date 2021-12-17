@@ -1,7 +1,7 @@
 package bastoni.backend
 package briscola
 
-import bastoni.domain.*
+import bastoni.domain.model.*
 
 import scala.annotation.tailrec
 import scala.util.Random

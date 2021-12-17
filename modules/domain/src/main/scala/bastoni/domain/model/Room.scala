@@ -1,4 +1,4 @@
-package bastoni.domain
+package bastoni.domain.model
 
 import java.util.UUID
 import scala.util.Try

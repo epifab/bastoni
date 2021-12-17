@@ -2,9 +2,9 @@ package bastoni.backend
 
 import bastoni.backend
 import bastoni.backend.briscola.Game
-import bastoni.domain.*
-import bastoni.domain.Rank.*
-import bastoni.domain.Suit.*
+import bastoni.domain.model.*
+import bastoni.domain.model.Rank.*
+import bastoni.domain.model.Suit.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 

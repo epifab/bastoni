@@ -1,6 +1,6 @@
 package bastoni.backend
 
-import bastoni.domain.*
+import bastoni.domain.model.*
 import cats.Monad
 import cats.effect.std.Queue
 import cats.effect.{Concurrent, Sync}

@@ -1,7 +1,7 @@
 package bastoni.backend.briscola
 
 import bastoni.backend.GamePlayer
-import bastoni.domain.Player
+import bastoni.domain.model.Player
 
 sealed trait GameState
 

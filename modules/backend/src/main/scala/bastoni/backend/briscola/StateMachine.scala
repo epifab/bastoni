@@ -1,7 +1,7 @@
 package bastoni.backend
 package briscola
 
-import bastoni.domain.{Command, Event, Player}
+import bastoni.domain.model.{Command, Event, Player, PlayerId}
 
 class StateMachine private(state: GameState) extends GameStateMachine:
   override def apply(message: Command | Event): (Option[StateMachine], List[Event | Command | DelayedCommand]) =

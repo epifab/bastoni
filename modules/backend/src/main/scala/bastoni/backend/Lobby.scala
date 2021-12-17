@@ -1,6 +1,6 @@
 package bastoni.backend
 
-import bastoni.domain.*
+import bastoni.domain.model.*
 
 object Lobby:
 
