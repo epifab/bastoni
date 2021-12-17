@@ -18,7 +18,7 @@ object WebHtmlRoute:
       .contramap[Html](html => "<!DOCTYPE html>\n" + html.xml.mkString)
       .withContentType(`Content-Type`(MediaType.text.html))
 
-  def apply(appVersion: Int): HttpRoutes[IO] =
+  def apply(appVersion: String): HttpRoutes[IO] =
     HttpRoutes.of[IO] {
       case req@GET -> Root => Ok(
         Html(

@@ -11,7 +11,7 @@ object App extends IOApp:
   val router = Router(
     "/assets" -> StaticResourceRoute("assets"),
     "/static" -> StaticResourceRoute("static"),
-    "/" -> WebHtmlRoute(1)
+    "/" -> WebHtmlRoute("LOCAL")
   )
 
   val webServer: ServerBuilder[IO] = {
