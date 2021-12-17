@@ -88,22 +88,22 @@ object Briscola:
           DealRound(players.map(MatchPlayer(_, Set.empty, Set.empty)), Nil, 2, strippedDeck) ->
             List(DeckShuffled(seed))
 
-        case ((DealRound(player :: Nil, done, 0, deck), _), DrawCard(p)) if player.is(p) =>
+        case ((DealRound(player :: Nil, done, 0, deck), _), Continue) =>
           deck.deal { (card, tail) => WillDealTrump(done :+ player.draw(card), tail) -> List(CardDealt(player.id, card)) }
 
-        case ((DealRound(player :: Nil, done, remaining, deck), _), DrawCard(p)) if player.is(p) =>
+        case ((DealRound(player :: Nil, done, remaining, deck), _), Continue) =>
           deck.deal { (card, tail) => DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) -> List(CardDealt(player.id, card)) }
 
-        case ((DealRound(player :: todo, done, remaining, deck), _), DrawCard(p)) if player.is(p) =>
+        case ((DealRound(player :: todo, done, remaining, deck), _), Continue) =>
           deck.deal { (card, tail) => DealRound(todo, done :+ player.draw(card), remaining, tail) -> List(CardDealt(player.id, card)) }
 
         case ((WillDealTrump(players, deck), _), Continue) =>
           deck.deal { (card, tail) => PlayRound(players, Nil, tail :+ card, card) -> List(TrumpRevealed(card)) }
 
-        case ((DrawRound(player :: Nil, done, deck, trump), _), DrawCard(p)) if player.is(p) =>
+        case ((DrawRound(player :: Nil, done, deck, trump), _), Continue) =>
           deck.deal { (card, tail) => PlayRound(done :+ player.draw(card), Nil, tail, trump) -> List(CardDealt(player.id, card)) }
 
-        case ((DrawRound(player :: todo, done, deck, trump), _), DrawCard(p)) if player.is(p) =>
+        case ((DrawRound(player :: todo, done, deck, trump), _), Continue) =>
           deck.deal { (card, tail) => DrawRound(todo, done :+ player.draw(card), tail, trump) -> List(CardDealt(player.id, card)) }
 
         case ((PlayRound(player :: Nil, done, deck, trump), _), PlayCard(p, card)) if player.is(p) && player.has(card) =>

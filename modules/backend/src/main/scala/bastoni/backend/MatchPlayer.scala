@@ -7,6 +7,7 @@ case class MatchPlayer(gamePlayer: GamePlayer, hand: Set[Card], collected: Set[C
 
   val id: PlayerId = gamePlayer.id
   def is(p: Player): Boolean = p.id == id
+  def is(p: PlayerId): Boolean = p == id
 
   def has(card: Card): Boolean = hand.contains(card)
   def draw(card: Card) = copy(hand = hand + card)

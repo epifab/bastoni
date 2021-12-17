@@ -15,133 +15,138 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
   val roomId = RoomId.newId
   val room = Room(roomId, List(player1, player2))
 
+  val drawCard      = Continue
+  val revealTrump   = Continue
+  val completeTrick = Continue
+  val completeMatch = Continue
+
   "A game can be played" in {
     val input =
       fs2.Stream(
         ShuffleDeck(10),
 
-        DrawCard(player1),
-        DrawCard(player2),
-        DrawCard(player1),
-        DrawCard(player2),
-        DrawCard(player1),
-        DrawCard(player2),
-        Continue,
+        drawCard,
+        drawCard,
+        drawCard,
+        drawCard,
+        drawCard,
+        drawCard,
+        completeTrick,
 
-        PlayCard(player1, Card(Due, Bastoni)),
-        PlayCard(player2, Card(Quattro, Spade)),
-        Continue,
+        PlayCard(player1.id, Card(Due, Bastoni)),
+        PlayCard(player2.id, Card(Quattro, Spade)),
+        completeTrick,
 
-        DrawCard(player1),
-        DrawCard(player2),
-        PlayCard(player1, Card(Sei, Denari)),
-        PlayCard(player2, Card(Re, Denari)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player1.id, Card(Sei, Denari)),
+        PlayCard(player2.id, Card(Re, Denari)),
+        completeTrick,
 
-        DrawCard(player2),
-        DrawCard(player1),
-        PlayCard(player2, Card(Cinque, Spade)),
-        PlayCard(player1, Card(Tre, Spade)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player2.id, Card(Cinque, Spade)),
+        PlayCard(player1.id, Card(Tre, Spade)),
+        completeTrick,
 
-        DrawCard(player1),
-        DrawCard(player2),
-        PlayCard(player1, Card(Sette, Denari)),
-        PlayCard(player2, Card(Sei, Bastoni)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player1.id, Card(Sette, Denari)),
+        PlayCard(player2.id, Card(Sei, Bastoni)),
+        completeTrick,
 
-        DrawCard(player1),
-        DrawCard(player2),
-        PlayCard(player1, Card(Fante, Bastoni)),
-        PlayCard(player2, Card(Due, Denari)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player1.id, Card(Fante, Bastoni)),
+        PlayCard(player2.id, Card(Due, Denari)),
+        completeTrick,
 
-        DrawCard(player1),
-        DrawCard(player2),
-        PlayCard(player1, Card(Tre, Denari)),
-        PlayCard(player2, Card(Asso, Coppe)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player1.id, Card(Tre, Denari)),
+        PlayCard(player2.id, Card(Asso, Coppe)),
+        completeTrick,
 
-        DrawCard(player2),
-        DrawCard(player1),
-        PlayCard(player2, Card(Sette, Bastoni)),
-        PlayCard(player1, Card(Asso, Bastoni)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player2.id, Card(Sette, Bastoni)),
+        PlayCard(player1.id, Card(Asso, Bastoni)),
+        completeTrick,
 
-        DrawCard(player1),
-        DrawCard(player2),
-        PlayCard(player1, Card(Fante, Spade)),
-        PlayCard(player2, Card(Asso, Spade)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player1.id, Card(Fante, Spade)),
+        PlayCard(player2.id, Card(Asso, Spade)),
+        completeTrick,
 
-        DrawCard(player2),
-        DrawCard(player1),
-        PlayCard(player2, Card(Cinque, Bastoni)),
-        PlayCard(player1, Card(Cavallo, Denari)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player2.id, Card(Cinque, Bastoni)),
+        PlayCard(player1.id, Card(Cavallo, Denari)),
+        completeTrick,
 
-        DrawCard(player2),
-        DrawCard(player1),
-        PlayCard(player2, Card(Re, Bastoni)),
-        PlayCard(player1, Card(Due, Coppe)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player2.id, Card(Re, Bastoni)),
+        PlayCard(player1.id, Card(Due, Coppe)),
+        completeTrick,
 
-        DrawCard(player1),
-        DrawCard(player2),
-        PlayCard(player1, Card(Fante, Denari)),
-        PlayCard(player2, Card(Cavallo, Bastoni)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player1.id, Card(Fante, Denari)),
+        PlayCard(player2.id, Card(Cavallo, Bastoni)),
+        completeTrick,
 
-        DrawCard(player1),
-        DrawCard(player2),
-        PlayCard(player1, Card(Quattro, Bastoni)),
-        PlayCard(player2, Card(Cavallo, Spade)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player1.id, Card(Quattro, Bastoni)),
+        PlayCard(player2.id, Card(Cavallo, Spade)),
+        completeTrick,
 
-        DrawCard(player1),
-        DrawCard(player2),
-        PlayCard(player1, Card(Quattro, Coppe)),
-        PlayCard(player2, Card(Sei, Coppe)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player1.id, Card(Quattro, Coppe)),
+        PlayCard(player2.id, Card(Sei, Coppe)),
+        completeTrick,
 
-        DrawCard(player2),
-        DrawCard(player1),
-        PlayCard(player2, Card(Sette, Spade)),
-        PlayCard(player1, Card(Cinque, Denari)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player2.id, Card(Sette, Spade)),
+        PlayCard(player1.id, Card(Cinque, Denari)),
+        completeTrick,
 
-        DrawCard(player2),
-        DrawCard(player1),
-        PlayCard(player2, Card(Sette, Coppe)),
-        PlayCard(player1, Card(Re, Spade)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player2.id, Card(Sette, Coppe)),
+        PlayCard(player1.id, Card(Re, Spade)),
+        completeTrick,
 
-        DrawCard(player2),
-        DrawCard(player1),
-        PlayCard(player2, Card(Sei, Spade)),
-        PlayCard(player1, Card(Quattro, Denari)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player2.id, Card(Sei, Spade)),
+        PlayCard(player1.id, Card(Quattro, Denari)),
+        completeTrick,
 
-        DrawCard(player2),
-        DrawCard(player1),
-        PlayCard(player2, Card(Tre, Bastoni)),
-        PlayCard(player1, Card(Fante, Coppe)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player2.id, Card(Tre, Bastoni)),
+        PlayCard(player1.id, Card(Fante, Coppe)),
+        completeTrick,
 
-        DrawCard(player1),
-        DrawCard(player2),
-        PlayCard(player1, Card(Due, Spade)),
-        PlayCard(player2, Card(Asso, Denari)),
-        Continue,
+        drawCard,
+        drawCard,
+        PlayCard(player1.id, Card(Due, Spade)),
+        PlayCard(player2.id, Card(Asso, Denari)),
+        completeTrick,
 
-        PlayCard(player1, Card(Cavallo, Coppe)),
-        PlayCard(player2, Card(Re, Coppe)),
-        Continue,
+        PlayCard(player1.id, Card(Cavallo, Coppe)),
+        PlayCard(player2.id, Card(Re, Coppe)),
+        completeTrick,
 
-        PlayCard(player2, Card(Cinque, Coppe)),
-        PlayCard(player1, Card(Tre, Coppe)),
-        Continue,
-        Continue,
+        PlayCard(player2.id, Card(Cinque, Coppe)),
+        PlayCard(player1.id, Card(Tre, Coppe)),
+        completeTrick,
+        completeMatch,
 
       ).map(Message(roomId, _))
 
@@ -280,29 +285,38 @@ class Briscola2Spec extends AnyFreeSpec with Matchers:
   "Irrelevant messages are ignored" in {
     val input = fs2.Stream(
       Message(room.id, ShuffleDeck(10)),
-      Message(room.id, ShuffleDeck(1)),         // ignored (already shuffled)
-      Message(room.id, DrawCard(player1)),
-      Message(room.id, DrawCard(player1)),      // ignored (not your turn)
-      Message(room.id, DrawCard(player3)),      // ignored (not in the room)
-      Message(room.id, DrawCard(player2)),
-      Message(room.id, PlayCard(player2, Card(Asso, Spade))),       // ignored (not your turn)
-      Message(room.id, PlayCard(player2, Card(Due, Bastoni))),         // ignored (not your card)
-      Message(RoomId.newId, PlayCard(player1, Card(Due, Bastoni))),    // ignored (different room)
+      Message(room.id, ShuffleDeck(1)),   // ignored (already shuffled)
+      Message(room.id, drawCard),
+      Message(room.id, drawCard),
+      Message(room.id, drawCard),
+      Message(room.id, drawCard),
+      Message(room.id, drawCard),
+      Message(room.id, drawCard),
+      Message(room.id, revealTrump),
+      Message(room.id, Continue),      // ignored, waiting for a player to play
+      Message(room.id, PlayCard(player2.id, Card(Asso, Spade))),       // ignored (not your turn)
+      Message(room.id, PlayCard(player1.id, Card(Asso, Spade))),       // ignored (not your card)
+      Message(RoomId.newId, PlayCard(player1.id, Card(Due, Bastoni))), // ignored (different room)
     )
 
     Briscola[fs2.Pure](room, input).compile.toList shouldBe List(
       Message(room.id, DeckShuffled(10)),
       Message(room.id, CardDealt(player1.id, Card(Due, Bastoni))),
       Message(room.id, CardDealt(player2.id, Card(Asso, Spade))),
+      Message(room.id, CardDealt(player1.id, Card(Sette, Denari))),
+      Message(room.id, CardDealt(player2.id, Card(Quattro, Spade))),
+      Message(room.id, CardDealt(player1.id, Card(Sei, Denari))),
+      Message(room.id, CardDealt(player2.id, Card(Re, Denari))),
+      Message(room.id, TrumpRevealed(Card(Cinque, Coppe)))
     )
   }
 
   "Game is aborted if a player leaves" in {
     val input = fs2.Stream(
       Message(room.id, ShuffleDeck(10)),
-      Message(room.id, DrawCard(player1)),
+      Message(room.id, drawCard),
       Message(room.id, PlayerLeft(player1, Room(room.id, List(player2)))),
-      Message(room.id, DrawCard(player2)), // too late, game was aborted
+      Message(room.id, drawCard), // too late, game was aborted
     )
 
     Briscola[fs2.Pure](room, input).compile.toList shouldBe List(
