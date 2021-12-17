@@ -10,7 +10,7 @@ case class StateMachine(state: MatchState) extends GameStateMachine:
       case (MatchState.Terminated, events) => None -> events
       case (state, events) => Some(new StateMachine(state)) -> events
 
-  override val gameType: GameType = GameType.Briscola
+  override val gameType: GameType = GameType.Scopa
   override def encoded: Json = Encoder[MatchState].apply(state)
 
 

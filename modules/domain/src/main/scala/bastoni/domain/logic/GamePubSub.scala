@@ -56,9 +56,10 @@ object GamePubSub:
 
   private def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Command =
     eventAndSeed match
-      case (FromPlayer.Connect, _)             => Connect
-      case (FromPlayer.JoinTable, seed)        => JoinTable(me, seed)
-      case (FromPlayer.LeaveTable, _)          => LeaveTable(me)
-      case (FromPlayer.StartGame(gameType), _) => StartGame(me.id, gameType)
-      case (FromPlayer.ShuffleDeck, seed)      => ShuffleDeck(seed)
-      case (FromPlayer.PlayCard(card), _)      => PlayCard(me.id, card)
+      case (FromPlayer.Connect, _)                => Connect
+      case (FromPlayer.JoinTable, seed)           => JoinTable(me, seed)
+      case (FromPlayer.LeaveTable, _)             => LeaveTable(me)
+      case (FromPlayer.StartGame(gameType), _)    => StartGame(me.id, gameType)
+      case (FromPlayer.ShuffleDeck, seed)         => ShuffleDeck(seed)
+      case (FromPlayer.PlayCard(card), _)         => PlayCard(me.id, card)
+      case (FromPlayer.TakeCards(card, taken), _) => TakeCards(me.id, card, taken)

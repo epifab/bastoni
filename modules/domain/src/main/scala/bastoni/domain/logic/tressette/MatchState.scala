@@ -12,7 +12,7 @@ object MatchState:
     val players = users.map(MatchPlayer(_, 0))
     InProgress(players, GameState.Ready(players), pointsToWin)
 
-  case class  InProgress(players: List[MatchPlayer], state: GameState, pointsToWin: Int) extends MatchState
+  case class  InProgress(players: List[MatchPlayer], game: GameState, pointsToWin: Int) extends MatchState
   case object Terminated extends MatchState
 
   given Encoder[MatchState] = Encoder.instance {

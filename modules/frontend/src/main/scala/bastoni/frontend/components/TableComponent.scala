@@ -14,6 +14,10 @@ val TableComponent =
           .map(SeatComponent(_))
           .toTagMod,
         <.p(
+          "Board: ",
+          CardsComponent(table.board)
+        ),
+        <.p(
           "Deck: ",
           CardsComponent(table.deck)
         )

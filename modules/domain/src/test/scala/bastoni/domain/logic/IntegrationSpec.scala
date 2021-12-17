@@ -90,6 +90,18 @@ class IntegrationSpec extends AsyncIOFreeSpec:
     playGame(4, GameType.Tressette).asserting(_ shouldBe a[Event.MatchCompleted])
   }
 
+  "Two players can play an entire scopa game" in {
+    playGame(2, GameType.Scopa).asserting(_ shouldBe a[Event.MatchCompleted])
+  }
+
+  "Three players can play an entire scopa game" in {
+    playGame(2, GameType.Scopa).asserting(_ shouldBe a[Event.MatchCompleted])
+  }
+
+  "Four players can play an entire scopa game" in {
+    playGame(4, GameType.Scopa).asserting(_ shouldBe a[Event.MatchCompleted])
+  }
+
   "Aborting a game" in {
     playGame(
       4,

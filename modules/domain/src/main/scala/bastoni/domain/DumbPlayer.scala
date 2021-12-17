@@ -20,13 +20,18 @@ object DumbPlayer:
           case (table, ToPlayer.GameEvent(event)) => table.map(_.update(event))
         }
         .collect { case Some(table) => table }
-        .map(
-          _.seatFor(me) match {
+        .map(table =>
+          table.seatFor(me) match {
             case Some(PlayerSeat(ActingPlayer(_, Action.PlayCard, _), hand, _, _)) =>
               Some(PlayCard(hand.flatMap(_.card).headOption.getOrElse(throw new IllegalStateException("No cards in hand"))))
 
             case Some(PlayerSeat(ActingPlayer(_, Action.PlayCardOf(suit), _), hand, _, _)) =>
               Some(PlayCard(hand.flatMap(_.card).pipe(hand => hand.find(_.suit == suit).orElse(hand.headOption)).getOrElse(throw new IllegalStateException("No cards in hand"))))
+
+            case Some(PlayerSeat(ActingPlayer(_, Action.TakeCards, _), hand, _, _)) =>
+              val card = hand.flatMap(_.card).headOption.getOrElse(throw new IllegalStateException("No cards in hand"))
+              val takes = bastoni.domain.logic.scopa.Game.takeCombinations(table.board.flatMap(_.card), card).next()
+              Some(TakeCards(card, takes.toList))
 
             case Some(PlayerSeat(ActingPlayer(_, Action.ShuffleDeck, _), _, _, _)) =>
               Some(ShuffleDeck)

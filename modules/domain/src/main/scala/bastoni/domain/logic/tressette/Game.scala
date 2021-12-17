@@ -114,7 +114,7 @@ object Game:
 
       val scores: List[GameScore] = teams.map(players => GameScore(players, rete = players.exists(_.id == rete)))
 
-      val matchPointsCount: List[MatchScore] = teams.zip(scores).map {
+      val matchScores: List[MatchScore] = teams.zip(scores).map {
         case (players, points) =>
           MatchScore(players.map(_.id), players.head.matchPlayer.win(points.points).points)
       }
@@ -125,7 +125,7 @@ object Game:
           .map(pointsCount => matchPlayer.matchPlayer.win(pointsCount.points))
       }
 
-      GameState.Completed(updatedPlayers) -> List(TressetteGameCompleted(scores, matchPointsCount))
+      GameState.Completed(updatedPlayers) -> List(TressetteGameCompleted(scores, matchScores))
 
     case (m, _) => m -> Nil
   }

@@ -203,10 +203,7 @@ trait Table[C <: CardView]:
           seat.copy(hand = event.cards ++ seat.hand)
         case whatever => whatever
       },
-      deck = deck match {
-        case head :: tail => tail
-        case whatever => whatever
-      }
+      deck = deck.drop(event.cards.size)
     )
 
   def seatFor(user: User): Option[PlayerSeat[C]] =

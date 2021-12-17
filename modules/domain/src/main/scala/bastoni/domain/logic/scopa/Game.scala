@@ -55,33 +55,38 @@ object Game:
     case (GameState.Ready(players), GameStarted(_)) =>
       GameState.Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck))
 
-    case (GameState.Ready(players), ShuffleDeck(seed)) =>
+    case (GameState.Ready(matchPlayers), ShuffleDeck(seed)) =>
       val shuffledDeck = new Random(seed).shuffle(Deck.instance)
+      val players = matchPlayers.map(Player(_, Nil, Nil))
+      val state =
+        if (players.size == 4) GameState.Deal5Round(players, shuffledDeck)
+        else GameState.Deal3Round(players, Nil, shuffledDeck)
+      state -> List(DeckShuffled(shuffledDeck), Continue.later)
 
-      GameState.DealRound(
-        size = if (players.size == 4) 5 else 3,
-        todo = players.map(Player(_, Nil, Nil)),
-        done = Nil,
-        deck = shuffledDeck,
-        remaining = if (players.size == 4) 1 else 0
-      ) -> List(DeckShuffled(shuffledDeck), Continue.later)
-
-    case (GameState.DealRound(size, player :: Nil, done, deck, 0), Continue) =>
-      deck.dealOrDie(size) { (cards, tail) =>
+    case (GameState.Deal3Round(player :: Nil, done, deck), Continue) =>
+      deck.dealOrDie(3) { (cards, tail) =>
         GameState.WillDealBoardCards(done :+ player.draw(cards), tail) ->
           List(CardsDealt(player.id, cards, Direction.Player), Continue.later)
       }
 
-    case (GameState.DealRound(size, player :: Nil, done, deck, remaining), Continue) =>
-      deck.dealOrDie(size) { (cards, tail) =>
-        GameState.DealRound(size, Nil, done :+ player.draw(cards), tail, remaining - 1) ->
+    case (GameState.Deal3Round(player :: todo, done, deck), Continue) =>
+      deck.dealOrDie(3) { (cards, tail) =>
+        GameState.Deal3Round(todo, done :+ player.draw(cards), tail) ->
           List(CardsDealt(player.id, cards, Direction.Player), Continue.later)
       }
 
-    case (GameState.DealRound(size, player :: todo, done, deck, remaining), Continue) =>
-      deck.dealOrDie(size) { (cards, tail) =>
-        GameState.DealRound(size, todo, done :+ player.draw(cards), tail, remaining) ->
-          List(CardsDealt(player.id, cards, Direction.Player), Continue.later)
+    case (GameState.Deal5Round(player :: done, deck), Continue) =>
+      deck.dealOrDie(5) { (cards, tail) =>
+        val cardsDealt = CardsDealt(player.id, cards, Direction.Player)
+        val players = done :+ player.draw(cards)
+
+        if (tail.isEmpty)
+          withTiemout(
+            GameState.PlayRound(players, tail, board = Nil),
+            ActionRequested(done.head.id, Action.TakeCards, Some(Timeout.Max)),
+            List(cardsDealt)
+          )
+        else GameState.Deal5Round(players, tail) -> List(cardsDealt, Continue.later)
       }
 
     case (GameState.WillDealBoardCards(players, deck), Continue) =>
@@ -191,45 +196,57 @@ object Game:
         case _ => players.map(List(_))
 
       val scores: List[GameScore] = GameScore(teams)
-      ???
+
+      val matchScores: List[MatchScore] = teams.zip(scores).map {
+        case (players, points) =>
+          MatchScore(players.map(_.id), players.head.matchPlayer.win(points.points).points)
+      }
+
+      val updatedPlayers: List[MatchPlayer] = players.flatMap { matchPlayer =>
+        scores
+          .find(_.playerIds.exists(matchPlayer.is))
+          .map(pointsCount => matchPlayer.matchPlayer.win(pointsCount.points))
+      }
+
+      GameState.Completed(updatedPlayers) -> List(ScopaGameCompleted(scores, matchScores))
   }
 
   private[scopa] val playMatchStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
 
-    case (MatchState.InProgress(players, gameState, rounds), message) =>
+    case (MatchState.InProgress(players, gameState, pointsToWin), message) =>
       playGameStep(gameState, message) match
         case (GameState.Completed(players), events) =>
-
-          def ready(shiftedRound: List[MatchPlayer], rounds: Int) =
-            MatchState.InProgress(shiftedRound, GameState.Ready(shiftedRound), rounds) -> (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck))
+          def ready(shiftedRound: List[MatchPlayer], pointsToWin: Int) =
+            MatchState.InProgress(shiftedRound, GameState.Ready(shiftedRound), pointsToWin) -> (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck))
 
           val teamSize = if (players.size == 4) 2 else 1
 
-          if (rounds == 0) {
-            players.groupMap(_.points)(_.id).maxBy(_._1)._2 match {
-              case winners if winners.size == teamSize => MatchState.Terminated -> (events :+ MatchCompleted(winners))
-              case _ => ready(players.tail :+ players.head, 0)
-            }
-          }
-          else ready(players.tail :+ players.head, rounds - 1)
+          val winners: List[MatchPlayer] = players.groupBy(_.points).maxBy(_._1)._2
+          val winnerPoints = winners.head.points
+
+          if (winnerPoints < pointsToWin || winners.size > teamSize) ready(players.tail :+ players.head, pointsToWin)
+          else MatchState.Terminated -> (events :+ MatchCompleted(winners.map(_.id)))
 
         case (GameState.Aborted, events) =>
           MatchState.Terminated -> (events :+ MatchAborted)
 
         case (newGameState, events) =>
-          MatchState.InProgress(players, newGameState, rounds) -> events
+          MatchState.InProgress(players, newGameState, pointsToWin) -> events
 
     case (state, _) => state -> uneventful
 
   }
 
   def legalPlay(board: List[Card], played: Card, taken: List[Card]): Boolean =
-    val possibleTakes: Iterator[Set[Card]] =
-      if (board.exists(_.rank == played.rank)) board.iterator.filter(_.rank == played.rank).map(Set(_))
-      else for {
+    takeCombinations(board, played).exists(_ == taken.toSet)
+
+  def takeCombinations(board: List[Card], toPlay: Card): Iterator[Set[Card]] =
+    if (board.exists(_.rank == toPlay.rank)) board.iterator.filter(_.rank == toPlay.rank).map(Set(_))
+    else
+      val combinations = for {
         size <- (1 to board.size).iterator
         combination <- board.combinations(size)
-        if combination.map(_.rank.value).sum == played.rank.value
+        if combination.map(_.rank.value).sum == toPlay.rank.value
       } yield combination.toSet
 
-    (taken.isEmpty && possibleTakes.isEmpty) || possibleTakes.exists(_ == taken.toSet)
+      if (combinations.isEmpty) Iterator(Set.empty) else combinations

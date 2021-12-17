@@ -16,7 +16,8 @@ object GameState:
 
   sealed trait Active(val activePlayers: List[MatchPlayer]) extends GameState
   case class   Ready(players: List[MatchPlayer]) extends Active(players)
-  case class   DealRound(size: Int, todo: List[Player], done: List[Player], deck: List[Card], remaining: Int) extends Active((done ++ todo).map(_.matchPlayer))
+  case class   Deal3Round(todo: List[Player], done: List[Player], deck: List[Card]) extends Active((done ++ todo).map(_.matchPlayer))
+  case class   Deal5Round(players: List[Player], deck: List[Card]) extends Active(players.map(_.matchPlayer))
   case class   WillDealBoardCards(players: List[Player], deck: List[Card]) extends Active(players.map(_.matchPlayer))
   case class   DrawRound(todo: List[Player], done: List[Player], deck: List[Card], boardCards: List[Card]) extends Active((done ++ todo).map(_.matchPlayer))
   case class   PlayRound(players: List[Player], deck: List[Card], board: List[Card]) extends Active(players.map(_.matchPlayer))
@@ -32,7 +33,8 @@ object GameState:
 
   given Encoder[GameState] = Encoder.instance {
     case s: Ready              => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
-    case s: DealRound          => deriveEncoder[DealRound].mapJsonObject(_.add("stage", "DealRound".asJson))(s)
+    case s: Deal3Round         => deriveEncoder[Deal3Round].mapJsonObject(_.add("stage", "Deal3Round".asJson))(s)
+    case s: Deal5Round         => deriveEncoder[Deal5Round].mapJsonObject(_.add("stage", "Deal5Round".asJson))(s)
     case s: WillDealBoardCards => deriveEncoder[WillDealBoardCards].mapJsonObject(_.add("stage", "WillDealBoardCards".asJson))(s)
     case s: DrawRound          => deriveEncoder[DrawRound].mapJsonObject(_.add("stage", "DrawRound".asJson))(s)
     case s: PlayRound          => deriveEncoder[PlayRound].mapJsonObject(_.add("stage", "PlayRound".asJson))(s)
@@ -44,7 +46,8 @@ object GameState:
 
   given Decoder[GameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
     case "Ready"              => deriveDecoder[Ready](cursor)
-    case "DealRound"          => deriveDecoder[DealRound](cursor)
+    case "Deal3Round"         => deriveDecoder[Deal3Round](cursor)
+    case "Deal5Round"         => deriveDecoder[Deal5Round](cursor)
     case "WillDealBoardCards" => deriveDecoder[WillDealBoardCards](cursor)
     case "DrawRound"          => deriveDecoder[DrawRound](cursor)
     case "PlayRound"          => deriveDecoder[PlayRound](cursor)
