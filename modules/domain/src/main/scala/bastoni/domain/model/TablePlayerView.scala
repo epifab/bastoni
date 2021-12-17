@@ -39,7 +39,7 @@ case class TablePlayerView(
         deck = List.fill(numberOfCards)(CardPlayerView(None))
       )
 
-    case event: Event.CardDealtPlayerView => cardDealtUpdate(event)
+    case event: Event.CardsDealtPlayerView => cardsDealtUpdate(event)
 
     case event: PublicEvent => publicEventUpdate(event)
   }

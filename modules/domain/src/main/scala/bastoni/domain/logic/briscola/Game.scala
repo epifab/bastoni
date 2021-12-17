@@ -66,31 +66,24 @@ object Game:
         MatchState.DealRound(
           players.map(MatchPlayer(_, Nil, Nil)),
           Nil,
-          2,
           deck
         ) -> List(DeckShuffled(deck), Continue.later)
       }
 
-    case (MatchState.DealRound(player :: Nil, done, 0, deck), Continue) =>
-      deck.dealOrDie { (card, tail) =>
-        MatchState.WillDealTrump(done :+ player.draw(card), tail) ->
-          List(CardDealt(player.id, card, Direction.Player), Continue.later)
+    case (MatchState.DealRound(player :: Nil, done, deck), Continue) =>
+      deck.dealOrDie(3) { (cards, tail) =>
+        MatchState.WillDealTrump(done :+ player.draw(cards), tail) ->
+          List(CardsDealt(player.id, cards, Direction.Player), Continue.later)
       }
 
-    case (MatchState.DealRound(player :: Nil, done, remaining, deck), Continue) =>
-      deck.dealOrDie { (card, tail) =>
-        MatchState.DealRound(done :+ player.draw(card), Nil, remaining - 1, tail) ->
-          List(CardDealt(player.id, card, Direction.Player), Continue.shortly)
-      }
-
-    case (MatchState.DealRound(player :: todo, done, remaining, deck), Continue) =>
-      deck.dealOrDie { (card, tail) =>
-        MatchState.DealRound(todo, done :+ player.draw(card), remaining, tail) ->
-          List(CardDealt(player.id, card, Direction.Player), Continue.shortly)
+    case (MatchState.DealRound(player :: todo, done, deck), Continue) =>
+      deck.dealOrDie(3) { (cards, tail) =>
+        MatchState.DealRound(todo, done :+ player.draw(cards), tail) ->
+          List(CardsDealt(player.id, cards, Direction.Player), Continue.shortly)
       }
 
     case (MatchState.WillDealTrump(players, deck), Continue) =>
-      deck.dealOrDie { (card, tail) =>
+      deck.deal1OrDie { (card, tail) =>
         withTiemout(
           state = MatchState.PlayRound(players, Nil, tail :+ card, card),
           request = ActionRequested(players.head.id, Action.PlayCard),
@@ -99,19 +92,19 @@ object Game:
       }
 
     case (MatchState.DrawRound(player :: Nil, done, deck, trump), Continue) =>
-      deck.dealOrDie { (card, tail) =>
+      deck.deal1OrDie { (card, tail) =>
         val players = done :+ player.draw(card)
         withTiemout(
           state = MatchState.PlayRound(players, Nil, tail, trump),
           request = ActionRequested(players.head.id, Action.PlayCard),
-          before = List(CardDealt(player.id, card, Direction.Player))
+          before = List(CardsDealt(player.id, List(card), Direction.Player))
         )
       }
 
     case (MatchState.DrawRound(player :: todo, done, deck, trump), Continue) =>
-      deck.dealOrDie { (card, tail) =>
+      deck.deal1OrDie { (card, tail) =>
         MatchState.DrawRound(todo, done :+ player.draw(card), tail, trump) ->
-          List(CardDealt(player.id, card, Direction.Player), Continue.shortly)
+          List(CardsDealt(player.id, List(card), Direction.Player), Continue.shortly)
       }
 
     case (wait: MatchState.WaitingForPlayer, tick: Tick) => wait.ticked(tick)

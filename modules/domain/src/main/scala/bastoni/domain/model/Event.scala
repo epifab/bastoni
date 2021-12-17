@@ -32,19 +32,19 @@ object Event:
   case object MatchAborted extends PublicEvent
   case object GameAborted extends PublicEvent
 
-  sealed trait CardDealt[C <: CardView]:
+  sealed trait CardsDealt[C <: CardView]:
     def playerId: PlayerId
-    def card: C
+    def cards: List[C]
 
-  case class CardDealtServerView(playerId: PlayerId, card: CardServerView) extends CardDealt[CardServerView] with ServerEvent
-  case class CardDealtPlayerView(playerId: PlayerId, card: CardPlayerView) extends CardDealt[CardPlayerView] with PlayerEvent
+  case class CardsDealtServerView(playerId: PlayerId, cards: List[CardServerView]) extends CardsDealt[CardServerView] with ServerEvent
+  case class CardsDealtPlayerView(playerId: PlayerId, cards: List[CardPlayerView]) extends CardsDealt[CardPlayerView] with PlayerEvent
 
-  object CardDealt:
-    def apply(playerId: PlayerId, card: Card, facing: Direction): CardDealtServerView =
-      CardDealtServerView(playerId, CardServerView(card, facing))
+  object CardsDealt:
+    def apply(playerId: PlayerId, cards: List[Card], facing: Direction): CardsDealtServerView =
+      CardsDealtServerView(playerId, cards.map(card => CardServerView(card, facing)))
 
-    def apply(playerId: PlayerId, card: Option[Card]): CardDealtPlayerView =
-      CardDealtPlayerView(playerId, CardPlayerView(card))
+    def apply(playerId: PlayerId, cards: List[Option[Card]]): CardsDealtPlayerView =
+      CardsDealtPlayerView(playerId, cards.map(CardPlayerView(_)))
 
   sealed trait DeckShuffled
   case class DeckShuffledServerView(cards: List[Card]) extends DeckShuffled with ServerEvent
@@ -75,15 +75,15 @@ object Event:
   }
 
   given serverEventEncoder: Encoder[ServerEvent] = Encoder.instance {
-    case obj: DeckShuffledServerView  => deriveEncoder[DeckShuffledServerView].mapJsonObject(_.add("type", "DeckShuffled".asJson))(obj)
-    case obj: CardDealtServerView     => deriveEncoder[CardDealtServerView].mapJsonObject(_.add("type", "CardDealt".asJson))(obj)
+    case obj: DeckShuffledServerView => deriveEncoder[DeckShuffledServerView].mapJsonObject(_.add("type", "DeckShuffled".asJson))(obj)
+    case obj: CardsDealtServerView   => deriveEncoder[CardsDealtServerView].mapJsonObject(_.add("type", "CardsDealt".asJson))(obj)
     case obj: Snapshot               => deriveEncoder[Snapshot].mapJsonObject(_.add("type", "Snapshot".asJson))(obj)
     case obj: PublicEvent            => publicEventEncoder(obj)
   }
 
   given playerEventEncoder: Encoder[PlayerEvent] = Encoder.instance {
-    case obj: DeckShuffledPlayerView  => deriveEncoder[DeckShuffledPlayerView].mapJsonObject(_.add("type", "DeckShuffled".asJson))(obj)
-    case obj: CardDealtPlayerView     => deriveEncoder[CardDealtPlayerView].mapJsonObject(_.add("type", "CardDealt".asJson))(obj)
+    case obj: DeckShuffledPlayerView => deriveEncoder[DeckShuffledPlayerView].mapJsonObject(_.add("type", "DeckShuffled".asJson))(obj)
+    case obj: CardsDealtPlayerView   => deriveEncoder[CardsDealtPlayerView].mapJsonObject(_.add("type", "CardsDealt".asJson))(obj)
     case obj: PublicEvent            => publicEventEncoder(obj)
   }
 
@@ -104,13 +104,13 @@ object Event:
 
   given serverEventDecoder: Decoder[ServerEvent] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
     case "DeckShuffled" => deriveDecoder[DeckShuffledServerView](obj)
-    case "CardDealt"    => deriveDecoder[CardDealtServerView](obj)
+    case "CardsDealt"   => deriveDecoder[CardsDealtServerView](obj)
     case "Snapshot"     => deriveDecoder[Snapshot](obj)
     case somethingElse  => publicEventDecoder(obj)
   })
 
   given playerEventDecoder: Decoder[PlayerEvent] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
     case "DeckShuffled" => deriveDecoder[DeckShuffledPlayerView](obj)
-    case "CardDealt"    => deriveDecoder[CardDealtPlayerView](obj)
+    case "CardsDealt"   => deriveDecoder[CardsDealtPlayerView](obj)
     case somethingElse  => publicEventDecoder(obj)
   })

@@ -30,7 +30,7 @@ case class TableServerView(
         deck = deck.map(card => CardServerView(card, Direction.Down))
       )
 
-    case event: Event.CardDealtServerView => cardDealtUpdate(event)
+    case event: Event.CardsDealtServerView => cardsDealtUpdate(event)
 
     case Event.Snapshot(table) => table
 

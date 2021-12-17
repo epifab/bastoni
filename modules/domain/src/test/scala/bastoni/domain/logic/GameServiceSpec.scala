@@ -140,7 +140,6 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       ShuffleDeck(shuffleSeed).toMessage(room1Id),
       Continue.toMessage(room1Id),
       ShuffleDeck(shuffleSeed).toMessage(room2Id),
-      Continue.toMessage(room1Id),
       Continue.toMessage(room2Id),
       LeaveTable(player1).toMessage(room1Id),
       PlayerLeftTable(player1, 2).toMessage(room1Id)
@@ -157,13 +156,11 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
       DeckShuffled(shuffledDeck).toMessage(room1Id),
       Delayed(Continue.toMessage(room1Id), Delay.Medium),
-      CardDealt(player1.id, Card(Due, Bastoni), Direction.Player).toMessage(room1Id),
+      CardsDealt(player1.id, List(Card(Due, Bastoni), Card(Asso, Spade), Card(Sette, Denari)), Direction.Player).toMessage(room1Id),
       Delayed(Continue.toMessage(room1Id), Delay.Short),
       DeckShuffled(shuffledDeck).toMessage(room2Id),
       Delayed(Continue.toMessage(room2Id), Delay.Medium),
-      CardDealt(player2.id, Card(Asso,Spade), Direction.Player).toMessage(room1Id),
-      Delayed(Continue.toMessage(room1Id), Delay.Short),
-      CardDealt(player2.id, Card(Due, Bastoni), Direction.Player).toMessage(room2Id),
+      CardsDealt(player2.id, List(Card(Due, Bastoni), Card(Asso, Spade), Card(Sette, Denari), Card(Quattro, Spade), Card(Sei, Denari)), Direction.Player).toMessage(room2Id),
       Delayed(Continue.toMessage(room2Id), Delay.Short),
       PlayerLeftTable(player1, 2).toMessage(room1Id),
       MatchAborted.toMessage(room1Id),

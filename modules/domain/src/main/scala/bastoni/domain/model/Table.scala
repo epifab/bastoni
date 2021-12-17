@@ -167,11 +167,11 @@ trait Table[C <: CardView]:
         )
 
 
-  protected def cardDealtUpdate(event: Event.CardDealt[C]): TableView =
+  protected def cardsDealtUpdate(event: Event.CardsDealt[C]): TableView =
     updateWith(
       seats = seats.map {
         case seat if seat.player.exists(_.playerId == event.playerId) =>
-          seat.copy(hand = event.card :: seat.hand)
+          seat.copy(hand = event.cards ++ seat.hand)
         case whatever => whatever
       },
       deck = deck match {

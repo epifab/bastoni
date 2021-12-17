@@ -17,7 +17,7 @@ object MatchState:
 
   sealed trait Active(val activePlayers: List[GamePlayer]) extends MatchState
   case class   Ready(players: List[GamePlayer]) extends Active(players)
-  case class   DealRound(todo: List[MatchPlayer], done: List[MatchPlayer], remaining: Int, deck: List[Card]) extends Active((done ++ todo).map(_.gamePlayer))
+  case class   DealRound(todo: List[MatchPlayer], done: List[MatchPlayer], deck: List[Card]) extends Active((done ++ todo).map(_.gamePlayer))
   case class   WillDealTrump(players: List[MatchPlayer], deck: List[Card]) extends Active(players.map(_.gamePlayer))
   case class   DrawRound(todo: List[MatchPlayer], done: List[MatchPlayer], deck: List[Card], trump: Card) extends Active((done ++ todo).map(_.gamePlayer))
   case class   PlayRound(todo: List[MatchPlayer], done: List[(MatchPlayer, Card)], deck: List[Card], trump: Card) extends Active((done.map(_._1) ++ todo).map(_.gamePlayer))

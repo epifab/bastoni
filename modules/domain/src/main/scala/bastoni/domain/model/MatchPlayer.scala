@@ -12,6 +12,7 @@ case class MatchPlayer(gamePlayer: GamePlayer, hand: List[Card], collected: List
 
   def has(card: Card): Boolean = hand.contains(card)
   def draw(card: Card) = copy(hand = card :: hand)
+  def draw(cards: List[Card]) = copy(hand = cards ++ hand)
 
   def play(card: Card) =
     if (!has(card)) throw new IllegalArgumentException("Card not found")

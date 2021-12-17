@@ -137,32 +137,13 @@ object Briscola4Spec:
       DeckShuffled(shuffledDeck),
       mediumDelay,
 
-      CardDealt(player1.id, Card(Due, Bastoni), Direction.Player),
+      CardsDealt(player1.id, List(Card(Due, Bastoni), Card(Asso, Spade), Card(Sette, Denari)), Direction.Player),
       shortDelay,
-      CardDealt(player2.id, Card(Asso, Spade), Direction.Player),
+      CardsDealt(player2.id, List(Card(Quattro, Spade), Card(Sei, Denari), Card(Re, Denari)), Direction.Player),
       shortDelay,
-      CardDealt(player3.id, Card(Sette, Denari), Direction.Player),
+      CardsDealt(player3.id, List(Card(Cinque, Coppe), Card(Asso, Bastoni), Card(Cinque, Spade)), Direction.Player),
       shortDelay,
-      CardDealt(player4.id, Card(Quattro, Spade), Direction.Player),
-
-      shortDelay,
-      CardDealt(player1.id, Card(Sei, Denari), Direction.Player),
-      shortDelay,
-      CardDealt(player2.id, Card(Re, Denari), Direction.Player),
-      shortDelay,
-      CardDealt(player3.id, Card(Cinque, Coppe), Direction.Player),
-      shortDelay,
-      CardDealt(player4.id, Card(Asso, Bastoni), Direction.Player),
-
-      shortDelay,
-      CardDealt(player1.id, Card(Cinque, Spade), Direction.Player), // Due Bastoni, Sei Denari, Cinque Spade
-      shortDelay,
-      CardDealt(player2.id, Card(Sei, Bastoni), Direction.Player),  // Asso Spade, Re Denari, Sei Bastoni
-      shortDelay,
-      CardDealt(player3.id, Card(Tre, Spade), Direction.Player),    // Sette Denari, Cinque Coppe, Tre Spade
-      shortDelay,
-      CardDealt(player4.id, Card(Tre, Denari), Direction.Player),   // Quattro Spade, Asso Bastoni, Tre Denari
-
+      CardsDealt(player4.id, List(Card(Sei, Bastoni), Card(Tre, Spade), Card(Tre, Denari)), Direction.Player),
       mediumDelay,
       TrumpRevealed(Card(Asso, Coppe)),
 
@@ -182,13 +163,13 @@ object Briscola4Spec:
       TrickCompleted(player4.id),  // 11
 
       mediumDelay,
-      CardDealt(player4.id, Card(Fante, Bastoni), Direction.Player),  // Quattro Spade, Tre Denari, Fante Bastoni
+      CardsDealt(player4.id, List(Card(Fante, Bastoni)), Direction.Player),  // Quattro Spade, Tre Denari, Fante Bastoni
       shortDelay,
-      CardDealt(player1.id, Card(Due, Denari), Direction.Player),     // Sei Denari, Cinque Spade, Due Denari
+      CardsDealt(player1.id, List(Card(Due, Denari)), Direction.Player),     // Sei Denari, Cinque Spade, Due Denari
       shortDelay,
-      CardDealt(player2.id, Card(Fante, Spade), Direction.Player),    // Asso Spade, Re Denari, Fante Spade
+      CardsDealt(player2.id, List(Card(Fante, Spade)), Direction.Player),    // Asso Spade, Re Denari, Fante Spade
       shortDelay,
-      CardDealt(player3.id, Card(Re, Bastoni), Direction.Player),     // Cinque Coppe, Tre Spade, Re Bastoni
+      CardsDealt(player3.id, List(Card(Re, Bastoni)), Direction.Player),     // Cinque Coppe, Tre Spade, Re Bastoni
       ActionRequested(player4.id, Action.PlayCard),
       willTick(366268412),
       CardPlayed(player4.id, Card(Fante, Bastoni)),
@@ -205,13 +186,13 @@ object Briscola4Spec:
       TrickCompleted(player3.id),  // 8
 
       mediumDelay,
-      CardDealt(player3.id, Card(Sette, Bastoni), Direction.Player),  // Cinque Coppe, Tre Spade, Sette Bastoni
+      CardsDealt(player3.id, List(Card(Sette, Bastoni)), Direction.Player),  // Cinque Coppe, Tre Spade, Sette Bastoni
       shortDelay,
-      CardDealt(player4.id, Card(Tre, Coppe), Direction.Player),      // Quattro Spade, Tre Denari, Tre Coppe
+      CardsDealt(player4.id, List(Card(Tre, Coppe)), Direction.Player),      // Quattro Spade, Tre Denari, Tre Coppe
       shortDelay,
-      CardDealt(player1.id, Card(Fante, Coppe), Direction.Player),    // Sei Denari, Cinque Spade, Fante Coppe
+      CardsDealt(player1.id, List(Card(Fante, Coppe)), Direction.Player),    // Sei Denari, Cinque Spade, Fante Coppe
       shortDelay,
-      CardDealt(player2.id, Card(Cinque, Bastoni), Direction.Player), // Asso Spade, Re Denari, Cinque Bastoni
+      CardsDealt(player2.id, List(Card(Cinque, Bastoni)), Direction.Player), // Asso Spade, Re Denari, Cinque Bastoni
       ActionRequested(player3.id, Action.PlayCard),
       willTick(318297128),
       CardPlayed(player3.id, Card(Sette, Bastoni)),
@@ -228,13 +209,13 @@ object Briscola4Spec:
       TrickCompleted(player3.id),  // 0 + 8 = 8
 
       mediumDelay,
-      CardDealt(player3.id, Card(Sei, Coppe), Direction.Player),        // Cinque Coppe, Tre Spade, Sei Coppe
+      CardsDealt(player3.id, List(Card(Sei, Coppe)), Direction.Player),        // Cinque Coppe, Tre Spade, Sei Coppe
       shortDelay,
-      CardDealt(player4.id, Card(Cavallo, Denari), Direction.Player),   // Tre Denari, Tre Coppe, Cavallo Denari
+      CardsDealt(player4.id, List(Card(Cavallo, Denari)), Direction.Player),   // Tre Denari, Tre Coppe, Cavallo Denari
       shortDelay,
-      CardDealt(player1.id, Card(Cavallo, Bastoni), Direction.Player),  // Cinque Spade, Fante Coppe, Cavallo Bastoni
+      CardsDealt(player1.id, List(Card(Cavallo, Bastoni)), Direction.Player),  // Cinque Spade, Fante Coppe, Cavallo Bastoni
       shortDelay,
-      CardDealt(player2.id, Card(Due, Coppe), Direction.Player),        // Asso Spade, Re Denari, Due Coppe
+      CardsDealt(player2.id, List(Card(Due, Coppe)), Direction.Player),        // Asso Spade, Re Denari, Due Coppe
       ActionRequested(player3.id, Action.PlayCard),
       willTick(-343908206),
       CardPlayed(player3.id, Card(Sei, Coppe)),
@@ -251,13 +232,13 @@ object Briscola4Spec:
       TrickCompleted(player3.id),  // 10 + 8 = 18
 
       mediumDelay,
-      CardDealt(player3.id, Card(Fante, Denari), Direction.Player),     // Cinque Coppe, Tre Spade, Fante Denari
+      CardsDealt(player3.id, List(Card(Fante, Denari)), Direction.Player),     // Cinque Coppe, Tre Spade, Fante Denari
       shortDelay,
-      CardDealt(player4.id, Card(Cavallo, Spade), Direction.Player),    // Tre Denari, Tre Coppe, Cavallo Spade
+      CardsDealt(player4.id, List(Card(Cavallo, Spade)), Direction.Player),    // Tre Denari, Tre Coppe, Cavallo Spade
       shortDelay,
-      CardDealt(player1.id, Card(Quattro, Bastoni), Direction.Player),  // Cinque Spade, Fante Coppe, Quattro Bastoni
+      CardsDealt(player1.id, List(Card(Quattro, Bastoni)), Direction.Player),  // Cinque Spade, Fante Coppe, Quattro Bastoni
       shortDelay,
-      CardDealt(player2.id, Card(Re, Coppe), Direction.Player),         // Asso Spade, Due Coppe, Re Coppe
+      CardsDealt(player2.id, List(Card(Re, Coppe)), Direction.Player),         // Asso Spade, Due Coppe, Re Coppe
       ActionRequested(player3.id, Action.PlayCard),
       willTick(1281485486),
       CardPlayed(player3.id, Card(Fante, Denari)),
@@ -274,13 +255,13 @@ object Briscola4Spec:
       TrickCompleted(player2.id),  // 16 + 11 = 27
 
       mediumDelay,
-      CardDealt(player2.id, Card(Quattro, Coppe), Direction.Player),  // Asso Spade, Due Coppe, Quattro Coppe
+      CardsDealt(player2.id, List(Card(Quattro, Coppe)), Direction.Player),  // Asso Spade, Due Coppe, Quattro Coppe
       shortDelay,
-      CardDealt(player3.id, Card(Asso, Denari), Direction.Player),    // Cinque Coppe, Tre Spade, Asso Denari
+      CardsDealt(player3.id, List(Card(Asso, Denari)), Direction.Player),    // Cinque Coppe, Tre Spade, Asso Denari
       shortDelay,
-      CardDealt(player4.id, Card(Sette, Spade), Direction.Player),    // Tre Coppe, Cavallo Spade, Sette Spade
+      CardsDealt(player4.id, List(Card(Sette, Spade)), Direction.Player),    // Tre Coppe, Cavallo Spade, Sette Spade
       shortDelay,
-      CardDealt(player1.id, Card(Cinque, Denari), Direction.Player),  // Cinque Spade, Fante Coppe, Cinque Denari
+      CardsDealt(player1.id, List(Card(Cinque, Denari)), Direction.Player),  // Cinque Spade, Fante Coppe, Cinque Denari
       ActionRequested(player2.id, Action.PlayCard),
       willTick(469903836),
       CardPlayed(player2.id, Card(Due, Coppe)),
@@ -297,13 +278,13 @@ object Briscola4Spec:
       TrickCompleted(player3.id),  // 0 + 18 = 18
 
       mediumDelay,
-      CardDealt(player3.id, Card(Sette, Coppe), Direction.Player),    // Tre Spade, Asso Denari, Sette Coppe
+      CardsDealt(player3.id, List(Card(Sette, Coppe)), Direction.Player),    // Tre Spade, Asso Denari, Sette Coppe
       shortDelay,
-      CardDealt(player4.id, Card(Re, Spade), Direction.Player),       // Tre Coppe, Cavallo Spade, Re Spade
+      CardsDealt(player4.id, List(Card(Re, Spade)), Direction.Player),       // Tre Coppe, Cavallo Spade, Re Spade
       shortDelay,
-      CardDealt(player1.id, Card(Sei, Spade), Direction.Player),      // Fante Coppe, Cinque Denari, Sei Spade
+      CardsDealt(player1.id, List(Card(Sei, Spade)), Direction.Player),      // Fante Coppe, Cinque Denari, Sei Spade
       shortDelay,
-      CardDealt(player2.id, Card(Quattro, Denari), Direction.Player), // Asso Spade, Quattro Coppe, Quattro Denari
+      CardsDealt(player2.id, List(Card(Quattro, Denari)), Direction.Player), // Asso Spade, Quattro Coppe, Quattro Denari
       ActionRequested(player3.id, Action.PlayCard),
       willTick(1392774646),
       CardPlayed(player3.id, Card(Sette, Coppe)),
@@ -320,13 +301,13 @@ object Briscola4Spec:
       TrickCompleted(player3.id),  // 3 + 18 = 21
 
       mediumDelay,
-      CardDealt(player3.id, Card(Tre, Bastoni), Direction.Player),      // Tre Spade, Asso Denari, Tre Bastoni
+      CardsDealt(player3.id, List(Card(Tre, Bastoni)), Direction.Player),      // Tre Spade, Asso Denari, Tre Bastoni
       shortDelay,
-      CardDealt(player4.id, Card(Due, Spade), Direction.Player),        // Tre Coppe, Re Spade, Due Spade
+      CardsDealt(player4.id, List(Card(Due, Spade)), Direction.Player),        // Tre Coppe, Re Spade, Due Spade
       shortDelay,
-      CardDealt(player1.id, Card(Cavallo, Coppe), Direction.Player),    // Fante Coppe, Cinque Denari, Cavallo Coppe
+      CardsDealt(player1.id, List(Card(Cavallo, Coppe)), Direction.Player),    // Fante Coppe, Cinque Denari, Cavallo Coppe
       shortDelay,
-      CardDealt(player2.id, Card(Asso, Coppe), Direction.Player),       // Asso Spade, Quattro Coppe, Asso Coppe
+      CardsDealt(player2.id, List(Card(Asso, Coppe)), Direction.Player),       // Asso Spade, Quattro Coppe, Asso Coppe
 
       ActionRequested(player3.id, Action.PlayCard),
       willTick(1516183072),

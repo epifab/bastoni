@@ -7,7 +7,11 @@ object Deck:
   } yield Card(rank, suit)).toList
 
 extension(deck: List[Card])
-  def dealOrDie[T](f: (Card, List[Card]) => T): T =
+  def deal1OrDie[T](f: (Card, List[Card]) => T): T =
     deck match
       case card :: restOfTheDeck => f(card, restOfTheDeck)
-      case _ => throw new RuntimeException("The deck was empty")
+      case _ => throw new IllegalStateException("The deck was empty")
+
+  def dealOrDie[T](n: Int)(f: (List[Card], List[Card]) => T): T =
+    if (deck.size < n) throw new IllegalStateException("The deck was empty")
+    else f.tupled(deck.splitAt(n))
