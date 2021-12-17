@@ -1,14 +1,17 @@
-package bastoni.domain.logic
+package bastoni.domain
 
+import bastoni.domain.logic.{GamePublisher, GameSubscriber}
 import bastoni.domain.model.*
 import bastoni.domain.view.FromPlayer.{JoinRoom, PlayCard, ShuffleDeck}
-import bastoni.domain.view.{PlayerSeat, SeatView, TableView, ToPlayer}
-import cats.effect.{Sync}
+import bastoni.domain.view.{PlayerSeat, ToPlayer}
+import cats.effect.syntax.temporal.*
+import cats.effect.{Sync, Temporal}
 
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.chaining.*
 
 object DumbPlayer:
-  def apply[F[_]: Sync](me: Player, roomId: RoomId, subscriber: GameSubscriber[F], publisher: GamePublisher[F]): fs2.Stream[F, Unit] =
+  def apply[F[_]: Sync: Temporal](me: Player, roomId: RoomId, subscriber: GameSubscriber[F], publisher: GamePublisher[F], pause: FiniteDuration = 0.millis): fs2.Stream[F, Unit] =
     val actions =
       fs2.Stream(JoinRoom) ++ subscriber
         .subscribe(me, roomId)
@@ -27,6 +30,7 @@ object DumbPlayer:
           }
         }
         .collect { case Some(event) => event }
+        .evalMap { event => Sync[F].pure(event).delayBy(pause) }
 
     actions
       // .evalTap { act => Sync[F].delay(println(s"${me.name} will ${act.getClass.getSimpleName.filter(_ != '$')}")) }

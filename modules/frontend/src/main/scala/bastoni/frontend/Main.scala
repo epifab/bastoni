@@ -1,7 +1,8 @@
 package bastoni.frontend
 
-import bastoni.domain.logic.Services
-import cats.effect.IO
+import bastoni.frontend.components.GameComponent
+import org.scalajs.dom.document
 
 @main def run(): Unit =
-  println("Hello")
+  val root = document.getElementById("app-wrapper")
+  components.GameComponent().renderIntoDOM(root)

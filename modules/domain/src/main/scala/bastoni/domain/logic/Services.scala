@@ -1,7 +1,7 @@
 package bastoni.domain.logic
 
 import bastoni.domain.repos.*
-import cats.effect.{Concurrent, Resource, Async}
+import cats.effect.{Async, Resource}
 
 object Services:
 
@@ -12,20 +12,24 @@ object Services:
     messageRepo: MessageRepo[F],
     tableRepo: TableRepo[F],
     roomRepo: RoomRepo[F]
-  ): Resource[F, fs2.Stream[F, Unit]] =
+  ): Resource[F, (GamePublisher[F], GameSubscriber[F], fs2.Stream[F, Unit])] =
     for {
       gameService         <- GameService.runner(messageBus, gameRepo, messageRepo)
       lobby               <- Lobby.runner(messageBus, roomRepo)
       gameSnapshotService <- GameSnapshotService.runner(messageBus, snapshotBus, tableRepo)
-    } yield {
-      messageBus.run
-        .concurrently(snapshotBus.run)
-        .concurrently(gameService)
-        .concurrently(lobby)
-        .concurrently(gameSnapshotService)
-    }
 
-  def inMemory[F[_]: Async]: Resource[F, fs2.Stream[F, Unit]] =
+      pub = GameSnapshotService.publisher(messageBus)
+      sub = GameSnapshotService.subscriber(snapshotBus)
+
+      servicesRunner =
+        messageBus.run
+          .concurrently(snapshotBus.run)
+          .concurrently(gameService)
+          .concurrently(lobby)
+          .concurrently(gameSnapshotService)
+    } yield (pub, sub, servicesRunner)
+
+  def inMemory[F[_]: Async]: Resource[F, (GamePublisher[F], GameSubscriber[F], fs2.Stream[F, Unit])] =
     for {
       messageBus  <- Resource.eval(MessageBus.inMemory)
       snapshotBus <- Resource.eval(SnapshotBus.inMemory)

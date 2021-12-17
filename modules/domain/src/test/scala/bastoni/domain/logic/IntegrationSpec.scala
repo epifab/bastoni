@@ -17,7 +17,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
   private val timeout = 30.seconds
 
   extension (player: Player)
-    def dumb[F[_]: Sync](sub: GameSubscriber[F], pub: GamePublisher[F]): fs2.Stream[F, Unit] = DumbPlayer(player, roomId, sub, pub)
+    def dumb(sub: GameSubscriber[IO], pub: GamePublisher[IO]): fs2.Stream[IO, Unit] = DumbPlayer(player, roomId, sub, pub)
 
   val roomId = RoomId.newId
 
