@@ -31,17 +31,17 @@ case class EndOfMatchPlayer(override val player: MatchPlayer, winner: Boolean) e
 object PlayerState:
 
   given Encoder[PlayerState] = Encoder.instance {
-    case obj: SittingOut       => deriveEncoder[SittingOut].mapJsonObject(_.add("type", "SittingOut".asJson))(obj)
-    case obj: WaitingPlayer    => deriveEncoder[WaitingPlayer].mapJsonObject(_.add("type", "WaitingPlayer".asJson))(obj)
-    case obj: ActingPlayer     => deriveEncoder[ActingPlayer].mapJsonObject(_.add("type", "ActingPlayer".asJson))(obj)
-    case obj: EndOfGamePlayer => deriveEncoder[EndOfGamePlayer].mapJsonObject(_.add("type", "EndOfMatchPlayer".asJson))(obj)
-    case obj: EndOfMatchPlayer  => deriveEncoder[EndOfMatchPlayer].mapJsonObject(_.add("type", "EndOfGamePlayer".asJson))(obj)
+    case obj: SittingOut       => deriveEncoder[SittingOut].mapJsonObject(_.add("state", "SittingOut".asJson))(obj)
+    case obj: WaitingPlayer    => deriveEncoder[WaitingPlayer].mapJsonObject(_.add("state", "Waiting".asJson))(obj)
+    case obj: ActingPlayer     => deriveEncoder[ActingPlayer].mapJsonObject(_.add("state", "Acting".asJson))(obj)
+    case obj: EndOfGamePlayer  => deriveEncoder[EndOfGamePlayer].mapJsonObject(_.add("state", "EndOfGame".asJson))(obj)
+    case obj: EndOfMatchPlayer => deriveEncoder[EndOfMatchPlayer].mapJsonObject(_.add("state", "EndOfMatch".asJson))(obj)
   }
 
-  given Decoder[PlayerState] = Decoder.instance { cursor => cursor.downField("type").as[String].flatMap {
-    case "SittingOut"       => deriveDecoder[SittingOut].tryDecode(cursor)
-    case "WaitingPlayer"    => deriveDecoder[WaitingPlayer].tryDecode(cursor)
-    case "ActingPlayer"     => deriveDecoder[ActingPlayer].tryDecode(cursor)
-    case "EndOfMatchPlayer" => deriveDecoder[EndOfGamePlayer].tryDecode(cursor)
-    case "EndOfGamePlayer"  => deriveDecoder[EndOfMatchPlayer].tryDecode(cursor)
+  given Decoder[PlayerState] = Decoder.instance { cursor => cursor.downField("state").as[String].flatMap {
+    case "SittingOut" => deriveDecoder[SittingOut].tryDecode(cursor)
+    case "Waiting"    => deriveDecoder[WaitingPlayer].tryDecode(cursor)
+    case "Acting"     => deriveDecoder[ActingPlayer].tryDecode(cursor)
+    case "EndOfGame"  => deriveDecoder[EndOfGamePlayer].tryDecode(cursor)
+    case "EndOfMatch" => deriveDecoder[EndOfMatchPlayer].tryDecode(cursor)
   }}
