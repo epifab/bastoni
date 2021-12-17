@@ -190,7 +190,7 @@ object Game:
         case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
         case _ => players.map(List(_))
 
-      val scores = ScopaScore(teams)
+      val scores: List[GameScore] = GameScore(teams)
       ???
   }
 

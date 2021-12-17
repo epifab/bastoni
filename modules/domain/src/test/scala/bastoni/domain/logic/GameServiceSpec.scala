@@ -259,15 +259,42 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         oldMessage.data,
         CardPlayed(user1.id, player1Card),
         TrickCompleted(user2.id),
-        GameCompleted(
-          winnerIds = List(user1.id),
-          points = List(
-            PointsCount(List(user2.id), 21),
-            PointsCount(List(user1.id), 99),
+        BriscolaGameCompleted(
+          scores = List(
+            briscola.GameScore(
+              List(user2.id),
+              List(
+                briscola.GameScoreItem(Card(Asso, Denari), 11),
+                briscola.GameScoreItem(Card(Tre, Denari), 10)
+              )
+            ),
+            briscola.GameScore(
+              List(user1.id),
+              List(
+                briscola.GameScoreItem(Card(Asso, Coppe), 11),
+                briscola.GameScoreItem(Card(Asso, Spade), 11),
+                briscola.GameScoreItem(Card(Asso, Bastoni), 11),
+                briscola.GameScoreItem(Card(Tre, Coppe), 10),
+                briscola.GameScoreItem(Card(Tre, Spade), 10),
+                briscola.GameScoreItem(Card(Tre, Bastoni), 10),
+                briscola.GameScoreItem(Card(Fante, Denari), 2),
+                briscola.GameScoreItem(Card(Fante, Coppe), 2),
+                briscola.GameScoreItem(Card(Fante, Spade), 2),
+                briscola.GameScoreItem(Card(Fante, Bastoni), 2),
+                briscola.GameScoreItem(Card(Cavallo, Denari), 3),
+                briscola.GameScoreItem(Card(Cavallo, Coppe), 3),
+                briscola.GameScoreItem(Card(Cavallo, Spade), 3),
+                briscola.GameScoreItem(Card(Cavallo, Bastoni), 3),
+                briscola.GameScoreItem(Card(Re, Denari), 4),
+                briscola.GameScoreItem(Card(Re, Coppe), 4),
+                briscola.GameScoreItem(Card(Re, Spade), 4),
+                briscola.GameScoreItem(Card(Re, Bastoni), 4)
+              )
+            ),
           ),
-          matchPoints = List(
-            PointsCount(List(user2.id), 1),
-            PointsCount(List(user1.id), 3)
+          matchScores = List(
+            MatchScore(List(user2.id), 1),
+            MatchScore(List(user1.id), 3)
           )
         ),
         MatchCompleted(List(user1.id))

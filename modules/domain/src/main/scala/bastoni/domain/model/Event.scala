@@ -1,5 +1,6 @@
 package bastoni.domain.model
 
+import bastoni.domain.logic.{briscola, tressette, scopa}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
 import io.circe.{Decoder, Encoder, Json}
@@ -9,12 +10,6 @@ sealed trait Event
 sealed trait ServerEvent extends Event
 sealed trait PlayerEvent extends Event
 sealed trait PublicEvent extends ServerEvent with PlayerEvent
-
-case class PointsCount(playerIds: List[UserId], points: Int)
-
-object PointsCount:
-  given Encoder[PointsCount] = deriveEncoder
-  given Decoder[PointsCount] = deriveDecoder
 
 
 object Event:
@@ -29,10 +24,19 @@ object Event:
   case class  ActionRequested(playerId: UserId, action: Action, timeout: Option[Timeout.Active] = None) extends PublicEvent
   case class  TimedOut(playerId: UserId, action: Action) extends PublicEvent
   case class  TrickCompleted(winnerId: UserId) extends PublicEvent
-  case class  GameCompleted(winnerIds: List[UserId], points: List[PointsCount], matchPoints: List[PointsCount]) extends PublicEvent
-  case class  MatchCompleted(winnerIds: List[UserId]) extends PublicEvent
-  case object GameAborted extends PublicEvent
-  case object MatchAborted extends PublicEvent
+
+  sealed trait GameCompleted extends PublicEvent:
+    def scores: List[Score]
+    def matchScores: List[MatchScore]
+    def winnerIds: List[UserId] = scores.winners
+
+  case class BriscolaGameCompleted(scores: List[briscola.GameScore], matchScores: List[MatchScore]) extends GameCompleted
+  case class TressetteGameCompleted(scores: List[tressette.GameScore], matchScores: List[MatchScore]) extends GameCompleted
+  case class ScopaGameCompleted(scores: List[scopa.GameScore], matchScores: List[MatchScore]) extends GameCompleted
+
+  case class   MatchCompleted(winnerIds: List[UserId]) extends PublicEvent
+  case object  GameAborted extends PublicEvent
+  case object  MatchAborted extends PublicEvent
 
   sealed trait CardsDealt[C <: CardView]:
     def playerId: UserId
@@ -72,7 +76,11 @@ object Event:
     case obj: CardPlayed        => deriveEncoder[CardPlayed].mapJsonObject(_.add("type", "CardPlayed".asJson))(obj)
     case obj: CardsTaken        => deriveEncoder[CardsTaken].mapJsonObject(_.add("type", "CardsTaken".asJson))(obj)
     case obj: TrickCompleted    => deriveEncoder[TrickCompleted].mapJsonObject(_.add("type", "TrickCompleted".asJson))(obj)
-    case obj: GameCompleted     => deriveEncoder[GameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson))(obj)
+
+    case obj: BriscolaGameCompleted  => deriveEncoder[BriscolaGameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson).add("gameType", (GameType.Briscola: GameType).asJson))(obj)
+    case obj: TressetteGameCompleted => deriveEncoder[TressetteGameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson).add("gameType", (GameType.Tressette: GameType).asJson))(obj)
+    case obj: ScopaGameCompleted     => deriveEncoder[ScopaGameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson).add("gameType", (GameType.Scopa: GameType).asJson))(obj)
+
     case obj: MatchCompleted    => deriveEncoder[MatchCompleted].mapJsonObject(_.add("type", "MatchCompleted".asJson))(obj)
     case GameAborted            => Json.obj("type" -> "GameAborted".asJson)
     case MatchAborted           => Json.obj("type" -> "MatchAborted".asJson)
@@ -102,7 +110,14 @@ object Event:
     case "CardPlayed"        => deriveDecoder[CardPlayed](obj)
     case "CardsTaken"        => deriveDecoder[CardsTaken](obj)
     case "TrickCompleted"    => deriveDecoder[TrickCompleted](obj)
-    case "GameCompleted"     => deriveDecoder[GameCompleted](obj)
+
+    case "GameCompleted" =>
+      obj.downField("gameType").as[GameType] flatMap {
+        case GameType.Briscola => deriveDecoder[BriscolaGameCompleted](obj)
+        case GameType.Tressette => deriveDecoder[TressetteGameCompleted](obj)
+        case GameType.Scopa => deriveDecoder[ScopaGameCompleted](obj)
+      }
+
     case "MatchCompleted"    => deriveDecoder[MatchCompleted](obj)
     case "GameAborted"       => Right(GameAborted)
     case "MatchAborted"      => Right(MatchAborted)

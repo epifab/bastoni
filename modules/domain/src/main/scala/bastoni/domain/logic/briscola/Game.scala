@@ -137,15 +137,13 @@ object Game:
         case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
         case ps => ps.map(List(_))
 
-      val points = teams.map(players => PointsCount(players.map(_.id), players.foldRight(0)(_.points + _)))
+      val scores: List[GameScore] = teams.map(players => GameScore(players))
 
-      val winners: List[UserId] = points.sortBy(-_.points) match
-        case PointsCount(winners, wp) :: PointsCount(_, lp) :: _ if wp > lp => winners
-        case _ => Nil
+      val winners: List[UserId] = scores.winners
 
-      val matchPoints: List[PointsCount] = teams.flatMap(teamPlayers => teamPlayers.headOption.map {
-        case winner if winners.exists(winner.is) => PointsCount(teamPlayers.map(_.id), winner.matchPlayer.win.points)
-        case loser => PointsCount(teamPlayers.map(_.id), loser.matchPlayer.points)
+      val matchPoints: List[MatchScore] = teams.flatMap(teamPlayers => teamPlayers.headOption.map {
+        case winner if winners.exists(winner.is) => MatchScore(teamPlayers.map(_.id), winner.matchPlayer.win.points)
+        case loser => MatchScore(teamPlayers.map(_.id), loser.matchPlayer.points)
       })
 
       val updatedPlayers = players.map {
@@ -153,7 +151,7 @@ object Game:
         case loser => loser.matchPlayer
       }
 
-      GameState.Completed(updatedPlayers) -> List(GameCompleted(winners, points, matchPoints))
+      GameState.Completed(updatedPlayers) -> List(BriscolaGameCompleted(scores, matchPoints))
   }
 
   private[briscola] val playMatchStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {

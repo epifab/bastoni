@@ -365,17 +365,16 @@ object Briscola3Spec:
       TrickCompleted(player1.id),  // 24
 
       longDelay,
-      GameCompleted(
-        winnerIds = List(player1.id),
-        points = List(
-          PointsCount(List(player1.id), 54),
-          PointsCount(List(player2.id), 41),
-          PointsCount(List(player3.id), 25),
+      BriscolaGameCompleted(
+        scores = List(
+//          MatchScore(List(player1.id), 54),
+//          MatchScore(List(player2.id), 41),
+//          MatchScore(List(player3.id), 25),
         ),
-        matchPoints = List(
-          PointsCount(List(player1.id), player1.points + 1),
-          PointsCount(List(player2.id), player2.points),
-          PointsCount(List(player3.id), player3.points)
+        matchScores = List(
+          MatchScore(List(player1.id), player1.points + 1),
+          MatchScore(List(player2.id), player2.points),
+          MatchScore(List(player3.id), player3.points)
         )
       )
     ).map(_.toMessage(roomId))

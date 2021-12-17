@@ -119,19 +119,19 @@ trait Table[C <: CardView]:
           }
         )
 
-      case Event.GameCompleted(winnerIds, points, matchPoints) =>
-        extension (points: List[PointsCount])
+      case done: Event.GameCompleted =>
+        extension (score: List[Score])
           def pointsFor(player: MatchPlayer): Option[Int] =
-            points.find(_.playerIds.exists(player.is)).map(_.points)
+            score.find(_.playerIds.exists(player.is)).map(_.points)
 
         updateWith(
           seats = seats.map(seat => seat.copy(
             player = seat.player.map {
               case active: SittingIn =>
                 EndOfGamePlayer(
-                  player = active.player.copy(points = matchPoints.pointsFor(active.player).getOrElse(active.player.points)),
-                  points = points.pointsFor(active.player).getOrElse(0),
-                  winner = winnerIds.exists(active.is)
+                  player = active.player.copy(points = done.matchScores.pointsFor(active.player).getOrElse(active.player.points)),
+                  points = done.scores.pointsFor(active.player).getOrElse(0),
+                  winner = done.winnerIds.exists(active.is)
                 )
               case whatever => whatever
             },

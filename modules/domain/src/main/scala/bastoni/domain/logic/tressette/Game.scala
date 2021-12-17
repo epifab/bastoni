@@ -112,28 +112,20 @@ object Game:
       // The last trick is called "rete" (net) which will add a point to the final score
       val rete = players.head.id
 
-      val pointsCount: List[PointsCount] = teams.map(players =>
-        PointsCount(
-          playerIds = players.map(_.id),
-          points = (players.foldRight(0)(_.points + _) / 3) + (if (players.exists(_.id == rete)) 1 else 0)
-        )
-      )
+      val scores: List[GameScore] = teams.map(players => GameScore(players, rete = players.exists(_.id == rete)))
 
-      val matchPointsCount: List[PointsCount] = teams.zip(pointsCount).map {
+      val matchPointsCount: List[MatchScore] = teams.zip(scores).map {
         case (players, points) =>
-          PointsCount(players.map(_.id), players.head.matchPlayer.win(points.points).points)
+          MatchScore(players.map(_.id), players.head.matchPlayer.win(points.points).points)
       }
 
-      // it's not possible to draw so maxBy is good enough
-      val winners: List[UserId] = pointsCount.maxBy(_.points).playerIds
-
       val updatedPlayers: List[MatchPlayer] = players.flatMap { matchPlayer =>
-        pointsCount
+        scores
           .find(_.playerIds.exists(matchPlayer.is))
           .map(pointsCount => matchPlayer.matchPlayer.win(pointsCount.points))
       }
 
-      GameState.Completed(updatedPlayers) -> List(GameCompleted(winners, pointsCount, matchPointsCount))
+      GameState.Completed(updatedPlayers) -> List(TressetteGameCompleted(scores, matchPointsCount))
 
     case (m, _) => m -> Nil
   }
