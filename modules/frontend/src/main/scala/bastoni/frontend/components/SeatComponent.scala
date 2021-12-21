@@ -19,10 +19,6 @@ val SeatComponent =
           "Collected: ",
           CardsComponent(seat.taken)
         ),
-        <.p(
-          "Played: ",
-          CardsComponent(seat.played)
-        ),
         <.hr
       )
     }

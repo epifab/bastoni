@@ -28,17 +28,7 @@ object Fixtures:
 
   val messageId: MessageId = MessageId.unsafeParse("1FA083E5-802E-476A-B17D-48C81D637B51")
 
-  def willTick(hash: Int): Delayed[Command] = Delayed(Tick(hash), Delay.Tick)
-
-  val dealCards     = Continue
-  val drawCards     = Continue
-  val revealTrump   = Continue
-  val completeTrick = Continue
-  val completeMatch = Continue
-
-  val shortDelay: Delayed[Command] = Delayed(Continue, Delay.Short)
-  val mediumDelay: Delayed[Command] = Delayed(Continue, Delay.Medium)
-  val longDelay: Delayed[Command] = Delayed(Continue, Delay.Long)
+  def willTick(hash: Int): Delayed[Command] = Delayed(Tick(hash), Delay.ActionTimeout)
 
   val shuffleSeed = 10
   val shuffledDeck = List(

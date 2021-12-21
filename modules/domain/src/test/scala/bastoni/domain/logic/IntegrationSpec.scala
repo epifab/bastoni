@@ -19,7 +19,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
   extension (player: User)
     def dumb(sub: GameSubscriber[IO], pub: GamePublisher[IO]): fs2.Stream[IO, Unit] = DumbPlayer(player, roomId, sub, pub)
 
-  val roomId = RoomId.newId
+  val roomId: RoomId = RoomId.newId
 
   def playGame(
     numberOfPlayers: 2 | 3 | 4,
@@ -50,7 +50,10 @@ class IntegrationSpec extends AsyncIOFreeSpec:
 
       gameServiceRunner <- fs2.Stream.resource(
         if (realSpeed) GameService.runner(messageBus, gameRepo, messageRepo)
-        else GameService.runner(messageBus, gameRepo, messageRepo, _ => 2.millis)
+        else GameService.runner(messageBus, gameRepo, messageRepo, {
+          case Delay.ActionTimeout => 100.millis
+          case _ => 2.millis
+        })
       )
 
       lastMessage <-
@@ -58,8 +61,8 @@ class IntegrationSpec extends AsyncIOFreeSpec:
           .subscribe
           .concurrently(messageBus.run)
           .concurrently(gameServiceRunner)
-          .concurrently(activateStream)
           .concurrently(playStreams)
+          .concurrently(activateStream)
           // .evalTap(message => IO(println(message.data.getClass.getSimpleName)))
           .collect[Event] {
             case Message(_, `roomId`, e: Event.MatchCompleted) => e

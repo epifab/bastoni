@@ -37,12 +37,11 @@ case class TableServerView(
   def toPlayerView(me: User): TablePlayerView =
     TablePlayerView(
       seats = seats.map {
-        case Seat(player, hand, taken, played) =>
+        case Seat(player, hand, taken) =>
           Seat[CardPlayerView](
             player = player,
             hand = hand.map(_.toPlayerView(me.id, player.map(_.id))),
-            taken = taken.map(_.toPlayerView(me.id, player.map(_.id))),
-            played = played.map(_.toPlayerView(me.id, player.map(_.id)))
+            taken = taken.map(_.toPlayerView(me.id, player.map(_.id)))
           )
       },
       deck = deck.map(_.toPlayerView(me.id, None)),
@@ -50,7 +49,7 @@ case class TableServerView(
       active = active
     )
 
-  val players: List[User] = seats.collect { case Seat(Some(seated), _, _, _) => seated }
+  val players: List[User] = seats.collect { case Seat(Some(seated), _, _) => seated }
   val size: Int = seats.size
   val isFull: Boolean = seats.forall(_.player.isDefined)
   val isEmpty: Boolean = seats.forall(_.player.isEmpty)
@@ -60,13 +59,13 @@ case class TableServerView(
   def contains(player: UserId): Boolean = seatIndexFor(player).isDefined
 
   def seatIndexFor(player: User): Option[Int] = seatIndexFor(player.id)
-  def seatIndexFor(id: UserId): Option[Int] = indexedSeats.collectFirst { case (Seat(Some(player), _, _, _), index) if player.is(id) => index }
+  def seatIndexFor(id: UserId): Option[Int] = indexedSeats.collectFirst { case (Seat(Some(player), _, _), index) if player.is(id) => index }
 
   def join(player: User, seed: Int): Either[TableError, (TableServerView, Int)] =
     if (contains(player)) Left(TableError.DuplicatePlayer) else {
       new Random(seed)
         .shuffle(indexedSeats)
-        .collectFirst { case (Seat(None, _, _, _), index) => index }
+        .collectFirst { case (Seat(None, _, _), index) => index }
         .fold[Either[TableError, (TableServerView, Int)]](Left(TableError.FullTable)) { targetIndex =>
           Right(updateWith(
             seats = indexedSeats.map {

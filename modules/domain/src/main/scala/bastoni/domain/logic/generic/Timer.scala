@@ -26,7 +26,7 @@ trait Timer[State, Self <: Timer[State, Self]]:
             updated -> List(updated.request, updated.nextTick)
       }
 
-    def nextTick: Delayed[Command] = Delayed(Command.Tick(ref), Delay.Tick)
+    def nextTick: Delayed[Command] = Delayed(Command.Tick(ref), Delay.ActionTimeout)
 
 
 object Timer:

@@ -62,7 +62,7 @@ object RegressionSpecGen extends IOApp:
         outputBus <- fs2.Stream.eval(Fs2Bus[IO, StateMachineOutput])
 
         initialTable = TableServerView(
-          seats = users.map(u => Seat(Some(WaitingPlayer(MatchPlayer(u, 0))), Nil, Nil, Nil)),
+          seats = users.map(u => Seat(Some(WaitingPlayer(MatchPlayer(u, 0))), Nil, Nil)),
           deck = Nil,
           board = Nil,
           active = false

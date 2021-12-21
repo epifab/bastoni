@@ -4,6 +4,7 @@ package scopa
 import bastoni.domain.logic.generic.Timer
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
+import bastoni.domain.model.Delay.syntax.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
@@ -42,18 +43,18 @@ object Game extends GameLogic[MatchState]:
       val state =
         if (players.size == 4) GameState.Deal5Round(players, shuffledDeck)
         else GameState.Deal3Round(players, Nil, shuffledDeck)
-      state -> List(DeckShuffled(shuffledDeck), Continue.later)
+      state -> List(DeckShuffled(shuffledDeck), Continue.toDealCards)
 
     case (GameState.Deal3Round(player :: Nil, done, deck), Continue) =>
       deck.dealOrDie(3) { (cards, tail) =>
         GameState.WillDealBoardCards(done :+ player.draw(cards), tail) ->
-          List(CardsDealt(player.id, cards, Direction.Player), Continue.later)
+          List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
     case (GameState.Deal3Round(player :: todo, done, deck), Continue) =>
       deck.dealOrDie(3) { (cards, tail) =>
         GameState.Deal3Round(todo, done :+ player.draw(cards), tail) ->
-          List(CardsDealt(player.id, cards, Direction.Player), Continue.later)
+          List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
     case (GameState.Deal5Round(player :: done, deck), Continue) =>
@@ -68,7 +69,7 @@ object Game extends GameLogic[MatchState]:
             Action.TakeCards,
             List(cardsDealt)
           )
-        else GameState.Deal5Round(players, tail) -> List(cardsDealt, Continue.later)
+        else GameState.Deal5Round(players, tail) -> List(cardsDealt, Continue.toDealCards)
       }
 
     case (GameState.WillDealBoardCards(players, deck), Continue) =>
@@ -95,14 +96,17 @@ object Game extends GameLogic[MatchState]:
     case (GameState.DrawRound(player :: todo, done, deck, trump), Continue) =>
       deck.dealOrDie(3) { (cards, tail) =>
         GameState.DrawRound(todo, done :+ player.draw(cards), tail, trump) ->
-          List(CardsDealt(player.id, cards, Direction.Player), Continue.later)
+          List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
     case (wait: GameState.WaitingForPlayer, tick: Tick) => wait.ticked(tick)
 
     case (wait: GameState.WaitingForPlayer, event) if playGameStepPF.isDefinedAt(wait.state -> event) => playGameStepPF(wait.state -> event)
 
-    case (GameState.PlayRound(player :: nextPlayer :: others, deck, board), TakeCards(p, played, taken)) if player.is(p) && player.has(played) && legalPlay(board, played, taken) =>
+    case (state@ GameState.PlayRound(player :: _, _, board), command@ TakeCards(playerId, played, taken)) if player.is(playerId) && player.has(played) && legalPlay(board, played, taken) =>
+      GameState.WillTakeCards(state, command) -> List(CardPlayed(playerId, played), Continue.toTakeCards)
+
+    case (GameState.WillTakeCards(GameState.PlayRound(player :: nextPlayer :: others, deck, board), TakeCards(_, played, taken)), Continue) =>
 
       val isLastPlay = nextPlayer.hand.isEmpty && deck.isEmpty
 
@@ -112,15 +116,14 @@ object Game extends GameLogic[MatchState]:
           // This is worth a point if:
           // - it's not the last play
           // - there are 4 players at the table ("scopone scientifico" variant)
-          val extraPoint = !isLastPlay || (others.size == 2)
+          val scopa: Option[Card] = Option.when(!isLastPlay || (others.size == 2))(played)
           (
-            player.play(played).take(played :: board).addExtraPoints(if (extraPoint) 1 else 0),
+            player.play(played).take(played :: board).addExtraPoints(if (scopa.isDefined) 1 else 0),
             Nil,
             CardsTaken(
               playerId = player.id,
-              played = played,
               taken = played :: board,
-              extraPoint = extraPoint
+              scopa = scopa
             )
           )
         }
@@ -131,9 +134,8 @@ object Game extends GameLogic[MatchState]:
             Nil,
             CardsTaken(
               playerId = player.id,
-              played = played,
               taken = played :: board,
-              extraPoint = false
+              scopa = None
             )
           )
         }
@@ -143,9 +145,8 @@ object Game extends GameLogic[MatchState]:
             board.filterNot(taken.contains),
             CardsTaken(
               playerId = player.id,
-              played = played,
               taken = played :: taken,
-              extraPoint = false
+              scopa = None
             )
           )
         }
@@ -155,9 +156,8 @@ object Game extends GameLogic[MatchState]:
             played :: board,
             CardsTaken(
               player.id,
-              played,
               Nil,
-              extraPoint = false
+              scopa = None
             )
           )
         }
@@ -172,8 +172,8 @@ object Game extends GameLogic[MatchState]:
           before = List(event)
         )
       }
-      else if (deck.nonEmpty) GameState.DrawRound(updatedPlayers, Nil, deck, updatedBoard) -> List(event, Continue.later)
-      else GameState.WillComplete(updatedPlayers) -> List(event, Continue.muchLater)
+      else if (deck.nonEmpty) GameState.DrawRound(updatedPlayers, Nil, deck, updatedBoard) -> List(event, Continue.toDealCards)
+      else GameState.WillComplete(updatedPlayers) -> List(event, Continue.toCompleteGame)
 
     case (GameState.WillComplete(players), Continue) =>
       val teams = players match

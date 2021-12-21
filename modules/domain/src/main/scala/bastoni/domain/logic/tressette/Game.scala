@@ -4,6 +4,7 @@ package tressette
 import bastoni.domain.logic.generic.Timer
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
+import bastoni.domain.model.Delay.syntax.*
 import bastoni.domain.model.Event.*
 import cats.Applicative
 
@@ -43,7 +44,7 @@ object Game extends GameLogic[MatchState]:
           Nil,
           1, // 5 cards at a time: 2 rounds
           deck
-        ) -> List(DeckShuffled(deck), Continue.later)
+        ) -> List(DeckShuffled(deck), Continue.toDealCards)
       }
       else GameState.Aborted -> List(GameAborted)
 
@@ -61,13 +62,13 @@ object Game extends GameLogic[MatchState]:
     case (GameState.DealRound(player :: Nil, done, remaining, deck), Continue) =>
       deck.dealOrDie(5) { (cards, tail) =>
         GameState.DealRound(done :+ player.draw(cards), Nil, remaining - 1, tail) ->
-          List(CardsDealt(player.id, cards, Direction.Player), Continue.shortly)
+          List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
     case (GameState.DealRound(player :: todo, done, remaining, deck), Continue) =>
       deck.dealOrDie(5) { (cards, tail) =>
         GameState.DealRound(todo, done :+ player.draw(cards), remaining, tail) ->
-          List(CardsDealt(player.id, cards, Direction.Player), Continue.shortly)
+          List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
     case (GameState.DrawRound(player :: Nil, done, deck), Continue) =>
@@ -84,7 +85,7 @@ object Game extends GameLogic[MatchState]:
     case (GameState.DrawRound(player :: todo, done, deck), Continue) =>
       deck.deal1OrDie { (card, tail) =>
         GameState.DrawRound(todo, done :+ player.draw(card), tail) ->
-          List(CardsDealt(player.id, List(card), Direction.Up), Continue.shortly)
+          List(CardsDealt(player.id, List(card), Direction.Up), Continue.toDealCards)
       }
 
     case (wait: GameState.WaitingForPlayer, tick: Tick) => wait.ticked(tick)
@@ -93,7 +94,7 @@ object Game extends GameLogic[MatchState]:
 
     case (GameState.PlayRound(player :: Nil, (firstDone, trump) :: done, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card, trump) =>
       // last player of the trick
-      GameState.WillCompleteTrick((firstDone, trump) :: (done :+ (player.play(card), card)), deck) -> List(CardPlayed(player.id, card), Continue.later)
+      GameState.WillCompleteTrick((firstDone, trump) :: (done :+ (player.play(card), card)), deck) -> List(CardPlayed(player.id, card), Continue.toTakeCards)
 
     case (GameState.PlayRound(player :: next :: players, Nil, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card) =>
       // first player of the trick (can play any card)
@@ -118,8 +119,8 @@ object Game extends GameLogic[MatchState]:
       val winner = updatedPlayers.head
 
       val (state, commands) =
-        if (deck.isEmpty && winner.hand.isEmpty) GameState.WillComplete(updatedPlayers) -> List(Continue.muchLater)
-        else if (deck.nonEmpty) GameState.DrawRound(updatedPlayers, Nil, deck) -> List(Continue.later)
+        if (deck.isEmpty && winner.hand.isEmpty) GameState.WillComplete(updatedPlayers) -> List(Continue.toCompleteGame)
+        else if (deck.nonEmpty) GameState.DrawRound(updatedPlayers, Nil, deck) -> List(Continue.toDealCards)
         else withTimeout(state = GameState.PlayRound(updatedPlayers, Nil, Nil), player = updatedPlayers.head.id, action = Action.PlayCard)
 
       state -> (TrickCompleted(winner.id) :: commands)

@@ -20,7 +20,7 @@ object Event:
   case class  TrumpRevealed(card: Card) extends PublicEvent
   case class  BoardCardsDealt(cards: List[Card]) extends PublicEvent
   case class  CardPlayed(playerId: UserId, card: Card) extends PublicEvent
-  case class  CardsTaken(playerId: UserId, played: Card, taken: List[Card], extraPoint: Boolean) extends PublicEvent
+  case class  CardsTaken(playerId: UserId, taken: List[Card], scopa: Option[Card]) extends PublicEvent
   case class  ActionRequested(playerId: UserId, action: Action, timeout: Option[Timeout.Active]) extends PublicEvent
   case class  TimedOut(playerId: UserId, action: Action) extends PublicEvent
   case class  TrickCompleted(winnerId: UserId) extends PublicEvent

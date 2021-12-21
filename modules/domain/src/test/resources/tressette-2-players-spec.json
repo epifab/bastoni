@@ -727,7 +727,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -776,7 +776,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -825,7 +825,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -874,7 +874,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -933,7 +933,7 @@
         "ref" : -160784083,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -960,7 +960,7 @@
         "ref" : 414504625,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -976,7 +976,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -988,7 +988,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1009,7 +1009,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1040,7 +1040,7 @@
         "ref" : 1791874029,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1067,7 +1067,7 @@
         "ref" : -1533201835,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1083,7 +1083,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -1095,7 +1095,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1116,7 +1116,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1147,7 +1147,7 @@
         "ref" : -1171655095,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1174,7 +1174,7 @@
         "ref" : -211231141,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1190,7 +1190,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -1202,7 +1202,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1223,7 +1223,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1254,7 +1254,7 @@
         "ref" : -421229279,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1281,7 +1281,7 @@
         "ref" : -480195177,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1297,7 +1297,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -1309,7 +1309,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1330,7 +1330,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1361,7 +1361,7 @@
         "ref" : 1627459197,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1388,7 +1388,7 @@
         "ref" : 2046872621,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1404,7 +1404,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -1416,7 +1416,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1437,7 +1437,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1468,7 +1468,7 @@
         "ref" : -1095866183,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1495,7 +1495,7 @@
         "ref" : 1449973009,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1511,7 +1511,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -1523,7 +1523,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1544,7 +1544,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1575,7 +1575,7 @@
         "ref" : -1512497473,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1602,7 +1602,7 @@
         "ref" : -601400773,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1618,7 +1618,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -1630,7 +1630,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1651,7 +1651,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1682,7 +1682,7 @@
         "ref" : -1031457287,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1709,7 +1709,7 @@
         "ref" : -1910964439,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1725,7 +1725,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -1737,7 +1737,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1758,7 +1758,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1789,7 +1789,7 @@
         "ref" : 624879787,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1816,7 +1816,7 @@
         "ref" : 368610749,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1832,7 +1832,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -1844,7 +1844,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1865,7 +1865,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1896,7 +1896,7 @@
         "ref" : 286453713,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1923,7 +1923,7 @@
         "ref" : -1992617499,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -1939,7 +1939,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -1951,7 +1951,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -1972,7 +1972,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Short",
+      "delay" : "DealCards",
       "supertype" : "Command"
     },
     {
@@ -2003,7 +2003,7 @@
         "ref" : 1647820455,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2030,7 +2030,7 @@
         "ref" : -694819617,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2046,7 +2046,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2068,7 +2068,7 @@
         "ref" : -1392173403,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2095,7 +2095,7 @@
         "ref" : -1553566419,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2111,7 +2111,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2133,7 +2133,7 @@
         "ref" : 1127066523,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2160,7 +2160,7 @@
         "ref" : -945373883,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2176,7 +2176,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2198,7 +2198,7 @@
         "ref" : 1364393121,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2225,7 +2225,7 @@
         "ref" : -999038089,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2241,7 +2241,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2263,7 +2263,7 @@
         "ref" : 2033727247,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2290,7 +2290,7 @@
         "ref" : 1065939581,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2306,7 +2306,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2328,7 +2328,7 @@
         "ref" : 416936495,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2355,7 +2355,7 @@
         "ref" : -1323141353,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2371,7 +2371,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2393,7 +2393,7 @@
         "ref" : -954220789,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2420,7 +2420,7 @@
         "ref" : -550107213,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2436,7 +2436,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2458,7 +2458,7 @@
         "ref" : -1342145137,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2485,7 +2485,7 @@
         "ref" : -783096577,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2501,7 +2501,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2523,7 +2523,7 @@
         "ref" : 1702502427,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2550,7 +2550,7 @@
         "ref" : 1536358213,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2566,7 +2566,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2588,7 +2588,7 @@
         "ref" : -269826789,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2615,7 +2615,7 @@
         "ref" : 1988504157,
         "type" : "Tick"
       },
-      "delay" : "Tick",
+      "delay" : "ActionTimeout",
       "supertype" : "Command"
     },
     {
@@ -2631,7 +2631,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Medium",
+      "delay" : "TakeCards",
       "supertype" : "Command"
     },
     {
@@ -2643,7 +2643,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "Long",
+      "delay" : "CompleteGame",
       "supertype" : "Command"
     },
     {

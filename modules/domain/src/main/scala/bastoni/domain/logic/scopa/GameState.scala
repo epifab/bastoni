@@ -18,6 +18,7 @@ object GameState:
   case class   WillDealBoardCards(players: List[Player], deck: List[Card]) extends Active(players.map(_.matchPlayer))
   case class   DrawRound(todo: List[Player], done: List[Player], deck: List[Card], boardCards: List[Card]) extends Active((done ++ todo).map(_.matchPlayer))
   case class   PlayRound(players: List[Player], deck: List[Card], board: List[Card]) extends Active(players.map(_.matchPlayer))
+  case class   WillTakeCards(state: PlayRound, command: Command.TakeCards) extends Active(state.activePlayers)
   case class   WillComplete(players: List[Player]) extends Active(players.map(_.matchPlayer))
 
   case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: ActionRequested, state: PlayRound) extends Active(state.activePlayers) with Timer[GameState, WaitingForPlayer]:
@@ -35,6 +36,7 @@ object GameState:
     case s: WillDealBoardCards => deriveEncoder[WillDealBoardCards].mapJsonObject(_.add("stage", "WillDealBoardCards".asJson))(s)
     case s: DrawRound          => deriveEncoder[DrawRound].mapJsonObject(_.add("stage", "DrawRound".asJson))(s)
     case s: PlayRound          => deriveEncoder[PlayRound].mapJsonObject(_.add("stage", "PlayRound".asJson))(s)
+    case s: WillTakeCards      => deriveEncoder[WillTakeCards].mapJsonObject(_.add("stage", "WillTakeCards".asJson))(s)
     case s: WaitingForPlayer   => deriveEncoder[WaitingForPlayer].mapJsonObject(_.add("stage", "WaitingForPlayer".asJson))(s)
     case s: WillComplete       => deriveEncoder[WillComplete].mapJsonObject(_.add("stage", "WillComplete".asJson))(s)
     case s: Completed          => deriveEncoder[Completed].mapJsonObject(_.add("stage", "Completed".asJson))(s)
@@ -48,6 +50,7 @@ object GameState:
     case "WillDealBoardCards" => deriveDecoder[WillDealBoardCards](cursor)
     case "DrawRound"          => deriveDecoder[DrawRound](cursor)
     case "PlayRound"          => deriveDecoder[PlayRound](cursor)
+    case "WillTakeCards"      => deriveDecoder[WillTakeCards](cursor)
     case "WaitingForPlayer"   => deriveDecoder[WaitingForPlayer](cursor)
     case "WillComplete"       => deriveDecoder[WillComplete](cursor)
     case "Completed"          => deriveDecoder[Completed](cursor)

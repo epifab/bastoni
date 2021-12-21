@@ -4,22 +4,26 @@ import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
 enum Delay:
-  case Short, Medium, Long, Tick
+  case DealCards, TakeCards, CompleteGame, ActionTimeout
 
 object Delay:
   given Encoder[Delay] = Encoder[String].contramap(_.toString)
   given Decoder[Delay] = Decoder[String].map(Delay.valueOf)
+
+  object syntax:
+    extension (command: Command.Continue.type)
+      def toDealCards: Delayed[Command] = Delayed(command, Delay.DealCards)
+      def toTakeCards: Delayed[Command] = Delayed(command, Delay.TakeCards)
+      def toCompleteGame: Delayed[Command] = Delayed(command, Delay.CompleteGame)
+
+    extension (command: Command.Tick)
+      def toActionTimeout: Delayed[Command] = Delayed(command, Delay.ActionTimeout)
 
 case class Delayed[+T](inner: T, delay: Delay):
   def map[U](f: T => U): Delayed[U] = Delayed(f(inner), delay)
 
 object Delayed:
   given [T](using Codec[T]): Codec[Delayed[T]] = deriveCodec
-
-extension (command: Command)
-  def shortly: Delayed[Command]   = Delayed(command, Delay.Short)
-  def later: Delayed[Command]     = Delayed(command, Delay.Medium)
-  def muchLater: Delayed[Command] = Delayed(command, Delay.Long)
 
 type PotentiallyDelayed[T] = T | Delayed[T]
 

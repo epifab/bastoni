@@ -8,15 +8,14 @@ import scala.util.Random
 case class Seat[C <: CardView](
   player: Option[PlayerState],
   hand: List[C],
-  taken: List[C],
-  played: List[C]
+  taken: List[C]
 )
 
 object Seat:
   given playerView: Codec[Seat[CardPlayerView]] = deriveCodec
   given serverView: Codec[Seat[CardServerView]] = deriveCodec
 
-case class PlayerSeat[C <: CardView](player: PlayerState, hand: List[C], taken: List[C], played: List[C])
+case class TakenSeat[C <: CardView](player: PlayerState, hand: List[C], taken: List[C])
 
 trait Table[C <: CardView]:
   type TableView
@@ -59,7 +58,7 @@ trait Table[C <: CardView]:
       case Event.GameStarted(_) =>
         updateWith(
           seats = seats.map {
-            case seat@ Seat(Some(sittingOut: SittingOut), _, _, _) => seat.copy(player = Some(sittingOut.sitIn))
+            case seat@ Seat(Some(sittingOut: SittingOut), _, _) => seat.copy(player = Some(sittingOut.sitIn))
             case whatever => whatever
           },
           active = true
@@ -79,44 +78,36 @@ trait Table[C <: CardView]:
       case Event.CardPlayed(playerId, card) =>
         updateWith(
           seats = seats.map {
-            case seat@ Seat(Some(acting: ActingPlayer), _, _, _) if acting.is(playerId) =>
+            case seat@ Seat(Some(acting: ActingPlayer), _, _) if acting.is(playerId) =>
               seat.copy(
                 player = Some(acting.done),
-                hand = removeCard(seat.hand, card),
-                played = buildCard(card, Direction.Up) :: seat.played
-              )
-            case whatever => whatever
-          }
-        )
-
-      case Event.CardsTaken(playerId, played, taken, extraPoint) =>
-        updateWith(
-          seats = seats.map {
-            case seat@ Seat(Some(acting: ActingPlayer), _, _, _) if acting.is(playerId) =>
-              seat.copy(
-                player = Some(acting.done),
-                hand = removeCard(seat.hand, played),
-                taken =
-                  if (taken.isEmpty) seat.taken
-                  else (taken.map(buildCard(_, Direction.Down)) ++ (buildCard(played, if (extraPoint) Direction.Up else Direction.Down) :: seat.taken))
+                hand = removeCard(seat.hand, card)
               )
             case whatever => whatever
           },
-          board =
-            if (taken.isEmpty) (buildCard(played, Direction.Up) :: board)
-            else taken.foldLeft(board)(removeCard)
+          board = buildCard(card, Direction.Up) :: board
+        )
+
+      case Event.CardsTaken(playerId, taken, scopa) =>
+        updateWith(
+          seats = seats.map {
+            case seat@ Seat(Some(acting: ActingPlayer), _, _) if acting.is(playerId) =>
+              seat.copy(
+                player = Some(acting.done),
+                taken = taken.map(card => buildCard(card, if (scopa.contains(card)) Direction.Up else Direction.Down)) ++ seat.taken
+              )
+            case whatever => whatever
+          },
+          board = taken.foldLeft(board)(removeCard)
         )
 
       case Event.TrickCompleted(winnerId) =>
         updateWith(
           seats = seats.map {
-            case seat if seat.player.exists(_.is(winnerId)) =>
-              seat.copy(
-                taken = seat.taken ++ seats.flatMap(_.played),
-                played = Nil
-              )
-            case seat => seat.copy(played = Nil)
-          }
+            case seat if seat.player.exists(_.is(winnerId)) => seat.copy(taken = seat.taken ++ board)
+            case whatever => whatever
+          },
+          board = Nil
         )
 
       case done: Event.GameCompleted =>
@@ -136,8 +127,7 @@ trait Table[C <: CardView]:
               case whatever => whatever
             },
             hand = Nil,
-            taken = Nil,
-            played = Nil
+            taken = Nil
           )),
           deck = Nil,
           board = Nil
@@ -146,7 +136,7 @@ trait Table[C <: CardView]:
       case Event.MatchCompleted(winnerIds) =>
         updateWith(
           seats = seats.map {
-            case seat@ Seat(Some(active: SittingIn), _, _, _) =>
+            case seat@ Seat(Some(active: SittingIn), _, _) =>
               seat.copy(player = Some(EndOfMatchPlayer(active.player, winner = winnerIds.contains(active.player.id))))
             case whatever => whatever
           },
@@ -156,10 +146,10 @@ trait Table[C <: CardView]:
       case Event.GameAborted | Event.MatchAborted =>
         updateWith(
           seats = seats.map {
-            case Seat(Some(player: SittingIn), _, _, _) =>
-              Seat(Some(player.sitOut), Nil, Nil, Nil)
-            case Seat(whatever, _, _, _) =>
-              Seat(whatever, Nil, Nil, Nil)
+            case Seat(Some(player: SittingIn), _, _) =>
+              Seat(Some(player.sitOut), Nil, Nil)
+            case Seat(whatever, _, _) =>
+              Seat(whatever, Nil, Nil)
           },
           deck = Nil,
           board = Nil,
@@ -169,9 +159,9 @@ trait Table[C <: CardView]:
       case Event.ActionRequested(playerId, Action.ShuffleDeck, timeout) =>
         updateWith(
           seats = seats.map {
-            case seat@ Seat(Some(waiting: SittingIn), _, _, _) if waiting.is(playerId) =>
-              seat.copy(player = Some(waiting.act(Action.ShuffleDeck, timeout).mapPlayer(_.copy(dealer = true))))
-            case seat@ Seat(Some(sittingIn: SittingIn), _, _, _) =>
+            case seat@ Seat(Some(player: SittingIn), _, _) if player.is(playerId) =>
+              seat.copy(player = Some(player.act(Action.ShuffleDeck, timeout).mapPlayer(_.copy(dealer = true))))
+            case seat@ Seat(Some(sittingIn: SittingIn), _, _) =>
               seat.copy(player = Some(sittingIn.mapPlayer(_.copy(dealer = false))))
             case whatever => whatever
           }
@@ -180,7 +170,7 @@ trait Table[C <: CardView]:
       case Event.ActionRequested(playerId, action, timeout) =>
         updateWith(
           seats = seats.map {
-            case seat@ Seat(Some(player: SittingIn), _, _, _) if player.is(playerId) =>
+            case seat@ Seat(Some(player: SittingIn), _, _) if player.is(playerId) =>
               seat.copy(player = Some(player.act(action, timeout)))
             case whatever => whatever
           }
@@ -189,7 +179,7 @@ trait Table[C <: CardView]:
       case Event.TimedOut(playerId, _) =>
         updateWith(
           seats = seats.map {
-            case seat@ Seat(Some(player: ActingPlayer), _, _, _) if player.is(playerId) =>
+            case seat@ Seat(Some(player: ActingPlayer), _, _) if player.is(playerId) =>
               seat.copy(player = Some(player.copy(timeout = Some(Timeout.TimedOut))))
             case whatver => whatver
           }
@@ -208,20 +198,20 @@ trait Table[C <: CardView]:
   protected def deckShuffledUpdate(newDeck: List[C]): TableView =
     updateWith(
       seats = seats.map {
-        case seat@ Seat(Some(acting@ ActingPlayer(targetPlayer, Action.ShuffleDeck, _)), _, _, _) =>
+        case seat@ Seat(Some(acting@ ActingPlayer(targetPlayer, Action.ShuffleDeck, _)), _, _) =>
           seat.copy(player = Some(acting.done))
         case whatever => whatever
       },
       deck = newDeck
     )
 
-  def seatFor(userId: UserId): Option[PlayerSeat[C]] =
+  def seatFor(userId: UserId): Option[TakenSeat[C]] =
     seats.collectFirst {
-      case Seat(Some(player), hand, taken, played) if player.is(userId) =>
-        PlayerSeat(player, hand, taken, played)
+      case Seat(Some(player), hand, taken) if player.is(userId) =>
+        TakenSeat(player, hand, taken)
     }
 
-  def seatFor(user: User): Option[PlayerSeat[C]] = seatFor(user.id)
+  def seatFor(user: User): Option[TakenSeat[C]] = seatFor(user.id)
 
 
 object Table:
