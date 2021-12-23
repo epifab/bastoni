@@ -11,15 +11,12 @@ val SeatComponent =
     .render_P { case (seat, index) =>
       <.div(^.className := s"seat seat-$index",
         PlayerComponent(seat.player),
-        <.p(
-          "Hand: ",
-          CardsComponent(seat.hand)
+        <.div(^.className := "hand",
+          CardsComponent(seat.hand, CardSize.Medium)
         ),
-        <.p(
-          "Collected: ",
-          CardsComponent(seat.taken)
-        ),
-        <.hr
+        <.div(^.className := "taken",
+          CardsComponent(seat.taken, CardSize.Small)
+        )
       )
     }
     .build

@@ -1,19 +1,64 @@
 body {
     background: black;
     color: white;
+    font-family: 'Open Sans', sans-serif;
 }
 
-.cards {
+h1 {
+    text-align: center;
+    padding: 10px;
+    margin: 0 0 20px 0;
+    background-color: #222;
+}
+
+h1 img {
+    max-width: 150px;
+    background-color: #eec61e;
+    border-radius: 50px;
+}
+
+.spinning {
+    animation: spin-360 infinite 4s linear;
+}
+
+@keyframes spin-360 {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+
+.hand .cards {
     text-align: center;
 }
 
 .card {
+    background-image: url('/static/carte/retro.jpg');
+    background-size: 100%;
+    display: inline-block;
+}
+
+.card.lg {
+    box-shadow: -10px 0 15px -4px #222;
     margin: 0 3px;
     width: 90px;
     height: 148px;
     border-radius: 5px;
-    background-image: url('/static/carte/retro.jpg');
-    display: inline-block;
+}
+
+.card.md {
+    box-shadow: -5px 0 2px -4px #222;
+    margin: 0 1px;
+    width: 45px;
+    height: 74px;
+    border-radius: 2px;
+}
+
+.card.sm {
+    box-shadow: -2px 0 1px -2px #222;
+    margin: 0;
+    width: 27px;
+    height: 45px;
+    border-radius: 1px;
 }
 
 .card.denari.asso { background-image: url('/static/carte/denari/01.jpg') }
@@ -59,3 +104,68 @@ body {
 .card.bastoni.fante { background-image: url('/static/carte/bastoni/08.jpg') }
 .card.bastoni.cavallo { background-image: url('/static/carte/bastoni/09.jpg') }
 .card.bastoni.re { background-image: url('/static/carte/bastoni/10.jpg') }
+
+.card.lg { margin-left: -10px; }
+.card.md { margin-left: -7px; }
+.card.sm { margin-left: -4px; }
+
+.board .card { margin-left: 2px }
+
+.card {
+    position: relative;
+}
+
+.card .occurrences {
+    position: absolute;
+    background-color: #FFF;
+    border-radius: 20px;
+    font-weight: bold;
+    color: #000;
+    border: 2px solid #AAA;
+}
+
+.card.md .occurrences {
+    top: 20px;
+    left: 6px;
+    padding: 5px 10px;
+}
+
+.card.sm .occurrences {
+    top: 5px;
+    left: 2px;
+    padding: 5px 10px;
+}
+
+.table, .opponents {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+}
+
+.seat {
+    grid-column: span 4;
+}
+
+.seat .player {
+    border-radius: 40px 40px 0 0;
+    text-align: center;
+    background-color: #274558;
+    padding: 5px;
+    margin: 0 2px;
+}
+
+.table {
+    margin: 10px 0;
+    min-height: 50px;
+    padding: 30px 0;
+    background: rgb(37,90,52);
+    background: radial-gradient(circle, rgba(8,166,53,1) 9%, rgba(19,108,39,1) 65%, rgba(17,70,29,1) 91%);
+    border-radius: 30px;
+}
+
+.board {
+    grid-column: span 8;
+}
+
+.deck {
+    grid-column: span 4;
+}

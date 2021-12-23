@@ -6,4 +6,4 @@ import org.scalajs.dom.document
 
 @main def run(): Unit =
   val root = document.getElementById("app-wrapper")
-  components.GameComponent(GameType.Scopa).renderIntoDOM(root)
+  components.GameComponent(GameType.Briscola).renderIntoDOM(root)

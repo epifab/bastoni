@@ -16,15 +16,18 @@ import scala.concurrent.duration.DurationInt
 val GameComponent =
   ScalaComponent
     .builder[GameType]
-    .initialState[Option[TablePlayerView]](None)
+    .initialState[Option[GameProps]](None)
     .renderBackend[GameComponentBackend]
     .componentDidMount(_.backend.start)
     .build
 
 
-class GameComponentBackend($: BackendScope[GameType, Option[TablePlayerView]]):
-  def render(table: Option[TablePlayerView]) = table match
-    case Some(table) => <.div(^.className := "game", TableComponent(table))
+class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
+  def render(props: Option[GameProps]) = props match
+    case Some(props) =>
+      <.div(^.className := ("game" :: props.table.active.map(_.toString.toLowerCase).toList).mkString(" "),
+        TableComponent(props)
+      )
     case None => <.div("Waiting...")
 
   val start: Callback =
@@ -53,7 +56,7 @@ class GameComponentBackend($: BackendScope[GameType, Option[TablePlayerView]]):
         case (oldTable, ToPlayer.GameEvent(event)) => oldTable.map(_.update(event))
       }
       .collect { case Some(table) => table }
-      .evalMap(table => IO($.setState(Some(table)).runNow()))
+      .evalMap(table => IO($.setState(Some(GameProps(table, me.id))).runNow()))
       .concurrently(runner)
       .concurrently(p1).concurrently(p2).concurrently(p3).concurrently(p4)
       .concurrently(pub.publish(me, roomId)(fs2.Stream[IO, FromPlayer](FromPlayer.StartGame(gameType)).delayBy(2.seconds)))

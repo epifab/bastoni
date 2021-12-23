@@ -4,23 +4,28 @@ import bastoni.domain.model.*
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.html_<^.*
 
+import scala.util.chaining.*
+
 val TableComponent =
   ScalaComponent
-    .builder[TablePlayerView]
+    .builder[GameProps]
     .noBackend
-    .render_P { table =>
-      <.div(^.className := "table",
-        table.seats.zipWithIndex
-          .map(SeatComponent(_))
-          .toTagMod,
-        <.p(
-          "Board: ",
-          CardsComponent(table.board)
+    .render_P { props =>
+      <.main(
+        <.div(^.className := "opponents",
+          props.opponents
+            .map(SeatComponent(_))
+            .toTagMod
         ),
-        <.p(
-          "Deck: ",
-          CardsComponent(table.deck)
-        )
+        <.div(^.className := "table",
+          <.div(^.className := "deck",
+            CardsComponent(props.table.deck, CardSize.Medium)
+          ),
+          <.div(^.className := "board",
+            CardsComponent(props.table.board, CardSize.Medium)
+          )
+        ),
+        MySeatComponent(props.mySeat),
       )
     }
     .build
