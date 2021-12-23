@@ -11,7 +11,7 @@ case class CardPlayerView(card: Option[Card]) extends CardView:
 
 case class CardServerView(card: Card, facing: Direction) extends CardView:
   override def value: Option[Card] = Some(card)
-  def toPlayerView(me: UserId, context: Option[UserId]) = facing match {
+  def toPlayerView(me: UserId, context: Option[UserId]): CardPlayerView = facing match {
     case Direction.Up => CardPlayerView(Some(card))
     case Direction.Down => CardPlayerView(None)
     case _ => CardPlayerView(Option.when(context.contains(me))(card))

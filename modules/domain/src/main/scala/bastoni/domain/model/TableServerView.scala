@@ -9,7 +9,7 @@ case class TableServerView(
   override val seats: List[Seat[CardServerView]],
   override val deck: List[CardServerView],
   override val board: List[CardServerView],
-  override val active: Boolean
+  override val active: Option[GameType]
 ) extends Table[CardServerView]:
 
   override type TableView = TableServerView
@@ -18,10 +18,11 @@ case class TableServerView(
     seats: List[Seat[CardServerView]] = this.seats,
     deck: List[CardServerView] = this.deck,
     board: List[CardServerView] = this.board,
-    active: Boolean = this.active
+    active: Option[GameType] = this.active
   ): TableServerView = TableServerView(seats, deck, board, active)
 
   override protected def buildCard(card: Card, direction: Direction): CardServerView = CardServerView(card, direction)
+  override protected def faceDown(card: CardServerView): CardServerView = card.copy(facing = Direction.Down)
   override protected def removeCard(cards: List[CardServerView], card: Card): List[CardServerView] = cards.filterNot(_.card == card)
 
   def update(event: ServerEvent): TableServerView = event match {

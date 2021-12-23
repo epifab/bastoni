@@ -23,18 +23,19 @@ trait Table[C <: CardView]:
   def seats: List[Seat[C]]
   def deck: List[C]
   def board: List[C]
-  def active: Boolean
+  def active: Option[GameType]
 
   lazy val indexedSeats: List[(Seat[C], Int)] = seats.zipWithIndex
 
   protected def buildCard(card: Card, direction: Direction): C
+  protected def faceDown(card: C): C
   protected def removeCard(cards: List[C], card: Card): List[C]
 
   protected def updateWith(
     seats: List[Seat[C]] = this.seats,
     deck: List[C] = this.deck,
     board: List[C] = this.board,
-    active: Boolean = active
+    active: Option[GameType] = active
   ): TableView
 
   protected def publicEventUpdate(message: PublicEvent): TableView =
@@ -55,13 +56,13 @@ trait Table[C <: CardView]:
           }
         )
 
-      case Event.GameStarted(_) =>
+      case Event.GameStarted(gameType) =>
         updateWith(
           seats = seats.map {
             case seat@ Seat(Some(sittingOut: SittingOut), _, _) => seat.copy(player = Some(sittingOut.sitIn))
             case whatever => whatever
           },
-          active = true
+          active = Some(gameType)
         )
 
       case Event.TrumpRevealed(card) =>
@@ -91,9 +92,8 @@ trait Table[C <: CardView]:
       case Event.CardsTaken(playerId, taken, scopa) =>
         updateWith(
           seats = seats.map {
-            case seat@ Seat(Some(acting: ActingPlayer), _, _) if acting.is(playerId) =>
+            case seat@ Seat(Some(player: SittingIn), _, _) if player.is(playerId) =>
               seat.copy(
-                player = Some(acting.done),
                 taken = taken.map(card => buildCard(card, if (scopa.contains(card)) Direction.Up else Direction.Down)) ++ seat.taken
               )
             case whatever => whatever
@@ -104,7 +104,7 @@ trait Table[C <: CardView]:
       case Event.TrickCompleted(winnerId) =>
         updateWith(
           seats = seats.map {
-            case seat if seat.player.exists(_.is(winnerId)) => seat.copy(taken = seat.taken ++ board)
+            case seat if seat.player.exists(_.is(winnerId)) => seat.copy(taken = seat.taken ++ board.map(faceDown))
             case whatever => whatever
           },
           board = Nil
@@ -140,7 +140,7 @@ trait Table[C <: CardView]:
               seat.copy(player = Some(EndOfMatchPlayer(active.player, winner = winnerIds.contains(active.player.id))))
             case whatever => whatever
           },
-          active = false
+          active = None
         )
 
       case Event.GameAborted | Event.MatchAborted =>
@@ -153,7 +153,7 @@ trait Table[C <: CardView]:
           },
           deck = Nil,
           board = Nil,
-          active = false
+          active = None
         )
 
       case Event.ActionRequested(playerId, Action.ShuffleDeck, timeout) =>

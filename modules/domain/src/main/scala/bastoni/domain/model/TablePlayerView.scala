@@ -4,7 +4,7 @@ case class TablePlayerView(
   override val seats: List[Seat[CardPlayerView]],
   override val deck: List[CardPlayerView],
   override val board: List[CardPlayerView],
-  override val active: Boolean
+  override val active: Option[GameType]
 ) extends Table[CardPlayerView]:
 
   override type TableView = TablePlayerView
@@ -13,13 +13,15 @@ case class TablePlayerView(
     seats: List[Seat[CardPlayerView]] = this.seats,
     deck: List[CardPlayerView] = this.deck,
     board: List[CardPlayerView] = this.board,
-    active: Boolean = this.active
+    active: Option[GameType] = this.active
   ): TablePlayerView = TablePlayerView(seats, deck, board, active)
 
   override protected def buildCard(card: Card, direction: Direction): CardPlayerView = CardPlayerView(direction match {
     case Direction.Up => Some(card)
     case _ => None
   })
+
+  override protected def faceDown(card: CardPlayerView): CardPlayerView = card.copy(card = None)
 
   extension[T](list: List[T])
     def removeFirst(cond: T => Boolean): List[T] =
