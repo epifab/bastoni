@@ -32,8 +32,7 @@ object WebHtmlRoute:
             <body>
               <h1><img src="/static/denari.svg" alt="Controbuio" /></h1>
               <div id="app-wrapper">Loading web app</div>
-              <script src={s"/assets/frontend-jsdeps.js?v=$appVersion"}></script>
-              <script src={s"/assets/frontend-opt/main.js?v=$appVersion"}></script>
+              <script src={s"/assets/frontend-opt-bundle.js?v=$appVersion"}></script>
             </body>
           </html>
         )
