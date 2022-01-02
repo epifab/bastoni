@@ -9,8 +9,12 @@ import cats.effect.unsafe.implicits.global
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.component.Scala.BackendScope
 import japgolly.scalajs.react.vdom.html_<^.*
-import org.scalajs.dom.Console
+import org.scalajs.dom
+import org.scalajs.dom.html.Image
+import org.scalajs.dom.{Console, HTMLImageElement, window}
+import reactkonva.{KLayer, KStage}
 
+import scala.scalajs.js
 import scala.concurrent.duration.DurationInt
 
 val GameComponent =
@@ -23,11 +27,28 @@ val GameComponent =
 
 
 class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
-  def render(props: Option[GameProps]) = props match
+  def render(props: Option[GameProps]): VdomNode = props match
     case Some(props) =>
-      <.div(^.className := ("game" :: props.table.active.map(_.toString.toLowerCase).toList).mkString(" "),
-        TableComponent(props)
-      )
+      KStage
+        .builder
+        .set(_.width = window.innerWidth)
+        .set(_.height = window.innerHeight)
+        .build(
+          KLayer.build(
+            CardsComponent(
+              List(
+                CardPlayerView(Some(Card(Rank.Re, Suit.Denari))),
+                CardPlayerView(Some(Card(Rank.Re, Suit.Coppe))),
+                CardPlayerView(Some(Card(Rank.Re, Suit.Bastoni))),
+                CardPlayerView(None)
+              ),
+              CardSize.Large
+            )
+          )
+        )
+//      <.div(^.className := ("game" :: props.table.active.map(_.toString.toLowerCase).toList).mkString(" "),
+//        TableComponent(props)
+//      )
     case None => <.div("Waiting...")
 
   val start: Callback =

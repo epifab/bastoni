@@ -9,7 +9,6 @@ val catsCoreVersion = "2.6.1"
 val catsEffectVersion = "3.3.0"
 val catsEffectTestingVersion = "1.4.0"
 val http4sVersion = "0.23.7"
-val http4sJdkClientVersion = "0.5.0"
 val log4catsVersion = "2.1.1"
 val redis4catsVersion = "1.0.0"
 val fs2Version = "3.2.2"
@@ -48,8 +47,6 @@ lazy val frontend = (project in file("modules/frontend"))
 
     libraryDependencies ++= Seq(
       "org.scala-js"                      %%% "scalajs-dom" % scalaJsDomVersion,
-      "me.shadaj"                         %%% "slinky-core" % slinkyVersion,
-      "me.shadaj"                         %%% "slinky-web"  % slinkyVersion,
       "com.github.japgolly.scalajs-react" %%% "core"        % scalaJsReactVersion,
     ),
     Compile / npmDependencies ++= Seq(
@@ -68,7 +65,6 @@ lazy val backend = (project in file("modules/backend"))
       "org.http4s"             %% "http4s-dsl"             % http4sVersion,
       "org.http4s"             %% "http4s-circe"           % http4sVersion,
       "org.http4s"             %% "http4s-blaze-server"    % http4sVersion,
-      "org.http4s"             %% "http4s-jdk-http-client" % http4sJdkClientVersion % Test,
       "org.scala-lang.modules" %% "scala-xml"              % scalaXmlVersion,
       "dev.profunktor"         %% "redis4cats-effects"     % redis4catsVersion,
       "org.typelevel"          %% "log4cats-slf4j"         % log4catsVersion,
