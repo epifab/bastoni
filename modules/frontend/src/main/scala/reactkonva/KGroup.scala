@@ -6,6 +6,6 @@ import org.scalajs.dom.*
 
 import scala.scalajs.js
 
-object KGroup extends ExternalComponentPropsAndChildren[KGroup.Props](ReactKonvaDOM.Group):
+object KGroup extends ExternalComponentWithChildren[KGroup.Props](ReactKonvaDOM.Group):
   @js.native
   trait Props extends ContainerProps

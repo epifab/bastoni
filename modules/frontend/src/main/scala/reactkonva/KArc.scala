@@ -10,7 +10,7 @@ import reactkonva.ReactKonvaDOM.Context
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 
-object KArc extends ExternalComponentPropsNoChildren[KArc.Props](ReactKonvaDOM.Arc):
+object KArc extends ExternalComponentWithoutChildren[KArc.Props](ReactKonvaDOM.Arc):
   @js.native
   trait Props extends ShapeProps:
     // Arc

@@ -7,7 +7,7 @@ import scala.scalajs.js.annotation.JSGlobal
 import konva.Konva.Vector2d
 import org.scalajs.dom.*
 
-object KLayer extends ExternalComponentPropsAndChildren[KLayer.Props](ReactKonvaDOM.Layer):
+object KLayer extends ExternalComponentWithChildren[KLayer.Props](ReactKonvaDOM.Layer):
   @js.native
   trait Props extends ContainerProps:
     // Layer

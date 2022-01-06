@@ -125,7 +125,7 @@ trait ShapeProps extends NodeProps:
 trait ExternalComponent[Props <: NodeProps]:
   def apply(f: Props => Unit): TagMod
 
-trait ExternalComponentPropsNoChildren[Props <: ShapeProps](rawComponent: js.Object):
+trait ExternalComponentWithoutChildren[Props <: ShapeProps](rawComponent: js.Object):
   private val component = JsComponent[Props, Children.None, Null](rawComponent)
 
   def builder: ExternalComponentWithoutChildrenBuilder[Props] =
@@ -133,7 +133,7 @@ trait ExternalComponentPropsNoChildren[Props <: ShapeProps](rawComponent: js.Obj
     ExternalComponentWithoutChildrenBuilder(props, () => component(props))
 
 
-trait ExternalComponentPropsAndChildren[Props <: ContainerProps](rawComponent: js.Object):
+trait ExternalComponentWithChildren[Props <: ContainerProps](rawComponent: js.Object):
   private val component = JsComponent[Props, Children.Varargs, Null](rawComponent)
 
   def build(children: VdomNode*): VdomNode =

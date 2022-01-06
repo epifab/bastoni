@@ -2,17 +2,32 @@ package bastoni.frontend.components
 
 import bastoni.domain.model.*
 import japgolly.scalajs.react.*
-import japgolly.scalajs.react.component.Generic.{Mounted, Unmounted}
-import japgolly.scalajs.react.vdom.html_<^.*
+import japgolly.scalajs.react.vdom.VdomElement
 import konva.Konva
 import konva.KonvaHelper.Vector2d
+import org.scalajs.dom.{HTMLCanvasElement, document}
 import org.scalajs.dom.html.Image
-import org.scalajs.dom.{HTMLCanvasElement, document, window}
-import reactkonva.{KGroup, KImage, KLayer, KStage}
+import reactkonva.{KCircle, KGroup, KImage, KText}
 
 import scala.scalajs.js
 
-case class CardProps(card: Card | Int, width: Double, height: Double, radius: Double)
+trait CardSize:
+  def width: Double
+  def height: Double
+  def radius: Double
+
+object FullCardSize extends CardSize:
+  val width: Double = 90
+  val height: Double = 148
+  val radius: Double = 10
+
+case class ScaledCardSize(original: CardSize, scale: Double) extends CardSize:
+  val width: Double = original.width * scale
+  val height: Double = original.height * scale
+  val radius: Double = original.radius * scale
+
+object ScaledCardSize:
+  def width(w: Double): ScaledCardSize = ScaledCardSize(FullCardSize, w / FullCardSize.width)
 
 object Img:
   def apply(src: String): Image =
@@ -21,6 +36,8 @@ object Img:
     img
 
 object CardComponent:
+  case class Props(card: Card | Int, size: CardSize)
+
   private val cardImages: Map[Card, Image] =
     Deck.instance.map { card =>
       val suit = card.suit.toString.toLowerCase
@@ -31,10 +48,10 @@ object CardComponent:
 
   private val cardBackImage: Image = Img("/static/carte/retro.jpg")
 
-  private def renderCard(props: CardProps): HTMLCanvasElement =
+  private def renderCard(props: Props): HTMLCanvasElement =
     val imageProps = (new js.Object).asInstanceOf[KImage.Props]
-    imageProps.width = props.width
-    imageProps.height = props.height
+    imageProps.width = props.size.width
+    imageProps.height = props.size.height
     imageProps.image = props.card match {
       case card: Card => cardImages(card)
       case _: Int => cardBackImage
@@ -43,9 +60,9 @@ object CardComponent:
     val image = new Konva.Image(imageProps)
 
     val groupProps = (new js.Object).asInstanceOf[KGroup.Props]
-    groupProps.width = props.width
-    groupProps.height = props.height
-    groupProps.clipFunc = borderRadius(0, 0, props.width, props.height, props.radius)
+    groupProps.width = props.size.width
+    groupProps.height = props.size.height
+    groupProps.clipFunc = borderRadius(0, 0, props.size.width, props.size.height, props.size.radius)
 
     val group = new Konva.Group(groupProps)
 
@@ -67,69 +84,44 @@ object CardComponent:
   }
 
   private val component =
-    ScalaFnComponent[CardProps] { props =>
-      KImage
-        .builder
-        .set(_.image = renderCard(props))
-        .set(_.shadowColor = "#222")
-        .set(_.shadowBlur = props.radius)
-        .set(_.shadowOpacity = 0.8)
-        .set(_.shadowOffset = Vector2d(-props.radius, 0))
-        .build()
+    ScalaFnComponent[Props] { props =>
+      KGroup.build(
+        KImage
+          .builder
+          .set(_.image = renderCard(props))
+          .set(_.shadowColor = "#222")
+          .set(_.shadowBlur = props.size.radius)
+          .set(_.shadowOpacity = 0.8)
+          .set(_.shadowOffset = Vector2d(-props.size.radius, 0))
+          .build(),
+        props.card match {
+          case occurrences: Int if occurrences > 1 =>
+            KGroup
+              .build(
+                KCircle
+                  .builder
+                  .set(_.radius = (props.size.width - 5) / 2)
+                  .set(_.x = props.size.width / 2)
+                  .set(_.y = props.size.height / 2)
+                  .set(_.fill = "#222")
+                  .set(_.stroke = "#FFF")
+                  .set(_.strokeWidth = 3)
+                  .build(),
+                KText
+                  .builder
+                  .set(_.text = occurrences.toString)
+                  .set(_.height = props.size.height)
+                  .set(_.width = props.size.width)
+                  .set(_.fontFamily = "'Open Sans', sans-serif")
+                  .set(_.fontStyle = "bold")
+                  .set(_.fill = "#FFF")
+                  .set(_.align = "center")
+                  .set(_.verticalAlign = "middle")
+                  .build()
+              )
+          case _ => KGroup.build()
+        }
+      )
     }
 
-  def apply(props: CardProps): VdomElement = component(props)
-
-
-enum CardSize(val width: Int, val height: Int, val radius: Int):
-  case Small extends CardSize(28, 45, 2)
-  case Medium extends CardSize(45, 74, 5)
-  case Full extends CardSize(90, 148, 10)
-
-def CardsComponent(cards: List[CardPlayerView]): VdomNode =
-  val containerWidth: Double = window.innerWidth
-  val containerHeight: Double = window.innerHeight
-
-  val cardOffsetFactorX = 0.8
-  val cardOffsetFactorY = 0.7
-
-  val cardWidth: Double = Math.min(CardSize.Full.width, (containerWidth / ((4 * cardOffsetFactorX) + 1)).floor)
-  val cardHeight: Double = (cardWidth / CardSize.Full.width) * CardSize.Full.height
-  val cardRadius: Double = (cardWidth / CardSize.Full.width) * CardSize.Full.radius
-
-  val cardOffsetX: Double = cardWidth * cardOffsetFactorX
-  val cardOffsetY: Double = cardHeight * cardOffsetFactorY
-
-  def faceDownCompacted(cx: List[Option[Card]], count: Int): List[Card | Int] =
-    cx match
-      case None :: tail => faceDownCompacted(tail, count + 1)
-      case Some(card) :: tail if count == 0 => card :: faceDownCompacted(tail, 0)
-      case Some(card) :: tail => count :: card :: faceDownCompacted(tail, 0)
-      case Nil if count > 0 => count :: Nil
-      case Nil => Nil
-
-  val cardsPerRow: Int = ((containerWidth - cardWidth) / cardOffsetX).floor.toInt + 1
-  val numberOfRows: Int = (cards.size / cardsPerRow.toDouble).ceil.toInt
-  val verticalOffset: Double = containerHeight - cardHeight - ((numberOfRows - 1) * cardOffsetY)
-
-  KGroup
-    .builder
-    .build(
-      faceDownCompacted(cards.map(_.card), 0)
-        .grouped(cardsPerRow)
-        .zipWithIndex
-        .flatMap { case (cards, row) =>
-          val rowSize: Double = cardWidth + (cardOffsetX * (cards.size - 1))
-          val horizontalOffset: Double = Math.max(0, containerWidth - rowSize) / 2.0
-          cards.zipWithIndex
-            .map { case (card, col) =>
-              KGroup
-                .builder
-                .set(_.width = containerWidth)
-                .set(_.height = containerHeight)
-                .set(_.x = horizontalOffset + (cardOffsetX * col))
-                .set(_.y = verticalOffset + (row * cardOffsetY))
-                .build(CardComponent(CardProps(card, cardWidth, cardHeight, cardRadius)))
-            }
-        }.toSeq: _*
-    )
+  def apply(cardOrOccurrences: Card | Int, size: CardSize): VdomElement = component(Props(cardOrOccurrences, size))
