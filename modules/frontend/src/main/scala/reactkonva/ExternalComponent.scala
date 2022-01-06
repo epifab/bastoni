@@ -28,8 +28,8 @@ trait NodeProps extends js.Object:
   var scaleY: js.UndefOr[Double] = js.native
   var rotation: js.UndefOr[Int] = js.native
   var offset: js.UndefOr[Vector2d] = js.native
-  var offsetX: js.UndefOr[Int] = js.native
-  var offsetY: js.UndefOr[Int] = js.native
+  var offsetX: js.UndefOr[Double] = js.native
+  var offsetY: js.UndefOr[Double] = js.native
 
   var _useStrictMode: js.UndefOr[Boolean] = js.native
   var draggable: js.UndefOr[Boolean] = js.native

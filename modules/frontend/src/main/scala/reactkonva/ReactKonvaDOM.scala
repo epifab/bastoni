@@ -35,8 +35,8 @@ object ReactKonvaDOM extends js.Object:
   @js.native
   trait Context extends js.Any:
     def beginPath(): Unit
-    def moveTo(x: Int, y: Int): Unit
-    def lineTo(x: Int, y: Int): Unit
-    def quadraticCurveTo(x: Int, y: Int, w: Int, h: Int): Unit
+    def moveTo(x: Double, y: Double): Unit
+    def lineTo(x: Double, y: Double): Unit
+    def quadraticCurveTo(x: Double, y: Double, w: Double, h: Double): Unit
     def closePath(): Unit
     def fillStrokeShape(shape: ShapeRef): Unit

@@ -30,7 +30,7 @@ object WebHtmlRoute:
               <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             </head>
             <body>
-              <h1><img src="/static/denari.svg" alt="Controbuio" /></h1>
+              <!-- h1><img src="/static/denari.svg" alt="Controbuio" /></h1 -->
               <div id="app-wrapper">Loading web app</div>
               <script src={s"/assets/frontend-opt-bundle.js?v=$appVersion"}></script>
             </body>

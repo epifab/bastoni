@@ -12,10 +12,10 @@ val SeatComponent =
       <.div(^.className := s"seat seat-$index",
         PlayerComponent(seat.player),
         <.div(^.className := "hand",
-          CardsComponent(seat.hand, CardSize.Medium)
+          //CardsComponent(seat.hand, CardSize.Medium)
         ),
         <.div(^.className := "taken",
-          CardsComponent(seat.taken, CardSize.Small)
+          //CardsComponent(seat.taken, CardSize.Small)
         )
       )
     }

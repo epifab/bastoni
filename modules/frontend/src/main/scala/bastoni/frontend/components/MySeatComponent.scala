@@ -14,10 +14,10 @@ val MySeatComponent =
         seat.whenDefined { seat =>
           TagMod(
             <.div(^.className := "hand",
-              CardsComponent(seat.hand, CardSize.Large)
+              //CardsComponent(seat.hand, CardSize.Large)
             ),
             <.div(^.className := "taken",
-              CardsComponent(seat.taken, CardSize.Medium)
+              //CardsComponent(seat.taken, CardSize.Medium)
             )
           )
         }

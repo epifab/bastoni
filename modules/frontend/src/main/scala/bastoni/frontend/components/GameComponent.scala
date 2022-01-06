@@ -34,17 +34,23 @@ class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
         .set(_.width = window.innerWidth)
         .set(_.height = window.innerHeight)
         .build(
-          KLayer.build(
-            CardsComponent(
-              List(
-                CardPlayerView(Some(Card(Rank.Re, Suit.Denari))),
-                CardPlayerView(Some(Card(Rank.Re, Suit.Coppe))),
-                CardPlayerView(Some(Card(Rank.Re, Suit.Bastoni))),
-                CardPlayerView(None)
-              ),
-              CardSize.Large
+          KLayer
+            .build(
+              CardsComponent(
+                List(
+                  CardPlayerView(Some(Card(Rank.Asso, Suit.Denari))),
+                  CardPlayerView(Some(Card(Rank.Asso, Suit.Coppe))),
+                  CardPlayerView(Some(Card(Rank.Asso, Suit.Bastoni))),
+                  CardPlayerView(Some(Card(Rank.Asso, Suit.Spade))),
+                  CardPlayerView(Some(Card(Rank.Due, Suit.Denari))),
+                  CardPlayerView(Some(Card(Rank.Due, Suit.Coppe))),
+                  CardPlayerView(Some(Card(Rank.Due, Suit.Bastoni))),
+                  CardPlayerView(Some(Card(Rank.Due, Suit.Spade))),
+                  CardPlayerView(Some(Card(Rank.Tre, Suit.Denari))),
+                  CardPlayerView(Some(Card(Rank.Tre, Suit.Coppe))),
+                ),
+              )
             )
-          )
         )
 //      <.div(^.className := ("game" :: props.table.active.map(_.toString.toLowerCase).toList).mkString(" "),
 //        TableComponent(props)

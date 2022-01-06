@@ -19,10 +19,10 @@ val TableComponent =
         ),
         <.div(^.className := "table",
           <.div(^.className := "deck",
-            CardsComponent(props.table.deck, CardSize.Medium)
+            //CardsComponent(props.table.deck, CardSize.Medium)
           ),
           <.div(^.className := "board",
-            CardsComponent(props.table.board, CardSize.Medium)
+            //CardsComponent(props.table.board, CardSize.Medium)
           )
         ),
         MySeatComponent(props.mySeat),

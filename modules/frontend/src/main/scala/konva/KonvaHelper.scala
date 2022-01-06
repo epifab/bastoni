@@ -15,7 +15,7 @@ object KonvaHelper {
   }
 
   object Vector2d {
-    def apply(x: Int, y: Int): Konva.Vector2d = js.Dynamic.literal(
+    def apply(x: Double, y: Double): Konva.Vector2d = js.Dynamic.literal(
       x = x,
       y = y
     ).asInstanceOf[Konva.Vector2d]
