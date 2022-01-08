@@ -1,7 +1,7 @@
 package reactkonva
 
 import konva.Konva.{IRect, Vector2d}
-import konva.{Konva, ShapeRef}
+import konva.{Konva, ShapeProps}
 import org.scalajs.dom.*
 import reactkonva.ReactKonvaDOM.Context
 

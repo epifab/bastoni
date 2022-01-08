@@ -1,7 +1,7 @@
 package reactkonva
 
-import konva.Konva
 import konva.Konva.Vector2d
+import konva.{Konva, ShapeProps}
 import org.scalajs.dom.*
 
 import scala.scalajs.js

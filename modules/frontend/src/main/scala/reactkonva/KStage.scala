@@ -1,6 +1,6 @@
 package reactkonva
 
-import konva.Konva
+import konva.{Konva, ContainerProps}
 import konva.Konva.Vector2d
 import org.scalajs.dom.*
 

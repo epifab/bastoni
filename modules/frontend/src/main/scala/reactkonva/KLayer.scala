@@ -1,6 +1,6 @@
 package reactkonva
 
-import konva.Konva
+import konva.{Konva, ContainerProps}
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal

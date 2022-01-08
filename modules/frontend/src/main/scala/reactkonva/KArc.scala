@@ -3,7 +3,7 @@ package reactkonva
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.component.Js.Component
 import japgolly.scalajs.react.vdom.TagMod
-import konva.{Konva, ShapeRef}
+import konva.{Konva, ShapeProps}
 import org.scalajs.dom.*
 import reactkonva.ReactKonvaDOM.Context
 

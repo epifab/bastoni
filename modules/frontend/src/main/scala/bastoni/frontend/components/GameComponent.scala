@@ -29,11 +29,13 @@ val GameComponent =
 class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
   def render(props: Option[GameProps]): VdomNode = props match
     case Some(props) =>
-      KStage
-        .builder
-        .set(_.width = window.innerWidth)
-        .set(_.height = window.innerHeight)
-        .build(KLayer.build(CardsLayer(props)))
+      KStage(
+        { p =>
+          p.width = window.innerWidth
+          p.height = window.innerHeight
+        },
+        KLayer(CardsLayer(props))
+      )
 
     case None => <.div("Waiting...")
 

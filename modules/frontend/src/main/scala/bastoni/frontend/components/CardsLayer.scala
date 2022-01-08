@@ -1,6 +1,7 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.*
+import bastoni.frontend.JsObject
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.VdomNode
 import konva.Konva
@@ -37,40 +38,37 @@ object CardsLayer:
       val deckOffsetY = (containerHeight - mediumCardSize.height) / 2
 
       val deck: VdomNode =
-        KGroup
-          .build(
-            faceDownCompacted(props.table.deck.map(_.card), 0)
-              .zipWithIndex
-              .reverse
-              .map { case (card, col) =>
-                KGroup
-                  .builder
-                  .set(_.y = deckOffsetY)
-                  .set(_.x = deckOffsetX + (col * mediumCardSize.width * cardOffsetFactorX))
-                  .build(CardComponent(card, mediumCardSize))
-              }: _*
-          )
+        KGroup(
+          faceDownCompacted(props.table.deck.map(_.card), 0)
+            .zipWithIndex
+            .reverse
+            .map { case (card, col) =>
+              CardComponent(card, mediumCardSize, (deckOffsetX + (col * mediumCardSize.width * cardOffsetFactorX), deckOffsetY))
+            }: _*
+        )
 
       val boardOffsetX = mediumCardSize.width * 3
       val boardOffsetY = FullCardSize.height
       val boardCardsPerRow = (containerWidth / (mediumCardSize.width + 2)).floor.toInt
       val board =
-        KGroup
-          .build(
-            faceDownCompacted(props.table.board.map(_.card), 0)
-              .reverse
-              .grouped(boardCardsPerRow)
-              .zipWithIndex
-              .flatMap { case (line, row) =>
-                line.zipWithIndex.map { case (card, col) =>
-                  KGroup
-                    .builder
-                    .set(_.x = boardOffsetX + ((mediumCardSize.width + 2) * col))
-                    .set(_.y = boardOffsetY + ((mediumCardSize.height + 2) * row))
-                    .build(CardComponent(card, mediumCardSize))
-                }
-              }.toSeq: _*
-          )
+        KGroup(
+          faceDownCompacted(props.table.board.map(_.card), 0)
+            .reverse
+            .grouped(boardCardsPerRow)
+            .zipWithIndex
+            .flatMap { case (line, row) =>
+              line.zipWithIndex.map { case (card, col) =>
+                CardComponent(
+                  card,
+                  mediumCardSize,
+                  (
+                    boardOffsetX + ((mediumCardSize.width + 2) * col),
+                    boardOffsetY + ((mediumCardSize.height + 2) * row)
+                  )
+                )
+              }
+            }.toSeq: _*
+        )
 
 
       val myCards = props.table.seatFor(props.me) match {
@@ -79,32 +77,33 @@ object CardsLayer:
           val numberOfRows: Int = (hand.size / cardsPerRow.toDouble).ceil.toInt
           val verticalOffset: Double = containerHeight - fullCardSize.height - ((numberOfRows - 1) * cardOffsetY)
 
-          KGroup
-            .builder
-            .build(
-              faceDownCompacted(hand.map(_.card), 0)
-                .grouped(cardsPerRow)
-                .zipWithIndex
-                .flatMap { case (cards, row) =>
-                  val rowSize: Double = fullCardSize.width + (cardOffsetX * (cards.size - 1))
-                  val horizontalOffset: Double = Math.max(0, containerWidth - rowSize) / 2.0
-                  cards.zipWithIndex
-                    .map { case (card, col) =>
-                      KGroup
-                        .builder
-                        .set(_.width = containerWidth)
-                        .set(_.height = containerHeight)
-                        .set(_.x = horizontalOffset + (cardOffsetX * col))
-                        .set(_.y = verticalOffset + (row * cardOffsetY))
-                        .build(CardComponent(card, fullCardSize))
-                    }
-                }.toSeq: _*
+          KGroup(
+            faceDownCompacted(hand.map(_.card), 0)
+              .grouped(cardsPerRow)
+              .zipWithIndex
+              .flatMap { case (cards, row) =>
+                val rowSize: Double = fullCardSize.width + (cardOffsetX * (cards.size - 1))
+                val horizontalOffset: Double = Math.max(0, containerWidth - rowSize) / 2.0
+                cards.zipWithIndex
+                  .map { case (card, col) =>
+                    CardComponent(
+                      card,
+                      mediumCardSize,
+                      (deckOffsetX, deckOffsetY),
+                      targetSize = Some(fullCardSize),
+                      targetPosition = Some((
+                        horizontalOffset + (cardOffsetX * col),
+                        verticalOffset + (cardOffsetY * row)
+                      ))
+                    )
+                  }
+              }.toSeq: _*
             )
 
-        case None => KGroup.build()
+        case None => KGroup()
       }
 
-      KGroup.build(deck, board, myCards)
+      KGroup(deck, board, myCards)
     }
 
   def apply(gameProps: GameProps): VdomNode = component(gameProps)
