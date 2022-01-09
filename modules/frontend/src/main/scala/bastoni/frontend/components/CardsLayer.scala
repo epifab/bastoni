@@ -69,17 +69,26 @@ object CardsLayer:
       // ----------------------
 
       val deckLayout: List[CardsLayout] = compactFaceDownCards(props.table.deck.map(_.card), 0)
-        .zipWithIndex
         .reverse
-        .map { case (cardOrOccurences, col) =>
-          cardOrOccurences -> Point(
-            layout.table.deck.position.x,
-            layout.table.deck.position.y + (col * layout.table.deck.sizes.height * .8)
-          )
-        }
         .map {
-          case (count: Int, position) => CardsLayout.Contracted(position, count, layout.table.deck.sizes)
-          case (card: Card, position) => CardsLayout.Expanded(List(card -> position), layout.table.deck.sizes)
+          case count: Int =>
+            CardsLayout.Contracted(
+              Point(
+                layout.table.deck.position.x,
+                layout.table.deck.position.y
+              ),
+              count,
+              layout.table.deck.sizes
+            )
+          case card: Card =>
+            CardsLayout.Expanded(
+              List(card -> Point(
+                layout.table.deck.position.x + (layout.table.deck.sizes.width * .5),
+                layout.table.deck.position.y + (layout.table.deck.sizes.height * .8)
+              )),
+              layout.table.deck.sizes,
+              rotation = Some(23)
+            )
         }
 
       // ----------------------
@@ -92,9 +101,9 @@ object CardsLayer:
       val renderedCards: List[VdomNode] =
         (boardLayout :: deckLayout ++ pilesLayout ++ handsLayout)
           .flatMap {
-            case CardsLayout.Expanded(positions, size) => Some(KGroup(positions.map { case (card, point) => CardComponent(card, size, point) }: _*))
-            case CardsLayout.Contracted(position, count, size) if count > 0 => Some(CardComponent(count, size, position))
-            case CardsLayout.Contracted(position, count, size) => None
+            case CardsLayout.Expanded(positions, size, rotation) => Some(KGroup(positions.map { case (card, position) => CardComponent(card, size, position, rotation) }: _*))
+            case CardsLayout.Contracted(position, count, size, rotation) if count > 0 => Some(CardComponent(count, size, position, rotation))
+            case CardsLayout.Contracted(position, count, size, rotation) => None
           }
 
       KGroup(renderedCards: _*)

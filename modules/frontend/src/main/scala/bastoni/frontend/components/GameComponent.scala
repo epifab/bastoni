@@ -13,7 +13,7 @@ import japgolly.scalajs.react.vdom.html_<^.*
 import org.scalajs.dom
 import org.scalajs.dom.html.Image
 import org.scalajs.dom.{Console, HTMLImageElement, window}
-import reactkonva.{KLayer, KStage}
+import reactkonva.{KGroup, KLayer, KStage}
 
 import scala.scalajs.js
 import scala.concurrent.duration.DurationInt
@@ -37,7 +37,17 @@ class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
           p.width = window.innerWidth
           p.height = window.innerHeight
         },
-        KLayer(CardsLayer(props, layout))
+        KLayer(
+          TableComponent(layout.table),
+          KGroup(
+            List(
+              props.opponent(0).flatMap(_.player).map(PlayerComponent(_, layout.player1)),
+              props.opponent(1).flatMap(_.player).map(PlayerComponent(_, layout.player2)),
+              props.opponent(2).flatMap(_.player).map(PlayerComponent(_, layout.player3)),
+            ).flatten: _*
+          ),
+          CardsLayer(props, layout)
+        )
       )
 
     case None => <.div("Waiting...")

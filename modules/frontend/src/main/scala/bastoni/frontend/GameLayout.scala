@@ -48,13 +48,13 @@ object TableLayout:
   val pileSize: CardSize = CardSize.full.scaleTo(30)
   val deckSize: CardSize = CardSize.full.scaleTo(45)
   val boardSize: CardSize = deckSize
+  val cardsMargin = 10
 
   def apply(canvasSize: Size): TableLayout = {
-    val topLeftTable = Point(0, OtherPlayerLayout.cardSize.height + 80)
-    val bottomRightTable = Point(canvasSize.width, canvasSize.height - Player0HandLayout.defaultSize.height * 1.9)
+    val topLeftTable = Point(0, OtherPlayerLayout.cardSize.height + 70)
+    val bottomRightTable = Point(canvasSize.width, canvasSize.height - Player0HandLayout.defaultSize.height * (1 + Player0HandLayout.verticalOverlapFactor) - cardsMargin)
     val middleTable = topLeftTable.y + ((bottomRightTable.y - topLeftTable.y) / 2)
     val tableSize = Size(bottomRightTable.x - topLeftTable.x, bottomRightTable.y - topLeftTable.y)
-    val cardsMargin = 10
 
     TableLayout(
       topLeftTable,
@@ -80,7 +80,7 @@ object TableLayout:
       ),
       DeckLayout(
         deckSize,
-        Point(cardsMargin, middleTable + (deckSize.height / 2))
+        Point(cardsMargin, middleTable - (deckSize.height / 2))
       ),
       BoardLayout(
         sizes = boardSize,
@@ -103,8 +103,8 @@ object TableLayout:
 sealed trait CardsLayout
 
 object CardsLayout:
-  case class Contracted(position: Point, count: Int, sizes: CardSize) extends CardsLayout
-  case class Expanded(positions: List[(Card, Point)], sizes: CardSize) extends CardsLayout
+  case class Contracted(position: Point, count: Int, sizes: CardSize, rotation: Option[Int] = None) extends CardsLayout
+  case class Expanded(positions: List[(Card, Point)], sizes: CardSize, rotation: Option[Int] = None) extends CardsLayout
 
 object Player0HandLayout:
   val defaultSize: CardSize = CardSize.full

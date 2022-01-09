@@ -27,6 +27,7 @@ object CardComponent:
     card: Card | Int,
     size: CardSize,
     position: Point,
+    rotation: Option[Int],
     targetSize: Option[CardSize],
     targetPosition: Option[Point]
   )
@@ -106,6 +107,7 @@ object CardComponent:
           p.ref = ref => groupRef.set(Some(ref))
           p.x = props.position.x
           p.y = props.position.y
+          props.rotation.foreach(rotation => p.rotation = rotation)
         },
         KImage { p =>
           p.ref = ref => imageRef.set(Some(ref))
@@ -163,6 +165,7 @@ object CardComponent:
     cardOrOccurrences: Card | Int,
     size: CardSize,
     position: Point,
+    rotation: Option[Int] = None,
     targetSize: Option[CardSize] = None,
     targetPosition: Option[Point] = None
-  ): VdomElement = component(Props(cardOrOccurrences, size, position, targetSize, targetPosition))
+  ): VdomElement = component(Props(cardOrOccurrences, size, position, rotation, targetSize, targetPosition))

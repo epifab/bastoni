@@ -1,31 +1,23 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.*
+import bastoni.frontend.TableLayout
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.html_<^.*
+import reactkonva.KRect
 
 import scala.util.chaining.*
 
-val TableComponent =
-  ScalaComponent
-    .builder[GameProps]
-    .noBackend
-    .render_P { props =>
-      <.main(
-        <.div(^.className := "opponents",
-          props.opponents
-            .map(SeatComponent(_))
-            .toTagMod
-        ),
-        <.div(^.className := "table",
-          <.div(^.className := "deck",
-            //CardsComponent(props.table.deck, CardSize.Medium)
-          ),
-          <.div(^.className := "board",
-            //CardsComponent(props.table.board, CardSize.Medium)
-          )
-        ),
-        MySeatComponent(props.mySeat),
-      )
+object TableComponent:
+  private val component = ScalaFnComponent[TableLayout] { layout =>
+      KRect { p =>
+        p.cornerRadius = 30
+        p.x = layout.position.x
+        p.y = layout.position.y
+        p.width = layout.size.width
+        p.height = layout.size.height
+        p.fill = "rgba(8,166,53.1)"
+      }
     }
-    .build
+
+  def apply(layout: TableLayout): VdomElement = component(layout)
