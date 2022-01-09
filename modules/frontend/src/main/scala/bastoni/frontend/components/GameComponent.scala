@@ -1,4 +1,5 @@
-package bastoni.frontend.components
+package bastoni.frontend
+package components
 
 import bastoni.domain.DumbPlayer
 import bastoni.domain.logic.Services
@@ -27,6 +28,8 @@ val GameComponent =
 
 
 class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
+  val layout: GameLayout = GameLayout(Size(window.innerWidth, window.innerHeight))
+
   def render(props: Option[GameProps]): VdomNode = props match
     case Some(props) =>
       KStage(
@@ -34,7 +37,7 @@ class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
           p.width = window.innerWidth
           p.height = window.innerHeight
         },
-        KLayer(CardsLayer(props))
+        KLayer(CardsLayer(props, layout))
       )
 
     case None => <.div("Waiting...")

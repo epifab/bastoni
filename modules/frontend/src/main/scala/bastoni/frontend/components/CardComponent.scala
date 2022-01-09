@@ -1,4 +1,5 @@
-package bastoni.frontend.components
+package bastoni.frontend
+package components
 
 import bastoni.domain.model.*
 import bastoni.frontend.JsObject
@@ -15,24 +16,6 @@ import reactkonva.*
 import java.util.concurrent.atomic.AtomicReference
 import scala.scalajs.js
 
-trait CardSize:
-  def width: Double
-  def height: Double
-  def radius: Double
-
-object FullCardSize extends CardSize:
-  val width: Double = 90
-  val height: Double = 148
-  val radius: Double = 10
-
-case class ScaledCardSize(original: CardSize, scale: Double) extends CardSize:
-  val width: Double = original.width * scale
-  val height: Double = original.height * scale
-  val radius: Double = original.radius * scale
-
-object ScaledCardSize:
-  def width(w: Double): ScaledCardSize = ScaledCardSize(FullCardSize, w / FullCardSize.width)
-
 object Img:
   def apply(src: String): Image =
     val img = document.createElement("img").asInstanceOf[Image]
@@ -43,9 +26,9 @@ object CardComponent:
   case class Props(
     card: Card | Int,
     size: CardSize,
-    position: (Double, Double),
+    position: Point,
     targetSize: Option[CardSize],
-    targetPosition: Option[(Double, Double)]
+    targetPosition: Option[Point]
   )
 
   private val cardImages: Map[Card, Image] =
@@ -61,8 +44,8 @@ object CardComponent:
   private def renderCard(card: Option[Card]): HTMLCanvasElement =
     val image = new Konva.Image(
       JsObject[KImage.Props] { p =>
-        p.width = FullCardSize.width
-        p.height = FullCardSize.height
+        p.width = CardSize.full.width
+        p.height = CardSize.full.height
         p.image = card match {
           case Some(card) => cardImages(card)
           case None => cardBackImage
@@ -72,9 +55,9 @@ object CardComponent:
 
     val group = new Konva.Group(
       JsObject[KGroup.Props] { p =>
-        p.width = FullCardSize.width
-        p.height = FullCardSize.height
-        p.clipFunc = borderRadius(0, 0, FullCardSize.width, FullCardSize.height, FullCardSize.radius)
+        p.width = CardSize.full.width
+        p.height = CardSize.full.height
+        p.clipFunc = borderRadius(0, 0, CardSize.full.width, CardSize.full.height, CardSize.full.borderRadius)
       }
     )
 
@@ -110,8 +93,8 @@ object CardComponent:
       )))
       _ <- props.targetPosition.fold(Callback.empty)(targetPosition => Callback(groupRef.get.foreach(r =>
         r.to(JsObject[TweenProps] { p =>
-          p.x = targetPosition._1
-          p.y = targetPosition._2
+          p.x = targetPosition.x
+          p.y = targetPosition.y
           p.duration = 0.5
         })
       )))
@@ -121,8 +104,8 @@ object CardComponent:
       KGroup(
         { p =>
           p.ref = ref => groupRef.set(Some(ref))
-          p.x = props.position._1
-          p.y = props.position._2
+          p.x = props.position.x
+          p.y = props.position.y
         },
         KImage { p =>
           p.ref = ref => imageRef.set(Some(ref))
@@ -133,9 +116,9 @@ object CardComponent:
           p.width = props.size.width
           p.height = props.size.height
           p.shadowColor = "#222"
-          p.shadowBlur = props.size.radius
+          p.shadowBlur = props.size.borderRadius
           p.shadowOpacity = 0.8
-          p.shadowOffset = Vector2d(-props.size.radius, 0)
+          p.shadowOffset = Vector2d(-props.size.borderRadius, 0)
         },
 
         props.card match {
@@ -179,7 +162,7 @@ object CardComponent:
   def apply(
     cardOrOccurrences: Card | Int,
     size: CardSize,
-    position: (Double, Double),
+    position: Point,
     targetSize: Option[CardSize] = None,
-    targetPosition: Option[(Double, Double)] = None
+    targetPosition: Option[Point] = None
   ): VdomElement = component(Props(cardOrOccurrences, size, position, targetSize, targetPosition))
