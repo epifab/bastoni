@@ -37,6 +37,7 @@ case class TableServerView(
 
   def toPlayerView(me: User): TablePlayerView =
     TablePlayerView(
+      me.id,
       seats = seats.map {
         case Seat(player, hand, taken) =>
           Seat[CardPlayerView](

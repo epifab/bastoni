@@ -29,7 +29,49 @@ case class PilesLayout(
   sizes: CardSize
 )
 
-case class DeckLayout(sizes: CardSize, position: Point)
+case class DeckLayout(sizes: CardSize, basePosition: Point, cardsLayout: List[Option[Card]] => List[CardsLayout])
+
+object DeckLayout:
+  private def compactFaceDownCards(cx: List[Option[Card]], count: Int): List[Card | Int] =
+    cx match
+      case None :: tail => compactFaceDownCards(tail, count + 1)
+      case Some(card) :: tail if count == 0 => card :: compactFaceDownCards(tail, 0)
+      case Some(card) :: tail => count :: card :: compactFaceDownCards(tail, 0)
+      case Nil if count > 0 => count :: Nil
+      case Nil => Nil
+
+  def apply(sizes: CardSize, basePosition: Point): DeckLayout = {
+    DeckLayout(
+      sizes,
+      basePosition,
+      cards => {
+        compactFaceDownCards(cards, 0)
+          .reverse
+          .map {
+            case count: Int =>
+              CardsLayout.Contracted(
+                Point(
+                  basePosition.x,
+                  basePosition.y
+                ),
+                count,
+                sizes
+              )
+            case card: Card =>
+              CardsLayout.Expanded(
+                List(card -> Point(
+                  basePosition.x + (sizes.width * .5),
+                  basePosition.y + (sizes.height * .8)
+                )),
+                sizes,
+                rotation = Some(23)
+              )
+          }
+
+      }
+    )
+  }
+
 
 case class BoardLayout(
   sizes: CardSize,
@@ -103,8 +145,20 @@ object TableLayout:
 sealed trait CardsLayout
 
 object CardsLayout:
-  case class Contracted(position: Point, count: Int, sizes: CardSize, rotation: Option[Int] = None) extends CardsLayout
-  case class Expanded(positions: List[(Card, Point)], sizes: CardSize, rotation: Option[Int] = None) extends CardsLayout
+  case class Contracted(
+    position: Point,
+    count: Int,
+    sizes: CardSize,
+    rotation: Option[Int] = None
+  ) extends CardsLayout
+
+  case class Expanded(
+    positions: List[(Card, Point)],
+    sizes: CardSize,
+    rotation: Option[Int] = None,
+    originalPositions: Map[Card, Point] = Map.empty,
+    originalSizes: Map[Card, CardSize] = Map.empty
+  ) extends CardsLayout
 
 object Player0HandLayout:
   val defaultSize: CardSize = CardSize.full

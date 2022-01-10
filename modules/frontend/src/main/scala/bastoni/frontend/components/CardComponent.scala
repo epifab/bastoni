@@ -28,8 +28,8 @@ object CardComponent:
     size: CardSize,
     position: Point,
     rotation: Option[Int],
-    targetSize: Option[CardSize],
-    targetPosition: Option[Point]
+    originalSize: Option[CardSize],
+    originalPosition: Option[Point]
   )
 
   private val cardImages: Map[Card, Image] =
@@ -85,28 +85,28 @@ object CardComponent:
 
     val animation: Callback = for {
       props <- $.props
-      _ <- props.targetSize.fold(Callback.empty)(targetSize => Callback(imageRef.get.foreach(r =>
+      _ <- if (props.originalSize.isEmpty) Callback.empty else Callback(imageRef.get.foreach(r =>
         r.to(JsObject[TweenProps] { p =>
-          p.width = targetSize.width
-          p.height = targetSize.height
+          p.width = props.size.width
+          p.height = props.size.height
           p.duration = 0.5
         })
-      )))
-      _ <- props.targetPosition.fold(Callback.empty)(targetPosition => Callback(groupRef.get.foreach(r =>
+      ))
+      _ <- if (props.originalPosition.isEmpty) Callback.empty else Callback(groupRef.get.foreach(r =>
         r.to(JsObject[TweenProps] { p =>
-          p.x = targetPosition.x
-          p.y = targetPosition.y
+          p.x = props.position.x
+          p.y = props.position.y
           p.duration = 0.5
         })
-      )))
+      ))
     } yield ()
 
     def render(props: Props): VdomNode =
       KGroup(
         { p =>
           p.ref = ref => groupRef.set(Some(ref))
-          p.x = props.position.x
-          p.y = props.position.y
+          p.x = props.originalPosition.getOrElse(props.position).x
+          p.y = props.originalPosition.getOrElse(props.position).y
           props.rotation.foreach(rotation => p.rotation = rotation)
         },
         KImage { p =>
@@ -115,10 +115,10 @@ object CardComponent:
             case card: Card => Some(card)
             case _ => None
           })
-          p.width = props.size.width
-          p.height = props.size.height
+          p.width = props.originalSize.getOrElse(props.size).width
+          p.height = props.originalSize.getOrElse(props.size).height
+          p.shadowBlur = props.originalSize.getOrElse(props.size).borderRadius
           p.shadowColor = "#222"
-          p.shadowBlur = props.size.borderRadius
           p.shadowOpacity = 0.8
           p.shadowOffset = Vector2d(-props.size.borderRadius, 0)
         },
@@ -166,6 +166,6 @@ object CardComponent:
     size: CardSize,
     position: Point,
     rotation: Option[Int] = None,
-    targetSize: Option[CardSize] = None,
-    targetPosition: Option[Point] = None
-  ): VdomElement = component(Props(cardOrOccurrences, size, position, rotation, targetSize, targetPosition))
+    originalSize: Option[CardSize] = None,
+    originalPosition: Option[Point] = None
+  ): VdomElement = component(Props(cardOrOccurrences, size, position, rotation, originalSize, originalPosition))

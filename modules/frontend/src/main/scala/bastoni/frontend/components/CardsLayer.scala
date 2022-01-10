@@ -10,98 +10,70 @@ import reactkonva.KGroup
 
 
 object CardsLayer:
-  private def compactFaceDownCards(cx: List[Option[Card]], count: Int): List[Card | Int] =
-    cx match
-      case None :: tail => compactFaceDownCards(tail, count + 1)
-      case Some(card) :: tail if count == 0 => card :: compactFaceDownCards(tail, 0)
-      case Some(card) :: tail => count :: card :: compactFaceDownCards(tail, 0)
-      case Nil if count > 0 => count :: Nil
-      case Nil => Nil
+
+  def handsLayout(table: TablePlayerView, layout: GameLayout): List[CardsLayout] = {
+    val hands: List[Option[List[Option[Card]]]] = List(
+      table.mySeat.map(_.hand.map(_.card)),
+      table.opponent(0).map(_.hand.map(_.card)),
+      table.opponent(1).map(_.hand.map(_.card)),
+      table.opponent(2).map(_.hand.map(_.card)),
+    )
+
+    val handsLayoutF: List[List[Option[Card]] => CardsLayout] = List(
+      layout.player0.hand,
+      layout.player1.hand,
+      layout.player2.hand,
+      layout.player3.hand
+    )
+
+    hands.zip(handsLayoutF).flatMap(_ map _)
+  }
+
+  def pilesLayout(table: TablePlayerView, layout: GameLayout): List[CardsLayout.Contracted] = {
+    val piles = List(
+      table.mySeat.map(_.taken.size),
+      table.opponent(0).map(_.taken.size),
+      table.opponent(1).map(_.taken.size),
+      table.opponent(2).map(_.taken.size)
+    )
+
+    val pilesPosition = List(
+      layout.table.piles.player0,
+      layout.table.piles.player1,
+      layout.table.piles.player2,
+      layout.table.piles.player3,
+    )
+
+    piles.zip(pilesPosition).flatMap { case (pile, position) =>
+      pile.map(count => CardsLayout.Contracted(position, count, layout.table.piles.sizes))
+    }
+  }
 
   private val component =
     ScalaFnComponent[(GameProps, GameLayout)] { case (props: GameProps, layout: GameLayout) =>
 
-      // ----------------------
-      // hands
-      // ----------------------
+      val table = props.table  // transition.map(_._1).getOrElse(props.table)
 
-      val hands: List[Option[List[Option[Card]]]] = List(
-        props.mySeat.map(_.hand.map(_.card)),
-        props.opponent(0).map(_.hand.map(_.card)),
-        props.opponent(1).map(_.hand.map(_.card)),
-        props.opponent(2).map(_.hand.map(_.card)),
-      )
-
-      val handsLayoutF: List[List[Option[Card]] => CardsLayout] = List(
-        layout.player0.hand,
-        layout.player1.hand,
-        layout.player2.hand,
-        layout.player3.hand
-      )
-
-      val handsLayout: List[CardsLayout] = hands.zip(handsLayoutF).flatMap { case (h, l) => h.map(l) }
-
-
-      // ----------------------
-      // piles
-      // ----------------------
-
-      val piles = List(
-        props.mySeat.map(_.taken.size),
-        props.opponent(0).map(_.taken.size),
-        props.opponent(1).map(_.taken.size),
-        props.opponent(2).map(_.taken.size)
-      )
-
-      val pilesPosition = List(
-        layout.table.piles.player0,
-        layout.table.piles.player1,
-        layout.table.piles.player2,
-        layout.table.piles.player3,
-      )
-
-      val pilesLayout = piles.zip(pilesPosition).flatMap { case (pile, position) =>
-        pile.map(count => CardsLayout.Contracted(position, count, layout.table.piles.sizes))
-      }
-
-      // ----------------------
-      // deck
-      // ----------------------
-
-      val deckLayout: List[CardsLayout] = compactFaceDownCards(props.table.deck.map(_.card), 0)
-        .reverse
-        .map {
-          case count: Int =>
-            CardsLayout.Contracted(
-              Point(
-                layout.table.deck.position.x,
-                layout.table.deck.position.y
-              ),
-              count,
-              layout.table.deck.sizes
-            )
-          case card: Card =>
-            CardsLayout.Expanded(
-              List(card -> Point(
-                layout.table.deck.position.x + (layout.table.deck.sizes.width * .5),
-                layout.table.deck.position.y + (layout.table.deck.sizes.height * .8)
-              )),
-              layout.table.deck.sizes,
-              rotation = Some(23)
-            )
-        }
-
-      // ----------------------
-      // board
-      // ----------------------
-
-      val boardLayout: CardsLayout = CardsLayout.Expanded(layout.table.board.positions(props.table.board.flatMap(_.card)), layout.table.board.sizes)
-
+      val hands = handsLayout(table, layout)
+      val piles = pilesLayout(table, layout)
+      val deck: List[CardsLayout] = layout.table.deck.cardsLayout(table.deck.map(_.card))
+      val board: CardsLayout = CardsLayout.Expanded(layout.table.board.positions(table.board.flatMap(_.card)), layout.table.board.sizes)
 
       val renderedCards: List[VdomNode] =
-        (boardLayout :: deckLayout ++ pilesLayout ++ handsLayout)
+        (board :: deck ++ piles ++ hands)
           .flatMap {
-            case CardsLayout.Expanded(positions, size, rotation) => Some(KGroup(positions.map { case (card, position) => CardComponent(card, size, position, rotation) }: _*))
+            case CardsLayout.Expanded(positions, size, rotation, originalPositions, originalSizes) =>
+              Some(KGroup(positions.map {
+                case (card, position) => CardComponent(
+                  card,
+                  size,
+                  position,
+                  rotation,
+                  originalPosition = originalPositions.get(card),
+                  originalSize = originalSizes.get(card)
+                )
+              }: _*))
+
             case CardsLayout.Contracted(position, count, size, rotation) if count > 0 => Some(CardComponent(count, size, position, rotation))
             case CardsLayout.Contracted(position, count, size, rotation) => None
           }

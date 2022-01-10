@@ -18,13 +18,16 @@ import reactkonva.{KGroup, KLayer, KStage}
 import scala.scalajs.js
 import scala.concurrent.duration.DurationInt
 
-val GameComponent =
-  ScalaComponent
-    .builder[GameType]
-    .initialState[Option[GameProps]](None)
-    .renderBackend[GameComponentBackend]
-    .componentDidMount(_.backend.start)
-    .build
+object GameComponent:
+  private val component =
+    ScalaComponent
+      .builder[GameType]
+      .initialState[Option[GameProps]](None)
+      .renderBackend[GameComponentBackend]
+      .componentDidMount(_.backend.start)
+      .build
+
+  def apply(gameType: GameType): VdomElement = component(gameType)
 
 
 class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
@@ -41,9 +44,9 @@ class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
           TableComponent(layout.table),
           KGroup(
             List(
-              props.opponent(0).flatMap(_.player).map(PlayerComponent(_, layout.player1)),
-              props.opponent(1).flatMap(_.player).map(PlayerComponent(_, layout.player2)),
-              props.opponent(2).flatMap(_.player).map(PlayerComponent(_, layout.player3)),
+              props.table.opponent(0).flatMap(_.player).map(PlayerComponent(_, layout.player1)),
+              props.table.opponent(1).flatMap(_.player).map(PlayerComponent(_, layout.player2)),
+              props.table.opponent(2).flatMap(_.player).map(PlayerComponent(_, layout.player3)),
             ).flatten: _*
           ),
           CardsLayer(props, layout)
@@ -73,12 +76,11 @@ class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
     p4 = DumbPlayer(me, roomId, sub, pub, pause = 1.second)
 
     tables <- sub.subscribe(me, roomId)
-      .scan[Option[TablePlayerView]](None) {
-        case (_, ToPlayer.Snapshot(table)) => Some(table)
-        case (oldTable, ToPlayer.GameEvent(event)) => oldTable.map(_.update(event))
+      .scan[Option[GameProps]](None) {
+        case (_, ToPlayer.Snapshot(table)) => Some(GameProps(table, me.id, None))
+        case (props, ToPlayer.GameEvent(event)) => props.map(p => p.copy(table = p.table.update(event), transition = Some(p.table -> event)))
       }
-      .collect { case Some(table) => table }
-      .evalMap(table => IO($.setState(Some(GameProps(table, me.id))).runNow()))
+      .evalMap(props => IO($.setState(props).runNow()))
       .concurrently(runner)
       .concurrently(p1).concurrently(p2).concurrently(p3).concurrently(p4)
       .concurrently(pub.publish(me, roomId)(fs2.Stream[IO, FromPlayer](FromPlayer.StartGame(gameType)).delayBy(2.seconds)))
