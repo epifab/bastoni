@@ -1,17 +1,21 @@
 package bastoni.domain
 
+import bastoni.domain.logic.Fixtures.cardOf
 import bastoni.domain.model.*
+import io.circe.parser.parse
+import io.circe.syntax.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import io.circe.syntax.*
-import io.circe.parser.parse
 
 class JsonSpec extends AnyFreeSpec with Matchers:
 
   "Encoding of players" in {
     val player = Player(
       MatchPlayer(User(UserId.newId, "John"), 15),
-      List(Card(Rank.Asso, Suit.Denari), Card(Rank.Sette, Suit.Denari)),
+      List(
+        VisibleCard(Rank.Asso, Suit.Denari, 5),
+        VisibleCard(Rank.Sette, Suit.Denari, 7)
+      ),
       Nil
     )
 
@@ -22,8 +26,8 @@ class JsonSpec extends AnyFreeSpec with Matchers:
          |  "name": "John",
          |  "points": 15,
          |  "hand": [
-         |    ["Asso", "Denari"],
-         |    ["Sette", "Denari"]
+         |    {"rank": "Asso", "suit": "Denari", "ref": 5},
+         |    {"rank": "Sette", "suit": "Denari", "ref": 7}
          |  ],
          |  "taken": []
          |}""".stripMargin
@@ -51,8 +55,8 @@ class JsonSpec extends AnyFreeSpec with Matchers:
 
   "Server events are encoded / decoded with a discriminant property" - {
     "case class" in {
-      val expectedJson = parse("""{"type": "DeckShuffled", "cards": [["Asso","Denari"],["Due","Coppe"]]}""").getOrElse(fail("Invalid json"))
-      val event: ServerEvent = Event.DeckShuffled(List(Card(Rank.Asso, Suit.Denari), Card(Rank.Due, Suit.Coppe)))
+      val expectedJson = parse("""{"type": "DeckShuffled", "cards": [{"rank": "Asso", "suit": "Denari", "ref": 0},{"rank": "Due", "suit": "Coppe", "ref": 1}]}""").getOrElse(fail("Invalid json"))
+      val event: ServerEvent = Event.DeckShuffled(List(Card(Rank.Asso, Suit.Denari, 0), Card(Rank.Due, Suit.Coppe, 1)))
 
       event.asJson shouldBe expectedJson
       expectedJson.as[ServerEvent] shouldBe Right(event)

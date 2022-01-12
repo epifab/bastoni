@@ -16,8 +16,8 @@ import scala.concurrent.duration.DurationInt
 
 class GameServiceSpec extends AsyncIOFreeSpec:
 
-  val room1Id = RoomId.newId
-  val room2Id = RoomId.newId
+  val room1Id: RoomId = RoomId.newId
+  val room2Id: RoomId = RoomId.newId
   val room1Players = List(user1, user2)
   val room2Players = List(user2, user3)
 
@@ -93,7 +93,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
   "Random messages will be ignored" in {
     val commands = fs2.Stream(
       JoinTable(user1, joinSeed).toMessage(room1Id),
-      PlayCard(user1.id, Card(Rank.Sette, Suit.Denari)).toMessage(room1Id) // will be ignored
+      PlayCard(user1.id, cardOf(Rank.Sette, Suit.Denari)).toMessage(room1Id) // will be ignored
     )
 
     gameService(commands).asserting(_ shouldBe List(PlayerJoinedTable(user1, 3).toMessage(room1Id)))
@@ -155,11 +155,11 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
       DeckShuffled(shuffledDeck).toMessage(room1Id),
       Delayed(Continue.toMessage(room1Id), Delay.DealCards),
-      CardsDealt(user1.id, List(Card(Due, Bastoni), Card(Asso, Spade), Card(Sette, Denari)), Direction.Player).toMessage(room1Id),
+      CardsDealt(user1.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari)), Direction.Player).toMessage(room1Id),
       Delayed(Continue.toMessage(room1Id), Delay.DealCards),
       DeckShuffled(shuffledDeck).toMessage(room2Id),
       Delayed(Continue.toMessage(room2Id), Delay.DealCards),
-      CardsDealt(user2.id, List(Card(Due, Bastoni), Card(Asso, Spade), Card(Sette, Denari), Card(Quattro, Spade), Card(Sei, Denari)), Direction.Player).toMessage(room2Id),
+      CardsDealt(user2.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari), cardOf(Quattro, Spade), cardOf(Sei, Denari)), Direction.Player).toMessage(room2Id),
       Delayed(Continue.toMessage(room2Id), Delay.DealCards),
       PlayerLeftTable(user1, 2).toMessage(room1Id),
       GameAborted.toMessage(room1Id),
@@ -178,7 +178,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       Continue,
       Continue,
       Connect,
-      PlayCard(user1.id, Card(Due, Bastoni)),
+      PlayCard(user1.id, cardOf(Due, Bastoni)),
       Connect
     ).map(_.toMessage(room1))
 
@@ -199,23 +199,23 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                     )
                   ),
                   hand = List(
-                    CardServerView(Card(Due, Bastoni), Direction.Player),
-                    CardServerView(Card(Asso, Spade), Direction.Player),
-                    CardServerView(Card(Sette, Denari), Direction.Player)
+                    CardServerView(cardOf(Due, Bastoni), Direction.Player),
+                    CardServerView(cardOf(Asso, Spade), Direction.Player),
+                    CardServerView(cardOf(Sette, Denari), Direction.Player)
                   ),
                   taken = Nil
                 ),
                 Seat(
                   Some(WaitingPlayer(MatchPlayer(user2, 0, false))),
                   hand = List(
-                    CardServerView(Card(Quattro, Spade), Direction.Player),
-                    CardServerView(Card(Sei, Denari), Direction.Player),
-                    CardServerView(Card(Re, Denari), Direction.Player)
+                    CardServerView(cardOf(Quattro, Spade), Direction.Player),
+                    CardServerView(cardOf(Sei, Denari), Direction.Player),
+                    CardServerView(cardOf(Re, Denari), Direction.Player)
                   ),
                   taken = Nil
                 )
               ),
-              deck = shuffledDeck.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(Card(Cinque, Coppe), Direction.Up),
+              deck = shuffledDeck.cards.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
               board = Nil,
               active = Some(GameType.Briscola)
             )
@@ -230,24 +230,24 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                     WaitingPlayer(MatchPlayer(user1, 0, false))
                   ),
                   hand = List(
-                    CardServerView(Card(Asso, Spade), Direction.Player),
-                    CardServerView(Card(Sette, Denari), Direction.Player)
+                    CardServerView(cardOf(Asso, Spade), Direction.Player),
+                    CardServerView(cardOf(Sette, Denari), Direction.Player)
                   ),
                   taken = Nil
                 ),
                 Seat(
                   Some(ActingPlayer(MatchPlayer(user2, 0, false), Action.PlayCard, Some(Timeout.Max))),
                   hand = List(
-                    CardServerView(Card(Quattro, Spade), Direction.Player),
-                    CardServerView(Card(Sei, Denari), Direction.Player),
-                    CardServerView(Card(Re, Denari), Direction.Player)
+                    CardServerView(cardOf(Quattro, Spade), Direction.Player),
+                    CardServerView(cardOf(Sei, Denari), Direction.Player),
+                    CardServerView(cardOf(Re, Denari), Direction.Player)
                   ),
                   taken = Nil
                 )
               ),
-              deck = shuffledDeck.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(Card(Cinque, Coppe), Direction.Up),
+              deck = shuffledDeck.cards.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
               board = List(
-                CardServerView(Card(Due, Bastoni), Direction.Up)
+                CardServerView(cardOf(Due, Bastoni), Direction.Up)
               ),
               active = Some(GameType.Briscola)
             )
@@ -261,10 +261,10 @@ class GameServiceSpec extends AsyncIOFreeSpec:
     val player1 = MatchPlayer(user1, 2)
     val player2 = MatchPlayer(user2, 1)
 
-    val player1Card = Card(Rank.Tre, Suit.Denari)
-    val player2Card = Card(Rank.Asso, Suit.Denari)
+    val player1Card = cardOf(Rank.Tre, Suit.Denari)
+    val player2Card = cardOf(Rank.Asso, Suit.Denari)
 
-    val player1Collected = Deck.instance.filter(card => card != player1Card && card != player2Card)
+    val player1Collected = shuffledDeck.cards.filter(card => card != player1Card && card != player2Card)
 
     val initialContext = new GameContext(
       table = new TableServerView(
@@ -291,7 +291,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           briscola.GameState.PlayRound(
             List(Player(player1, List(player1Card), player1Collected)),
             List(Player(player2, Nil, Nil) -> player2Card),
-            Nil,
+            Nil.toDeck,
             player1Card
           ),
           rounds = 0
@@ -301,7 +301,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
     val oldMessage = CardPlayed(user2.id, player2Card).toMessage(room1Id)
 
-    val resultIO = (for {
+    val resultIO = for {
       gameRepo <- JsonRepos.gameRepo
       messageRepo <- JsonRepos.messageRepo
       _ <- gameRepo.set(room1Id, initialContext)
@@ -322,7 +322,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       } yield event).compile.toList
       newContext <- gameRepo.get(room1Id)
       messages <- messageRepo.inFlight.compile.toList
-    } yield (events, newContext, messages))
+    } yield (events, newContext, messages)
 
     resultIO.asserting { case (events, newContext, messages) =>
       events shouldBe List(
@@ -334,31 +334,31 @@ class GameServiceSpec extends AsyncIOFreeSpec:
             briscola.GameScore(
               List(user2.id),
               List(
-                briscola.GameScoreItem(Card(Asso, Denari), 11),
-                briscola.GameScoreItem(Card(Tre, Denari), 10)
+                briscola.GameScoreItem(cardOf(Asso, Denari), 11),
+                briscola.GameScoreItem(cardOf(Tre, Denari), 10)
               )
             ),
             briscola.GameScore(
               List(user1.id),
               List(
-                briscola.GameScoreItem(Card(Asso, Coppe), 11),
-                briscola.GameScoreItem(Card(Asso, Spade), 11),
-                briscola.GameScoreItem(Card(Asso, Bastoni), 11),
-                briscola.GameScoreItem(Card(Tre, Coppe), 10),
-                briscola.GameScoreItem(Card(Tre, Spade), 10),
-                briscola.GameScoreItem(Card(Tre, Bastoni), 10),
-                briscola.GameScoreItem(Card(Fante, Denari), 2),
-                briscola.GameScoreItem(Card(Fante, Coppe), 2),
-                briscola.GameScoreItem(Card(Fante, Spade), 2),
-                briscola.GameScoreItem(Card(Fante, Bastoni), 2),
-                briscola.GameScoreItem(Card(Cavallo, Denari), 3),
-                briscola.GameScoreItem(Card(Cavallo, Coppe), 3),
-                briscola.GameScoreItem(Card(Cavallo, Spade), 3),
-                briscola.GameScoreItem(Card(Cavallo, Bastoni), 3),
-                briscola.GameScoreItem(Card(Re, Denari), 4),
-                briscola.GameScoreItem(Card(Re, Coppe), 4),
-                briscola.GameScoreItem(Card(Re, Spade), 4),
-                briscola.GameScoreItem(Card(Re, Bastoni), 4)
+                briscola.GameScoreItem(cardOf(Asso, Spade), 11),
+                briscola.GameScoreItem(cardOf(Asso, Bastoni), 11),
+                briscola.GameScoreItem(cardOf(Asso, Coppe), 11),
+                briscola.GameScoreItem(cardOf(Tre, Spade), 10),
+                briscola.GameScoreItem(cardOf(Tre, Coppe), 10),
+                briscola.GameScoreItem(cardOf(Tre, Bastoni), 10),
+                briscola.GameScoreItem(cardOf(Re, Denari), 4),
+                briscola.GameScoreItem(cardOf(Re, Bastoni), 4),
+                briscola.GameScoreItem(cardOf(Re, Coppe), 4),
+                briscola.GameScoreItem(cardOf(Re, Spade), 4),
+                briscola.GameScoreItem(cardOf(Cavallo, Denari), 3),
+                briscola.GameScoreItem(cardOf(Cavallo, Bastoni), 3),
+                briscola.GameScoreItem(cardOf(Cavallo, Spade), 3),
+                briscola.GameScoreItem(cardOf(Cavallo, Coppe), 3),
+                briscola.GameScoreItem(cardOf(Fante, Bastoni), 2),
+                briscola.GameScoreItem(cardOf(Fante, Spade), 2),
+                briscola.GameScoreItem(cardOf(Fante, Coppe), 2),
+                briscola.GameScoreItem(cardOf(Fante, Denari), 2),
               )
             ),
           ),
@@ -397,9 +397,9 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
   "Future undelivered events will still be sent" in {
 
-    val message1: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, Card(Rank.Asso, Suit.Coppe))), Delay.CompleteGame)
-    val message2: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, Card(Rank.Due, Suit.Coppe))), Delay.TakeCards)
-    val message3: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, Card(Rank.Tre, Suit.Coppe))), Delay.DealCards)
+    val message1: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Asso, Suit.Coppe))), Delay.CompleteGame)
+    val message2: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Due, Suit.Coppe))), Delay.TakeCards)
+    val message3: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Tre, Suit.Coppe))), Delay.DealCards)
 
     val eventsIO = (for {
       bus <- MessageBus.inMemory[IO]

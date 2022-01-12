@@ -13,11 +13,11 @@ sealed trait GameState
 object GameState:
   sealed trait Active(val activePlayers: List[MatchPlayer]) extends GameState
   case class   Ready(players: List[MatchPlayer]) extends Active(players)
-  case class   Deal3Round(todo: List[Player], done: List[Player], deck: List[Card]) extends Active((done ++ todo).map(_.matchPlayer))
-  case class   Deal5Round(players: List[Player], deck: List[Card]) extends Active(players.map(_.matchPlayer))
-  case class   WillDealBoardCards(players: List[Player], deck: List[Card]) extends Active(players.map(_.matchPlayer))
-  case class   DrawRound(todo: List[Player], done: List[Player], deck: List[Card], boardCards: List[Card]) extends Active((done ++ todo).map(_.matchPlayer))
-  case class   PlayRound(players: List[Player], deck: List[Card], board: List[Card]) extends Active(players.map(_.matchPlayer))
+  case class   Deal3Round(todo: List[Player], done: List[Player], deck: Deck) extends Active((done ++ todo).map(_.matchPlayer))
+  case class   Deal5Round(players: List[Player], deck: Deck) extends Active(players.map(_.matchPlayer))
+  case class   WillDealBoardCards(players: List[Player], deck: Deck) extends Active(players.map(_.matchPlayer))
+  case class   DrawRound(todo: List[Player], done: List[Player], deck: Deck, boardCards: List[VisibleCard]) extends Active((done ++ todo).map(_.matchPlayer))
+  case class   PlayRound(players: List[Player], deck: Deck, board: List[VisibleCard]) extends Active(players.map(_.matchPlayer))
   case class   WillTakeCards(state: PlayRound, command: Command.TakeCards) extends Active(state.activePlayers)
   case class   WillComplete(players: List[Player]) extends Active(players.map(_.matchPlayer))
 

@@ -12,12 +12,12 @@ sealed trait GameState
 object GameState:
   sealed trait Active(val activePlayers: List[MatchPlayer]) extends GameState
   case class   Ready(players: List[MatchPlayer]) extends Active(players)
-  case class   DealRound(todo: List[Player], done: List[Player], deck: List[Card]) extends Active((done ++ todo).map(_.matchPlayer))
-  case class   WillDealTrump(players: List[Player], deck: List[Card]) extends Active(players.map(_.matchPlayer))
-  case class   DrawRound(todo: List[Player], done: List[Player], deck: List[Card], trump: Card) extends Active((done ++ todo).map(_.matchPlayer))
-  case class   PlayRound(todo: List[Player], done: List[(Player, Card)], deck: List[Card], trump: Card) extends Active((done.map(_._1) ++ todo).map(_.matchPlayer))
-  case class   WillCompleteTrick(players: List[(Player, Card)], deck: List[Card], trump: Card) extends Active(players.map(_._1.matchPlayer))
-  case class   WillComplete(players: List[Player], trump: Card) extends Active(players.map(_.matchPlayer))
+  case class   DealRound(todo: List[Player], done: List[Player], deck: Deck) extends Active((done ++ todo).map(_.matchPlayer))
+  case class   WillDealTrump(players: List[Player], deck: Deck) extends Active(players.map(_.matchPlayer))
+  case class   DrawRound(todo: List[Player], done: List[Player], deck: Deck, trump: VisibleCard) extends Active((done ++ todo).map(_.matchPlayer))
+  case class   PlayRound(todo: List[Player], done: List[(Player, VisibleCard)], deck: Deck, trump: VisibleCard) extends Active((done.map(_._1) ++ todo).map(_.matchPlayer))
+  case class   WillCompleteTrick(players: List[(Player, VisibleCard)], deck: Deck, trump: VisibleCard) extends Active(players.map(_._1.matchPlayer))
+  case class   WillComplete(players: List[Player], trump: VisibleCard) extends Active(players.map(_.matchPlayer))
 
   case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: ActionRequested, state: PlayRound) extends Active(state.activePlayers) with Timer[GameState, WaitingForPlayer]:
     override val timedOut: GameState = GameState.Aborted

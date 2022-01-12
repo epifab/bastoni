@@ -38,7 +38,7 @@ object Game extends GameLogic[MatchState]:
 
     case (GameState.Ready(players), ShuffleDeck(seed)) =>
       if (players.size == 2 || players.size == 4) {
-        val deck = new Random(seed).shuffle(Deck.instance)
+        val deck = Deck.shuffled(seed)
         GameState.DealRound(
           players.map(Player(_, Nil, Nil)),
           Nil,
@@ -121,7 +121,7 @@ object Game extends GameLogic[MatchState]:
       val (state, commands) =
         if (deck.isEmpty && winner.hand.isEmpty) GameState.WillComplete(updatedPlayers) -> List(Continue.toCompleteGame)
         else if (deck.nonEmpty) GameState.DrawRound(updatedPlayers, Nil, deck) -> List(Continue.toDealCards)
-        else withTimeout(state = GameState.PlayRound(updatedPlayers, Nil, Nil), player = updatedPlayers.head.id, action = Action.PlayCard)
+        else withTimeout(state = GameState.PlayRound(updatedPlayers, Nil, deck), player = updatedPlayers.head.id, action = Action.PlayCard)
 
       state -> (TrickCompleted(winner.id) :: commands)
 
@@ -189,12 +189,12 @@ object Game extends GameLogic[MatchState]:
     def >(other: Card): Boolean = value > other.value
 
   extension(player: Player)
-    def canPlay(card: Card) = player.has(card)
-    def canPlay(card: Card, trump: Card) = player.has(card) && (card.suit == trump.suit || player.hand.forall(_.suit != trump.suit))
+    def canPlay(card: VisibleCard) = player.has(card)
+    def canPlay(card: VisibleCard, trump: VisibleCard) = player.has(card) && (card.suit == trump.suit || player.hand.forall(_.suit != trump.suit))
 
-  private def completeTrick(players: List[(Player, Card)]): List[Player] =
+  private def completeTrick(players: List[(Player, VisibleCard)]): List[Player] =
     @tailrec
-    def trickWinner(winner: Option[(Player, Card)], opponents: List[(Player, Card)]): Player =
+    def trickWinner(winner: Option[(Player, VisibleCard)], opponents: List[(Player, VisibleCard)]): Player =
       (winner, opponents) match {
         case (Some((winner, card)), Nil) => winner
         case (None, Nil) => throw new IllegalArgumentException("Can't detect the winner for an empty list of players")

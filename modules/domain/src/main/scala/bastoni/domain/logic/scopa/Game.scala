@@ -38,7 +38,7 @@ object Game extends GameLogic[MatchState]:
       GameState.Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
 
     case (GameState.Ready(matchPlayers), ShuffleDeck(seed)) =>
-      val shuffledDeck = new Random(seed).shuffle(Deck.instance)
+      val shuffledDeck = Deck.shuffled(seed)
       val players = matchPlayers.map(Player(_, Nil, Nil))
       val state =
         if (players.size == 4) GameState.Deal5Round(players, shuffledDeck)
@@ -46,36 +46,36 @@ object Game extends GameLogic[MatchState]:
       state -> List(DeckShuffled(shuffledDeck), Continue.toDealCards)
 
     case (GameState.Deal3Round(player :: Nil, done, deck), Continue) =>
-      deck.dealOrDie(3) { (cards, tail) =>
-        GameState.WillDealBoardCards(done :+ player.draw(cards), tail) ->
+      deck.dealOrDie(3) { (cards, newDeck) =>
+        GameState.WillDealBoardCards(done :+ player.draw(cards), newDeck) ->
           List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
     case (GameState.Deal3Round(player :: todo, done, deck), Continue) =>
-      deck.dealOrDie(3) { (cards, tail) =>
-        GameState.Deal3Round(todo, done :+ player.draw(cards), tail) ->
+      deck.dealOrDie(3) { (cards, newDeck) =>
+        GameState.Deal3Round(todo, done :+ player.draw(cards), newDeck) ->
           List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
     case (GameState.Deal5Round(player :: done, deck), Continue) =>
-      deck.dealOrDie(5) { (cards, tail) =>
+      deck.dealOrDie(5) { (cards, newDeck) =>
         val cardsDealt = CardsDealt(player.id, cards, Direction.Player)
         val players = done :+ player.draw(cards)
 
-        if (tail.isEmpty)
+        if (newDeck.isEmpty)
           withTimeout(
-            GameState.PlayRound(players, tail, board = Nil),
+            GameState.PlayRound(players, newDeck, board = Nil),
             done.head.id,
             Action.TakeCards,
             List(cardsDealt)
           )
-        else GameState.Deal5Round(players, tail) -> List(cardsDealt, Continue.toDealCards)
+        else GameState.Deal5Round(players, newDeck) -> List(cardsDealt, Continue.toDealCards)
       }
 
     case (GameState.WillDealBoardCards(players, deck), Continue) =>
-      deck.dealOrDie(4) { (boardCards, tail) =>
+      deck.dealOrDie(4) { (boardCards, newDeck) =>
         withTimeout(
-          state = GameState.PlayRound(players, tail, boardCards),
+          state = GameState.PlayRound(players, newDeck, boardCards),
           player = players.head.id,
           action = Action.TakeCards,
           before = List(BoardCardsDealt(boardCards))
@@ -83,10 +83,10 @@ object Game extends GameLogic[MatchState]:
       }
 
     case (GameState.DrawRound(player :: Nil, done, deck, board), Continue) =>
-      deck.dealOrDie(3) { (cards, tail) =>
+      deck.dealOrDie(3) { (cards, newDeck) =>
         val players = done :+ player.draw(cards)
         withTimeout(
-          state = GameState.PlayRound(players, tail, board),
+          state = GameState.PlayRound(players, newDeck, board),
           player = players.head.id,
           action = Action.TakeCards,
           before = List(CardsDealt(player.id, cards, Direction.Player))
@@ -94,8 +94,8 @@ object Game extends GameLogic[MatchState]:
       }
 
     case (GameState.DrawRound(player :: todo, done, deck, trump), Continue) =>
-      deck.dealOrDie(3) { (cards, tail) =>
-        GameState.DrawRound(todo, done :+ player.draw(cards), tail, trump) ->
+      deck.dealOrDie(3) { (cards, newDeck) =>
+        GameState.DrawRound(todo, done :+ player.draw(cards), newDeck, trump) ->
           List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
@@ -116,7 +116,7 @@ object Game extends GameLogic[MatchState]:
           // This is worth a point if:
           // - it's not the last play
           // - there are 4 players at the table ("scopone scientifico" variant)
-          val scopa: Option[Card] = Option.when(!isLastPlay || (others.size == 2))(played)
+          val scopa: Option[VisibleCard] = Option.when(!isLastPlay || (others.size == 2))(played)
           (
             player.play(played).take(played :: board).addExtraPoints(if (scopa.isDefined) 1 else 0),
             Nil,
@@ -224,10 +224,10 @@ object Game extends GameLogic[MatchState]:
 
   }
 
-  def legalPlay(board: List[Card], played: Card, taken: List[Card]): Boolean =
+  def legalPlay(board: List[VisibleCard], played: VisibleCard, taken: List[VisibleCard]): Boolean =
     takeCombinations(board, played).contains(taken.toSet)
 
-  def takeCombinations(board: List[Card], toPlay: Card): Iterator[Set[Card]] =
+  def takeCombinations(board: List[VisibleCard], toPlay: VisibleCard): Iterator[Set[VisibleCard]] =
     if (board.exists(_.rank == toPlay.rank)) board.iterator.filter(_.rank == toPlay.rank).map(Set(_))
     else
       val combinations = for {

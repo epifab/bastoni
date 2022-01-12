@@ -27,9 +27,19 @@ trait Table[C <: CardView]:
 
   lazy val indexedSeats: List[(Seat[C], Int)] = seats.zipWithIndex
 
-  protected def buildCard(card: Card, direction: Direction): C
+  protected def buildCard(card: VisibleCard, direction: Direction): C
   protected def faceDown(card: C): C
-  protected def removeCard(cards: List[C], card: Card): List[C]
+
+  extension[T](list: List[T])
+    def removeFirst(cond: T => Boolean): List[T] =
+      list match {
+        case head :: tail if cond(head) => tail
+        case head :: tail => head :: tail.removeFirst(cond)
+        case Nil => Nil
+      }
+
+  protected def removeCard(cards: List[C], card: VisibleCard): List[C] =
+    cards.removeFirst(_.card.ref == card.ref)
 
   protected def updateWith(
     seats: List[Seat[C]] = this.seats,

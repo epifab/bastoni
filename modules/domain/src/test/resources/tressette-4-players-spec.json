@@ -57,37 +57,41 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Cinque",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Cinque",
+        "suit" : "Bastoni",
+        "ref" : 20
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Quattro",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Quattro",
+        "suit" : "Bastoni",
+        "ref" : 27
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Fante",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Fante",
+        "suit" : "Bastoni",
+        "ref" : 13
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Tre",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Tre",
+        "suit" : "Bastoni",
+        "ref" : 37
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -97,37 +101,41 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Sei",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Sei",
+        "suit" : "Spade",
+        "ref" : 35
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Asso",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Asso",
+        "suit" : "Spade",
+        "ref" : 1
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Cavallo",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Cavallo",
+        "suit" : "Spade",
+        "ref" : 26
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Sette",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Sette",
+        "suit" : "Spade",
+        "ref" : 31
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -137,37 +145,41 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Sei",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Sei",
+        "suit" : "Coppe",
+        "ref" : 21
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Re",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Re",
+        "suit" : "Coppe",
+        "ref" : 28
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Sette",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Sette",
+        "suit" : "Coppe",
+        "ref" : 33
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Cavallo",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Cavallo",
+        "suit" : "Coppe",
+        "ref" : 39
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -177,37 +189,41 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Fante",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Fante",
+        "suit" : "Denari",
+        "ref" : 25
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Asso",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Asso",
+        "suit" : "Denari",
+        "ref" : 30
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Quattro",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Quattro",
+        "suit" : "Denari",
+        "ref" : 36
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Cavallo",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Cavallo",
+        "suit" : "Denari",
+        "ref" : 22
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -217,37 +233,41 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Cinque",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Cinque",
+        "suit" : "Denari",
+        "ref" : 32
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Due",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Due",
+        "suit" : "Spade",
+        "ref" : 38
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Sette",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Sette",
+        "suit" : "Denari",
+        "ref" : 2
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Re",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Re",
+        "suit" : "Denari",
+        "ref" : 5
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -257,37 +277,41 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Quattro",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Quattro",
+        "suit" : "Coppe",
+        "ref" : 29
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Asso",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Asso",
+        "suit" : "Coppe",
+        "ref" : 12
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Tre",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Tre",
+        "suit" : "Coppe",
+        "ref" : 18
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Due",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Due",
+        "suit" : "Coppe",
+        "ref" : 24
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -297,37 +321,41 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Fante",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Fante",
+        "suit" : "Spade",
+        "ref" : 15
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Quattro",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Quattro",
+        "suit" : "Spade",
+        "ref" : 3
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Cinque",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Cinque",
+        "suit" : "Spade",
+        "ref" : 8
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Re",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Re",
+        "suit" : "Spade",
+        "ref" : 34
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -337,37 +365,41 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Tre",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Tre",
+        "suit" : "Spade",
+        "ref" : 10
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Re",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Re",
+        "suit" : "Bastoni",
+        "ref" : 16
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Cavallo",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Cavallo",
+        "suit" : "Bastoni",
+        "ref" : 23
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Cinque",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Cinque",
+        "suit" : "Coppe",
+        "ref" : 6
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -377,37 +409,41 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Tre",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Tre",
+        "suit" : "Denari",
+        "ref" : 11
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Sette",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Sette",
+        "suit" : "Bastoni",
+        "ref" : 17
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Sei",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Sei",
+        "suit" : "Denari",
+        "ref" : 4
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Asso",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Asso",
+        "suit" : "Bastoni",
+        "ref" : 7
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -417,37 +453,41 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Due",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Due",
+        "suit" : "Denari",
+        "ref" : 14
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Fante",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Fante",
+        "suit" : "Coppe",
+        "ref" : 19
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Due",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Due",
+        "suit" : "Bastoni",
+        "ref" : 0
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Sei",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Sei",
+        "suit" : "Bastoni",
+        "ref" : 9
+      },
       "type" : "PlayCard",
       "supertype" : "Command"
     },
@@ -463,166 +503,206 @@
   "output" : [
     {
       "cards" : [
-        [
-          "Due",
-          "Bastoni"
-        ],
-        [
-          "Asso",
-          "Spade"
-        ],
-        [
-          "Sette",
-          "Denari"
-        ],
-        [
-          "Quattro",
-          "Spade"
-        ],
-        [
-          "Sei",
-          "Denari"
-        ],
-        [
-          "Re",
-          "Denari"
-        ],
-        [
-          "Cinque",
-          "Coppe"
-        ],
-        [
-          "Asso",
-          "Bastoni"
-        ],
-        [
-          "Cinque",
-          "Spade"
-        ],
-        [
-          "Sei",
-          "Bastoni"
-        ],
-        [
-          "Tre",
-          "Spade"
-        ],
-        [
-          "Tre",
-          "Denari"
-        ],
-        [
-          "Asso",
-          "Coppe"
-        ],
-        [
-          "Fante",
-          "Bastoni"
-        ],
-        [
-          "Due",
-          "Denari"
-        ],
-        [
-          "Fante",
-          "Spade"
-        ],
-        [
-          "Re",
-          "Bastoni"
-        ],
-        [
-          "Sette",
-          "Bastoni"
-        ],
-        [
-          "Tre",
-          "Coppe"
-        ],
-        [
-          "Fante",
-          "Coppe"
-        ],
-        [
-          "Cinque",
-          "Bastoni"
-        ],
-        [
-          "Sei",
-          "Coppe"
-        ],
-        [
-          "Cavallo",
-          "Denari"
-        ],
-        [
-          "Cavallo",
-          "Bastoni"
-        ],
-        [
-          "Due",
-          "Coppe"
-        ],
-        [
-          "Fante",
-          "Denari"
-        ],
-        [
-          "Cavallo",
-          "Spade"
-        ],
-        [
-          "Quattro",
-          "Bastoni"
-        ],
-        [
-          "Re",
-          "Coppe"
-        ],
-        [
-          "Quattro",
-          "Coppe"
-        ],
-        [
-          "Asso",
-          "Denari"
-        ],
-        [
-          "Sette",
-          "Spade"
-        ],
-        [
-          "Cinque",
-          "Denari"
-        ],
-        [
-          "Sette",
-          "Coppe"
-        ],
-        [
-          "Re",
-          "Spade"
-        ],
-        [
-          "Sei",
-          "Spade"
-        ],
-        [
-          "Quattro",
-          "Denari"
-        ],
-        [
-          "Tre",
-          "Bastoni"
-        ],
-        [
-          "Due",
-          "Spade"
-        ],
-        [
-          "Cavallo",
-          "Coppe"
-        ]
+        {
+          "rank" : "Due",
+          "suit" : "Bastoni",
+          "ref" : 0
+        },
+        {
+          "rank" : "Asso",
+          "suit" : "Spade",
+          "ref" : 1
+        },
+        {
+          "rank" : "Sette",
+          "suit" : "Denari",
+          "ref" : 2
+        },
+        {
+          "rank" : "Quattro",
+          "suit" : "Spade",
+          "ref" : 3
+        },
+        {
+          "rank" : "Sei",
+          "suit" : "Denari",
+          "ref" : 4
+        },
+        {
+          "rank" : "Re",
+          "suit" : "Denari",
+          "ref" : 5
+        },
+        {
+          "rank" : "Cinque",
+          "suit" : "Coppe",
+          "ref" : 6
+        },
+        {
+          "rank" : "Asso",
+          "suit" : "Bastoni",
+          "ref" : 7
+        },
+        {
+          "rank" : "Cinque",
+          "suit" : "Spade",
+          "ref" : 8
+        },
+        {
+          "rank" : "Sei",
+          "suit" : "Bastoni",
+          "ref" : 9
+        },
+        {
+          "rank" : "Tre",
+          "suit" : "Spade",
+          "ref" : 10
+        },
+        {
+          "rank" : "Tre",
+          "suit" : "Denari",
+          "ref" : 11
+        },
+        {
+          "rank" : "Asso",
+          "suit" : "Coppe",
+          "ref" : 12
+        },
+        {
+          "rank" : "Fante",
+          "suit" : "Bastoni",
+          "ref" : 13
+        },
+        {
+          "rank" : "Due",
+          "suit" : "Denari",
+          "ref" : 14
+        },
+        {
+          "rank" : "Fante",
+          "suit" : "Spade",
+          "ref" : 15
+        },
+        {
+          "rank" : "Re",
+          "suit" : "Bastoni",
+          "ref" : 16
+        },
+        {
+          "rank" : "Sette",
+          "suit" : "Bastoni",
+          "ref" : 17
+        },
+        {
+          "rank" : "Tre",
+          "suit" : "Coppe",
+          "ref" : 18
+        },
+        {
+          "rank" : "Fante",
+          "suit" : "Coppe",
+          "ref" : 19
+        },
+        {
+          "rank" : "Cinque",
+          "suit" : "Bastoni",
+          "ref" : 20
+        },
+        {
+          "rank" : "Sei",
+          "suit" : "Coppe",
+          "ref" : 21
+        },
+        {
+          "rank" : "Cavallo",
+          "suit" : "Denari",
+          "ref" : 22
+        },
+        {
+          "rank" : "Cavallo",
+          "suit" : "Bastoni",
+          "ref" : 23
+        },
+        {
+          "rank" : "Due",
+          "suit" : "Coppe",
+          "ref" : 24
+        },
+        {
+          "rank" : "Fante",
+          "suit" : "Denari",
+          "ref" : 25
+        },
+        {
+          "rank" : "Cavallo",
+          "suit" : "Spade",
+          "ref" : 26
+        },
+        {
+          "rank" : "Quattro",
+          "suit" : "Bastoni",
+          "ref" : 27
+        },
+        {
+          "rank" : "Re",
+          "suit" : "Coppe",
+          "ref" : 28
+        },
+        {
+          "rank" : "Quattro",
+          "suit" : "Coppe",
+          "ref" : 29
+        },
+        {
+          "rank" : "Asso",
+          "suit" : "Denari",
+          "ref" : 30
+        },
+        {
+          "rank" : "Sette",
+          "suit" : "Spade",
+          "ref" : 31
+        },
+        {
+          "rank" : "Cinque",
+          "suit" : "Denari",
+          "ref" : 32
+        },
+        {
+          "rank" : "Sette",
+          "suit" : "Coppe",
+          "ref" : 33
+        },
+        {
+          "rank" : "Re",
+          "suit" : "Spade",
+          "ref" : 34
+        },
+        {
+          "rank" : "Sei",
+          "suit" : "Spade",
+          "ref" : 35
+        },
+        {
+          "rank" : "Quattro",
+          "suit" : "Denari",
+          "ref" : 36
+        },
+        {
+          "rank" : "Tre",
+          "suit" : "Bastoni",
+          "ref" : 37
+        },
+        {
+          "rank" : "Due",
+          "suit" : "Spade",
+          "ref" : 38
+        },
+        {
+          "rank" : "Cavallo",
+          "suit" : "Coppe",
+          "ref" : 39
+        }
       ],
       "type" : "DeckShuffled",
       "supertype" : "Event"
@@ -638,38 +718,43 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "cards" : [
         {
-          "card" : [
-            "Due",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Due",
+            "suit" : "Bastoni",
+            "ref" : 0
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Asso",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Asso",
+            "suit" : "Spade",
+            "ref" : 1
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Sette",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Sette",
+            "suit" : "Denari",
+            "ref" : 2
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Quattro",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Quattro",
+            "suit" : "Spade",
+            "ref" : 3
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Sei",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Sei",
+            "suit" : "Denari",
+            "ref" : 4
+          },
           "facing" : "Player"
         }
       ],
@@ -687,38 +772,43 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "cards" : [
         {
-          "card" : [
-            "Re",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Re",
+            "suit" : "Denari",
+            "ref" : 5
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Cinque",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Cinque",
+            "suit" : "Coppe",
+            "ref" : 6
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Asso",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Asso",
+            "suit" : "Bastoni",
+            "ref" : 7
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Cinque",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Cinque",
+            "suit" : "Spade",
+            "ref" : 8
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Sei",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Sei",
+            "suit" : "Bastoni",
+            "ref" : 9
+          },
           "facing" : "Player"
         }
       ],
@@ -736,38 +826,43 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "cards" : [
         {
-          "card" : [
-            "Tre",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Tre",
+            "suit" : "Spade",
+            "ref" : 10
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Tre",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Tre",
+            "suit" : "Denari",
+            "ref" : 11
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Asso",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Asso",
+            "suit" : "Coppe",
+            "ref" : 12
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Fante",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Fante",
+            "suit" : "Bastoni",
+            "ref" : 13
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Due",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Due",
+            "suit" : "Denari",
+            "ref" : 14
+          },
           "facing" : "Player"
         }
       ],
@@ -785,38 +880,43 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "cards" : [
         {
-          "card" : [
-            "Fante",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Fante",
+            "suit" : "Spade",
+            "ref" : 15
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Re",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Re",
+            "suit" : "Bastoni",
+            "ref" : 16
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Sette",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Sette",
+            "suit" : "Bastoni",
+            "ref" : 17
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Tre",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Tre",
+            "suit" : "Coppe",
+            "ref" : 18
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Fante",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Fante",
+            "suit" : "Coppe",
+            "ref" : 19
+          },
           "facing" : "Player"
         }
       ],
@@ -834,38 +934,43 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "cards" : [
         {
-          "card" : [
-            "Cinque",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Cinque",
+            "suit" : "Bastoni",
+            "ref" : 20
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Sei",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Sei",
+            "suit" : "Coppe",
+            "ref" : 21
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Cavallo",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Cavallo",
+            "suit" : "Denari",
+            "ref" : 22
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Cavallo",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Cavallo",
+            "suit" : "Bastoni",
+            "ref" : 23
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Due",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Due",
+            "suit" : "Coppe",
+            "ref" : 24
+          },
           "facing" : "Player"
         }
       ],
@@ -883,38 +988,43 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "cards" : [
         {
-          "card" : [
-            "Fante",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Fante",
+            "suit" : "Denari",
+            "ref" : 25
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Cavallo",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Cavallo",
+            "suit" : "Spade",
+            "ref" : 26
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Quattro",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Quattro",
+            "suit" : "Bastoni",
+            "ref" : 27
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Re",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Re",
+            "suit" : "Coppe",
+            "ref" : 28
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Quattro",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Quattro",
+            "suit" : "Coppe",
+            "ref" : 29
+          },
           "facing" : "Player"
         }
       ],
@@ -932,38 +1042,43 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "cards" : [
         {
-          "card" : [
-            "Asso",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Asso",
+            "suit" : "Denari",
+            "ref" : 30
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Sette",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Sette",
+            "suit" : "Spade",
+            "ref" : 31
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Cinque",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Cinque",
+            "suit" : "Denari",
+            "ref" : 32
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Sette",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Sette",
+            "suit" : "Coppe",
+            "ref" : 33
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Re",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Re",
+            "suit" : "Spade",
+            "ref" : 34
+          },
           "facing" : "Player"
         }
       ],
@@ -981,38 +1096,43 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "cards" : [
         {
-          "card" : [
-            "Sei",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Sei",
+            "suit" : "Spade",
+            "ref" : 35
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Quattro",
-            "Denari"
-          ],
+          "card" : {
+            "rank" : "Quattro",
+            "suit" : "Denari",
+            "ref" : 36
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Tre",
-            "Bastoni"
-          ],
+          "card" : {
+            "rank" : "Tre",
+            "suit" : "Bastoni",
+            "ref" : 37
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Due",
-            "Spade"
-          ],
+          "card" : {
+            "rank" : "Due",
+            "suit" : "Spade",
+            "ref" : 38
+          },
           "facing" : "Player"
         },
         {
-          "card" : [
-            "Cavallo",
-            "Coppe"
-          ],
+          "card" : {
+            "rank" : "Cavallo",
+            "suit" : "Coppe",
+            "ref" : 39
+          },
           "facing" : "Player"
         }
       ],
@@ -1030,7 +1150,7 @@
     },
     {
       "item" : {
-        "ref" : 708850293,
+        "ref" : -770577791,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1038,10 +1158,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Cinque",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Cinque",
+        "suit" : "Bastoni",
+        "ref" : 20
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1057,7 +1178,7 @@
     },
     {
       "item" : {
-        "ref" : -196878289,
+        "ref" : -303190171,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1065,10 +1186,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Quattro",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Quattro",
+        "suit" : "Bastoni",
+        "ref" : 27
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1084,7 +1206,7 @@
     },
     {
       "item" : {
-        "ref" : 1062343055,
+        "ref" : -960820081,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1092,10 +1214,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Fante",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Fante",
+        "suit" : "Bastoni",
+        "ref" : 13
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1111,7 +1234,7 @@
     },
     {
       "item" : {
-        "ref" : 1609438703,
+        "ref" : -70507791,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1119,10 +1242,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Tre",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Tre",
+        "suit" : "Bastoni",
+        "ref" : 37
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1149,7 +1273,7 @@
     },
     {
       "item" : {
-        "ref" : 1671344091,
+        "ref" : 128962653,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1157,10 +1281,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Sei",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Sei",
+        "suit" : "Spade",
+        "ref" : 35
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1176,7 +1301,7 @@
     },
     {
       "item" : {
-        "ref" : 161242377,
+        "ref" : -653528429,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1184,10 +1309,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Asso",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Asso",
+        "suit" : "Spade",
+        "ref" : 1
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1203,7 +1329,7 @@
     },
     {
       "item" : {
-        "ref" : -443167787,
+        "ref" : 1905950663,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1211,10 +1337,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Cavallo",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Cavallo",
+        "suit" : "Spade",
+        "ref" : 26
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1230,7 +1357,7 @@
     },
     {
       "item" : {
-        "ref" : -462194955,
+        "ref" : -109810213,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1238,10 +1365,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Sette",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Sette",
+        "suit" : "Spade",
+        "ref" : 31
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1268,7 +1396,7 @@
     },
     {
       "item" : {
-        "ref" : 31388869,
+        "ref" : -1871890375,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1276,10 +1404,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Sei",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Sei",
+        "suit" : "Coppe",
+        "ref" : 21
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1295,7 +1424,7 @@
     },
     {
       "item" : {
-        "ref" : -39847315,
+        "ref" : 2113795551,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1303,10 +1432,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Re",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Re",
+        "suit" : "Coppe",
+        "ref" : 28
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1322,7 +1452,7 @@
     },
     {
       "item" : {
-        "ref" : 1431274185,
+        "ref" : -1776114435,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1330,10 +1460,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Sette",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Sette",
+        "suit" : "Coppe",
+        "ref" : 33
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1349,7 +1480,7 @@
     },
     {
       "item" : {
-        "ref" : -647067679,
+        "ref" : 2063873519,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1357,10 +1488,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Cavallo",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Cavallo",
+        "suit" : "Coppe",
+        "ref" : 39
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1387,7 +1519,7 @@
     },
     {
       "item" : {
-        "ref" : -558613113,
+        "ref" : 1702928157,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1395,10 +1527,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Fante",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Fante",
+        "suit" : "Denari",
+        "ref" : 25
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1414,7 +1547,7 @@
     },
     {
       "item" : {
-        "ref" : -843220017,
+        "ref" : 1668064501,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1422,10 +1555,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Asso",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Asso",
+        "suit" : "Denari",
+        "ref" : 30
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1441,7 +1575,7 @@
     },
     {
       "item" : {
-        "ref" : 1400184085,
+        "ref" : 1530452703,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1449,10 +1583,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Quattro",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Quattro",
+        "suit" : "Denari",
+        "ref" : 36
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1468,7 +1603,7 @@
     },
     {
       "item" : {
-        "ref" : -686686471,
+        "ref" : 447739137,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1476,10 +1611,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Cavallo",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Cavallo",
+        "suit" : "Denari",
+        "ref" : 22
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1506,7 +1642,7 @@
     },
     {
       "item" : {
-        "ref" : -1536888145,
+        "ref" : -1639919539,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1514,10 +1650,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Cinque",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Cinque",
+        "suit" : "Denari",
+        "ref" : 32
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1533,7 +1670,7 @@
     },
     {
       "item" : {
-        "ref" : 1830904949,
+        "ref" : 247914951,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1541,10 +1678,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Due",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Due",
+        "suit" : "Spade",
+        "ref" : 38
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1560,7 +1698,7 @@
     },
     {
       "item" : {
-        "ref" : 1863304915,
+        "ref" : -2056893239,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1568,10 +1706,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Sette",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Sette",
+        "suit" : "Denari",
+        "ref" : 2
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1587,7 +1726,7 @@
     },
     {
       "item" : {
-        "ref" : -1305832639,
+        "ref" : -650587031,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1595,10 +1734,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Re",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Re",
+        "suit" : "Denari",
+        "ref" : 5
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1625,7 +1765,7 @@
     },
     {
       "item" : {
-        "ref" : -1902941399,
+        "ref" : 1059016473,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1633,10 +1773,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Quattro",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Quattro",
+        "suit" : "Coppe",
+        "ref" : 29
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1652,7 +1793,7 @@
     },
     {
       "item" : {
-        "ref" : 1637282257,
+        "ref" : -165380103,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1660,10 +1801,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Asso",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Asso",
+        "suit" : "Coppe",
+        "ref" : 12
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1679,7 +1821,7 @@
     },
     {
       "item" : {
-        "ref" : -2108683851,
+        "ref" : -293150197,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1687,10 +1829,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Tre",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Tre",
+        "suit" : "Coppe",
+        "ref" : 18
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1706,7 +1849,7 @@
     },
     {
       "item" : {
-        "ref" : 640361975,
+        "ref" : 153402045,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1714,10 +1857,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Due",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Due",
+        "suit" : "Coppe",
+        "ref" : 24
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1744,7 +1888,7 @@
     },
     {
       "item" : {
-        "ref" : -527663257,
+        "ref" : 1761939737,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1752,10 +1896,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Fante",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Fante",
+        "suit" : "Spade",
+        "ref" : 15
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1771,7 +1916,7 @@
     },
     {
       "item" : {
-        "ref" : 1110937087,
+        "ref" : -1542207089,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1779,10 +1924,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Quattro",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Quattro",
+        "suit" : "Spade",
+        "ref" : 3
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1798,7 +1944,7 @@
     },
     {
       "item" : {
-        "ref" : 230497757,
+        "ref" : 1644839361,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1806,10 +1952,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Cinque",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Cinque",
+        "suit" : "Spade",
+        "ref" : 8
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1825,7 +1972,7 @@
     },
     {
       "item" : {
-        "ref" : 1341537929,
+        "ref" : 909447551,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1833,10 +1980,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Re",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Re",
+        "suit" : "Spade",
+        "ref" : 34
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1863,7 +2011,7 @@
     },
     {
       "item" : {
-        "ref" : -1049521295,
+        "ref" : 705801651,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1871,10 +2019,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Tre",
-        "Spade"
-      ],
+      "card" : {
+        "rank" : "Tre",
+        "suit" : "Spade",
+        "ref" : 10
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1890,7 +2039,7 @@
     },
     {
       "item" : {
-        "ref" : 1387671587,
+        "ref" : 624037673,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1898,10 +2047,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Re",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Re",
+        "suit" : "Bastoni",
+        "ref" : 16
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1917,7 +2067,7 @@
     },
     {
       "item" : {
-        "ref" : 2244491,
+        "ref" : 1550691467,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1925,10 +2075,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Cavallo",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Cavallo",
+        "suit" : "Bastoni",
+        "ref" : 23
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1944,7 +2095,7 @@
     },
     {
       "item" : {
-        "ref" : 1140803433,
+        "ref" : -1214826935,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1952,10 +2103,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Cinque",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Cinque",
+        "suit" : "Coppe",
+        "ref" : 6
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -1982,7 +2134,7 @@
     },
     {
       "item" : {
-        "ref" : -1093171609,
+        "ref" : -953266939,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -1990,10 +2142,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Tre",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Tre",
+        "suit" : "Denari",
+        "ref" : 11
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -2009,7 +2162,7 @@
     },
     {
       "item" : {
-        "ref" : 1888478547,
+        "ref" : -1834225235,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -2017,10 +2170,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Sette",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Sette",
+        "suit" : "Bastoni",
+        "ref" : 17
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -2036,7 +2190,7 @@
     },
     {
       "item" : {
-        "ref" : 168548017,
+        "ref" : -1056801037,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -2044,10 +2198,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Sei",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Sei",
+        "suit" : "Denari",
+        "ref" : 4
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -2063,7 +2218,7 @@
     },
     {
       "item" : {
-        "ref" : 474993671,
+        "ref" : 716076513,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -2071,10 +2226,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Asso",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Asso",
+        "suit" : "Bastoni",
+        "ref" : 7
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -2101,7 +2257,7 @@
     },
     {
       "item" : {
-        "ref" : -928364383,
+        "ref" : 1775307173,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -2109,10 +2265,11 @@
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "card" : [
-        "Due",
-        "Denari"
-      ],
+      "card" : {
+        "rank" : "Due",
+        "suit" : "Denari",
+        "ref" : 14
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -2128,7 +2285,7 @@
     },
     {
       "item" : {
-        "ref" : -1594269633,
+        "ref" : 1650152717,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -2136,10 +2293,11 @@
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "card" : [
-        "Fante",
-        "Coppe"
-      ],
+      "card" : {
+        "rank" : "Fante",
+        "suit" : "Coppe",
+        "ref" : 19
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -2155,7 +2313,7 @@
     },
     {
       "item" : {
-        "ref" : 833342669,
+        "ref" : -1057655295,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -2163,10 +2321,11 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "card" : [
-        "Due",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Due",
+        "suit" : "Bastoni",
+        "ref" : 0
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -2182,7 +2341,7 @@
     },
     {
       "item" : {
-        "ref" : -1784331863,
+        "ref" : 2123372855,
         "type" : "Tick"
       },
       "delay" : "ActionTimeout",
@@ -2190,10 +2349,11 @@
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "card" : [
-        "Sei",
-        "Bastoni"
-      ],
+      "card" : {
+        "rank" : "Sei",
+        "suit" : "Bastoni",
+        "ref" : 9
+      },
       "type" : "CardPlayed",
       "supertype" : "Event"
     },
@@ -2228,122 +2388,137 @@
               "type" : "Rete"
             },
             {
-              "card" : [
-                "Fante",
-                "Denari"
-              ],
+              "card" : {
+                "rank" : "Fante",
+                "suit" : "Denari",
+                "ref" : 25
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Asso",
-                "Denari"
-              ],
+              "card" : {
+                "rank" : "Asso",
+                "suit" : "Denari",
+                "ref" : 30
+              },
               "thirds" : 3,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Cavallo",
-                "Denari"
-              ],
+              "card" : {
+                "rank" : "Cavallo",
+                "suit" : "Denari",
+                "ref" : 22
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Fante",
-                "Spade"
-              ],
+              "card" : {
+                "rank" : "Fante",
+                "suit" : "Spade",
+                "ref" : 15
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Re",
-                "Spade"
-              ],
+              "card" : {
+                "rank" : "Re",
+                "suit" : "Spade",
+                "ref" : 34
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Tre",
-                "Spade"
-              ],
+              "card" : {
+                "rank" : "Tre",
+                "suit" : "Spade",
+                "ref" : 10
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Re",
-                "Bastoni"
-              ],
+              "card" : {
+                "rank" : "Re",
+                "suit" : "Bastoni",
+                "ref" : 16
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Cavallo",
-                "Bastoni"
-              ],
+              "card" : {
+                "rank" : "Cavallo",
+                "suit" : "Bastoni",
+                "ref" : 23
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Tre",
-                "Denari"
-              ],
+              "card" : {
+                "rank" : "Tre",
+                "suit" : "Denari",
+                "ref" : 11
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Asso",
-                "Bastoni"
-              ],
+              "card" : {
+                "rank" : "Asso",
+                "suit" : "Bastoni",
+                "ref" : 7
+              },
               "thirds" : 3,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Due",
-                "Denari"
-              ],
+              "card" : {
+                "rank" : "Due",
+                "suit" : "Denari",
+                "ref" : 14
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Fante",
-                "Coppe"
-              ],
+              "card" : {
+                "rank" : "Fante",
+                "suit" : "Coppe",
+                "ref" : 19
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Due",
-                "Bastoni"
-              ],
+              "card" : {
+                "rank" : "Due",
+                "suit" : "Bastoni",
+                "ref" : 0
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Asso",
-                "Spade"
-              ],
+              "card" : {
+                "rank" : "Asso",
+                "suit" : "Spade",
+                "ref" : 1
+              },
               "thirds" : 3,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Cavallo",
-                "Spade"
-              ],
+              "card" : {
+                "rank" : "Cavallo",
+                "suit" : "Spade",
+                "ref" : 26
+              },
               "thirds" : 1,
               "type" : "Carta"
             }
@@ -2356,74 +2531,83 @@
           ],
           "items" : [
             {
-              "card" : [
-                "Fante",
-                "Bastoni"
-              ],
+              "card" : {
+                "rank" : "Fante",
+                "suit" : "Bastoni",
+                "ref" : 13
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Tre",
-                "Bastoni"
-              ],
+              "card" : {
+                "rank" : "Tre",
+                "suit" : "Bastoni",
+                "ref" : 37
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Asso",
-                "Coppe"
-              ],
+              "card" : {
+                "rank" : "Asso",
+                "suit" : "Coppe",
+                "ref" : 12
+              },
               "thirds" : 3,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Tre",
-                "Coppe"
-              ],
+              "card" : {
+                "rank" : "Tre",
+                "suit" : "Coppe",
+                "ref" : 18
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Due",
-                "Coppe"
-              ],
+              "card" : {
+                "rank" : "Due",
+                "suit" : "Coppe",
+                "ref" : 24
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Re",
-                "Coppe"
-              ],
+              "card" : {
+                "rank" : "Re",
+                "suit" : "Coppe",
+                "ref" : 28
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Cavallo",
-                "Coppe"
-              ],
+              "card" : {
+                "rank" : "Cavallo",
+                "suit" : "Coppe",
+                "ref" : 39
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Due",
-                "Spade"
-              ],
+              "card" : {
+                "rank" : "Due",
+                "suit" : "Spade",
+                "ref" : 38
+              },
               "thirds" : 1,
               "type" : "Carta"
             },
             {
-              "card" : [
-                "Re",
-                "Denari"
-              ],
+              "card" : {
+                "rank" : "Re",
+                "suit" : "Denari",
+                "ref" : 5
+              },
               "thirds" : 1,
               "type" : "Carta"
             }

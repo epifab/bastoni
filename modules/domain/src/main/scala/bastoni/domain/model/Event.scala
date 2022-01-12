@@ -17,10 +17,10 @@ object Event:
   case class  PlayerJoinedTable(user: User, seat: Int) extends PublicEvent
   case class  PlayerLeftTable(user: User, seat: Int) extends PublicEvent
   case class  GameStarted(gameType: GameType) extends PublicEvent
-  case class  TrumpRevealed(card: Card) extends PublicEvent
-  case class  BoardCardsDealt(cards: List[Card]) extends PublicEvent
-  case class  CardPlayed(playerId: UserId, card: Card) extends PublicEvent
-  case class  CardsTaken(playerId: UserId, taken: List[Card], scopa: Option[Card]) extends PublicEvent
+  case class  TrumpRevealed(card: VisibleCard) extends PublicEvent
+  case class  BoardCardsDealt(cards: List[VisibleCard]) extends PublicEvent
+  case class  CardPlayed(playerId: UserId, card: VisibleCard) extends PublicEvent
+  case class  CardsTaken(playerId: UserId, taken: List[VisibleCard], scopa: Option[VisibleCard]) extends PublicEvent
   case class  ActionRequested(playerId: UserId, action: Action, timeout: Option[Timeout.Active]) extends PublicEvent
   case class  TimedOut(playerId: UserId, action: Action) extends PublicEvent
   case class  TrickCompleted(winnerId: UserId) extends PublicEvent
@@ -46,22 +46,20 @@ object Event:
   case class CardsDealtPlayerView(playerId: UserId, cards: List[CardPlayerView]) extends CardsDealt[CardPlayerView] with PlayerEvent
 
   object CardsDealt:
-    def apply(playerId: UserId, cards: List[Card], facing: Direction): CardsDealtServerView =
+    def apply(playerId: UserId, cards: List[VisibleCard], facing: Direction): CardsDealtServerView =
       CardsDealtServerView(playerId, cards.map(card => CardServerView(card, facing)))
 
-    def apply(playerId: UserId, cards: List[Option[Card]]): CardsDealtPlayerView =
+    def apply(playerId: UserId, cards: List[CardInstance]): CardsDealtPlayerView =
       CardsDealtPlayerView(playerId, cards.map(CardPlayerView(_)))
 
   sealed trait DeckShuffled
-  case class DeckShuffledServerView(cards: List[Card]) extends DeckShuffled with ServerEvent
+  case class DeckShuffledServerView(cards: List[VisibleCard]) extends DeckShuffled with ServerEvent
   case class DeckShuffledPlayerView(numberOfCards: Int) extends DeckShuffled with PlayerEvent
 
   object DeckShuffled:
-    def apply(cards: List[Card]): DeckShuffledServerView =
-      DeckShuffledServerView(cards)
-
-    def apply(numberOfCards: Int): DeckShuffledPlayerView =
-      DeckShuffledPlayerView(numberOfCards)
+    def apply(deck: Deck): DeckShuffledServerView = DeckShuffledServerView(deck.cards)
+    def apply(cards: List[VisibleCard]): DeckShuffledServerView = DeckShuffledServerView(cards)
+    def apply(numberOfCards: Int): DeckShuffledPlayerView = DeckShuffledPlayerView(numberOfCards)
 
   case class Snapshot(table: TableServerView) extends ServerEvent
 

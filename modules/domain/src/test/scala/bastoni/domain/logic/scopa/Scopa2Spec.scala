@@ -22,17 +22,17 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       Continue,
       Continue,
       Continue,
-      TakeCards(user1.id, Card(Sette, Denari), List(Card(Asso, Bastoni), Card(Sei, Bastoni))),
+      TakeCards(user1.id, cardOf(Sette, Denari), List(cardOf(Asso, Bastoni), cardOf(Sei, Bastoni))),
       Continue,
-      TakeCards(user2.id, Card(Quattro, Spade), Nil),
+      TakeCards(user2.id, cardOf(Quattro, Spade), Nil),
       Continue,
-      TakeCards(user1.id, Card(Asso, Spade), Nil),
+      TakeCards(user1.id, cardOf(Asso, Spade), Nil),
       Continue,
-      TakeCards(user2.id, Card(Sei, Denari), List(Card(Asso, Spade), Card(Cinque, Coppe))),
+      TakeCards(user2.id, cardOf(Sei, Denari), List(cardOf(Asso, Spade), cardOf(Cinque, Coppe))),
       Continue,
-      TakeCards(user1.id, Card(Due, Bastoni), Nil),
+      TakeCards(user1.id, cardOf(Due, Bastoni), Nil),
       Continue,
-      TakeCards(user2.id, Card(Re, Denari), Nil),
+      TakeCards(user2.id, cardOf(Re, Denari), Nil),
       Continue,
       Continue,
       Continue,
@@ -42,55 +42,55 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       DeckShuffled(shuffledDeck),
 
       Continue.toDealCards,
-      CardsDealt(user1.id, List(Card(Due, Bastoni), Card(Asso, Spade), Card(Sette, Denari)), Direction.Player),
+      CardsDealt(user1.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari)), Direction.Player),
       Continue.toDealCards,
-      CardsDealt(user2.id, List(Card(Quattro, Spade), Card(Sei, Denari), Card(Re, Denari)), Direction.Player),
+      CardsDealt(user2.id, List(cardOf(Quattro, Spade), cardOf(Sei, Denari), cardOf(Re, Denari)), Direction.Player),
       Continue.toDealCards,
-      BoardCardsDealt(List(Card(Cinque, Coppe), Card(Asso, Bastoni), Card(Cinque, Spade), Card(Sei, Bastoni))),
+      BoardCardsDealt(List(cardOf(Cinque, Coppe), cardOf(Asso, Bastoni), cardOf(Cinque, Spade), cardOf(Sei, Bastoni))),
 
       ActionRequested(user1.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-878029045),
-      CardPlayed(user1.id, Card(Sette, Denari)),
+      willTick(-110145523),
+      CardPlayed(user1.id, cardOf(Sette, Denari)),
       Continue.toTakeCards,
-      CardsTaken(user1.id, List(Card(Sette, Denari), Card(Asso, Bastoni), Card(Sei, Bastoni)), scopa = None),
+      CardsTaken(user1.id, List(cardOf(Sette, Denari), cardOf(Asso, Bastoni), cardOf(Sei, Bastoni)), scopa = None),
 
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-1385947143),
-      CardPlayed(user2.id, Card(Quattro,Spade)),
+      willTick(-2020154127),
+      CardPlayed(user2.id, cardOf(Quattro, Spade)),
       Continue.toTakeCards,
       CardsTaken(user2.id, Nil, None),
 
       ActionRequested(user1.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(1752311865),
-      CardPlayed(user1.id, Card(Asso,Spade)),
+      willTick(1043339377),
+      CardPlayed(user1.id, cardOf(Asso, Spade)),
       Continue.toTakeCards,
       CardsTaken(user1.id, Nil, None),
 
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-464219601),
-      CardPlayed(user2.id, Card(Sei,Denari)),
+      willTick(495152213),
+      CardPlayed(user2.id, cardOf(Sei,Denari)),
       Continue.toTakeCards,
-      CardsTaken(user2.id, List(Card(Sei,Denari), Card(Asso,Spade), Card(Cinque,Coppe)), None),
+      CardsTaken(user2.id, List(cardOf(Sei,Denari), cardOf(Asso,Spade), cardOf(Cinque,Coppe)), None),
 
       ActionRequested(user1.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-59815643),
-      CardPlayed(user1.id, Card(Due,Bastoni)),
+      willTick(1767863701),
+      CardPlayed(user1.id, cardOf(Due,Bastoni)),
       Continue.toTakeCards,
       CardsTaken(user1.id, Nil, None),
 
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(1258608161),
-      CardPlayed(user2.id, Card(Re,Denari)),
+      willTick(-130872219),
+      CardPlayed(user2.id, cardOf(Re,Denari)),
       Continue.toTakeCards,
       CardsTaken(user2.id, Nil, None),
 
       Continue.toDealCards,
-      CardsDealt(user1.id, List(Card(Tre,Spade), Card(Tre,Denari), Card(Asso,Coppe)), Direction.Player),
+      CardsDealt(user1.id, List(cardOf(Tre,Spade), cardOf(Tre,Denari), cardOf(Asso,Coppe)), Direction.Player),
       Continue.toDealCards,
-      CardsDealt(user2.id, List(Card(Fante,Bastoni), Card(Due,Denari), Card(Fante,Spade)), Direction.Player),
+      CardsDealt(user2.id, List(cardOf(Fante,Bastoni), cardOf(Due,Denari), cardOf(Fante,Spade)), Direction.Player),
 
       ActionRequested(user1.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(1793470367),
+      willTick(-972199103),
     )
   }
 
@@ -99,17 +99,17 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       PlayRound(
         players = List(
           Player(MatchPlayer(user1, 0), List(), Nil, 0),
-          Player(MatchPlayer(user2, 0), List(Card(Sette, Spade)), Nil, 0)
+          Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0)
         ),
-        deck = Nil,
+        deck = Nil.toDeck,
         board = List(
-          Card(Tre, Spade),
-          Card(Sette, Denari),
-          Card(Quattro, Coppe)
+          cardOf(Tre, Spade),
+          cardOf(Sette, Denari),
+          cardOf(Quattro, Coppe)
         )
       )
 
-    val input = TakeCards(user1.id, Card(Sette, Spade), List(Card(Tre, Spade), Card(Quattro, Coppe)))
+    val input = TakeCards(user1.id, cardOf(Sette, Spade), List(cardOf(Tre, Spade), cardOf(Quattro, Coppe)))
 
     val (newState: GameState, events: List[StateMachineOutput]) = Game.playGameStep(initialState, input)
 
@@ -122,17 +122,17 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       PlayRound(
         players = List(
           Player(MatchPlayer(user1, 0), List(), Nil, 0),
-          Player(MatchPlayer(user2, 0), List(Card(Sette, Spade)), Nil, 0)
+          Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0)
         ),
-        deck = Nil,
+        deck = Nil.toDeck,
         board = List(
-          Card(Tre, Spade),
-          Card(Sette, Denari),
-          Card(Quattro, Coppe)
+          cardOf(Tre, Spade),
+          cardOf(Sette, Denari),
+          cardOf(Quattro, Coppe)
         )
       )
 
-    val input = TakeCards(user1.id, Card(Sette, Spade), Nil)
+    val input = TakeCards(user1.id, cardOf(Sette, Spade), Nil)
 
     val (newState: GameState, events: List[StateMachineOutput]) = Game.playGameStep(initialState, input)
 
@@ -144,18 +144,18 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     val initialState =
       PlayRound(
         players = List(
-          Player(MatchPlayer(user1, 0), List(Card(Sette, Denari)), Nil, 0),
-          Player(MatchPlayer(user2, 0), List(Card(Sette, Spade)), Nil, 0)
+          Player(MatchPlayer(user1, 0), List(cardOf(Sette, Denari)), Nil, 0),
+          Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0)
         ),
-        deck = Nil,
+        deck = Nil.toDeck,
         board = List(
-          Card(Tre, Spade),
-          Card(Quattro, Coppe),
-          Card(Re, Bastoni)
+          cardOf(Tre, Spade),
+          cardOf(Quattro, Coppe),
+          cardOf(Re, Bastoni)
         )
       )
 
-    val input = TakeCards(user1.id, Card(Sette, Denari), List(Card(Re, Bastoni)))
+    val input = TakeCards(user1.id, cardOf(Sette, Denari), List(cardOf(Re, Bastoni)))
 
     val (newState: GameState, events: List[StateMachineOutput]) = Game.playGameStep(initialState, input)
 
@@ -167,45 +167,45 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     val initialState =
       PlayRound(
         players = List(
-          Player(MatchPlayer(user1, 0), List(Card(Cavallo, Denari)), Nil, 0),
-          Player(MatchPlayer(user2, 0), List(Card(Sette, Spade)), Nil, 0)
+          Player(MatchPlayer(user1, 0), List(cardOf(Cavallo, Denari)), Nil, 0),
+          Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0)
         ),
-        deck = Nil,
+        deck = Nil.toDeck,
         board = List(
-          Card(Tre, Spade),
-          Card(Due, Spade),
-          Card(Quattro, Coppe),
-          Card(Sei, Bastoni)
+          cardOf(Tre, Spade),
+          cardOf(Due, Spade),
+          cardOf(Quattro, Coppe),
+          cardOf(Sei, Bastoni)
         )
       )
 
-    val input = TakeCards(user1.id, Card(Cavallo, Denari), List(Card(Quattro, Coppe), Card(Tre, Spade), Card(Due, Spade)))
+    val input = TakeCards(user1.id, cardOf(Cavallo, Denari), List(cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)))
 
     val (newState: GameState, _) = Game.playGameStep(initialState, input)
     val (newerState: GameState, events: List[StateMachineOutput]) = Game.playGameStep(newState, Continue)
 
     newerState shouldBe WaitingForPlayer(
-      -518420047,
+      1574812349,
       Timeout.Max,
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
       PlayRound(
         players = List(
-          Player(MatchPlayer(user2, 0), List(Card(Sette, Spade)), Nil, 0),
-          Player(MatchPlayer(user1, 0), Nil, List(Card(Cavallo, Denari), Card(Quattro, Coppe), Card(Tre, Spade), Card(Due, Spade)), 0),
+          Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0),
+          Player(MatchPlayer(user1, 0), Nil, List(cardOf(Cavallo, Denari), cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)), 0),
         ),
-        deck = Nil,
-        board = List(Card(Sei, Bastoni))
+        deck = Nil.toDeck,
+        board = List(cardOf(Sei, Bastoni))
       )
     )
 
     events shouldBe List(
       CardsTaken(
         user1.id,
-        List(Card(Cavallo, Denari), Card(Quattro, Coppe), Card(Tre, Spade), Card(Due, Spade)),
+        List(cardOf(Cavallo, Denari), cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)),
         scopa = None
       ),
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-518420047)
+      willTick(1574812349)
     )
   }
 
@@ -213,28 +213,28 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     val initialState =
       PlayRound(
         players = List(
-          Player(MatchPlayer(user1, 0), List(Card(Sette, Denari)), Nil, 0),
-          Player(MatchPlayer(user2, 0), List(Card(Sette, Spade)), Nil, 0)
+          Player(MatchPlayer(user1, 0), List(cardOf(Sette, Denari)), Nil, 0),
+          Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0)
         ),
-        deck = Nil,
-        board = List(Card(Tre, Spade), Card(Quattro, Coppe))
+        deck = Nil.toDeck,
+        board = List(cardOf(Tre, Spade), cardOf(Quattro, Coppe))
       )
 
-    val input = TakeCards(user1.id, Card(Sette, Denari), List(Card(Tre, Spade), Card(Quattro, Coppe)))
+    val input = TakeCards(user1.id, cardOf(Sette, Denari), List(cardOf(Tre, Spade), cardOf(Quattro, Coppe)))
 
     val (newState: GameState, _) = Game.playGameStep(initialState, input)
     val (newerState: GameState, events: List[StateMachineOutput]) = Game.playGameStep(newState, Continue)
 
     newerState shouldBe WaitingForPlayer(
-      740851846,
+      257352564,
       Timeout.Max,
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
       PlayRound(
         players = List(
-          Player(MatchPlayer(user2, 0), List(Card(Sette, Spade)), Nil, 0),
-          Player(MatchPlayer(user1, 0), Nil, List(Card(Sette, Denari), Card(Tre, Spade), Card(Quattro, Coppe)), 1),
+          Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0),
+          Player(MatchPlayer(user1, 0), Nil, List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)), 1),
         ),
-        deck = Nil,
+        deck = Nil.toDeck,
         board = Nil
       )
     )
@@ -242,11 +242,11 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     events shouldBe List(
       CardsTaken(
         user1.id,
-        List(Card(Sette, Denari), Card(Tre, Spade), Card(Quattro, Coppe)),
-        scopa = Some(Card(Sette, Denari))
+        List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)),
+        scopa = Some(cardOf(Sette, Denari))
       ),
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(740851846)
+      willTick(257352564)
     )
   }
 
@@ -254,14 +254,14 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     val initialState =
       PlayRound(
         players = List(
-          Player(MatchPlayer(user1, 0), List(Card(Sette, Denari)), Nil, 0),
+          Player(MatchPlayer(user1, 0), List(cardOf(Sette, Denari)), Nil, 0),
           Player(MatchPlayer(user2, 0), Nil, Nil, 0)
         ),
-        deck = Nil,
-        board = List(Card(Tre, Spade), Card(Quattro, Coppe))
+        deck = Nil.toDeck,
+        board = List(cardOf(Tre, Spade), cardOf(Quattro, Coppe))
       )
 
-    val input = TakeCards(user1.id, Card(Sette, Denari), List(Card(Tre, Spade), Card(Quattro, Coppe)))
+    val input = TakeCards(user1.id, cardOf(Sette, Denari), List(cardOf(Tre, Spade), cardOf(Quattro, Coppe)))
 
     val (newState: GameState, _) = Game.playGameStep(initialState, input)
     val (newerState: GameState, events: List[StateMachineOutput]) = Game.playGameStep(newState, Continue)
@@ -269,14 +269,14 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     newerState shouldBe WillComplete(
       List(
         Player(MatchPlayer(user2, 0), Nil, Nil, 0),
-        Player(MatchPlayer(user1, 0), Nil, List(Card(Sette, Denari), Card(Tre, Spade), Card(Quattro, Coppe)), 0),
+        Player(MatchPlayer(user1, 0), Nil, List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)), 0),
       )
     )
 
     events shouldBe List(
       CardsTaken(
         user1.id,
-        List(Card(Sette, Denari), Card(Tre, Spade), Card(Quattro, Coppe)),
+        List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)),
         scopa = None
       ),
       Continue.toCompleteGame

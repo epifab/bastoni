@@ -1,7 +1,7 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.*
-import bastoni.frontend.TableLayout
+import bastoni.frontend.model.TableLayout
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.html_<^.*
 import reactkonva.KRect
@@ -12,8 +12,8 @@ object TableComponent:
   private val component = ScalaFnComponent[TableLayout] { layout =>
       KRect { p =>
         p.cornerRadius = 30
-        p.x = layout.position.x
-        p.y = layout.position.y
+        p.x = layout.topLeft.x
+        p.y = layout.topLeft.y
         p.width = layout.size.width
         p.height = layout.size.height
         p.fill = "rgba(8,166,53.1)"

@@ -3,17 +3,19 @@ package components
 
 import bastoni.domain.model.*
 import bastoni.frontend.JsObject
+import bastoni.frontend.model.{CardLayout, CardSize}
 import cats.effect
 import cats.effect.IO
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
-import konva.{Konva, TweenProps, TweenRef}
 import konva.KonvaHelper.Vector2d
+import konva.{Konva, TweenProps, TweenRef}
 import org.scalajs.dom.html.Image
 import org.scalajs.dom.{HTMLCanvasElement, document}
 import reactkonva.*
 
 import java.util.concurrent.atomic.AtomicReference
+import scala.collection.MapView
 import scala.scalajs.js
 
 object Img:
@@ -23,38 +25,28 @@ object Img:
     img
 
 object CardComponent:
-  case class Props(
-    card: Card | Int,
-    size: CardSize,
-    position: Point,
-    rotation: Option[Int],
-    originalSize: Option[CardSize],
-    originalPosition: Option[Point]
-  )
 
-  private val cardImages: Map[Card, Image] =
-    Deck.instance.map { card =>
+  case class Props(current: CardLayout, previous: Option[CardLayout]):
+    def previousOrCurrent: CardLayout = previous.getOrElse(current)
+
+  private val cardImages: Map[Option[SimpleCard], Image] =
+    Map(None -> Img("/static/carte/retro.jpg")) ++ Deck.cards.map { card =>
       val suit = card.suit.toString.toLowerCase
       val rank = "%02d".format(card.rank.value)
       val img = Img(s"/static/carte/$suit/$rank.jpg")
-      card -> img
+      Some(card) -> img
     }.toMap
 
-  private val cardBackImage: Image = Img("/static/carte/retro.jpg")
-
-  private def renderCard(card: Option[Card]): HTMLCanvasElement =
-    val image = new Konva.Image(
+  private val konvaCards: MapView[Option[SimpleCard], HTMLCanvasElement] = cardImages.view.mapValues { image =>
+    val kimage = new Konva.Image(
       JsObject[KImage.Props] { p =>
         p.width = CardSize.full.width
         p.height = CardSize.full.height
-        p.image = card match {
-          case Some(card) => cardImages(card)
-          case None => cardBackImage
-        }
+        p.image = image
       }
     )
 
-    val group = new Konva.Group(
+    val kgroup = new Konva.Group(
       JsObject[KGroup.Props] { p =>
         p.width = CardSize.full.width
         p.height = CardSize.full.height
@@ -62,8 +54,9 @@ object CardComponent:
       }
     )
 
-    group.add(image)
-    group.toCanvas()
+    kgroup.add(kimage)
+    kgroup.toCanvas()
+  }
 
   private def borderRadius(x: Double, y: Double, width: Double, height: Double, radius: Double): reactkonva.ReactKonvaDOM.Context => Unit = ctx => {
     ctx.beginPath()
@@ -82,21 +75,23 @@ object CardComponent:
   class CardBackend($: BackendScope[Props, Unit]):
     private val groupRef = new AtomicReference[Option[TweenRef]](None)
     private val imageRef = new AtomicReference[Option[TweenRef]](None)
+    private val animationDuration = .6
 
     val animation: Callback = for {
       props <- $.props
-      _ <- if (props.originalSize.isEmpty) Callback.empty else Callback(imageRef.get.foreach(r =>
+      _ <- if (props.previous.isEmpty) Callback.empty else Callback(imageRef.get.foreach(r =>
         r.to(JsObject[TweenProps] { p =>
-          p.width = props.size.width
-          p.height = props.size.height
-          p.duration = 0.5
+          p.width = props.current.size.width
+          p.height = props.current.size.height
+          p.duration = animationDuration
         })
       ))
-      _ <- if (props.originalPosition.isEmpty) Callback.empty else Callback(groupRef.get.foreach(r =>
+      _ <- if (props.previous.isEmpty) Callback.empty else Callback(groupRef.get.foreach(r =>
         r.to(JsObject[TweenProps] { p =>
-          p.x = props.position.x
-          p.y = props.position.y
-          p.duration = 0.5
+          p.x = props.current.position.x
+          p.y = props.current.position.y
+          p.rotation = props.current.rotation
+          p.duration = animationDuration
         })
       ))
     } yield ()
@@ -105,55 +100,23 @@ object CardComponent:
       KGroup(
         { p =>
           p.ref = ref => groupRef.set(Some(ref))
-          p.x = props.originalPosition.getOrElse(props.position).x
-          p.y = props.originalPosition.getOrElse(props.position).y
-          props.rotation.foreach(rotation => p.rotation = rotation)
+          p.x = props.previousOrCurrent.position.x
+          p.y = props.previousOrCurrent.position.y
+          p.rotation = props.previousOrCurrent.rotation
         },
         KImage { p =>
           p.ref = ref => imageRef.set(Some(ref))
-          p.image = renderCard(props.card match {
-            case card: Card => Some(card)
-            case _ => None
-          })
-          p.width = props.originalSize.getOrElse(props.size).width
-          p.height = props.originalSize.getOrElse(props.size).height
-          p.shadowBlur = props.originalSize.getOrElse(props.size).borderRadius
+          p.image = konvaCards(props.current.card.toOption.map(_.simple))
+          p.width = props.previousOrCurrent.size.width
+          p.height = props.previousOrCurrent.size.height
+          p.shadowBlur = props.current.shadowSize
+          p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
           p.shadowColor = "#222"
           p.shadowOpacity = 0.8
-          p.shadowOffset = Vector2d(-props.size.borderRadius, 0)
-        },
-
-        props.card match {
-          case occurrences: Int if occurrences > 1 =>
-            KGroup(
-              KCircle(
-                { p =>
-                  p.radius = (props.size.width - 5) / 2
-                  p.x = props.size.width / 2
-                  p.y = props.size.height / 2
-                  p.fill = "#222"
-                  p.stroke = "#FFF"
-                  p.strokeWidth = 3
-                }
-              ),
-              KText(
-                { p =>
-                  p.text = occurrences.toString
-                  p.height = props.size.height
-                  p.width = props.size.width
-                  p.fontFamily = "'Open Sans', sans-serif"
-                  p.fontStyle = "bold"
-                  p.fill = "#FFF"
-                  p.align = "center"
-                  p.verticalAlign = "middle"
-                }
-              )
-            )
-          case _ => KGroup.apply()
         }
       )
 
-  private val component =
+  private def component =
     ScalaComponent
       .builder[Props]
       .stateless
@@ -161,11 +124,5 @@ object CardComponent:
       .componentDidMount(_.backend.animation)
       .build
 
-  def apply(
-    cardOrOccurrences: Card | Int,
-    size: CardSize,
-    position: Point,
-    rotation: Option[Int] = None,
-    originalSize: Option[CardSize] = None,
-    originalPosition: Option[Point] = None
-  ): VdomElement = component(Props(cardOrOccurrences, size, position, rotation, originalSize, originalPosition))
+  def apply(current: CardLayout, previous: Option[CardLayout]): VdomElement =
+    component.withKey(s"card-${current.card.ref}")(Props(current, previous))

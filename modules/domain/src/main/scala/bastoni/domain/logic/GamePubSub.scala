@@ -20,18 +20,15 @@ trait GamePublisher[F[_]]:
 object GamePubSub:
 
   def subscriber[F[_]](messageBus: MessageBus[F]): GameSubscriber[F] =
-    new GameSubscriber[F] {
-      override def subscribe(me: User, roomId: RoomId): fs2.Stream[F, ToPlayer] =
-        messageBus
-          .subscribe
-          .collect { case Message(_, `roomId`, event: Event) => event }
-          .collect {
-            case event: PublicEvent => ToPlayer.GameEvent(event)
-            case CardsDealtServerView(playerId, cards) => ToPlayer.GameEvent(CardsDealtPlayerView(playerId, cards.map(_.toPlayerView(me.id, Some(playerId)))))
-            case DeckShuffledServerView(deck) => ToPlayer.GameEvent(DeckShuffledPlayerView(deck.size))
-            case Snapshot(table) => ToPlayer.Snapshot(table.toPlayerView(me))
-          }
-    }
+    (me: User, roomId: RoomId) => messageBus
+      .subscribe
+      .collect { case Message(_, `roomId`, event: Event) => event }
+      .collect {
+        case event: PublicEvent => ToPlayer.GameEvent(event)
+        case CardsDealtServerView(playerId, cards) => ToPlayer.GameEvent(CardsDealtPlayerView(playerId, cards.map(_.toPlayerView(me.id, Some(playerId)))))
+        case DeckShuffledServerView(deck) => ToPlayer.GameEvent(DeckShuffledPlayerView(deck.size))
+        case Snapshot(table) => ToPlayer.Snapshot(table.toPlayerView(me))
+      }
 
   def publisher[F[_]](
     messageBus: MessageBus[F],

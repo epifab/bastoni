@@ -2,83 +2,121 @@ package bastoni.frontend
 package components
 
 import bastoni.domain.model.*
+import bastoni.frontend.model.*
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import konva.Konva
 import org.scalajs.dom.window
-import reactkonva.KGroup
+import reactkonva.{KCircle, KGroup, KText}
 
 
 object CardsLayer:
 
-  def handsLayout(table: TablePlayerView, layout: GameLayout): List[CardsLayout] = {
-    val hands: List[Option[List[Option[Card]]]] = List(
+  def renderHands(table: TablePlayerView, layout: GameLayout): List[CardLayout | CardGroupLayout] = {
+    val data: List[Option[List[CardInstance]]] = List(
       table.mySeat.map(_.hand.map(_.card)),
       table.opponent(0).map(_.hand.map(_.card)),
       table.opponent(1).map(_.hand.map(_.card)),
       table.opponent(2).map(_.hand.map(_.card)),
     )
 
-    val handsLayoutF: List[List[Option[Card]] => CardsLayout] = List(
-      layout.player0.hand,
-      layout.player1.hand,
-      layout.player2.hand,
-      layout.player3.hand
+    val renderers: List[CardsRenderer] = List(
+      layout.mainPlayer.renderHand,
+      layout.player1.renderHand,
+      layout.player2.renderHand,
+      layout.player3.renderHand
     )
 
-    hands.zip(handsLayoutF).flatMap(_ map _)
+    data.zip(renderers).flatMap { case (d, f) => d.toList.flatMap(f) }
   }
 
-  def pilesLayout(table: TablePlayerView, layout: GameLayout): List[CardsLayout.Contracted] = {
-    val piles = List(
-      table.mySeat.map(_.taken.size),
-      table.opponent(0).map(_.taken.size),
-      table.opponent(1).map(_.taken.size),
-      table.opponent(2).map(_.taken.size)
+  def renderPiles(table: TablePlayerView, layout: GameLayout): List[CardLayout | CardGroupLayout] = {
+    val data: List[Option[List[CardInstance]]] = List(
+      table.mySeat.map(_.taken.map(_.card)),
+      table.opponent(0).map(_.taken.map(_.card)),
+      table.opponent(1).map(_.taken.map(_.card)),
+      table.opponent(2).map(_.taken.map(_.card))
     )
 
-    val pilesPosition = List(
-      layout.table.piles.player0,
-      layout.table.piles.player1,
-      layout.table.piles.player2,
-      layout.table.piles.player3,
+    val renderers: List[CardsRenderer] = List(
+      layout.mainPlayer.renderPile,
+      layout.player1.renderPile,
+      layout.player2.renderPile,
+      layout.player3.renderPile,
     )
 
-    piles.zip(pilesPosition).flatMap { case (pile, position) =>
-      pile.map(count => CardsLayout.Contracted(position, count, layout.table.piles.sizes))
-    }
+    data.zip(renderers).flatMap { case (d, f) => d.toList.flatMap(f) }
   }
+
+  case class Props(current: List[CardLayout | CardGroupLayout], previous: Map[Int, CardLayout])
+
+  object Props:
+    def apply(props: GameProps, layout: GameLayout): Props =
+      def cardsFor(table: TablePlayerView): List[CardLayout | CardGroupLayout] =
+        renderHands(table, layout) ++
+          renderPiles(table, layout) ++
+          layout.renderBoard(table.board.map(_.card)) ++
+          layout.renderDeck(table.deck.map(_.card))
+
+      val cards = cardsFor(props.currentTable)
+
+      val previousCards: Map[Int, CardLayout] =
+        props.previousTable.map { previousTable =>
+          cardsFor(previousTable).flatMap {
+            case group: CardGroupLayout => group.toCardLayout
+            case card: CardLayout => List(card)
+          }.map(layout => layout.card.ref -> layout).toMap
+        }.getOrElse(Map.empty)
+
+      new Props(cards, previousCards)
 
   private val component =
-    ScalaFnComponent[(GameProps, GameLayout)] { case (props: GameProps, layout: GameLayout) =>
-
-      val table = props.table  // transition.map(_._1).getOrElse(props.table)
-
-      val hands = handsLayout(table, layout)
-      val piles = pilesLayout(table, layout)
-      val deck: List[CardsLayout] = layout.table.deck.cardsLayout(table.deck.map(_.card))
-      val board: CardsLayout = CardsLayout.Expanded(layout.table.board.positions(table.board.flatMap(_.card)), layout.table.board.sizes)
-
-      val renderedCards: List[VdomNode] =
-        (board :: deck ++ piles ++ hands)
-          .flatMap {
-            case CardsLayout.Expanded(positions, size, rotation, originalPositions, originalSizes) =>
-              Some(KGroup(positions.map {
-                case (card, position) => CardComponent(
-                  card,
-                  size,
-                  position,
-                  rotation,
-                  originalPosition = originalPositions.get(card),
-                  originalSize = originalSizes.get(card)
+    ScalaComponent
+      .builder[Props]
+      .stateless
+      .render_P { props =>
+        val renderedCards: List[VdomNode] =
+          props.current
+            .map {
+              case card: CardLayout => CardComponent(card, props.previous.get(card.card.ref))
+              case group: CardGroupLayout =>
+                KGroup(
+                  KGroup(group.toCardLayout.map(card => CardComponent(card, props.previous.get(card.card.ref))): _*),
+                  KGroup(
+                    { p =>
+                      p.x = group.topLeft.x
+                      p.y = group.topLeft.y
+                    },
+                    KCircle(
+                      { p =>
+                        p.radius = (group.cardSize.width - 5) / 2
+                        p.x = group.cardSize.width / 2
+                        p.y = group.cardSize.height / 2
+                        p.fill = "#222"
+                        p.stroke = "#FFF"
+                        p.strokeWidth = 3
+                      }
+                    ),
+                    KText(
+                      { p =>
+                        p.text = group.cards.length.toString
+                        p.height = group.cardSize.height
+                        p.width = group.cardSize.width
+                        p.fontFamily = "'Open Sans', sans-serif"
+                        p.fontStyle = "bold"
+                        p.fill = "#FFF"
+                        p.align = "center"
+                        p.verticalAlign = "middle"
+                      }
+                    )
+                  )
                 )
-              }: _*))
+            }
 
-            case CardsLayout.Contracted(position, count, size, rotation) if count > 0 => Some(CardComponent(count, size, position, rotation))
-            case CardsLayout.Contracted(position, count, size, rotation) => None
-          }
+        KGroup(renderedCards: _*)
+      }
+      .shouldComponentUpdate(c => CallbackTo(c.currentProps.current != c.nextProps.current))
+      .build
 
-      KGroup(renderedCards: _*)
-    }
-
-  def apply(gameProps: GameProps, gameLayout: GameLayout): VdomNode = component((gameProps, gameLayout))
+  def apply(gameProps: GameProps, gameLayout: GameLayout): VdomNode =
+    component(Props(gameProps, gameLayout))

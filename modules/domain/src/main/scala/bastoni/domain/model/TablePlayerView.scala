@@ -17,27 +17,20 @@ case class TablePlayerView(
     active: Option[GameType] = this.active
   ): TablePlayerView = TablePlayerView(me, seats, deck, board, active)
 
-  override protected def buildCard(card: Card, direction: Direction): CardPlayerView = CardPlayerView(direction match {
-    case Direction.Up => Some(card)
-    case _ => None
+  override protected def buildCard(card: VisibleCard, direction: Direction): CardPlayerView = CardPlayerView(direction match {
+    case Direction.Up => card
+    case _ => card.hidden
   })
 
-  override protected def faceDown(card: CardPlayerView): CardPlayerView = card.copy(card = None)
-
-  extension[T](list: List[T])
-    def removeFirst(cond: T => Boolean): List[T] =
-      list match {
-        case head :: tail if cond(head) => tail
-        case head :: tail => head :: tail.removeFirst(cond)
-        case Nil => Nil
-      }
-
-  override protected def removeCard(cards: List[CardPlayerView], card: Card): List[CardPlayerView] =
-    if (cards.exists(_.card.contains(card))) cards.removeFirst(_.card.contains(card))
-    else cards.removeFirst(_.card.isEmpty)
+  override protected def faceDown(card: CardPlayerView): CardPlayerView = card.copy(card = card.card.hidden)
 
   def update(event: PlayerEvent): TablePlayerView = event match {
-    case Event.DeckShuffledPlayerView(numberOfCards) => deckShuffledUpdate(List.fill(numberOfCards)(CardPlayerView(None)))
+    case Event.DeckShuffledPlayerView(numberOfCards) =>
+      deckShuffledUpdate(
+        (0 until numberOfCards)
+          .toList
+          .map(position => CardPlayerView(HiddenCard(position)))
+      )
 
     case event: Event.CardsDealtPlayerView => cardsDealtUpdate(event)
 

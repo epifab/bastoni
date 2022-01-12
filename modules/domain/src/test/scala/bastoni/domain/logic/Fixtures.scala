@@ -31,7 +31,8 @@ object Fixtures:
   def willTick(hash: Int): Delayed[Command] = Delayed(Tick(hash), Delay.ActionTimeout)
 
   val shuffleSeed = 10
-  val shuffledDeck = List(
+
+  val shuffledDeck: Deck = List(
     Card(Due, Bastoni),
     Card(Asso, Spade),
     Card(Sette, Denari),
@@ -72,14 +73,11 @@ object Fixtures:
     Card(Tre, Bastoni),
     Card(Due, Spade),
     Card(Cavallo, Coppe)
-  )
+  ).toDeck
+
+  def cardOf(rank: Rank, suit: Suit): VisibleCard =
+    shuffledDeck.cards
+      .find(c => c.rank == rank && c.suit == suit)
+      .getOrElse(throw new IllegalStateException("Card not found"))
 
   val joinSeed = 4099
-
-//  val seed =
-//    fs2.Stream.range(0, 10000)
-//      .map(i => i -> scala.util.Random(i).shuffle(List(1, 2, 3, 4)))
-//      .find { case (i, l) => l == List(4, 3, 2, 1) }
-//      .take(1)
-//      .compile
-//      .lastOrError

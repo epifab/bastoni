@@ -37,10 +37,10 @@ object Game extends GameLogic[MatchState]:
       GameState.Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
 
     case (GameState.Ready(players), ShuffleDeck(seed)) =>
-      val shuffledDeck = new Random(seed).shuffle(Deck.instance)
+      val shuffledDeck: Deck = Deck.shuffled(seed)
 
-      val deck =
-        if (players.size == 3) Some(shuffledDeck.filterNot(_ == Card(Rank.Due, Suit.Coppe)))
+      val deck: Option[Deck] =
+        if (players.size == 3) Some(shuffledDeck.discard(Rank.Due, Suit.Coppe))
         else if (players.size == 2 || players.size == 4) Some(shuffledDeck)
         else None // 1 or 5+ players not supported
 
@@ -53,21 +53,21 @@ object Game extends GameLogic[MatchState]:
       }
 
     case (GameState.DealRound(player :: Nil, done, deck), Continue) =>
-      deck.dealOrDie(3) { (cards, tail) =>
-        GameState.WillDealTrump(done :+ player.draw(cards), tail) ->
+      deck.dealOrDie(3) { (cards, newDeck) =>
+        GameState.WillDealTrump(done :+ player.draw(cards), newDeck) ->
           List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
     case (GameState.DealRound(player :: todo, done, deck), Continue) =>
-      deck.dealOrDie(3) { (cards, tail) =>
-        GameState.DealRound(todo, done :+ player.draw(cards), tail) ->
+      deck.dealOrDie(3) { (cards, newDeck) =>
+        GameState.DealRound(todo, done :+ player.draw(cards), newDeck) ->
           List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
       }
 
     case (GameState.WillDealTrump(players, deck), Continue) =>
-      deck.deal1OrDie { (card, tail) =>
+      deck.deal1OrDie { (card, newDeck) =>
         withTimeout(
-          state = GameState.PlayRound(players, Nil, tail :+ card, card),
+          state = GameState.PlayRound(players, Nil, newDeck.append(card), card),
           player = players.head.id,
           action = Action.PlayCard,
           before = List(TrumpRevealed(card))
@@ -75,10 +75,10 @@ object Game extends GameLogic[MatchState]:
       }
 
     case (GameState.DrawRound(player :: Nil, done, deck, trump), Continue) =>
-      deck.deal1OrDie { (card, tail) =>
+      deck.deal1OrDie { (card, newDeck) =>
         val players = done :+ player.draw(card)
         withTimeout(
-          state = GameState.PlayRound(players, Nil, tail, trump),
+          state = GameState.PlayRound(players, Nil, newDeck, trump),
           player = players.head.id,
           action = Action.PlayCard,
           before = List(CardsDealt(player.id, List(card), Direction.Player))
@@ -86,8 +86,8 @@ object Game extends GameLogic[MatchState]:
       }
 
     case (GameState.DrawRound(player :: todo, done, deck, trump), Continue) =>
-      deck.deal1OrDie { (card, tail) =>
-        GameState.DrawRound(todo, done :+ player.draw(card), tail, trump) ->
+      deck.deal1OrDie { (card, newDeck) =>
+        GameState.DrawRound(todo, done :+ player.draw(card), newDeck, trump) ->
           List(CardsDealt(player.id, List(card), Direction.Player), Continue.toDealCards)
       }
 
@@ -113,7 +113,7 @@ object Game extends GameLogic[MatchState]:
       val (state, messages: List[StateMachineOutput]) =
         if (deck.isEmpty && winner.hand.isEmpty) GameState.WillComplete(updatedPlayers, trump) -> List(Continue.toCompleteGame)
         else if (deck.nonEmpty) GameState.DrawRound(updatedPlayers, Nil, deck, trump) -> List(Continue.toDealCards)
-        else withTimeout(state = GameState.PlayRound(updatedPlayers, Nil, Nil, trump), player = updatedPlayers.head.id, action = Action.PlayCard)
+        else withTimeout(state = GameState.PlayRound(updatedPlayers, Nil, deck, trump), player = updatedPlayers.head.id, action = Action.PlayCard)
 
       state -> (TrickCompleted(winner.id) :: messages)
 
@@ -170,15 +170,15 @@ object Game extends GameLogic[MatchState]:
 
   }
 
-  extension(card: Card)
-    def >(other: Card): Boolean =
+  extension(card: VisibleCard)
+    def >(other: VisibleCard): Boolean =
       val points = GameScore.pointsFor(card)
       val otherPoints = GameScore.pointsFor(other)
       (points > otherPoints) || (points == otherPoints && card.rank.value > other.rank.value)
 
-  private def completeTrick(players: List[(Player, Card)], trump: Card): List[Player] =
+  private def completeTrick(players: List[(Player, VisibleCard)], trump: VisibleCard): List[Player] =
     @tailrec
-    def trickWinner(winner: Option[(Player, Card)], opponents: List[(Player, Card)]): Player =
+    def trickWinner(winner: Option[(Player, VisibleCard)], opponents: List[(Player, VisibleCard)]): Player =
       (winner, opponents) match {
         case (Some((winner, card)), Nil) => winner
         case (None, Nil) => throw new IllegalArgumentException("Can't detect the winner for an empty list of players")

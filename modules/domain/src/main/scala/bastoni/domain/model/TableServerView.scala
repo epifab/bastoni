@@ -21,12 +21,11 @@ case class TableServerView(
     active: Option[GameType] = this.active
   ): TableServerView = TableServerView(seats, deck, board, active)
 
-  override protected def buildCard(card: Card, direction: Direction): CardServerView = CardServerView(card, direction)
+  override protected def buildCard(card: VisibleCard, direction: Direction): CardServerView = CardServerView(card, direction)
   override protected def faceDown(card: CardServerView): CardServerView = card.copy(facing = Direction.Down)
-  override protected def removeCard(cards: List[CardServerView], card: Card): List[CardServerView] = cards.filterNot(_.card == card)
 
   def update(event: ServerEvent): TableServerView = event match {
-    case Event.DeckShuffledServerView(deck) => deckShuffledUpdate(deck.map(card => CardServerView(card, Direction.Down)))
+    case Event.DeckShuffledServerView(cards) => deckShuffledUpdate(cards.map(card => CardServerView(card, Direction.Down)))
 
     case event: Event.CardsDealtServerView => cardsDealtUpdate(event)
 

@@ -8,11 +8,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 @js.native
-trait TweenProps extends js.Object:
-  var x: js.UndefOr[Double] = js.native
-  var y: js.UndefOr[Double] = js.native
-  var width: js.UndefOr[Double] = js.native
-  var height: js.UndefOr[Double] = js.native
+trait TweenProps extends NodeProps:
   var duration: js.UndefOr[Double] = js.native
 
 @js.native

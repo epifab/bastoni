@@ -4,4 +4,4 @@ import bastoni.domain.model.*
 
 import scala.util.chaining.*
 
-case class GameProps(table: TablePlayerView, me: UserId, transition: Option[(TablePlayerView, PlayerEvent)])
+case class GameProps(me: UserId, currentTable: TablePlayerView, previousTable: Option[TablePlayerView])

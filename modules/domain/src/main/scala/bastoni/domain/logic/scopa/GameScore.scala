@@ -13,7 +13,7 @@ object GameScoreItem:
   case class  Carte(count: Int) extends GameScoreItem(1)
   case class  Denari(count: Int) extends GameScoreItem(1)
   case object SetteBello extends GameScoreItem(1)
-  case class  Primiera(cards: List[Card], count: Int) extends GameScoreItem(1)
+  case class  Primiera(cards: List[VisibleCard], count: Int) extends GameScoreItem(1)
   case class  Scope(count: Int) extends GameScoreItem(count)
 
   given Encoder[GameScoreItem] = Encoder.instance {
@@ -38,7 +38,7 @@ case class GameScore(playerIds: List[UserId], items: List[GameScoreItem]) extend
 object GameScore:
 
   def apply(teams: List[List[Player]]): List[GameScore] =
-    val teamWithCards: Map[List[Player], List[Card]] = teams.map(team => team -> team.flatMap(_.taken)).toMap
+    val teamWithCards: Map[List[Player], List[VisibleCard]] = teams.map(team => team -> team.flatMap(_.taken)).toMap
 
     val carte: Option[(List[Player], GameScoreItem)] =
       teamWithCards
@@ -57,7 +57,7 @@ object GameScore:
 
     val setteBello: Option[(List[Player], GameScoreItem)] =
       teamWithCards
-        .collectFirst { case (team, cards) if cards.contains(Card(Sette, Denari)) =>
+        .collectFirst { case (team, cards) if cards.exists(c => c.rank == Sette && c.suit == Denari) =>
           team -> GameScoreItem.SetteBello
         }
 
@@ -72,7 +72,7 @@ object GameScore:
       )
     )
 
-  def calculatePrimiera(cards: List[Card]): Option[GameScoreItem.Primiera] =
+  def calculatePrimiera(cards: List[VisibleCard]): Option[GameScoreItem.Primiera] =
 
     def valueOf(card: Card): Int =
       card.rank match {
@@ -86,10 +86,10 @@ object GameScore:
         case Re | Cavallo | Fante => 10
       }
 
-    def bestCard(cards: List[Card]): (Card, Int) =
+    def bestCard(cards: List[VisibleCard]): (VisibleCard, Int) =
       cards.map(card => card -> valueOf(card)).maxBy(_._2)
 
-    val groupedBySuit: Map[Suit, List[Card]] = cards.groupBy(_.suit)
+    val groupedBySuit: Map[Suit, List[VisibleCard]] = cards.groupBy(_.suit)
 
     for {
       denari <- groupedBySuit.get(Denari)

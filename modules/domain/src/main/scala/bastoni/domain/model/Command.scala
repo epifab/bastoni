@@ -14,8 +14,8 @@ object Command:
   case class  LeaveTable(user: User) extends Command
   case class  StartGame(playerId: UserId, gameType: GameType) extends Command
   case class  ShuffleDeck(seed: Int) extends Command
-  case class  PlayCard(playerId: UserId, card: Card) extends Command
-  case class  TakeCards(playerId: UserId, played: Card, taken: List[Card]) extends Command
+  case class  PlayCard(playerId: UserId, card: VisibleCard) extends Command
+  case class  TakeCards(playerId: UserId, played: VisibleCard, taken: List[VisibleCard]) extends Command
   case object Continue extends Command
   case class  Tick(ref: Int) extends Command
 
