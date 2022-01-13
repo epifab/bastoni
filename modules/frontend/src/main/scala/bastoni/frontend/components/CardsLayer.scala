@@ -53,10 +53,10 @@ object CardsLayer:
   object Props:
     def apply(props: GameProps, layout: GameLayout): Props =
       def cardsFor(table: TablePlayerView): List[CardLayout | CardGroupLayout] =
-        renderHands(table, layout) ++
+        layout.renderDeck(table.deck.map(_.card)) ++
           renderPiles(table, layout) ++
           layout.renderBoard(table.board.map(_.card)) ++
-          layout.renderDeck(table.deck.map(_.card))
+          renderHands(table, layout)
 
       val cards = cardsFor(props.currentTable)
 

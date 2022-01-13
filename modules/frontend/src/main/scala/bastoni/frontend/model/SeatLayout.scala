@@ -73,31 +73,3 @@ object MainPlayerHandRenderer:
       .toList
 
 
-object OtherPlayerLayout:
-  def apply(center: Point, handSize: CardSize, pileSize: CardSize): SeatLayout =
-    SeatLayout(
-      center = center,
-      radius = 45,
-      renderHand = cards => List(CardGroupLayout(
-        cards,
-        handSize,
-        topLeft = Point(
-          center.x - (handSize.width / 2),
-          center.y + 20
-        ),
-        rotation = 0,
-        shadowSize = 0,
-        margin = 60 / cards.length
-      )),
-      renderPile = cards => List(CardGroupLayout(
-        cards,
-        pileSize,
-        topLeft = Point(
-          center.x - (pileSize.width / 2),
-          center.y + GameLayout.cardsMargin + handSize.height + GameLayout.cardsMargin
-        ),
-        rotation = 0,
-        shadowSize = 0,
-        margin = .5
-      ))
-    )

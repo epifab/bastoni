@@ -43,6 +43,74 @@ object CardComponent:
     private val animations = new AtomicReference[List[CardLayout => Unit]](Nil)
     private val animationDuration = .6
 
+    private def renderCardBack(props: Props): VdomNode =
+      KGroup(
+        { p =>
+          p.ref = animationRef[TweenProps] { (p, current) =>
+            p.width = current.size.width
+            p.height = current.size.height
+            p.duration = animationDuration
+          }
+          p.width = props.initial.size.width
+          p.height = props.initial.size.height
+        },
+        KRect { p =>
+          p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
+            p.width = current.size.width
+            p.height = current.size.height
+            p.cornerRadius = current.size.cornerRadius
+            p.duration = animationDuration
+          }
+          p.width = props.initial.size.width
+          p.height = props.initial.size.height
+          p.cornerRadius = props.initial.size.cornerRadius
+          p.shadowBlur = props.current.shadowSize
+          p.shadowColor = "#222"
+          p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
+          p.shadowOpacity = .8
+          p.fill = "#777"
+        },
+        KRect { p =>
+          p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
+            // fillPatternScale doesn't work here
+            // p.fillPatternScale = Vector2d(current.size.cornerRadius / 5, current.size.cornerRadius / 5)
+            p.cornerRadius = current.size.cornerRadius
+            p.x = current.size.cornerRadius * 2
+            p.y = current.size.cornerRadius * 2
+            p.width = current.size.width - (current.size.cornerRadius * 4)
+            p.height = current.size.height - (current.size.cornerRadius * 4)
+            p.duration = animationDuration
+          }
+          p.fillPatternImage = backOfCardImagePattern
+          p.fillPatternRepeat = "repeat"
+          p.fillPatternRotation = 270
+          p.fillPatternScale = Vector2d(props.current.size.cornerRadius / 4, props.current.size.cornerRadius / 4)
+          p.stroke = "#555"
+          p.strokeWidth = 2
+          p.cornerRadius = props.initial.size.cornerRadius
+          p.x = props.initial.size.cornerRadius * 2
+          p.y = props.initial.size.cornerRadius * 2
+          p.width = props.initial.size.width - (props.initial.size.cornerRadius * 4)
+          p.height = props.initial.size.height - (props.initial.size.cornerRadius * 4)
+        }
+      )
+
+    private def renderCard(props: Props)(card: SimpleCard) =
+      KImage { p =>
+        p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
+          p.width = current.size.width
+          p.height = current.size.height
+          p.duration = animationDuration
+        }
+        p.image = cardImages(card)
+        p.width = props.initial.size.width
+        p.height = props.initial.size.height
+        p.shadowBlur = props.current.shadowSize
+        p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
+        p.shadowColor = "#222"
+        p.shadowOpacity = 0.8
+      }
+
     private def animationRef[P <: TweenProps](f: (P, CardLayout) => Unit): TweenRef => Unit = tween =>
       val previousAnimations: List[CardLayout => Unit] = animations.get()
       animations.set(((current: CardLayout) => tween.to(JsObject[P](p => f(p, current)))) :: previousAnimations)
@@ -67,75 +135,7 @@ object CardComponent:
           p.y = props.initial.position.y
           p.rotation = props.initial.rotation
         },
-        props.current.card.toOption.map(_.simple) match {
-          case None =>
-            KGroup(
-              { p =>
-                p.ref = animationRef[TweenProps] { (p, current) =>
-                  p.width = current.size.width
-                  p.height = current.size.height
-                  p.duration = animationDuration
-                }
-                p.width = props.initial.size.width
-                p.height = props.initial.size.height
-              },
-              KRect { p =>
-                p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
-                  p.width = current.size.width
-                  p.height = current.size.height
-                  p.cornerRadius = current.size.cornerRadius
-                  p.duration = animationDuration
-                }
-                p.width = props.initial.size.width
-                p.height = props.initial.size.height
-                p.cornerRadius = props.initial.size.cornerRadius
-                p.shadowBlur = props.current.shadowSize
-                p.shadowColor = "#222"
-                p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
-                p.shadowOpacity = .8
-                p.fill = "#777"
-              },
-              KRect { p =>
-                p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
-                  // fillPatternScale doesn't work here
-                  // p.fillPatternScale = Vector2d(current.size.cornerRadius / 5, current.size.cornerRadius / 5)
-                  p.cornerRadius = current.size.cornerRadius
-                  p.x = current.size.cornerRadius * 2
-                  p.y = current.size.cornerRadius * 2
-                  p.width = current.size.width - (current.size.cornerRadius * 4)
-                  p.height = current.size.height - (current.size.cornerRadius * 4)
-                  p.duration = animationDuration
-                }
-                p.fillPatternImage = backOfCardImagePattern
-                p.fillPatternRepeat = "repeat"
-                p.fillPatternRotation = 270
-                p.fillPatternScale = Vector2d(props.current.size.cornerRadius / 4, props.current.size.cornerRadius / 4)
-                p.stroke = "#555"
-                p.strokeWidth = 2
-                p.cornerRadius = props.initial.size.cornerRadius
-                p.x = props.initial.size.cornerRadius * 2
-                p.y = props.initial.size.cornerRadius * 2
-                p.width = props.initial.size.width - (props.initial.size.cornerRadius * 4)
-                p.height = props.initial.size.height - (props.initial.size.cornerRadius * 4)
-              }
-            )
-
-          case Some(card) =>
-            KImage { p =>
-              p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
-                p.width = current.size.width
-                p.height = current.size.height
-                p.duration = animationDuration
-              }
-              p.image = cardImages(card)
-              p.width = props.initial.size.width
-              p.height = props.initial.size.height
-              p.shadowBlur = props.current.shadowSize
-              p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
-              p.shadowColor = "#222"
-              p.shadowOpacity = 0.8
-            }
-          }
+        props.current.card.toOption.map(_.simple).fold(renderCardBack(props))(renderCard(props))
       )
 
   private def component =

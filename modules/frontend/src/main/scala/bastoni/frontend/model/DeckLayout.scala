@@ -3,7 +3,7 @@ package bastoni.frontend.model
 import bastoni.domain.model.{VisibleCard, CardInstance, HiddenCard}
 
 object DeckLayout:
-  def apply(sizes: CardSize, topLeft: Point): CardsRenderer =
+  def apply(size: CardSize, topLeft: Point): CardsRenderer =
     (cards: List[CardInstance]) =>
       CardsRenderer.collapseFaceDownCards(cards, Nil)
         .reverse
@@ -11,23 +11,23 @@ object DeckLayout:
           case hidden: List[HiddenCard] =>
             CardGroupLayout(
               hidden,
-              sizes,
+              size,
               Point(
                 topLeft.x,
                 topLeft.y
               ),
               rotation = 0,
-              shadowSize = 0,
-              margin = .5
+              shadowSize = size.cornerRadius.floor.toInt,
+              margin = 1
             )
 
           case card: VisibleCard =>
             CardLayout(
               card,
-              sizes,
+              size,
               Point(
-                topLeft.x + (sizes.width * .5),
-                topLeft.y + (sizes.height * .8)
+                topLeft.x + (size.width * .5),
+                topLeft.y + (size.height * .8)
               ),
               rotation = 23,
               shadowSize = 0

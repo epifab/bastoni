@@ -77,9 +77,7 @@ class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
     tables <- sub.subscribe(me, roomId)
       .scan[Option[TablePlayerView]](None) {
         case (_, ToPlayer.Snapshot(table)) => Some(table)
-        case (props, ToPlayer.GameEvent(event)) =>
-          println(event.getClass.getSimpleName)
-          props.map(_.update(event))
+        case (props, ToPlayer.GameEvent(event)) => props.map(_.update(event))
       }
       .zipWithPrevious
       .collect { case (prev, Some(current)) if !prev.flatten.contains(current) => GameProps(me.id, current, prev.flatten) }
