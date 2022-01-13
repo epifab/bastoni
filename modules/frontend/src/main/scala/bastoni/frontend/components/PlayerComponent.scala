@@ -15,6 +15,34 @@ object PlayerComponent:
           p.x = layout.center.x
           p.y = layout.center.y
           p.fill = "#2B5B79"
+
+          state match {
+            case PlayerState.ActingPlayer(_, _, timeout) =>
+              p.stroke = "#0EF"
+              p.strokeWidth = 10
+              p.shadowColor = "#1f34ba"
+              p.shadowBlur = 30
+              p.shadowOpacity = 1
+
+            case PlayerState.SittingOut(_) =>
+              p.opacity = .4
+
+            case PlayerState.EndOfMatchPlayer(_, true) =>
+              p.stroke = "#FFEB3B"
+              p.strokeWidth = 10
+              p.shadowColor = "#1f34ba"
+              p.shadowBlur = 30
+              p.shadowOpacity = 1
+
+            case PlayerState.EndOfGamePlayer(_, _, true) =>
+              p.stroke = "#FFEB3B"
+              p.strokeWidth = 15
+              p.shadowColor = "#1f34ba"
+              p.shadowBlur = 30
+              p.shadowOpacity = 1
+
+            case _ => ()
+          }
         },
         KText { p =>
           p.text = state.name

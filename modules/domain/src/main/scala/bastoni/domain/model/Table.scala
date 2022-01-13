@@ -1,5 +1,6 @@
 package bastoni.domain.model
 
+import bastoni.domain.model.PlayerState.*
 import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec
 
@@ -70,6 +71,7 @@ trait Table[C <: CardView]:
         updateWith(
           seats = seats.map {
             case seat@ Seat(Some(sittingOut: SittingOut), _, _) => seat.copy(player = Some(sittingOut.sitIn))
+            case seat@ Seat(Some(sittingOut: SittingIn), _, _) => seat.copy(player = Some(sittingOut.sitIn))
             case whatever => whatever
           },
           active = Some(gameType)
@@ -191,7 +193,7 @@ trait Table[C <: CardView]:
           seats = seats.map {
             case seat@ Seat(Some(player: ActingPlayer), _, _) if player.is(playerId) =>
               seat.copy(player = Some(player.copy(timeout = Some(Timeout.TimedOut))))
-            case whatver => whatver
+            case whatever => whatever
           }
         )
 

@@ -2,6 +2,7 @@ package bastoni.domain
 
 import bastoni.domain.logic.{GamePublisher, GameSubscriber}
 import bastoni.domain.model.*
+import bastoni.domain.model.PlayerState.*
 import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import cats.effect.syntax.temporal.*

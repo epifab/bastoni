@@ -1,5 +1,7 @@
 package bastoni.domain.model
 
+import bastoni.domain.model.PlayerState.*
+
 import scala.util.Random
 
 enum TableError:

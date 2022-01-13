@@ -49,7 +49,8 @@ class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
             props.currentTable.opponent(2).flatMap(_.player).map(PlayerComponent(_, layout.player3)),
           ).flatten: _*
         ),
-        KLayer(CardsLayer(props, layout))
+        KLayer(CardsLayer(props, layout)),
+        KLayer(props.currentTable.mySeat.map(_.player).map(PlayerComponent(_, layout.mainPlayer)).toList: _*)
       )
 
     case None => <.div("Waiting...")

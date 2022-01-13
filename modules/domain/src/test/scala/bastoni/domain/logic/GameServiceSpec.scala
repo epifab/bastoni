@@ -4,6 +4,7 @@ import bastoni.domain.AsyncIOFreeSpec
 import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.logic.{GameContext, GamePubSub}
 import bastoni.domain.model.Command.*
+import bastoni.domain.model.PlayerState.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*

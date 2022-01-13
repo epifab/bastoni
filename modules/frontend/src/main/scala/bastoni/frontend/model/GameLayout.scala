@@ -30,7 +30,7 @@ object GameLayout:
       mainPlayer = SeatLayout(
         center = Point(
           canvasSize.width / 2,
-          canvasSize.height
+          canvasSize.height - 30
         ),
         radius = 45,
         renderHand = MainPlayerHandRenderer(canvasSize),
@@ -57,7 +57,7 @@ object GameLayout:
                 middleTable - (deckSize.height / 2)
               ),
               rotation = 0,
-              shadowSize = 0
+              shadow = None
             )
           }
       },

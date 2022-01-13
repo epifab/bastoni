@@ -3,13 +3,13 @@ package components
 
 import bastoni.domain.model.*
 import bastoni.frontend.JsObject
-import bastoni.frontend.model.{CardLayout, CardSize}
+import bastoni.frontend.model.{CardLayout, CardSize, Shadow}
 import cats.effect
 import cats.effect.IO
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import konva.KonvaHelper.Vector2d
-import konva.{Konva, TweenProps, TweenRef}
+import konva.{Konva, ShapeProps, TweenProps, TweenRef}
 import org.scalajs.dom.html.Image
 import org.scalajs.dom.{HTMLCanvasElement, document}
 import reactkonva.*
@@ -43,6 +43,12 @@ object CardComponent:
     private val animations = new AtomicReference[List[CardLayout => Unit]](Nil)
     private val animationDuration = .6
 
+    private def withShadow(p: ShapeProps)(shadow: Shadow): Unit =
+      p.shadowBlur = shadow.size
+      p.shadowColor = "#222"
+      p.shadowOffset = Vector2d(-shadow.size, 0)
+      p.shadowOpacity = shadow.opacity
+
     private def renderCardBack(props: Props): VdomNode =
       KGroup(
         { p =>
@@ -64,11 +70,8 @@ object CardComponent:
           p.width = props.initial.size.width
           p.height = props.initial.size.height
           p.cornerRadius = props.initial.size.cornerRadius
-          p.shadowBlur = props.current.shadowSize
-          p.shadowColor = "#222"
-          p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
-          p.shadowOpacity = .8
           p.fill = "#777"
+          props.current.shadow.foreach(withShadow(p))
         },
         KRect { p =>
           p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
@@ -105,10 +108,7 @@ object CardComponent:
         p.image = cardImages(card)
         p.width = props.initial.size.width
         p.height = props.initial.size.height
-        p.shadowBlur = props.current.shadowSize
-        p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
-        p.shadowColor = "#222"
-        p.shadowOpacity = 0.8
+        props.current.shadow.foreach(withShadow(p))
       }
 
     private def animationRef[P <: TweenProps](f: (P, CardLayout) => Unit): TweenRef => Unit = tween =>

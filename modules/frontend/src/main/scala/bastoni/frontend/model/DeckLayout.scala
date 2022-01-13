@@ -17,7 +17,7 @@ object DeckLayout:
                 topLeft.y
               ),
               rotation = 0,
-              shadowSize = size.cornerRadius.floor.toInt,
+              shadow = Some(Shadow(size.cornerRadius.floor.toInt, .5)),
               margin = 1
             )
 
@@ -30,6 +30,6 @@ object DeckLayout:
                 topLeft.y + (size.height * .8)
               ),
               rotation = 23,
-              shadowSize = 0
+              shadow = None
             )
         }

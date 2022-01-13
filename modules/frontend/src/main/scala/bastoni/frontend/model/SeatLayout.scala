@@ -66,7 +66,7 @@ object MainPlayerHandRenderer:
                 verticalOffset + (verticalOverlap * row)
               ),
               rotation = 0,
-              shadowSize = 10
+              shadow = Some(Shadow(10, .8))
             )
           }
       }

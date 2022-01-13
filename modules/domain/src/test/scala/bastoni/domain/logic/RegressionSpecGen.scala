@@ -2,12 +2,13 @@ package bastoni.domain.logic
 
 import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.model.*
-import cats.effect.std.Queue
+import bastoni.domain.model.PlayerState.*
 import cats.effect.*
+import cats.effect.std.Queue
 import fs2.concurrent.Topic
-import io.circe.{Codec, Encoder, Decoder, Printer}
 import io.circe.generic.semiauto.deriveCodec
 import io.circe.syntax.*
+import io.circe.{Codec, Decoder, Encoder, Printer}
 
 import java.io.{File, PrintWriter}
 import scala.concurrent.duration.DurationInt
