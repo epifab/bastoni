@@ -29,7 +29,7 @@ object MainPlayerHandRenderer:
     val defaultSize: CardSize = CardSize.full
     defaultSize.scaleTo(
       Math.min(
-        defaultSize.width * 1.2,
+        defaultSize.width * 2,
         (canvasSize.width / ((maxCardsPerRow - 1) * horizontalOverlapFactor) + 1).floor
       )
     )

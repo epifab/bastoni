@@ -18,11 +18,11 @@ object GameLayout:
   def apply(canvasSize: Size): GameLayout = {
 
     val (pileSize, deckSize, boardSize, handSize) =
-      if (canvasSize.width > 800 && canvasSize.height > 600) (CardSize.full, CardSize.full, CardSize.full, CardSize.full)
+      if (canvasSize.width > 800 && canvasSize.height > 600) (CardSize.full / 2, CardSize.full / 3 * 2, CardSize.full, CardSize.full / 3 * 2)
       else (CardSize.scaleTo(30), CardSize.scaleTo(45), CardSize.scaleTo(50), CardSize.scaleTo(45))
 
     val topLeftTable = Point(0, handSize.height + 70)
-    val bottomRightTable = Point(canvasSize.width, canvasSize.height - MainPlayerHandRenderer.cardSizeFor(canvasSize).height * (1 + MainPlayerHandRenderer.verticalOverlapFactor) - cardsMargin)
+    val bottomRightTable = Point(canvasSize.width, canvasSize.height - MainPlayerHandRenderer.cardSizeFor(canvasSize).height - 2 * cardsMargin)
     val middleTable = topLeftTable.y + ((bottomRightTable.y - topLeftTable.y) / 2)
     val tableSize = Size(bottomRightTable.x - topLeftTable.x, bottomRightTable.y - topLeftTable.y)
 

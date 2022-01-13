@@ -82,34 +82,34 @@ object CardsLayer:
               case group: CardGroupLayout =>
                 KGroup(
                   KGroup(group.toCardLayout.map(card => CardComponent(card, props.previous.get(card.card.ref))): _*),
-                  KGroup(
-                    { p =>
-                      p.x = group.topLeft.x
-                      p.y = group.topLeft.y
-                    },
-                    KCircle(
-                      { p =>
-                        p.radius = (group.cardSize.width - 5) / 2
-                        p.x = group.cardSize.width / 2
-                        p.y = group.cardSize.height / 2
-                        p.fill = "#222"
-                        p.stroke = "#FFF"
-                        p.strokeWidth = 3
-                      }
-                    ),
-                    KText(
-                      { p =>
-                        p.text = group.cards.length.toString
-                        p.height = group.cardSize.height
-                        p.width = group.cardSize.width
-                        p.fontFamily = "'Open Sans', sans-serif"
-                        p.fontStyle = "bold"
-                        p.fill = "#FFF"
-                        p.align = "center"
-                        p.verticalAlign = "middle"
-                      }
-                    )
-                  )
+//                  KGroup(
+//                    { p =>
+//                      p.x = group.topLeft.x
+//                      p.y = group.topLeft.y
+//                    },
+//                    KCircle(
+//                      { p =>
+//                        p.radius = (group.cardSize.width - 5) / 2
+//                        p.x = group.cardSize.width / 2
+//                        p.y = group.cardSize.height / 2
+//                        p.fill = "#222"
+//                        p.stroke = "#FFF"
+//                        p.strokeWidth = 3
+//                      }
+//                    ),
+//                    KText(
+//                      { p =>
+//                        p.text = group.cards.length.toString
+//                        p.height = group.cardSize.height
+//                        p.width = group.cardSize.width
+//                        p.fontFamily = "'Open Sans', sans-serif"
+//                        p.fontStyle = "bold"
+//                        p.fill = "#FFF"
+//                        p.align = "center"
+//                        p.verticalAlign = "middle"
+//                      }
+//                    )
+//                  )
                 )
             }
 

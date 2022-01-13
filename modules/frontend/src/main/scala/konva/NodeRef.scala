@@ -109,8 +109,8 @@ trait ShapeProps extends NodeProps:
   var strokeEnabled: js.UndefOr[Boolean] = js.native
   var lineJoin: js.UndefOr[String] = js.native
   var lineCap: js.UndefOr[String] = js.native
-  var sceneFunc: js.UndefOr[(Context, ShapeRef) => Unit] = js.native
-  var hitFunc: js.UndefOr[(Context, ShapeRef) => Unit] = js.native
+  var sceneFunc: js.UndefOr[js.Function2[Context, ShapeRef, Unit]] = js.native
+  var hitFunc: js.UndefOr[js.Function2[Context, ShapeRef, Unit]] = js.native
   var shadowColor: js.UndefOr[String] = js.native
   var shadowBlur: js.UndefOr[Double] = js.native
   var shadowOffset: js.UndefOr[Vector2d] = js.native

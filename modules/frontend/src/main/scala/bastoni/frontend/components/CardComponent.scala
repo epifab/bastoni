@@ -27,93 +27,115 @@ object Img:
 object CardComponent:
 
   case class Props(current: CardLayout, previous: Option[CardLayout]):
-    def previousOrCurrent: CardLayout = previous.getOrElse(current)
+    def initial: CardLayout = previous.getOrElse(current)
 
-  private val cardImages: Map[Option[SimpleCard], Image] =
-    Map(None -> Img("/static/carte/retro.jpg")) ++ Deck.cards.map { card =>
+  private val cardImages: Map[SimpleCard, Image] =
+    Deck.cards.map { card =>
       val suit = card.suit.toString.toLowerCase
       val rank = "%02d".format(card.rank.value)
-      val img = Img(s"/static/carte/$suit/$rank.jpg")
-      Some(card) -> img
+      val img = Img(s"/static/carte/napoletane/$suit/$rank.svg")
+      card -> img
     }.toMap
 
-  private val konvaCards: MapView[Option[SimpleCard], HTMLCanvasElement] = cardImages.view.mapValues { image =>
-    val kimage = new Konva.Image(
-      JsObject[KImage.Props] { p =>
-        p.width = CardSize.full.width
-        p.height = CardSize.full.height
-        p.image = image
-      }
-    )
-
-    val kgroup = new Konva.Group(
-      JsObject[KGroup.Props] { p =>
-        p.width = CardSize.full.width
-        p.height = CardSize.full.height
-        p.clipFunc = borderRadius(0, 0, CardSize.full.width, CardSize.full.height, CardSize.full.borderRadius)
-      }
-    )
-
-    kgroup.add(kimage)
-    kgroup.toCanvas()
-  }
-
-  private def borderRadius(x: Double, y: Double, width: Double, height: Double, radius: Double): reactkonva.ReactKonvaDOM.Context => Unit = ctx => {
-    ctx.beginPath()
-    ctx.moveTo(x + radius, y)
-    ctx.lineTo(x + width - radius, y)
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
-    ctx.lineTo(x + width, y + height - radius)
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
-    ctx.lineTo(x + radius, y + height)
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
-    ctx.lineTo(x, y + radius)
-    ctx.quadraticCurveTo(x, y, x + radius, y)
-    ctx.closePath()
-  }
+  private val backOfCardImagePattern = Img("/static/carte/cube.svg")
 
   class CardBackend($: BackendScope[Props, Unit]):
-    private val groupRef = new AtomicReference[Option[TweenRef]](None)
-    private val imageRef = new AtomicReference[Option[TweenRef]](None)
+    private val animations = new AtomicReference[List[CardLayout => Unit]](Nil)
     private val animationDuration = .6
 
-    val animation: Callback = for {
+    private def animationRef[P <: TweenProps](f: (P, CardLayout) => Unit): TweenRef => Unit = tween =>
+      val previousAnimations: List[CardLayout => Unit] = animations.get()
+      animations.set(((current: CardLayout) => tween.to(JsObject[P](p => f(p, current)))) :: previousAnimations)
+
+    val animate: Callback = for {
       props <- $.props
-      _ <- if (props.previous.isEmpty) Callback.empty else Callback(imageRef.get.foreach(r =>
-        r.to(JsObject[TweenProps] { p =>
-          p.width = props.current.size.width
-          p.height = props.current.size.height
-          p.duration = animationDuration
-        })
-      ))
-      _ <- if (props.previous.isEmpty) Callback.empty else Callback(groupRef.get.foreach(r =>
-        r.to(JsObject[TweenProps] { p =>
-          p.x = props.current.position.x
-          p.y = props.current.position.y
-          p.rotation = props.current.rotation
-          p.duration = animationDuration
-        })
-      ))
+      _ <- if (props.previous.isEmpty) Callback.empty else Callback(animations.get.foreach(_(props.current)))
     } yield ()
 
     def render(props: Props): VdomNode =
+      animations.set(Nil)
+
       KGroup(
         { p =>
-          p.ref = ref => groupRef.set(Some(ref))
-          p.x = props.previousOrCurrent.position.x
-          p.y = props.previousOrCurrent.position.y
-          p.rotation = props.previousOrCurrent.rotation
+          p.ref = animationRef[TweenProps] { (p, current) =>
+            p.x = current.position.x
+            p.y = current.position.y
+            p.rotation = current.rotation
+            p.duration = animationDuration
+          }
+          p.x = props.initial.position.x
+          p.y = props.initial.position.y
+          p.rotation = props.initial.rotation
         },
-        KImage { p =>
-          p.ref = ref => imageRef.set(Some(ref))
-          p.image = konvaCards(props.current.card.toOption.map(_.simple))
-          p.width = props.previousOrCurrent.size.width
-          p.height = props.previousOrCurrent.size.height
-          p.shadowBlur = props.current.shadowSize
-          p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
-          p.shadowColor = "#222"
-          p.shadowOpacity = 0.8
-        }
+        props.current.card.toOption.map(_.simple) match {
+          case None =>
+            KGroup(
+              { p =>
+                p.ref = animationRef[TweenProps] { (p, current) =>
+                  p.width = current.size.width
+                  p.height = current.size.height
+                  p.duration = animationDuration
+                }
+                p.width = props.initial.size.width
+                p.height = props.initial.size.height
+              },
+              KRect { p =>
+                p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
+                  p.width = current.size.width
+                  p.height = current.size.height
+                  p.cornerRadius = current.size.cornerRadius
+                  p.duration = animationDuration
+                }
+                p.width = props.initial.size.width
+                p.height = props.initial.size.height
+                p.cornerRadius = props.initial.size.cornerRadius
+                p.shadowBlur = props.current.shadowSize
+                p.shadowColor = "#222"
+                p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
+                p.shadowOpacity = .8
+                p.fill = "#777"
+              },
+              KRect { p =>
+                p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
+                  // fillPatternScale doesn't work here
+                  // p.fillPatternScale = Vector2d(current.size.cornerRadius / 5, current.size.cornerRadius / 5)
+                  p.cornerRadius = current.size.cornerRadius
+                  p.x = current.size.cornerRadius * 2
+                  p.y = current.size.cornerRadius * 2
+                  p.width = current.size.width - (current.size.cornerRadius * 4)
+                  p.height = current.size.height - (current.size.cornerRadius * 4)
+                  p.duration = animationDuration
+                }
+                p.fillPatternImage = backOfCardImagePattern
+                p.fillPatternRepeat = "repeat"
+                p.fillPatternRotation = 270
+                p.fillPatternScale = Vector2d(props.current.size.cornerRadius / 4, props.current.size.cornerRadius / 4)
+                p.stroke = "#555"
+                p.strokeWidth = 2
+                p.cornerRadius = props.initial.size.cornerRadius
+                p.x = props.initial.size.cornerRadius * 2
+                p.y = props.initial.size.cornerRadius * 2
+                p.width = props.initial.size.width - (props.initial.size.cornerRadius * 4)
+                p.height = props.initial.size.height - (props.initial.size.cornerRadius * 4)
+              }
+            )
+
+          case Some(card) =>
+            KImage { p =>
+              p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
+                p.width = current.size.width
+                p.height = current.size.height
+                p.duration = animationDuration
+              }
+              p.image = cardImages(card)
+              p.width = props.initial.size.width
+              p.height = props.initial.size.height
+              p.shadowBlur = props.current.shadowSize
+              p.shadowOffset = Vector2d(-props.current.shadowSize, 0)
+              p.shadowColor = "#222"
+              p.shadowOpacity = 0.8
+            }
+          }
       )
 
   private def component =
@@ -121,7 +143,7 @@ object CardComponent:
       .builder[Props]
       .stateless
       .renderBackend[CardBackend]
-      .componentDidMount(_.backend.animation)
+      .componentDidMount(_.backend.animate)
       .build
 
   def apply(current: CardLayout, previous: Option[CardLayout]): VdomElement =

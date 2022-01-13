@@ -1,11 +1,13 @@
 package bastoni.frontend.model
 
-case class CardSize(size: Size, borderRadius: Double):
+case class CardSize(size: Size, cornerRadius: Double):
   def width: Double = size.width
   def height: Double = size.height
-  def scale(factor: Double): CardSize = CardSize(size.scale(factor), borderRadius * factor)
+  def scale(factor: Double): CardSize = CardSize(size.scale(factor), cornerRadius * factor)
+  def *(factor: Double): CardSize = scale(factor)
+  def /(factor: Double): CardSize = scale(1 / factor)
   def scaleTo(newWidth: Double): CardSize = scale(newWidth / size.width)
 
 object CardSize:
   def scaleTo(width: Double): CardSize = full.scaleTo(width)
-  val full: CardSize = CardSize(Size(90, 148), borderRadius = 10)
+   val full: CardSize = CardSize(Size(87, 140), cornerRadius = 5)

@@ -9,7 +9,7 @@ object CardGroupRenderer:
         cards,
         size,
         Point(
-          middle - (size.width / 2),
+          middle - (size.width / 2) - (margin(cards) * (cards.size - 1) / 2),
           top
         ),
         rotation = 0,
