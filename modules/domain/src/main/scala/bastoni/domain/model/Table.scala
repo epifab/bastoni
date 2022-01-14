@@ -23,7 +23,7 @@ trait Table[C <: CardView]:
 
   def seats: List[Seat[C]]
   def deck: List[C]
-  def board: List[C]
+  def board: List[(Option[UserId], C)]
   def active: Option[GameType]
 
   lazy val indexedSeats: List[(Seat[C], Int)] = seats.zipWithIndex
@@ -45,7 +45,7 @@ trait Table[C <: CardView]:
   protected def updateWith(
     seats: List[Seat[C]] = this.seats,
     deck: List[C] = this.deck,
-    board: List[C] = this.board,
+    board: List[(Option[UserId], C)] = this.board,
     active: Option[GameType] = active
   ): TableView
 
@@ -86,7 +86,7 @@ trait Table[C <: CardView]:
         )
 
       case Event.BoardCardsDealt(board) =>
-        updateWith(board = board.map(buildCard(_, Direction.Up)))
+        updateWith(board = board.map(c => None -> buildCard(c, Direction.Up)))
 
       case Event.CardPlayed(playerId, card) =>
         updateWith(
@@ -98,7 +98,7 @@ trait Table[C <: CardView]:
               )
             case whatever => whatever
           },
-          board = buildCard(card, Direction.Up) :: board
+          board = Some(playerId) -> buildCard(card, Direction.Up) :: board
         )
 
       case Event.CardsTaken(playerId, taken, scopa) =>
@@ -110,13 +110,17 @@ trait Table[C <: CardView]:
               )
             case whatever => whatever
           },
-          board = taken.foldLeft(board)(removeCard)
+          board = taken.foldLeft(board) {
+            case (remainingBoardCards, toRemove) => remainingBoardCards.filterNot {
+              case (_, boardCard) => boardCard.card.ref == toRemove.ref
+            }
+          }
         )
 
       case Event.TrickCompleted(winnerId) =>
         updateWith(
           seats = seats.map {
-            case seat if seat.player.exists(_.is(winnerId)) => seat.copy(taken = seat.taken ++ board.map(faceDown))
+            case seat if seat.player.exists(_.is(winnerId)) => seat.copy(taken = seat.taken ++ board.map { case (_, card) => faceDown(card) })
             case whatever => whatever
           },
           board = Nil

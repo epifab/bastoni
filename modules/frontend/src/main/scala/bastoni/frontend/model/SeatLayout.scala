@@ -73,7 +73,7 @@ object MainPlayerHandRenderer:
                 verticalOffset + (verticalOverlap * row)
               ),
               rotation = Angle.zero,
-              shadow = Some(Shadow(10, .8))
+              shadow = Some(Shadow(8, Point(-6, 0)))
             )
           }
       }

@@ -10,7 +10,7 @@ enum TableError:
 case class TableServerView(
   override val seats: List[Seat[CardServerView]],
   override val deck: List[CardServerView],
-  override val board: List[CardServerView],
+  override val board: List[(Option[UserId], CardServerView)],
   override val active: Option[GameType]
 ) extends Table[CardServerView]:
 
@@ -19,7 +19,7 @@ case class TableServerView(
   override protected def updateWith(
     seats: List[Seat[CardServerView]] = this.seats,
     deck: List[CardServerView] = this.deck,
-    board: List[CardServerView] = this.board,
+    board: List[(Option[UserId], CardServerView)] = this.board,
     active: Option[GameType] = this.active
   ): TableServerView = TableServerView(seats, deck, board, active)
 
@@ -48,7 +48,7 @@ case class TableServerView(
           )
       },
       deck = deck.map(_.toPlayerView(me.id, None)),
-      board = board.map(_.toPlayerView(me.id, None)),
+      board = board.map { case (u, c) => u -> c.toPlayerView(me.id, None) },
       active = active
     )
 

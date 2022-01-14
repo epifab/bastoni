@@ -18,6 +18,6 @@ object CardGroupRenderer:
         size,
         topLeft,
         rotation,
-        shadow = Some(Shadow(size.cornerRadius.floor.toInt, .5)),
+        shadow = Some(Shadow(size.cornerRadius.floor.toInt, Point(-size.cornerRadius, 0).rotate(rotation))),
         marginX = margin
       ))

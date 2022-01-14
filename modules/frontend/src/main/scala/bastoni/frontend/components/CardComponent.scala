@@ -46,8 +46,8 @@ object CardComponent:
     private def withShadow(p: ShapeProps)(shadow: Shadow): Unit =
       p.shadowBlur = shadow.size
       p.shadowColor = "#222"
-      p.shadowOffset = Vector2d(-shadow.size, 0)
-      p.shadowOpacity = shadow.opacity
+      p.shadowOffset = Vector2d(shadow.offset.x, shadow.offset.y)
+      p.shadowOpacity = .5
 
     private def renderCardBack(props: Props): VdomNode =
       KGroup(

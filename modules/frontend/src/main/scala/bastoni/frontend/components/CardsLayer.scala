@@ -53,9 +53,15 @@ object CardsLayer:
   object Props:
     def apply(props: GameProps, layout: GameLayout): Props =
       def cardsFor(table: TablePlayerView): List[CardLayout | CardGroupLayout] =
+        val players: Map[UserId, TablePlayer] =
+          table.mySeat.map(_.player.id -> TablePlayer.MainPlayer).toMap ++
+            table.opponent(0).flatMap(_.player).map(_.id -> TablePlayer.Player1).toMap ++
+            table.opponent(1).flatMap(_.player).map(_.id -> TablePlayer.Player2).toMap ++
+            table.opponent(2).flatMap(_.player).map(_.id -> TablePlayer.Player3).toMap
+
         layout.renderDeck(table.deck.map(_.card)) ++
           renderPiles(table, layout) ++
-          layout.renderBoard(table.board.map(_.card)) ++
+          layout.renderBoard(table.board.map { case (user, card) => user.flatMap(players.get) -> card.card }) ++
           renderHands(table, layout)
 
       val cards = cardsFor(props.currentTable)

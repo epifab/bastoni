@@ -4,7 +4,7 @@ case class TablePlayerView(
   me: UserId,
   override val seats: List[Seat[CardPlayerView]],
   override val deck: List[CardPlayerView],
-  override val board: List[CardPlayerView],
+  override val board: List[(Option[UserId], CardPlayerView)],
   override val active: Option[GameType]
 ) extends Table[CardPlayerView]:
 
@@ -13,7 +13,7 @@ case class TablePlayerView(
   override protected def updateWith(
     seats: List[Seat[CardPlayerView]] = this.seats,
     deck: List[CardPlayerView] = this.deck,
-    board: List[CardPlayerView] = this.board,
+    board: List[(Option[UserId], CardPlayerView)] = this.board,
     active: Option[GameType] = this.active
   ): TablePlayerView = TablePlayerView(me, seats, deck, board, active)
 

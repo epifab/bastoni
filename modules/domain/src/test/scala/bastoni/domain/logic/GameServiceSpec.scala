@@ -248,7 +248,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
               ),
               deck = shuffledDeck.cards.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
               board = List(
-                CardServerView(cardOf(Due, Bastoni), Direction.Up)
+                None -> CardServerView(cardOf(Due, Bastoni), Direction.Up)
               ),
               active = Some(GameType.Briscola)
             )
@@ -282,7 +282,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           )
         ),
         deck = Nil,
-        board = List(CardServerView(player2Card, Direction.Up)),
+        board = List(None -> CardServerView(player2Card, Direction.Up)),
         active = Some(GameType.Briscola)
       ),
       stateMachine = Some(generic.StateMachine(

@@ -1,6 +1,6 @@
 package bastoni.frontend.model
 
-import bastoni.domain.model.{VisibleCard, CardInstance, HiddenCard}
+import bastoni.domain.model.{CardInstance, HiddenCard, UserId, VisibleCard}
 
 case class CardLayout(
   card: CardInstance,
@@ -32,6 +32,11 @@ case class CardGroupLayout(
   }
 
 type CardsRenderer = List[CardInstance] => List[CardLayout | CardGroupLayout]
+
+enum TablePlayer:
+  case MainPlayer, Player1, Player2, Player3
+
+type BoardRenderer = List[(Option[TablePlayer], CardInstance)] => List[CardLayout | CardGroupLayout]
 
 object CardsRenderer:
   def collapseFaceDownCards(cx: List[CardInstance], collapsed: List[HiddenCard]): List[VisibleCard | List[HiddenCard]] =

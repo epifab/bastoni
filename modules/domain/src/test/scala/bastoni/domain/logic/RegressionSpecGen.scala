@@ -102,7 +102,7 @@ object RegressionSpecGen extends IOApp:
                   .seatFor(playerId)
                   .flatMap(_.hand.headOption.map(_.card))
                   .getOrElse(throw IllegalStateException("Player not there or empty hand"))
-                val taken = scopa.Game.takeCombinations(table.board.map(_.card), card).next().toList
+                val taken = scopa.Game.takeCombinations(table.board.map { case (_, c) => c.card }, card).next().toList
                 Command.TakeCards(playerId, card, taken)
             }
             .through(inputBus.publish)
