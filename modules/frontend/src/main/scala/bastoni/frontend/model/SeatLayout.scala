@@ -11,14 +11,19 @@ case class SeatLayout(
 )
 
 object OtherSeatLayout:
-  def apply(handSize: CardSize, pileSize: CardSize, center: Point, rotation: Angle): SeatLayout =
+  def apply(handSize: CardSize, pileSize: CardSize, center: Point, rotation: Angle): SeatLayout = {
+    val radius = 45
+
     SeatLayout(
       center,
-      radius = 45,
+      radius = radius,
       rotation,
       renderHand = CardGroupRenderer(
         handSize,
-        center,
+        center.copy(
+          x = center.x - Angle(90 - rotation.deg).cos * (handSize.height - radius - 15),
+          y = center.y - Angle(90 - rotation.deg).sin * (handSize.height - radius - 15)
+        ),
         Angle(-rotation.deg),
         margin = 30
       ),
@@ -29,6 +34,7 @@ object OtherSeatLayout:
         margin = .6
       )
     )
+  }
 
 
 object MainPlayerHandRenderer:
@@ -36,8 +42,8 @@ object MainPlayerHandRenderer:
     val defaultSize: CardSize = CardSize.full
     defaultSize.scaleTo(
       Math.min(
-        defaultSize.width * 2,
-        (canvasSize.width / ((maxCardsPerRow - 1) * horizontalOverlapFactor) + 1).floor
+        (canvasSize.height / 3) * CardSize.ratioW,
+        canvasSize.width / ((maxCardsPerRow - 1) * horizontalOverlapFactor) + 1
       )
     )
   }

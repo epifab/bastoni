@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.collection.MapView
 import scala.scalajs.js
 
-object Img:
+object Image:
   def apply(src: String): Image =
     val img = document.createElement("img").asInstanceOf[Image]
     img.src = src
@@ -29,15 +29,15 @@ object CardComponent:
   case class Props(current: CardLayout, previous: Option[CardLayout]):
     def initial: CardLayout = previous.getOrElse(current)
 
-  private val cardImages: Map[SimpleCard, Image] =
+  val backOfCardImagePattern: Image = Image("/static/carte/cube.svg")
+
+  val cardImages: Map[SimpleCard, Image] =
     Deck.cards.map { card =>
       val suit = card.suit.toString.toLowerCase
       val rank = "%02d".format(card.rank.value)
-      val img = Img(s"/static/carte/napoletane/$suit/$rank.svg")
+      val img = Image(s"/static/carte/napoletane/$suit/$rank.svg")
       card -> img
     }.toMap
-
-  private val backOfCardImagePattern = Img("/static/carte/cube.svg")
 
   class CardBackend($: BackendScope[Props, Unit]):
     private val animations = new AtomicReference[List[CardLayout => Unit]](Nil)

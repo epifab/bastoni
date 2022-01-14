@@ -17,9 +17,10 @@ object GameLayout:
   private val seatRadius = 45
 
   def apply(canvasSize: Size): GameLayout = {
-    val (pileSize, deckSize, boardSize, handSize) =
-      if (canvasSize.width > 800 && canvasSize.height > 600) (CardSize.full / 2, CardSize.full / 3 * 2, CardSize.full, CardSize.full / 3 * 2)
-      else (CardSize.scaleTo(30), CardSize.scaleTo(seatRadius), CardSize.scaleTo(50), CardSize.scaleTo(seatRadius))
+    val pileSize = CardSize.scaleTo(5)
+    val deckSize = CardSize.scaleTo(Math.min(canvasSize.width / 7, canvasSize.height / 7 * CardSize.ratioW))
+    val handSize = CardSize.scaleTo(Math.min(canvasSize.width / 5, canvasSize.height / 5 * CardSize.ratioW))
+    val boardSize = CardSize.scaleTo(Math.min(canvasSize.width / 5, canvasSize.height / 5 * CardSize.ratioW))
 
     val cardsMargin: Int = (boardSize.width / 4).floor.toInt
 
