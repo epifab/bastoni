@@ -14,17 +14,17 @@ object CardsLayer:
 
   def renderHands(table: TablePlayerView, layout: GameLayout): List[CardLayout | CardGroupLayout] = {
     val data: List[Option[List[CardInstance]]] = List(
-      table.mySeat.map(_.hand.map(_.card)),
       table.opponent(0).map(_.hand.map(_.card)),
       table.opponent(1).map(_.hand.map(_.card)),
       table.opponent(2).map(_.hand.map(_.card)),
+      table.mySeat.map(_.hand.map(_.card))
     )
 
     val renderers: List[CardsRenderer] = List(
-      layout.mainPlayer.renderHand,
       layout.player1.renderHand,
       layout.player2.renderHand,
-      layout.player3.renderHand
+      layout.player3.renderHand,
+      layout.mainPlayer.renderHand
     )
 
     data.zip(renderers).flatMap { case (d, f) => d.toList.flatMap(f) }

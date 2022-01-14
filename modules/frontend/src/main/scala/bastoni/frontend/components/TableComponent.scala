@@ -11,7 +11,6 @@ import scala.util.chaining.*
 object TableComponent:
   private val component = ScalaFnComponent[TableLayout] { layout =>
       KRect { p =>
-        p.cornerRadius = 30
         p.x = layout.topLeft.x
         p.y = layout.topLeft.y
         p.width = layout.size.width

@@ -1,7 +1,7 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.*
-import bastoni.frontend.model.SeatLayout
+import bastoni.frontend.model.*
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.html_<^.*
 import reactkonva.{KCircle, KGroup, KText}
@@ -9,6 +9,13 @@ import reactkonva.{KCircle, KGroup, KText}
 object PlayerComponent:
   private val component =
     ScalaFnComponent[(PlayerState, SeatLayout)] { case (state, layout) =>
+      val textRadius: Double = Math.sqrt(2 * layout.radius * layout.radius)
+      val textTopLeftAngle: Angle = Angle(225 - layout.rotation.deg)
+      val textPosition: Point = Point(
+        layout.center.x + textTopLeftAngle.sin * textRadius,
+        layout.center.y + textTopLeftAngle.cos * textRadius
+      )
+
       KGroup(
         KCircle { p =>
           p.radius = layout.radius
@@ -52,10 +59,11 @@ object PlayerComponent:
           p.fontFamily = "'Open Sans', sans-serif"
           p.fontStyle = "bold"
           p.fontSize = 16
-          p.y = layout.center.y - layout.radius
-          p.x = layout.center.x - layout.radius
+          p.x = textPosition.x
+          p.y = textPosition.y
           p.width = layout.radius * 2
           p.height = layout.radius * 2
+          p.rotation = layout.rotation.deg
         }
       )
     }

@@ -5,22 +5,29 @@ import bastoni.domain.model.{VisibleCard, CardInstance}
 case class SeatLayout(
   center: Point,
   radius: Double,
+  rotation: Angle,
   renderHand: CardsRenderer,
   renderPile: CardsRenderer
 )
 
 object OtherSeatLayout:
-  def apply(handSize: CardSize, pileSize: CardSize, center: Point): SeatLayout =
+  def apply(handSize: CardSize, pileSize: CardSize, center: Point, rotation: Angle): SeatLayout =
     SeatLayout(
       center,
       radius = 45,
+      rotation,
       renderHand = CardGroupRenderer(
         handSize,
-        center.x,
-        center.y + 20,
-        cards => if (cards.isEmpty) 0 else 30 / cards.length
+        center,
+        Angle(-rotation.deg),
+        margin = 30
       ),
-      renderPile = CardGroupRenderer(pileSize, center.x, center.y + 20 + handSize.height + 20)
+      renderPile = CardGroupRenderer(
+        pileSize,
+        center,
+        Angle(-rotation.deg),
+        margin = .6
+      )
     )
 
 
@@ -65,7 +72,7 @@ object MainPlayerHandRenderer:
                 horizontalOffset + (horizontalOverlap * col),
                 verticalOffset + (verticalOverlap * row)
               ),
-              rotation = 0,
+              rotation = Angle.zero,
               shadow = Some(Shadow(10, .8))
             )
           }

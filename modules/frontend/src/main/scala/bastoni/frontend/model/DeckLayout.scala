@@ -16,9 +16,9 @@ object DeckLayout:
                 topLeft.x,
                 topLeft.y
               ),
-              rotation = 0,
+              rotation = Angle.zero,
               shadow = Some(Shadow(size.cornerRadius.floor.toInt, .5)),
-              margin = 1
+              marginX = 1
             )
 
           case card: VisibleCard =>
@@ -29,7 +29,7 @@ object DeckLayout:
                 topLeft.x + (size.width * .5),
                 topLeft.y + (size.height * .8)
               ),
-              rotation = 23,
+              rotation = Angle(23),
               shadow = None
             )
         }

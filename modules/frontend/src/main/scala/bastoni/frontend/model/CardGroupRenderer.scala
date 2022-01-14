@@ -3,16 +3,21 @@ package bastoni.frontend.model
 import bastoni.domain.model.CardInstance
 
 object CardGroupRenderer:
-  def apply(size: CardSize, middle: Double, top: Double, margin: List[CardInstance] => Double = _ => .6): CardsRenderer =
+  def apply(size: CardSize, center: Point, rotation: Angle, margin: Double): CardsRenderer =
     (cards: List[CardInstance]) =>
+      val blockWidth = size.width + (margin * (cards.size - 1))
+      val blockHeight = size.height
+
+      val topLeft = Point(
+        center.x - rotation.cos * blockWidth / 2,
+        center.y - rotation.sin * blockWidth / 2
+      )
+
       List(CardGroupLayout(
         cards,
         size,
-        Point(
-          middle - (size.width / 2) - (margin(cards) * (cards.size - 1) / 2),
-          top
-        ),
-        rotation = 0,
+        topLeft,
+        rotation,
         shadow = Some(Shadow(size.cornerRadius.floor.toInt, .5)),
-        margin = margin(cards)
+        marginX = margin
       ))

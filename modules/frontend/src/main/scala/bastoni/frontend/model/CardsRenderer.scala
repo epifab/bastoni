@@ -6,7 +6,7 @@ case class CardLayout(
   card: CardInstance,
   size: CardSize,
   position: Point,
-  rotation: Int,
+  rotation: Angle,
   shadow: Option[Shadow]
 )
 
@@ -14,15 +14,18 @@ case class CardGroupLayout(
   cards: List[CardInstance],
   cardSize: CardSize,
   topLeft: Point,
-  rotation: Int,
+  rotation: Angle,
   shadow: Option[Shadow],
-  margin: Double
+  marginX: Double
 ):
   def toCardLayout: List[CardLayout] = cards.zipWithIndex.map { case (card, index) =>
     CardLayout(
       card,
       cardSize,
-      topLeft.copy(x = topLeft.x + (index * margin)),
+      Point(
+        x = topLeft.x + (rotation.cos * index * marginX),
+        y = topLeft.y + (rotation.sin * index * marginX)
+      ),
       rotation,
       shadow
     )

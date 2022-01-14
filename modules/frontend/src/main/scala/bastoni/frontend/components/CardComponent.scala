@@ -128,12 +128,12 @@ object CardComponent:
           p.ref = animationRef[TweenProps] { (p, current) =>
             p.x = current.position.x
             p.y = current.position.y
-            p.rotation = current.rotation
+            p.rotation = current.rotation.deg
             p.duration = animationDuration
           }
           p.x = props.initial.position.x
           p.y = props.initial.position.y
-          p.rotation = props.initial.rotation
+          p.rotation = props.initial.rotation.deg
         },
         props.current.card.toOption.map(_.simple).fold(renderCardBack(props))(renderCard(props))
       )

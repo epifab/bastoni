@@ -40,3 +40,4 @@ object ReactKonvaDOM extends js.Object:
     def quadraticCurveTo(x: Double, y: Double, w: Double, h: Double): Unit
     def closePath(): Unit
     def fillStrokeShape(shape: ShapeRef): Unit
+    def rotate(x: Double): Unit

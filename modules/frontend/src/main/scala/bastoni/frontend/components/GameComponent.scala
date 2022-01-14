@@ -42,15 +42,15 @@ class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
           p.height = window.innerHeight
         },
         KLayer(TableComponent(layout.table)),
+        KLayer(CardsLayer(props, layout)),
         KLayer(
           List(
+            props.currentTable.mySeat.map(_.player).map(PlayerComponent(_, layout.mainPlayer)),
             props.currentTable.opponent(0).flatMap(_.player).map(PlayerComponent(_, layout.player1)),
             props.currentTable.opponent(1).flatMap(_.player).map(PlayerComponent(_, layout.player2)),
             props.currentTable.opponent(2).flatMap(_.player).map(PlayerComponent(_, layout.player3)),
           ).flatten: _*
         ),
-        KLayer(CardsLayer(props, layout)),
-        KLayer(props.currentTable.mySeat.map(_.player).map(PlayerComponent(_, layout.mainPlayer)).toList: _*)
       )
 
     case None => <.div("Waiting...")
