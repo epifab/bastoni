@@ -2,6 +2,7 @@ package bastoni.frontend
 package components
 
 import bastoni.domain.model.*
+import bastoni.domain.view.FromPlayer
 import bastoni.frontend.model.*
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
@@ -48,7 +49,7 @@ object CardsLayer:
     data.zip(renderers).flatMap { case (d, f) => d.toList.flatMap(f) }
   }
 
-  case class Props(current: List[CardLayout | CardGroupLayout], previous: Map[Int, CardLayout])
+  case class Props(current: List[CardLayout | CardGroupLayout], previous: Map[Int, CardLayout], selectable: Map[Int, Callback])
 
   object Props:
     def apply(props: GameProps, layout: GameLayout): Props =
@@ -74,20 +75,35 @@ object CardsLayer:
           }.map(layout => layout.card.ref -> layout).toMap
         }.getOrElse(Map.empty)
 
-      new Props(cards, previousCards)
+      val selectableCards: Map[Int, Callback] = props.currentTable.mySeat.fold(Map.empty)(seat => seat.player match {
+        case PlayerState.ActingPlayer(_, Action.PlayCard, _) =>
+          seat
+            .hand.flatMap(_.card.toOption)
+            .map { (card: VisibleCard) => card.ref -> props.callback(FromPlayer.PlayCard(card)) }
+            .toMap
+
+        case PlayerState.ActingPlayer(_, Action.PlayCardOf(suit), _) =>
+          val hand: List[VisibleCard] = seat.hand.flatMap(_.card.toOption)
+          val anyCard: Boolean = hand.forall(_.suit != suit)
+          hand.collect { case card if card.suit == suit || anyCard => card.ref -> props.callback(FromPlayer.PlayCard(card)) }.toMap
+
+        case _ => Map.empty
+      })
+
+      new Props(cards, previousCards, selectableCards)
 
   private val component =
     ScalaComponent
       .builder[Props]
       .stateless
-      .render_P { props =>
+      .render_P { (props: Props) =>
         val renderedCards: List[VdomNode] =
           props.current
             .map {
-              case card: CardLayout => CardComponent(card, props.previous.get(card.card.ref))
+              case card: CardLayout => CardComponent(card, props.previous.get(card.card.ref), props.selectable.get(card.card.ref))
               case group: CardGroupLayout =>
                 KGroup(
-                  KGroup(group.toCardLayout.map(card => CardComponent(card, props.previous.get(card.card.ref))): _*),
+                  KGroup(group.toCardLayout.map(card => CardComponent(card, props.previous.get(card.card.ref), props.selectable.get(card.card.ref))): _*),
 //                  KGroup(
 //                    { p =>
 //                      p.x = group.topLeft.x
@@ -121,7 +137,10 @@ object CardsLayer:
 
         KGroup(renderedCards: _*)
       }
-      .shouldComponentUpdate(c => CallbackTo(c.currentProps.current != c.nextProps.current))
+      .shouldComponentUpdate(c => CallbackTo(
+        c.currentProps.current != c.nextProps.current ||
+          c.currentProps.selectable != c.nextProps.selectable
+      ))
       .build
 
   def apply(gameProps: GameProps, gameLayout: GameLayout): VdomNode =

@@ -4,7 +4,7 @@ import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
 enum Delay:
-  case DealCards, TakeCards, CompleteGame, ActionTimeout
+  case AfterShuffleDeck, AfterDealCards, AfterPlayCard, BeforeTakeCards, AfterTakeCards, BeforeGameOver, ActionTimeout
 
 object Delay:
   given Encoder[Delay] = Encoder[String].contramap(_.toString)
@@ -12,9 +12,12 @@ object Delay:
 
   object syntax:
     extension (command: Command.Continue.type)
-      def toDealCards: Delayed[Command] = Delayed(command, Delay.DealCards)
-      def toTakeCards: Delayed[Command] = Delayed(command, Delay.TakeCards)
-      def toCompleteGame: Delayed[Command] = Delayed(command, Delay.CompleteGame)
+      def afterShufflingDeck: Delayed[Command] = Delayed(command, Delay.AfterShuffleDeck)
+      def afterDealingCards: Delayed[Command] = Delayed(command, Delay.AfterDealCards)
+      def afterTakingCards: Delayed[Command] = Delayed(command, Delay.AfterTakeCards)
+      def beforeTakingCards: Delayed[Command] = Delayed(command, Delay.BeforeTakeCards)
+      def afterPlayingCards: Delayed[Command] = Delayed(command, Delay.AfterPlayCard)
+      def beforeGameOver: Delayed[Command] = Delayed(command, Delay.BeforeGameOver)
 
     extension (command: Command.Tick)
       def toActionTimeout: Delayed[Command] = Delayed(command, Delay.ActionTimeout)

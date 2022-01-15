@@ -176,9 +176,7 @@ trait Table[C <: CardView]:
         updateWith(
           seats = seats.map {
             case seat@ Seat(Some(player: SittingIn), _, _) if player.is(playerId) =>
-              seat.copy(player = Some(player.act(Action.ShuffleDeck, timeout).mapPlayer(_.copy(dealer = true))))
-            case seat@ Seat(Some(sittingIn: SittingIn), _, _) =>
-              seat.copy(player = Some(sittingIn.mapPlayer(_.copy(dealer = false))))
+              seat.copy(player = Some(player.act(Action.ShuffleDeck, timeout)))
             case whatever => whatever
           }
         )

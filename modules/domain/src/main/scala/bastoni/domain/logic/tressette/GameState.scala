@@ -17,6 +17,7 @@ object GameState:
   case class   DealRound(todo: List[Player], done: List[Player], remaining: Int, deck: Deck) extends Active((done ++ todo).map(_.matchPlayer))
   case class   DrawRound(todo: List[Player], done: List[Player], deck: Deck) extends Active((done ++ todo).map(_.matchPlayer))
   case class   PlayRound(todo: List[Player], done: List[(Player, VisibleCard)], deck: Deck) extends Active((done.map(_._1) ++ todo).map(_.matchPlayer))
+  case class   WillPlay(round: PlayRound) extends Active(round.activePlayers)
   case class   WillCompleteTrick(players: List[(Player, VisibleCard)], deck: Deck) extends Active(players.map(_._1.matchPlayer))
   case class   WillComplete(players: List[Player]) extends Active(players.map(_.matchPlayer))
 
@@ -34,6 +35,7 @@ object GameState:
     case s: DrawRound         => deriveEncoder[DrawRound].mapJsonObject(_.add("stage", "DrawRound".asJson))(s)
     case s: PlayRound         => deriveEncoder[PlayRound].mapJsonObject(_.add("stage", "PlayRound".asJson))(s)
     case s: WaitingForPlayer  => deriveEncoder[WaitingForPlayer].mapJsonObject(_.add("stage", "WaitingForPlayer".asJson))(s)
+    case s: WillPlay          => deriveEncoder[WillPlay].mapJsonObject(_.add("stage", "WillPlay".asJson))(s)
     case s: WillCompleteTrick => deriveEncoder[WillCompleteTrick].mapJsonObject(_.add("stage", "WillCompleteTrick".asJson))(s)
     case s: WillComplete      => deriveEncoder[WillComplete].mapJsonObject(_.add("stage", "WillComplete".asJson))(s)
     case s: Completed         => deriveEncoder[Completed].mapJsonObject(_.add("stage", "Completed".asJson))(s)
@@ -46,6 +48,7 @@ object GameState:
     case "DrawRound"         => deriveDecoder[DrawRound](cursor)
     case "PlayRound"         => deriveDecoder[PlayRound](cursor)
     case "WaitingForPlayer"  => deriveDecoder[WaitingForPlayer](cursor)
+    case "WillPlay"          => deriveDecoder[WillPlay](cursor)
     case "WillCompleteTrick" => deriveDecoder[WillCompleteTrick](cursor)
     case "WillComplete"      => deriveDecoder[WillComplete](cursor)
     case "Completed"         => deriveDecoder[Completed](cursor)

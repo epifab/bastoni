@@ -28,6 +28,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Due",
@@ -35,6 +39,10 @@
         "ref" : 0
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -60,6 +68,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Asso",
@@ -67,6 +79,10 @@
         "ref" : 7
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -92,6 +108,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Sei",
@@ -99,6 +119,10 @@
         "ref" : 9
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -124,6 +148,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Tre",
@@ -131,6 +159,10 @@
         "ref" : 11
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -156,6 +188,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "card" : {
         "rank" : "Fante",
@@ -163,6 +199,10 @@
         "ref" : 13
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -188,6 +228,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "card" : {
         "rank" : "Fante",
@@ -195,6 +239,10 @@
         "ref" : 15
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -220,6 +268,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "card" : {
         "rank" : "Sette",
@@ -227,6 +279,10 @@
         "ref" : 17
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -252,6 +308,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Fante",
@@ -259,6 +319,10 @@
         "ref" : 19
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -284,6 +348,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Sei",
@@ -291,6 +359,10 @@
         "ref" : 21
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -316,6 +388,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Cavallo",
@@ -323,6 +399,10 @@
         "ref" : 23
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -348,6 +428,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "card" : {
         "rank" : "Fante",
@@ -355,6 +439,10 @@
         "ref" : 25
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -380,6 +468,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "card" : {
         "rank" : "Quattro",
@@ -387,6 +479,10 @@
         "ref" : 27
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -412,6 +508,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Quattro",
@@ -419,6 +519,10 @@
         "ref" : 29
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -444,6 +548,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Sette",
@@ -451,6 +559,10 @@
         "ref" : 31
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -476,6 +588,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Sette",
@@ -483,6 +599,10 @@
         "ref" : 33
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -508,6 +628,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Sei",
@@ -515,6 +639,10 @@
         "ref" : 35
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -540,6 +668,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Tre",
@@ -547,6 +679,10 @@
         "ref" : 37
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -572,6 +708,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Cavallo",
@@ -579,6 +719,10 @@
         "ref" : 39
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -596,6 +740,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Asso",
@@ -603,6 +751,10 @@
         "ref" : 1
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -620,6 +772,10 @@
       "supertype" : "Command"
     },
     {
+      "type" : "Continue",
+      "supertype" : "Command"
+    },
+    {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "card" : {
         "rank" : "Sette",
@@ -627,6 +783,10 @@
         "ref" : 2
       },
       "type" : "PlayCard",
+      "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
       "supertype" : "Command"
     },
     {
@@ -859,7 +1019,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterShuffleDeck",
       "supertype" : "Command"
     },
     {
@@ -897,7 +1057,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -935,7 +1095,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -946,6 +1106,13 @@
       },
       "type" : "TrumpRevealed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -973,6 +1140,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1005,7 +1179,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1017,7 +1191,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -1039,7 +1213,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -1056,6 +1230,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -1083,6 +1264,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1115,7 +1303,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1127,7 +1315,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -1149,7 +1337,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -1166,6 +1354,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -1193,6 +1388,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1225,7 +1427,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1237,7 +1439,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -1259,7 +1461,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -1276,6 +1478,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -1303,6 +1512,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1335,7 +1551,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1347,7 +1563,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -1369,7 +1585,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -1386,6 +1602,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1413,6 +1636,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -1445,7 +1675,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1457,7 +1687,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -1479,7 +1709,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -1496,6 +1726,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1523,6 +1760,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -1555,7 +1799,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1567,7 +1811,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -1589,7 +1833,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -1606,6 +1850,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1633,6 +1884,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -1665,7 +1923,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1677,7 +1935,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -1699,7 +1957,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -1716,6 +1974,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -1743,6 +2008,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1775,7 +2047,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1787,7 +2059,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -1809,7 +2081,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -1826,6 +2098,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -1853,6 +2132,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1885,7 +2171,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1897,7 +2183,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -1919,7 +2205,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -1936,6 +2222,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -1963,6 +2256,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -1995,7 +2295,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2007,7 +2307,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -2029,7 +2329,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -2046,6 +2346,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -2073,6 +2380,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2105,7 +2419,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2117,7 +2431,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -2139,7 +2453,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -2156,6 +2470,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -2183,6 +2504,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2215,7 +2543,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2227,7 +2555,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -2249,7 +2577,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -2266,6 +2594,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2293,6 +2628,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -2325,7 +2667,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2337,7 +2679,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -2359,7 +2701,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -2376,6 +2718,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2403,6 +2752,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -2435,7 +2791,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2447,7 +2803,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -2469,7 +2825,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -2486,6 +2842,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2513,6 +2876,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -2545,7 +2915,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2557,7 +2927,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -2579,7 +2949,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -2596,6 +2966,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2623,6 +3000,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -2655,7 +3039,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2667,7 +3051,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -2689,7 +3073,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -2706,6 +3090,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2733,6 +3124,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -2765,7 +3163,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2777,7 +3175,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterPlayCard",
       "supertype" : "Command"
     },
     {
@@ -2799,7 +3197,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "DealCards",
+      "delay" : "AfterDealCards",
       "supertype" : "Command"
     },
     {
@@ -2816,6 +3214,13 @@
       ],
       "type" : "CardsDealt",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterDealCards",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2843,6 +3248,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -2875,13 +3287,20 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
       "winnerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "type" : "TrickCompleted",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2909,6 +3328,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -2941,13 +3367,20 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
       "winnerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "type" : "TrickCompleted",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
@@ -2975,6 +3408,13 @@
       },
       "type" : "CardPlayed",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterPlayCard",
+      "supertype" : "Command"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
@@ -3007,7 +3447,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "TakeCards",
+      "delay" : "BeforeTakeCards",
       "supertype" : "Command"
     },
     {
@@ -3019,7 +3459,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "CompleteGame",
+      "delay" : "BeforeGameOver",
       "supertype" : "Command"
     },
     {

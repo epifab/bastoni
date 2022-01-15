@@ -98,7 +98,7 @@ trait ShapeProps extends NodeProps:
   var fillRadialGradientEndPointY: js.UndefOr[Double] = js.native
   var fillRadialGradientStartRadius: js.UndefOr[Double] = js.native
   var fillRadialGradientEndRadius: js.UndefOr[Double] = js.native
-  var fillRadialGradientColorStops: js.UndefOr[Seq[js.Any]] = js.native // TODO : Array<number | string>;
+  var fillRadialGradientColorStops: js.UndefOr[Seq[Double | String]] = js.native
   var fillEnabled: js.UndefOr[Boolean] = js.native
   var fillPriority: js.UndefOr[String] = js.native
   var stroke: js.UndefOr[String] = js.native

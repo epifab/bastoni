@@ -155,13 +155,13 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       GameStarted(GameType.Tressette).toMessage(room2Id),
 
       DeckShuffled(shuffledDeck).toMessage(room1Id),
-      Delayed(Continue.toMessage(room1Id), Delay.DealCards),
+      Delayed(Continue.toMessage(room1Id), Delay.AfterShuffleDeck),
       CardsDealt(user1.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari)), Direction.Player).toMessage(room1Id),
-      Delayed(Continue.toMessage(room1Id), Delay.DealCards),
+      Delayed(Continue.toMessage(room1Id), Delay.AfterDealCards),
       DeckShuffled(shuffledDeck).toMessage(room2Id),
-      Delayed(Continue.toMessage(room2Id), Delay.DealCards),
+      Delayed(Continue.toMessage(room2Id), Delay.AfterShuffleDeck),
       CardsDealt(user2.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari), cardOf(Quattro, Spade), cardOf(Sei, Denari)), Direction.Player).toMessage(room2Id),
-      Delayed(Continue.toMessage(room2Id), Delay.DealCards),
+      Delayed(Continue.toMessage(room2Id), Delay.AfterDealCards),
       PlayerLeftTable(user1, 2).toMessage(room1Id),
       GameAborted.toMessage(room1Id),
       MatchAborted.toMessage(room1Id),
@@ -178,8 +178,10 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       Continue,
       Continue,
       Continue,
+      Continue,
       Connect,
       PlayCard(user1.id, cardOf(Due, Bastoni)),
+      Continue,
       Connect
     ).map(_.toMessage(room1))
 
@@ -194,7 +196,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 Seat(
                   Some(
                     ActingPlayer(
-                      MatchPlayer(user1, 0, false),
+                      MatchPlayer(user1, 0),
                       Action.PlayCard,
                       Some(Timeout.Max)
                     )
@@ -207,7 +209,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   taken = Nil
                 ),
                 Seat(
-                  Some(WaitingPlayer(MatchPlayer(user2, 0, false))),
+                  Some(WaitingPlayer(MatchPlayer(user2, 0))),
                   hand = List(
                     CardServerView(cardOf(Quattro, Spade), Direction.Player),
                     CardServerView(cardOf(Sei, Denari), Direction.Player),
@@ -227,9 +229,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 Seat(None, Nil, Nil),
                 Seat(None, Nil, Nil),
                 Seat(
-                  Some(
-                    WaitingPlayer(MatchPlayer(user1, 0, false))
-                  ),
+                  Some(WaitingPlayer(MatchPlayer(user1, 0))),
                   hand = List(
                     CardServerView(cardOf(Asso, Spade), Direction.Player),
                     CardServerView(cardOf(Sette, Denari), Direction.Player)
@@ -237,7 +237,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   taken = Nil
                 ),
                 Seat(
-                  Some(ActingPlayer(MatchPlayer(user2, 0, false), Action.PlayCard, Some(Timeout.Max))),
+                  Some(ActingPlayer(MatchPlayer(user2, 0), Action.PlayCard, Some(Timeout.Max))),
                   hand = List(
                     CardServerView(cardOf(Quattro, Spade), Direction.Player),
                     CardServerView(cardOf(Sei, Denari), Direction.Player),
@@ -247,9 +247,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 )
               ),
               deck = shuffledDeck.cards.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
-              board = List(
-                None -> CardServerView(cardOf(Due, Bastoni), Direction.Up)
-              ),
+              board = List(Some(user1.id) -> CardServerView(cardOf(Due, Bastoni), Direction.Up)),
               active = Some(GameType.Briscola)
             )
           )
@@ -398,9 +396,9 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
   "Future undelivered events will still be sent" in {
 
-    val message1: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Asso, Suit.Coppe))), Delay.CompleteGame)
-    val message2: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Due, Suit.Coppe))), Delay.TakeCards)
-    val message3: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Tre, Suit.Coppe))), Delay.DealCards)
+    val message1: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Asso, Suit.Coppe))), Delay.BeforeGameOver)
+    val message2: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Due, Suit.Coppe))), Delay.BeforeTakeCards)
+    val message3: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Tre, Suit.Coppe))), Delay.AfterDealCards)
 
     val eventsIO = (for {
       bus <- MessageBus.inMemory[IO]
@@ -412,10 +410,10 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       events <- (for {
         gameServiceRunner <- fs2.Stream.resource(
           GameService.runner[IO](bus, gameRepo, messageRepo, {
-            case Delay.DealCards => 20.millis
-            case Delay.TakeCards => 30.millis
-            case Delay.CompleteGame => 40.millis
-            case Delay.ActionTimeout => 100.millis
+            case Delay.AfterDealCards => 20.millis
+            case Delay.BeforeTakeCards => 30.millis
+            case Delay.BeforeGameOver => 40.millis
+            case _ => 100.millis
           })
         )
         subscription <- fs2.Stream.resource(bus.subscribeAwait)

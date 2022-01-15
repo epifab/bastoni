@@ -16,7 +16,7 @@ object OtherSeatLayout:
 
     SeatLayout(
       center,
-      radius = radius,
+      radius,
       rotation,
       renderHand = CardGroupRenderer(
         handSize,

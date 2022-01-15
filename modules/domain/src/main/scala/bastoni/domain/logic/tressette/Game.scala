@@ -2,6 +2,7 @@ package bastoni.domain.logic
 package tressette
 
 import bastoni.domain.logic.generic.Timer
+import bastoni.domain.logic.tressette.GameState.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Delay.syntax.*
@@ -17,9 +18,9 @@ object Game extends GameLogic[MatchState]:
   override def initialState(users: List[User]): MatchState = MatchState(users)
   override def isFinal(state: MatchState): Boolean = state == MatchState.Terminated
 
-  private def withTimeout(state: GameState.PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (GameState.Active, List[StateMachineOutput]) =
+  private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
     val request = ActionRequested(player, action, Some(Timeout.Max))
-    val newState = GameState.WaitingForPlayer(Timer.ref[GameState](state), Timeout.Max, request, state)
+    val newState = WaitingForPlayer(Timer.ref[GameState](state), Timeout.Max, request, state)
     newState -> (before ++ List(request, newState.nextTick))
 
   val playGameStep: (GameState, StateMachineInput) => (GameState, List[StateMachineOutput]) =
@@ -30,102 +31,97 @@ object Game extends GameLogic[MatchState]:
 
   val playGameStepPF: PartialFunction[(GameState, StateMachineInput), (GameState, List[StateMachineOutput])] = {
 
-    case (active: GameState.Active, PlayerLeftTable(player, _)) if active.activePlayers.exists(_.is(player)) =>
-      GameState.Aborted -> List(GameAborted)
+    case (active: Active, PlayerLeftTable(player, _)) if active.activePlayers.exists(_.is(player)) =>
+      Aborted -> List(GameAborted)
 
-    case (GameState.Ready(players), GameStarted(_)) =>
-      GameState.Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
+    case (Ready(players), GameStarted(_)) =>
+      Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
 
-    case (GameState.Ready(players), ShuffleDeck(seed)) =>
+    case (Ready(players), ShuffleDeck(seed)) =>
       if (players.size == 2 || players.size == 4) {
         val deck = Deck.shuffled(seed)
-        GameState.DealRound(
+        DealRound(
           players.map(Player(_, Nil, Nil)),
           Nil,
           1, // 5 cards at a time: 2 rounds
           deck
-        ) -> List(DeckShuffled(deck), Continue.toDealCards)
+        ) -> List(DeckShuffled(deck), Continue.afterShufflingDeck)
       }
-      else GameState.Aborted -> List(GameAborted)
+      else Aborted -> List(GameAborted)
 
-    case (GameState.DealRound(player :: Nil, done, 0, deck), Continue) =>
+    case (DealRound(player :: Nil, done, 0, deck), Continue) =>
       deck.dealOrDie(5) { (cards, tail) =>
         val players = done :+ player.draw(cards)
-        withTimeout(
-          GameState.PlayRound(players, Nil, tail),
-          players.head.id,
-          Action.PlayCard,
-          List(CardsDealt(player.id, cards, Direction.Player))
+        WillPlay(PlayRound(players, Nil, tail)) -> List(
+          CardsDealt(player.id, cards, Direction.Player),
+          Continue.afterDealingCards
         )
       }
 
-    case (GameState.DealRound(player :: Nil, done, remaining, deck), Continue) =>
+    case (DealRound(player :: Nil, done, remaining, deck), Continue) =>
       deck.dealOrDie(5) { (cards, tail) =>
-        GameState.DealRound(done :+ player.draw(cards), Nil, remaining - 1, tail) ->
-          List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
+        DealRound(done :+ player.draw(cards), Nil, remaining - 1, tail) ->
+          List(CardsDealt(player.id, cards, Direction.Player), Continue.afterDealingCards)
       }
 
-    case (GameState.DealRound(player :: todo, done, remaining, deck), Continue) =>
+    case (DealRound(player :: todo, done, remaining, deck), Continue) =>
       deck.dealOrDie(5) { (cards, tail) =>
-        GameState.DealRound(todo, done :+ player.draw(cards), remaining, tail) ->
-          List(CardsDealt(player.id, cards, Direction.Player), Continue.toDealCards)
+        DealRound(todo, done :+ player.draw(cards), remaining, tail) ->
+          List(CardsDealt(player.id, cards, Direction.Player), Continue.afterDealingCards)
       }
 
-    case (GameState.DrawRound(player :: Nil, done, deck), Continue) =>
+    case (DrawRound(player :: Nil, done, deck), Continue) =>
       deck.deal1OrDie { (card, tail) =>
         val players = done :+ player.draw(card)
-        withTimeout(
-          state = GameState.PlayRound(players, Nil, tail),
-          player = players.head.id,
-          Action.PlayCard,
-          List(CardsDealt(player.id, List(card), Direction.Up)),
+        WillPlay(PlayRound(players, Nil, tail)) -> List(
+          CardsDealt(player.id, List(card), Direction.Up),
+          Continue.afterDealingCards
         )
       }
 
-    case (GameState.DrawRound(player :: todo, done, deck), Continue) =>
+    case (DrawRound(player :: todo, done, deck), Continue) =>
       deck.deal1OrDie { (card, tail) =>
-        GameState.DrawRound(todo, done :+ player.draw(card), tail) ->
-          List(CardsDealt(player.id, List(card), Direction.Up), Continue.toDealCards)
+        DrawRound(todo, done :+ player.draw(card), tail) ->
+          List(CardsDealt(player.id, List(card), Direction.Up), Continue.afterDealingCards)
       }
 
-    case (wait: GameState.WaitingForPlayer, tick: Tick) => wait.ticked(tick)
+    case (wait: WaitingForPlayer, tick: Tick) => wait.ticked(tick)
 
-    case (wait: GameState.WaitingForPlayer, event) if playGameStepPF.isDefinedAt(wait.state -> event) => playGameStepPF(wait.state -> event)
+    case (wait: WaitingForPlayer, event) if playGameStepPF.isDefinedAt(wait.state -> event) => playGameStepPF(wait.state -> event)
 
-    case (GameState.PlayRound(player :: Nil, (firstDone, trump) :: done, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card, trump) =>
+    case (PlayRound(player :: Nil, (firstDone, trump) :: done, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card, trump) =>
       // last player of the trick
-      GameState.WillCompleteTrick((firstDone, trump) :: (done :+ (player.play(card), card)), deck) -> List(CardPlayed(player.id, card), Continue.toTakeCards)
+      WillCompleteTrick((firstDone, trump) :: (done :+ (player.play(card), card)), deck) -> List(CardPlayed(player.id, card), Continue.beforeTakingCards)
 
-    case (GameState.PlayRound(player :: next :: players, Nil, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card) =>
+    case (WillPlay(round), Continue) =>
+      withTimeout(
+        state = round,
+        player = round.todo.head.id,
+        action = round.done.headOption.map(_._2.suit).fold(Action.PlayCard)(Action.PlayCardOf.apply)
+      )
+
+    case (PlayRound(player :: next :: players, Nil, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card) =>
       // first player of the trick (can play any card)
-      withTimeout(
-        GameState.PlayRound(next :: players, (player.play(card), card) :: Nil, deck),
-        next.id,
-        Action.PlayCardOf(card.suit),
-        List(CardPlayed(player.id, card))
-      )
+      WillPlay(PlayRound(next :: players, (player.play(card), card) :: Nil, deck)) ->
+        List(CardPlayed(player.id, card), Continue.afterPlayingCards)
 
-    case (GameState.PlayRound(player :: next :: players, (firstDone, trump) :: done, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card, trump) =>
+    case (PlayRound(player :: next :: players, (firstDone, trump) :: done, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card, trump) =>
       // middle player of the trick
-      withTimeout(
-        GameState.PlayRound(next :: players, (firstDone, trump) :: (done :+ (player.play(card), card)), deck),
-        next.id,
-        Action.PlayCardOf(trump.suit),
-        List(CardPlayed(player.id, card))
-      )
+      WillPlay(PlayRound(next :: players, (firstDone, trump) :: (done :+ (player.play(card), card)), deck)) ->
+        List(CardPlayed(player.id, card), Continue.afterPlayingCards)
 
-    case (GameState.WillCompleteTrick(players, deck), Continue) =>
+    case (WillCompleteTrick(players, deck), Continue) =>
       val updatedPlayers: List[Player] = completeTrick(players)
       val winner = updatedPlayers.head
 
       val (state, commands) =
-        if (deck.isEmpty && winner.hand.isEmpty) GameState.WillComplete(updatedPlayers) -> List(Continue.toCompleteGame)
-        else if (deck.nonEmpty) GameState.DrawRound(updatedPlayers, Nil, deck) -> List(Continue.toDealCards)
-        else withTimeout(state = GameState.PlayRound(updatedPlayers, Nil, deck), player = updatedPlayers.head.id, action = Action.PlayCard)
+        if (deck.isEmpty && winner.hand.isEmpty) WillComplete(updatedPlayers) -> List(Continue.beforeGameOver)
+        else if (deck.nonEmpty) DrawRound(updatedPlayers, Nil, deck) -> List(Continue.afterTakingCards)
+        else WillPlay(PlayRound(updatedPlayers, Nil, deck)) -> List(Continue.afterTakingCards)
 
       state -> (TrickCompleted(winner.id) :: commands)
 
-    case (GameState.WillComplete(players), Continue) =>
+    case (WillComplete(players), Continue) =>
       val teams = players match
         case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
         case ps => ps.map(List(_))
@@ -146,18 +142,18 @@ object Game extends GameLogic[MatchState]:
           .map(pointsCount => matchPlayer.matchPlayer.win(pointsCount.points))
       }
 
-      GameState.Completed(updatedPlayers) -> List(TressetteGameCompleted(scores, matchScores))
+      Completed(updatedPlayers) -> List(TressetteGameCompleted(scores, matchScores))
   }
 
   override val playStep: (MatchState, ServerEvent | Command) => (MatchState, List[ServerEvent | Command | Delayed[Command]]) = {
 
     case (MatchState.InProgress(matchPlayers, gameState, pointsToWin), message) =>
       playGameStep(gameState, message) match
-        case (GameState.Completed(players), events) =>
+        case (Completed(players), events) =>
 
           def ready(updatedPlayers: List[MatchPlayer], pointsToWin: Int) =
             val shiftedRound = updatedPlayers.slideUntil(_.is(matchPlayers.tail.head))
-            MatchState.InProgress(shiftedRound, GameState.Ready(shiftedRound), pointsToWin) ->
+            MatchState.InProgress(shiftedRound, Ready(shiftedRound), pointsToWin) ->
               (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck, timeout = None))
 
           val teamSize = if (players.size == 4) 2 else 1
@@ -168,7 +164,7 @@ object Game extends GameLogic[MatchState]:
           if (winnerPoints < pointsToWin || winners.size > teamSize) ready(players.tail :+ players.head, pointsToWin)
           else MatchState.Terminated -> (events :+ MatchCompleted(winners.map(_.id)))
 
-        case (GameState.Aborted, events) =>
+        case (Aborted, events) =>
           MatchState.Terminated -> (events :+ MatchAborted)
 
         case (newMatchState, events) =>

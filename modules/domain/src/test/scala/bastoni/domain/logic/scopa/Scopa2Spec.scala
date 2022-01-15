@@ -22,17 +22,24 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       Continue,
       Continue,
       Continue,
+      Continue,
       TakeCards(user1.id, cardOf(Sette, Denari), List(cardOf(Asso, Bastoni), cardOf(Sei, Bastoni))),
+      Continue,
       Continue,
       TakeCards(user2.id, cardOf(Quattro, Spade), Nil),
       Continue,
+      Continue,
       TakeCards(user1.id, cardOf(Asso, Spade), Nil),
+      Continue,
       Continue,
       TakeCards(user2.id, cardOf(Sei, Denari), List(cardOf(Asso, Spade), cardOf(Cinque, Coppe))),
       Continue,
+      Continue,
       TakeCards(user1.id, cardOf(Due, Bastoni), Nil),
       Continue,
+      Continue,
       TakeCards(user2.id, cardOf(Re, Denari), Nil),
+      Continue,
       Continue,
       Continue,
       Continue,
@@ -40,54 +47,61 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
 
     Game.playStream[cats.Id](players)(input).compile.toList shouldBe List[StateMachineOutput](
       DeckShuffled(shuffledDeck),
+      Continue.afterShufflingDeck,
 
-      Continue.toDealCards,
       CardsDealt(user1.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari)), Direction.Player),
-      Continue.toDealCards,
+      Continue.afterDealingCards,
       CardsDealt(user2.id, List(cardOf(Quattro, Spade), cardOf(Sei, Denari), cardOf(Re, Denari)), Direction.Player),
-      Continue.toDealCards,
+      Continue.afterDealingCards,
       BoardCardsDealt(List(cardOf(Cinque, Coppe), cardOf(Asso, Bastoni), cardOf(Cinque, Spade), cardOf(Sei, Bastoni))),
+      Continue.afterDealingCards,
 
       ActionRequested(user1.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(-110145523),
       CardPlayed(user1.id, cardOf(Sette, Denari)),
-      Continue.toTakeCards,
+      Continue.beforeTakingCards,
       CardsTaken(user1.id, List(cardOf(Sette, Denari), cardOf(Asso, Bastoni), cardOf(Sei, Bastoni)), scopa = None),
+      Continue.afterTakingCards,
 
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(-2020154127),
       CardPlayed(user2.id, cardOf(Quattro, Spade)),
-      Continue.toTakeCards,
+      Continue.beforeTakingCards,
       CardsTaken(user2.id, Nil, None),
+      Continue.afterTakingCards,
 
       ActionRequested(user1.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(1043339377),
       CardPlayed(user1.id, cardOf(Asso, Spade)),
-      Continue.toTakeCards,
+      Continue.beforeTakingCards,
       CardsTaken(user1.id, Nil, None),
+      Continue.afterTakingCards,
 
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(495152213),
       CardPlayed(user2.id, cardOf(Sei,Denari)),
-      Continue.toTakeCards,
+      Continue.beforeTakingCards,
       CardsTaken(user2.id, List(cardOf(Sei,Denari), cardOf(Asso,Spade), cardOf(Cinque,Coppe)), None),
+      Continue.afterTakingCards,
 
       ActionRequested(user1.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(1767863701),
       CardPlayed(user1.id, cardOf(Due,Bastoni)),
-      Continue.toTakeCards,
+      Continue.beforeTakingCards,
       CardsTaken(user1.id, Nil, None),
+      Continue.afterTakingCards,
 
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(-130872219),
       CardPlayed(user2.id, cardOf(Re,Denari)),
-      Continue.toTakeCards,
+      Continue.beforeTakingCards,
       CardsTaken(user2.id, Nil, None),
+      Continue.afterTakingCards,
 
-      Continue.toDealCards,
       CardsDealt(user1.id, List(cardOf(Tre,Spade), cardOf(Tre,Denari), cardOf(Asso,Coppe)), Direction.Player),
-      Continue.toDealCards,
+      Continue.afterDealingCards,
       CardsDealt(user2.id, List(cardOf(Fante,Bastoni), cardOf(Due,Denari), cardOf(Fante,Spade)), Direction.Player),
+      Continue.afterDealingCards,
 
       ActionRequested(user1.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(-972199103),
@@ -179,12 +193,13 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
         )
       )
 
-    val input = TakeCards(user1.id, cardOf(Cavallo, Denari), List(cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)))
+    val takeCards = TakeCards(user1.id, cardOf(Cavallo, Denari), List(cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)))
 
-    val (newState: GameState, _) = Game.playGameStep(initialState, input)
-    val (newerState: GameState, events: List[StateMachineOutput]) = Game.playGameStep(newState, Continue)
+    val (state1, e1) = Game.playGameStep(initialState, takeCards)
+    val (state2, e2: List[StateMachineOutput]) = Game.playGameStep(state1, Continue)
+    val (newState, e3) = Game.playGameStep(state2, Continue)
 
-    newerState shouldBe WaitingForPlayer(
+    newState shouldBe WaitingForPlayer(
       1574812349,
       Timeout.Max,
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
@@ -198,12 +213,18 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       )
     )
 
-    events shouldBe List(
+    (e1 ++ e2 ++ e3) shouldBe List(
+      CardPlayed(
+        user1.id,
+        cardOf(Cavallo, Denari)
+      ),
+      Continue.beforeTakingCards,
       CardsTaken(
         user1.id,
         List(cardOf(Cavallo, Denari), cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)),
         scopa = None
       ),
+      Continue.afterTakingCards,
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(1574812349)
     )
@@ -222,10 +243,11 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
 
     val input = TakeCards(user1.id, cardOf(Sette, Denari), List(cardOf(Tre, Spade), cardOf(Quattro, Coppe)))
 
-    val (newState: GameState, _) = Game.playGameStep(initialState, input)
-    val (newerState: GameState, events: List[StateMachineOutput]) = Game.playGameStep(newState, Continue)
+    val (state1, e1) = Game.playGameStep(initialState, input)
+    val (state2, e2) = Game.playGameStep(state1, Continue)
+    val (finalState, e3) = Game.playGameStep(state2, Continue)
 
-    newerState shouldBe WaitingForPlayer(
+    finalState shouldBe WaitingForPlayer(
       257352564,
       Timeout.Max,
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
@@ -239,12 +261,18 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       )
     )
 
-    events shouldBe List(
+    (e1 ++ e2 ++ e3) shouldBe List(
+      CardPlayed(
+        user1.id,
+        cardOf(Sette, Denari)
+      ),
+      Continue.beforeTakingCards,
       CardsTaken(
         user1.id,
         List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)),
         scopa = Some(cardOf(Sette, Denari))
       ),
+      Continue.afterTakingCards,
       ActionRequested(user2.id, Action.TakeCards, Some(Timeout.Max)),
       willTick(257352564)
     )
@@ -279,6 +307,6 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
         List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)),
         scopa = None
       ),
-      Continue.toCompleteGame
+      Continue.beforeGameOver
     )
   }

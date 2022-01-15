@@ -18,7 +18,7 @@ object GameLayout:
 
   def apply(canvasSize: Size): GameLayout = {
     val pileSize = CardSize.scaleTo(5)
-    val deckSize = CardSize.scaleTo(Math.min(canvasSize.width / 7, canvasSize.height / 7 * CardSize.ratioW))
+    val deckSize = CardSize.scaleTo(Math.min(canvasSize.width / 8, canvasSize.height / 8 * CardSize.ratioW))
     val handSize = CardSize.scaleTo(Math.min(canvasSize.width / 5, canvasSize.height / 5 * CardSize.ratioW))
     val boardSize = CardSize.scaleTo(Math.min(canvasSize.width / 5, canvasSize.height / 5 * CardSize.ratioW))
 
@@ -38,9 +38,9 @@ object GameLayout:
         )
       ),
 
-      player1 = OtherSeatLayout(handSize, pileSize, Point(textHeight, canvasSize.height / 2), rotation = Angle(90)),
-      player2 = OtherSeatLayout(handSize, pileSize, Point(canvasSize.width / 2, textHeight), rotation = Angle.zero),
-      player3 = OtherSeatLayout(handSize, pileSize, Point(canvasSize.width - textHeight, canvasSize.height / 2), rotation = Angle(-90)),
+      player1 = OtherSeatLayout(MainPlayerHandRenderer.cardSizeFor(canvasSize), pileSize, Point(textHeight, canvasSize.height / 2), rotation = Angle(90)),
+      player2 = OtherSeatLayout(MainPlayerHandRenderer.cardSizeFor(canvasSize), pileSize, Point(canvasSize.width / 2, textHeight), rotation = Angle.zero),
+      player3 = OtherSeatLayout(MainPlayerHandRenderer.cardSizeFor(canvasSize), pileSize, Point(canvasSize.width - textHeight, canvasSize.height / 2), rotation = Angle(-90)),
 
       table = TableLayout(Point(0, 0), canvasSize),  // topLeftTable, tableSize),
       renderBoard = (cards: List[(Option[TablePlayer], CardInstance)]) => {

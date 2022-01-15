@@ -45,9 +45,12 @@ object GameService:
     gameRepo: GameRepo[F],
     messageRepo: MessageRepo[F],
     delayDuration: Delay => FiniteDuration = {
-      case Delay.DealCards => 700.millis
-      case Delay.TakeCards => 2.seconds
-      case Delay.CompleteGame => 3.seconds
+      case Delay.AfterShuffleDeck => 500.millis
+      case Delay.AfterDealCards => 800.millis
+      case Delay.BeforeTakeCards => 2.seconds
+      case Delay.AfterTakeCards => 1.second
+      case Delay.AfterPlayCard => 1.second
+      case Delay.BeforeGameOver => 3.seconds
       case Delay.ActionTimeout => 3.seconds // players get 10 * 3 = 30 seconds to act
     }
   ): ServiceRunner[F] =

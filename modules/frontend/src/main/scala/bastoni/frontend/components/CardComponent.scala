@@ -26,7 +26,7 @@ object Image:
 
 object CardComponent:
 
-  case class Props(current: CardLayout, previous: Option[CardLayout]):
+  case class Props(current: CardLayout, previous: Option[CardLayout], selectable: Option[Callback]):
     def initial: CardLayout = previous.getOrElse(current)
 
   val backOfCardImagePattern: Image = Image("/static/carte/cube.svg")
@@ -49,14 +49,16 @@ object CardComponent:
       p.shadowOffset = Vector2d(shadow.offset.x, shadow.offset.y)
       p.shadowOpacity = .5
 
+    def cardAnimationRef: TweenRef => Unit = animationRef[TweenProps] { (p, current) =>
+      p.width = current.size.width
+      p.height = current.size.height
+      p.duration = animationDuration
+    }
+
     private def renderCardBack(props: Props): VdomNode =
       KGroup(
         { p =>
-          p.ref = animationRef[TweenProps] { (p, current) =>
-            p.width = current.size.width
-            p.height = current.size.height
-            p.duration = animationDuration
-          }
+          p.ref = cardAnimationRef
           p.width = props.initial.size.width
           p.height = props.initial.size.height
         },
@@ -100,11 +102,10 @@ object CardComponent:
 
     private def renderCard(props: Props)(card: SimpleCard) =
       KImage { p =>
-        p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
-          p.width = current.size.width
-          p.height = current.size.height
-          p.duration = animationDuration
+        props.selectable.foreach { callback =>
+          p.onClick = _ => callback.runNow()
         }
+        p.ref = cardAnimationRef
         p.image = cardImages(card)
         p.width = props.initial.size.width
         p.height = props.initial.size.height
@@ -146,5 +147,5 @@ object CardComponent:
       .componentDidMount(_.backend.animate)
       .build
 
-  def apply(current: CardLayout, previous: Option[CardLayout]): VdomElement =
-    component.withKey(s"card-${current.card.ref}")(Props(current, previous))
+  def apply(current: CardLayout, previous: Option[CardLayout], selectable: Option[Callback]): VdomElement =
+    component.withKey(s"card-${current.card.ref}")(Props(current, previous, selectable))
