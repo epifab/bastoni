@@ -11,13 +11,14 @@ import japgolly.scalajs.react.callback.CallbackTo
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import konva.Konva.KonvaEventObject
 import konva.KonvaHelper.Vector2d
-import konva.{Konva, NodeRef, ShapeProps, TweenProps, TweenRef}
+import konva.*
 import org.scalajs.dom.html.Image
 import org.scalajs.dom.{HTMLCanvasElement, MouseEvent, document, window}
 import reactkonva.*
 
 import java.util.concurrent.atomic.AtomicReference
 import scala.collection.MapView
+import scala.concurrent.duration.DurationInt
 import scala.scalajs.js
 
 object Image:
@@ -64,7 +65,7 @@ object CardComponent:
         state <- $.state
         _ <- {
           if (state.glowing <= 0) Callback.empty
-          else $.setState(State(state.glowing - .1), Callback(window.setTimeout(() => fadeGlow.runNow(), 100)))
+          else $.setState(State(state.glowing - .1), Utils.timeoutCallback(fadeGlow, 100.millis))
         }
       } yield ()
 

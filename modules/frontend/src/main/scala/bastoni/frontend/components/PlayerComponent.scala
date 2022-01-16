@@ -47,58 +47,9 @@ object PlayerComponent:
             case _ => ()
           }
         },
+
         state match {
-          case PlayerState.ActingPlayer(_, _, Some(timeout)) =>
-            KGroup(
-              KArc { p =>
-                p.x = layout.center.x
-                p.y = layout.center.y
-                p.angle = 360
-                p.innerRadius = layout.radius
-                p.outerRadius = layout.radius + circleStrokeSize
-                p.fill = Palette.black
-                p.shadowColor = Palette.blue
-                p.shadowBlur = 30
-                p.shadowOpacity = 1
-              },
-              KArc { p =>
-                p.x = layout.center.x
-                p.y = layout.center.y
-                p.angle = (220 * timeout.value.toDouble / Timeout.Max.value).floor.toInt
-                p.innerRadius = layout.radius
-                p.outerRadius = layout.radius + circleStrokeSize
-                p.rotation = layout.barsRotation.deg - 20
-                p.fill = timeout match {
-                  case Timeout.Max => Palette.green1
-                  case Timeout.T9 => Palette.green2
-                  case Timeout.T8 => Palette.green3
-                  case Timeout.T7 => Palette.yellow1
-                  case Timeout.T6 => Palette.yellow2
-                  case Timeout.T5 => Palette.mustard
-                  case Timeout.T4 => Palette.orange1
-                  case Timeout.T3 => Palette.orange2
-                  case Timeout.T2 => Palette.red1
-                  case Timeout.T1 => Palette.red2
-                  case Timeout.TimedOut => Palette.black
-                }
-              }
-            )
-
-          case PlayerState.ActingPlayer(_, _, None) =>
-            KGroup(
-              KArc { p =>
-                p.x = layout.center.x
-                p.y = layout.center.y
-                p.angle = 360
-                p.innerRadius = layout.radius
-                p.outerRadius = layout.radius + circleStrokeSize
-                p.fill = Palette.green1
-                p.shadowColor = Palette.blue
-                p.shadowBlur = circleStrokeSize
-                p.shadowOpacity = 1
-              }
-            )
-
+          case PlayerState.ActingPlayer(_, _, timeout) => TimeoutBar(layout.center, timeout, Angle(220), layout.barsRotation, layout.radius, circleStrokeSize)
           case _ => KGroup()
         },
         KText { p =>
