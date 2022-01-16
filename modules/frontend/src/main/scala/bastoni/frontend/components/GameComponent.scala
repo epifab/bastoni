@@ -76,9 +76,9 @@ class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
     roomId = RoomId.newId
 
     me = User(UserId.newId, "ME")
-    p1 = DumbPlayer(User(UserId.newId, "Tizio"), roomId, sub, pub)
-    p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub)
-    p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub)
+    p1 = DumbPlayer(User(UserId.newId, "Tizio"), roomId, sub, pub, pause = 4.seconds)
+    p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub, pause = 4.seconds)
+    p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub, pause = 4.seconds)
 
     tables <- sub.subscribe(me, roomId)
       .scan[Option[TablePlayerView]](None) {

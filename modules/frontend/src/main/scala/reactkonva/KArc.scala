@@ -14,7 +14,7 @@ object KArc extends ExternalComponentWithoutChildren[KArc.Props](ReactKonvaDOM.A
   @js.native
   trait Props extends ShapeProps:
     // Arc
-    var angle: js.UndefOr[Int] = js.native
-    var innerRadius: js.UndefOr[Int] = js.native
-    var outerRadius: js.UndefOr[Int] = js.native
+    var angle: js.UndefOr[Double] = js.native
+    var innerRadius: js.UndefOr[Double] = js.native
+    var outerRadius: js.UndefOr[Double] = js.native
     var clockwise: js.UndefOr[Boolean] = js.native

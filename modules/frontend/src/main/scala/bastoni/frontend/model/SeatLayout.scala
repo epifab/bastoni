@@ -5,7 +5,8 @@ import bastoni.domain.model.{VisibleCard, CardInstance}
 case class SeatLayout(
   center: Point,
   radius: Double,
-  rotation: Angle,
+  textRotation: Angle,
+  barsRotation: Angle,
   renderHand: CardsRenderer,
   renderPile: CardsRenderer
 )
@@ -17,14 +18,15 @@ object OtherSeatLayout:
     SeatLayout(
       center,
       radius,
-      rotation,
+      textRotation = rotation,
+      barsRotation = -rotation,
       renderHand = CardGroupRenderer(
         handSize,
         center.copy(
           x = center.x - Angle(90 - rotation.deg).cos * (handSize.height - radius - 15),
           y = center.y - Angle(90 - rotation.deg).sin * (handSize.height - radius - 15)
         ),
-        Angle(-rotation.deg),
+        rotation = -rotation,
         margin = 30
       ),
       renderPile = CardGroupRenderer(

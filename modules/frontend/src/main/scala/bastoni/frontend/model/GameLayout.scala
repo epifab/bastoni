@@ -27,7 +27,8 @@ object GameLayout:
     GameLayout(
       mainPlayer = SeatLayout(
         center = Point(canvasSize.width / 2, canvasSize.height - textHeight),
-        rotation = Angle.zero,
+        textRotation = Angle.zero,
+        barsRotation = Angle(180),
         radius = seatRadius,
         renderHand = MainPlayerHandRenderer(canvasSize),
         renderPile = CardGroupRenderer(
