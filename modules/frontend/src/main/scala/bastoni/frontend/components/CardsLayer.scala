@@ -137,10 +137,11 @@ object CardsLayer:
 
         KGroup(renderedCards: _*)
       }
-      .shouldComponentUpdate(c => CallbackTo(
-        c.currentProps.current != c.nextProps.current ||
-          c.currentProps.selectable != c.nextProps.selectable
-      ))
+      .shouldComponentUpdate(c => CallbackTo {
+        val layoutHasChanged = c.currentProps.current != c.nextProps.current
+        val selectableHasChanged = c.currentProps.selectable.keys.toSet != c.nextProps.selectable.keys.toSet
+        layoutHasChanged || selectableHasChanged
+      })
       .build
 
   def apply(gameProps: GameProps, gameLayout: GameLayout): VdomNode =

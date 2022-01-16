@@ -1,12 +1,15 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.*
+import bastoni.frontend.Palette
 import bastoni.frontend.model.*
 import japgolly.scalajs.react.*
-import japgolly.scalajs.react.vdom.html_<^.*
+import japgolly.scalajs.react.vdom.VdomElement
 import reactkonva.{KArc, KCircle, KGroup, KText}
 
 object PlayerComponent:
+  private val circleStrokeSize: Int = 15
+
   private val component =
     ScalaFnComponent[(PlayerState, SeatLayout)] { case (state: PlayerState, layout: SeatLayout) =>
       val textRadius: Double = Math.sqrt(2 * layout.radius * layout.radius)
@@ -21,24 +24,24 @@ object PlayerComponent:
           p.radius = layout.radius
           p.x = layout.center.x
           p.y = layout.center.y
-          p.fill = "#2B5B79"
+          p.fill = Palette.desaturatedBlue
 
           state match {
             case PlayerState.SittingOut(_) =>
               p.opacity = .4
 
             case PlayerState.EndOfMatchPlayer(_, true) =>
-              p.stroke = "#FFEB3B"
+              p.stroke = Palette.yellow1
               p.strokeWidth = 10
-              p.shadowColor = "#1f34ba"
+              p.shadowColor = Palette.blue
               p.shadowBlur = 30
               p.shadowOpacity = 1
 
             case PlayerState.EndOfGamePlayer(_, _, true) =>
-              p.stroke = "#FFEB3B"
-              p.strokeWidth = 15
-              p.shadowColor = "#1f34ba"
-              p.shadowBlur = 30
+              p.stroke = Palette.yellow1
+              p.strokeWidth = circleStrokeSize
+              p.shadowColor = Palette.blue
+              p.shadowBlur = circleStrokeSize
               p.shadowOpacity = 1
 
             case _ => ()
@@ -52,9 +55,9 @@ object PlayerComponent:
                 p.y = layout.center.y
                 p.angle = 360
                 p.innerRadius = layout.radius
-                p.outerRadius = layout.radius + 30
-                p.fill = "#000"
-                p.shadowColor = "#1f34ba"
+                p.outerRadius = layout.radius + circleStrokeSize
+                p.fill = Palette.black
+                p.shadowColor = Palette.blue
                 p.shadowBlur = 30
                 p.shadowOpacity = 1
               },
@@ -63,20 +66,20 @@ object PlayerComponent:
                 p.y = layout.center.y
                 p.angle = (220 * timeout.value.toDouble / Timeout.Max.value).floor.toInt
                 p.innerRadius = layout.radius
-                p.outerRadius = layout.radius + 30
+                p.outerRadius = layout.radius + circleStrokeSize
                 p.rotation = layout.barsRotation.deg - 20
                 p.fill = timeout match {
-                  case Timeout.Max => "#00a650"
-                  case Timeout.T9 => "#3ab54b"
-                  case Timeout.T8 => "#8ec63f"
-                  case Timeout.T7 => "#cadb2a"
-                  case Timeout.T6 => "#fef200"
-                  case Timeout.T5 => "#ffc20d"
-                  case Timeout.T4 => "#f8931d"
-                  case Timeout.T3 => "#f36523"
-                  case Timeout.T2 => "#ed1b24"
-                  case Timeout.T1 => "#ba131a"
-                  case Timeout.TimedOut => "#000"
+                  case Timeout.Max => Palette.green1
+                  case Timeout.T9 => Palette.green2
+                  case Timeout.T8 => Palette.green3
+                  case Timeout.T7 => Palette.yellow1
+                  case Timeout.T6 => Palette.yellow2
+                  case Timeout.T5 => Palette.mustard
+                  case Timeout.T4 => Palette.orange1
+                  case Timeout.T3 => Palette.orange2
+                  case Timeout.T2 => Palette.red1
+                  case Timeout.T1 => Palette.red2
+                  case Timeout.TimedOut => Palette.black
                 }
               }
             )
@@ -88,10 +91,10 @@ object PlayerComponent:
                 p.y = layout.center.y
                 p.angle = 360
                 p.innerRadius = layout.radius
-                p.outerRadius = layout.radius + 30
-                p.fill = "#00a650"
-                p.shadowColor = "#1f34ba"
-                p.shadowBlur = 30
+                p.outerRadius = layout.radius + circleStrokeSize
+                p.fill = Palette.green1
+                p.shadowColor = Palette.blue
+                p.shadowBlur = circleStrokeSize
                 p.shadowOpacity = 1
               }
             )
@@ -102,7 +105,7 @@ object PlayerComponent:
           p.text = state.name
           p.align = "center"
           p.verticalAlign = "middle"
-          p.fill = "#FFF"
+          p.fill = Palette.white
           p.fontFamily = "'Open Sans', sans-serif"
           p.fontStyle = "bold"
           p.fontSize = 16

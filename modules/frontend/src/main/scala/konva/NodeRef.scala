@@ -130,13 +130,19 @@ trait TweenRef extends js.Object:
 
 @js.native
 trait NodeRef extends js.Object:
-  def getClientRect(): Konva.IRect
-  def move(p: Konva.Vector2d): Unit
-  def width(): Int
-  def height(): Int
-  def rotation(): Int
-  def rotation(angle: Int): Unit
-  def getAttr(attr: String): js.Any
+  def getStage(): StageRef = js.native
+
+@js.native
+trait StageRef extends js.Object:
+  def container(): ContainerRef = js.native
+
+@js.native
+trait ContainerRef extends js.Object:
+  def style: ContainerStyleRef = js.native
+
+@js.native
+trait ContainerStyleRef extends js.Object:
+  var cursor: String = js.native
 
 @js.native
 trait ShapeRef extends NodeRef

@@ -10,6 +10,7 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.component.Scala.BackendScope
+import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import japgolly.scalajs.react.vdom.html_<^.*
 import org.scalajs.dom
 import org.scalajs.dom.html.Image

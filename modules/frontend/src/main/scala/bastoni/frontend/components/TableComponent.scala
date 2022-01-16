@@ -3,7 +3,7 @@ package bastoni.frontend.components
 import bastoni.domain.model.*
 import bastoni.frontend.model.TableLayout
 import japgolly.scalajs.react.*
-import japgolly.scalajs.react.vdom.html_<^.VdomElement
+import japgolly.scalajs.react.vdom.VdomElement
 import konva.Konva
 import konva.KonvaHelper.Vector2d
 import reactkonva.KRect

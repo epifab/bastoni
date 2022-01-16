@@ -18,7 +18,7 @@ object DeckLayout:
               ),
               rotation = Angle.zero,
               shadow = Some(Shadow(size.cornerRadius.floor.toInt, Point(-size.cornerRadius, 0))),
-              marginX = 1
+              marginX = .5
             )
 
           case card: VisibleCard =>

@@ -27,7 +27,7 @@ object OtherSeatLayout:
           y = center.y - Angle(90 - rotation.deg).sin * (handSize.height - radius - 15)
         ),
         rotation = -rotation,
-        margin = 30
+        margin = handSize.width / 6
       ),
       renderPile = CardGroupRenderer(
         pileSize,
