@@ -1,7 +1,9 @@
 package bastoni.frontend.model
 
-import bastoni.domain.model.CardInstance
+import bastoni.domain.model.{Action, CardInstance, PlayerState, TablePlayerView}
 import org.scalajs.dom.window
+
+import javax.swing.text.TableView
 
 case class GameLayout(
   mainPlayer: SeatLayout,
@@ -16,35 +18,51 @@ case class GameLayout(
 object GameLayout:
   private val textHeight: Int = 10
   private val seatRadius = 45
-  
-  def fromWindow(): GameLayout = GameLayout(Size(window.innerWidth, window.innerHeight))
 
-  def apply(canvasSize: Size): GameLayout = {
-    val pileSize = CardSize.scaleTo(5)
+  def fromWindow(table: Option[TablePlayerView]): GameLayout = GameLayout(Size(window.innerWidth, window.innerHeight), table)
+
+  def otherSeatLayout(handSize: CardSize, pileSize: CardSize, center: Point, rotation: Angle): SeatLayout =
+    SeatLayout(
+      OtherPlayersHandRenderer(center, seatRadius, handSize, rotation),
+      seatRadius,
+      handSize,
+      pileSize,
+      center,
+      rotation
+    )
+
+  def apply(canvasSize: Size, table: Option[TablePlayerView]): GameLayout = {
+    val pileSize = CardSize.scaleTo(Math.min(canvasSize.width / 8, canvasSize.height / 8 * CardSize.ratioW))
     val deckSize = CardSize.scaleTo(Math.min(canvasSize.width / 8, canvasSize.height / 8 * CardSize.ratioW))
     val handSize = CardSize.scaleTo(Math.min(canvasSize.width / 5, canvasSize.height / 5 * CardSize.ratioW))
     val boardSize = CardSize.scaleTo(Math.min(canvasSize.width / 5, canvasSize.height / 5 * CardSize.ratioW))
+    val mainPlayerHandSize: CardSize = table.flatMap(_.mySeat.flatMap { seat =>
+      Some(seat.player).collect {
+        case actor: PlayerState.ActingPlayer if actor.playing =>
+          CardSize.scaleTo(
+            Math.min(
+              (canvasSize.height / 3) * CardSize.ratioW,
+              canvasSize.width / (1 + ((seat.hand.size - 1) * MainPlayerHandRenderer.horizontalOverlapFactor))
+            )
+          )
+      }
+    }).getOrElse(handSize)
 
     val cardsMargin: Int = (boardSize.width / 4).floor.toInt
 
     GameLayout(
       mainPlayer = SeatLayout(
+        MainPlayerHandRenderer(mainPlayerHandSize, canvasSize),
+        seatRadius,
+        handSize,
+        pileSize,
         center = Point(canvasSize.width / 2, canvasSize.height - textHeight),
-        textRotation = Angle.zero,
-        barsRotation = Angle(180),
-        radius = seatRadius,
-        renderHand = MainPlayerHandRenderer(canvasSize),
-        renderPile = CardGroupRenderer(
-          pileSize,
-          center = Point(canvasSize.width / 2, canvasSize.height - textHeight - pileSize.height),
-          rotation = Angle.zero,
-          margin = .6
-        )
+        Angle(180)
       ),
 
-      player1 = OtherSeatLayout(MainPlayerHandRenderer.cardSizeFor(canvasSize), pileSize, Point(textHeight, canvasSize.height / 2), rotation = Angle(90)),
-      player2 = OtherSeatLayout(MainPlayerHandRenderer.cardSizeFor(canvasSize), pileSize, Point(canvasSize.width / 2, textHeight), rotation = Angle.zero),
-      player3 = OtherSeatLayout(MainPlayerHandRenderer.cardSizeFor(canvasSize), pileSize, Point(canvasSize.width - textHeight, canvasSize.height / 2), rotation = Angle(-90)),
+      player1 = otherSeatLayout(handSize, pileSize, Point(textHeight, canvasSize.height / 2), rotation = Angle(90)),
+      player2 = otherSeatLayout(handSize, pileSize, Point(canvasSize.width / 2, textHeight), rotation = Angle.zero),
+      player3 = otherSeatLayout(handSize, pileSize, Point(canvasSize.width - textHeight, canvasSize.height / 2), rotation = Angle(-90)),
 
       table = TableLayout(Point(0, 0), canvasSize),  // topLeftTable, tableSize),
       renderBoard = (cards: List[(Option[TablePlayer], CardInstance)]) => {

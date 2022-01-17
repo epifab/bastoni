@@ -30,12 +30,14 @@ extension(callback: Callback)
   def toIO: IO[Unit] = IO(callback.runNow())
 
 object GameComponent:
-  case class State(game: Option[GameState], layout: GameLayout):
-    def refreshLayout: State = copy(layout = GameLayout.fromWindow())
-    def update(state: GameState): State = copy(game = Some(state))
+  case class State(game: Option[GameState], currentLayout: GameLayout, previousLayout: GameLayout):
+    def refreshLayout: State = copy(currentLayout = GameLayout.fromWindow(game.map(_.currentTable)), previousLayout = currentLayout)
+    def update(state: GameState): State = copy(game = Some(state)).refreshLayout
 
   object State:
-    def initial: State = State(None, GameLayout.fromWindow())
+    def initial: State =
+      val layout = GameLayout.fromWindow(None)
+      State(None, layout, layout)
 
   private val component =
     ScalaComponent
@@ -55,14 +57,14 @@ object GameComponent:
             p.width = window.innerWidth
             p.height = window.innerHeight
           },
-          KLayer(TableComponent(state.layout.table)),
-          KLayer(CardsLayer(gameState, state.layout)),
+          KLayer(TableComponent(state.currentLayout.table)),
+          KLayer(CardsLayer(gameState, state.currentLayout, state.previousLayout)),
           KLayer(
             List(
-              gameState.currentTable.mySeat.map(_.player).map(PlayerComponent(_, state.layout.mainPlayer)),
-              gameState.currentTable.opponent(0).flatMap(_.player).map(PlayerComponent(_, state.layout.player1)),
-              gameState.currentTable.opponent(1).flatMap(_.player).map(PlayerComponent(_, state.layout.player2)),
-              gameState.currentTable.opponent(2).flatMap(_.player).map(PlayerComponent(_, state.layout.player3)),
+              gameState.currentTable.mySeat.map(_.player).map(PlayerComponent(_, state.currentLayout.mainPlayer)),
+              gameState.currentTable.opponent(0).flatMap(_.player).map(PlayerComponent(_, state.currentLayout.player1)),
+              gameState.currentTable.opponent(1).flatMap(_.player).map(PlayerComponent(_, state.currentLayout.player2)),
+              gameState.currentTable.opponent(2).flatMap(_.player).map(PlayerComponent(_, state.currentLayout.player3)),
             ).flatten: _*
           )
         )
@@ -82,9 +84,9 @@ object GameComponent:
       roomId = RoomId.newId
 
       me = User(UserId.newId, "ME")
-      p1 = DumbPlayer(User(UserId.newId, "Tizio"), roomId, sub, pub, pause = 4.seconds)
-      p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub, pause = 4.seconds)
-      p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub, pause = 4.seconds)
+      p1 = DumbPlayer(User(UserId.newId, "Tizio"), roomId, sub, pub, pause = 100.millis)
+      p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub, pause = 100.millis)
+      p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub, pause = 100.millis)
 
       tables <- sub.subscribe(me, roomId)
         .scan[Option[TablePlayerView]](None) {

@@ -2,7 +2,7 @@ package bastoni.frontend.model
 
 import bastoni.domain.model.{VisibleCard, CardInstance}
 
-case class SeatLayout(
+case class SeatLayout private(
   center: Point,
   radius: Double,
   textRotation: Angle,
@@ -11,52 +11,50 @@ case class SeatLayout(
   renderPile: CardsRenderer
 )
 
-object OtherSeatLayout:
-  def apply(handSize: CardSize, pileSize: CardSize, center: Point, rotation: Angle): SeatLayout = {
-    val radius = 45
+object SeatLayout:
+  def apply(
+    handRenderer: CardsRenderer,
+    seatRadius: Int,
+    handSize: CardSize,
+    pileSize: CardSize,
+    center: Point,
+    rotation: Angle
+  ): SeatLayout = {
 
-    SeatLayout(
+    val py1 = pileSize.height - seatRadius
+
+    val yangle = Angle(90 - rotation.deg)
+    val xangle = rotation
+
+    new SeatLayout(
       center,
-      radius,
-      textRotation = rotation,
+      seatRadius,
+      textRotation = -rotation,
+//      textRotation = rotation.normalised match {
+//        case a if a > 90 && a <= 270 => rotation
+//        case a => -rotation
+//      },
       barsRotation = -rotation,
-      renderHand = CardGroupRenderer(
-        handSize,
-        center.copy(
-          x = center.x - Angle(90 - rotation.deg).cos * (handSize.height - radius - 15),
-          y = center.y - Angle(90 - rotation.deg).sin * (handSize.height - radius - 15)
-        ),
-        rotation = -rotation,
-        margin = handSize.width / 6
-      ),
+      renderHand = handRenderer,
       renderPile = CardGroupRenderer(
         pileSize,
-        center,
-        Angle(-rotation.deg),
-        margin = .6
+        Point(
+          x = center.x + (xangle.cos * handSize.width * 1.2) - yangle.cos * py1,
+          y = center.y + (xangle.sin * handSize.width * 1.2) - yangle.sin * py1
+        ),
+        rotation = -rotation,
+        margin = Margin.PerCard(.6)
       )
     )
   }
 
 
 object MainPlayerHandRenderer:
-  def cardSizeFor(canvasSize: Size): CardSize = {
-    val defaultSize: CardSize = CardSize.full
-    defaultSize.scaleTo(
-      Math.min(
-        (canvasSize.height / 3) * CardSize.ratioW,
-        canvasSize.width / ((maxCardsPerRow - 1) * horizontalOverlapFactor) + 1
-      )
-    )
-  }
 
   val horizontalOverlapFactor = 0.8
   val verticalOverlapFactor = 0.7
 
-  val maxCardsPerRow: Int = 5
-
-  def apply(canvasSize: Size): CardsRenderer = (hand: List[CardInstance]) =>
-    val cardSize = cardSizeFor(canvasSize)
+  def apply(cardSize: CardSize, canvasSize: Size): CardsRenderer = (hand: List[CardInstance]) =>
 
     val horizontalOverlap: Double = cardSize.width * horizontalOverlapFactor
     val verticalOverlap: Double = cardSize.height * verticalOverlapFactor
@@ -87,4 +85,14 @@ object MainPlayerHandRenderer:
       }
       .toList
 
+object OtherPlayersHandRenderer:
+  def apply(center: Point, radius: Double, handSize: CardSize, rotation: Angle): CardsRenderer =
+    val hy1 = handSize.height - radius - 15
+    val yangle = Angle(90 - rotation.deg)
 
+    CardGroupRenderer(
+      handSize,
+      Point(center.x - yangle.cos * hy1, center.y - yangle.sin * hy1),
+      rotation = -rotation,
+      margin = Margin.Shared(handSize.width / 4)
+    )

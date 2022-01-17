@@ -16,15 +16,15 @@ case class CardGroupLayout(
   topLeft: Point,
   rotation: Angle,
   shadow: Option[Shadow],
-  marginX: Double
+  margin: Margin
 ):
   def toCardLayout: List[CardLayout] = cards.zipWithIndex.map { case (card, index) =>
     CardLayout(
       card,
       cardSize,
       Point(
-        x = topLeft.x + (rotation.cos * index * marginX),
-        y = topLeft.y + (rotation.sin * index * marginX)
+        x = topLeft.x + (rotation.cos * index * margin.perCard(cards.length)),
+        y = topLeft.y + (rotation.sin * index * margin.perCard(cards.length))
       ),
       rotation,
       shadow

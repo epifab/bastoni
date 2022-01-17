@@ -52,8 +52,8 @@ object CardsLayer:
   case class Props(current: List[CardLayout | CardGroupLayout], previous: Map[Int, CardLayout], selectable: Map[Int, Callback])
 
   object Props:
-    def apply(props: GameState, layout: GameLayout): Props =
-      def cardsFor(table: TablePlayerView): List[CardLayout | CardGroupLayout] =
+    def apply(props: GameState, currentLayout: GameLayout, previousLayout: GameLayout): Props =
+      def cardsFor(table: TablePlayerView, layout: GameLayout): List[CardLayout | CardGroupLayout] =
         val players: Map[UserId, TablePlayer] =
           table.mySeat.map(_.player.id -> TablePlayer.MainPlayer).toMap ++
             table.opponent(0).flatMap(_.player).map(_.id -> TablePlayer.Player1).toMap ++
@@ -65,11 +65,11 @@ object CardsLayer:
           layout.renderBoard(table.board.map { case (user, card) => user.flatMap(players.get) -> card.card }) ++
           renderHands(table, layout)
 
-      val cards = cardsFor(props.currentTable)
+      val cards = cardsFor(props.currentTable, currentLayout)
 
       val previousCards: Map[Int, CardLayout] =
         props.previousTable.map { previousTable =>
-          cardsFor(previousTable).flatMap {
+          cardsFor(previousTable, previousLayout).flatMap {
             case group: CardGroupLayout => group.toCardLayout
             case card: CardLayout => List(card)
           }.map(layout => layout.card.ref -> layout).toMap
@@ -144,5 +144,5 @@ object CardsLayer:
       })
       .build
 
-  def apply(gameProps: GameState, gameLayout: GameLayout): VdomNode =
-    component(Props(gameProps, gameLayout))
+  def apply(gameProps: GameState, currentLayout: GameLayout, previousLayout: GameLayout): VdomNode =
+    component(Props(gameProps, currentLayout, previousLayout))

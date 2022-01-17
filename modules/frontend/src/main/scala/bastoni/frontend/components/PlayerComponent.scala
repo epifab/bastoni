@@ -49,7 +49,16 @@ object PlayerComponent:
         },
 
         state match {
-          case PlayerState.ActingPlayer(_, _, timeout) => TimeoutBar(layout.center, timeout, Angle(220), layout.barsRotation, layout.radius, circleStrokeSize)
+          case PlayerState.ActingPlayer(_, _, timeout) =>
+            TimeoutBar(
+              center = layout.center,
+              timeout = timeout,
+              angle = Angle(220),
+              rotation = layout.barsRotation,
+              innerRadius = layout.radius,
+              size = circleStrokeSize
+            )
+
           case _ => KGroup()
         },
         KText { p =>

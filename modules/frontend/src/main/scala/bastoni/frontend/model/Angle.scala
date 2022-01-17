@@ -1,6 +1,7 @@
 package bastoni.frontend.model
 
 case class Angle(deg: Int):
+  val normalised: Int = deg % 360
   val rad: Double = deg * Math.PI / 180
   val sin: Double = Math.sin(rad)
   val cos: Double = Math.cos(rad)
