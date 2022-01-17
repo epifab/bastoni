@@ -185,4 +185,4 @@ object CardComponent:
       .build
 
   def apply(current: CardLayout, previous: Option[CardLayout], selectable: Option[Callback]): VdomElement =
-    component.withKey(s"card-${current.card.ref}")(Props(current, previous, selectable))
+    component.withKey(s"card-${current.card.ref}${current.card.toOption.fold("")(c => s"-${c.rank}-${c.suit}")}")(Props(current, previous, selectable))

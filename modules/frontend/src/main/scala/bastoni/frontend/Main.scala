@@ -16,6 +16,7 @@ import scala.concurrent.duration.DurationInt
   val loadedCount: AtomicInteger = new AtomicInteger(0)
 
   val images =
+    TableComponent.backgroundImage ::
     CardComponent.backOfCardImagePattern ::
     CardComponent.cardImages.values.toList
 

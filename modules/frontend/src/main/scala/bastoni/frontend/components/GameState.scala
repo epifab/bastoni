@@ -4,7 +4,7 @@ import bastoni.domain.model.*
 import bastoni.domain.view.FromPlayer
 import japgolly.scalajs.react.callback.Callback
 
-case class GameProps(
+case class GameState(
   me: UserId,
   currentTable: TablePlayerView,
   previousTable: Option[TablePlayerView],

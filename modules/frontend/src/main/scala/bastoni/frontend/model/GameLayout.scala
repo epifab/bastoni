@@ -1,6 +1,7 @@
 package bastoni.frontend.model
 
 import bastoni.domain.model.CardInstance
+import org.scalajs.dom.window
 
 case class GameLayout(
   mainPlayer: SeatLayout,
@@ -15,6 +16,8 @@ case class GameLayout(
 object GameLayout:
   private val textHeight: Int = 10
   private val seatRadius = 45
+  
+  def fromWindow(): GameLayout = GameLayout(Size(window.innerWidth, window.innerHeight))
 
   def apply(canvasSize: Size): GameLayout = {
     val pileSize = CardSize.scaleTo(5)

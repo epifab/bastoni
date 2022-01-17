@@ -30,76 +30,81 @@ extension(callback: Callback)
   def toIO: IO[Unit] = IO(callback.runNow())
 
 object GameComponent:
+  case class State(game: Option[GameState], layout: GameLayout):
+    def refreshLayout: State = copy(layout = GameLayout.fromWindow())
+    def update(state: GameState): State = copy(game = Some(state))
+
+  object State:
+    def initial: State = State(None, GameLayout.fromWindow())
+
   private val component =
     ScalaComponent
       .builder[GameType]
-      .initialState[Option[GameProps]](None)
+      .initialState[State](State.initial)
       .renderBackend[GameComponentBackend]
       .componentDidMount(_.backend.start)
       .build
 
   def apply(gameType: GameType): VdomElement = component(gameType)
 
-
-class GameComponentBackend($: BackendScope[GameType, Option[GameProps]]):
-  val layout: GameLayout = GameLayout(Size(window.innerWidth, window.innerHeight))
-
-  def render(state: Option[GameProps]): VdomNode = state match
-    case Some(props) =>
-      KStage(
-        { p =>
-          p.width = window.innerWidth
-          p.height = window.innerHeight
-        },
-        KLayer(TableComponent(layout.table)),
-        KLayer(CardsLayer(props, layout)),
-        KLayer(
-          List(
-            props.currentTable.mySeat.map(_.player).map(PlayerComponent(_, layout.mainPlayer)),
-            props.currentTable.opponent(0).flatMap(_.player).map(PlayerComponent(_, layout.player1)),
-            props.currentTable.opponent(1).flatMap(_.player).map(PlayerComponent(_, layout.player2)),
-            props.currentTable.opponent(2).flatMap(_.player).map(PlayerComponent(_, layout.player3)),
-          ).flatten: _*
+  private class GameComponentBackend($: BackendScope[GameType, State]):
+    def render(state: State): VdomNode = state.game match
+      case Some(gameState) =>
+        KStage(
+          { p =>
+            p.width = window.innerWidth
+            p.height = window.innerHeight
+          },
+          KLayer(TableComponent(state.layout.table)),
+          KLayer(CardsLayer(gameState, state.layout)),
+          KLayer(
+            List(
+              gameState.currentTable.mySeat.map(_.player).map(PlayerComponent(_, state.layout.mainPlayer)),
+              gameState.currentTable.opponent(0).flatMap(_.player).map(PlayerComponent(_, state.layout.player1)),
+              gameState.currentTable.opponent(1).flatMap(_.player).map(PlayerComponent(_, state.layout.player2)),
+              gameState.currentTable.opponent(2).flatMap(_.player).map(PlayerComponent(_, state.layout.player3)),
+            ).flatten: _*
+          )
         )
-      )
 
-    case None => <.div("Waiting...")
+      case None => <.div("Waiting...")
 
-  val start: Callback =
-    for {
-      gameType <- $.props
-      _ <- program(gameType).toCallback
-    } yield ()
+    val start: Callback =
+      for {
+        gameType <- $.props
+        _ <- Callback(window.onresize = _ => $.modState(_.refreshLayout).runNow())
+        _ <- program(gameType).toCallback
+      } yield ()
 
-  private def program(gameType: GameType): IO[Unit] = (for {
-    backend <- fs2.Stream.resource(Services.inMemory[IO])
-    (pub, sub, runner) = backend
-    roomId = RoomId.newId
+    private def program(gameType: GameType): IO[Unit] = (for {
+      backend <- fs2.Stream.resource(Services.inMemory[IO])
+      (pub, sub, runner) = backend
+      roomId = RoomId.newId
 
-    me = User(UserId.newId, "ME")
-    p1 = DumbPlayer(User(UserId.newId, "Tizio"), roomId, sub, pub, pause = 4.seconds)
-    p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub, pause = 4.seconds)
-    p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub, pause = 4.seconds)
+      me = User(UserId.newId, "ME")
+      p1 = DumbPlayer(User(UserId.newId, "Tizio"), roomId, sub, pub, pause = 4.seconds)
+      p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub, pause = 4.seconds)
+      p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub, pause = 4.seconds)
 
-    tables <- sub.subscribe(me, roomId)
-      .scan[Option[TablePlayerView]](None) {
-        case (_, ToPlayer.Snapshot(table)) => Some(table)
-        case (props, ToPlayer.GameEvent(event)) => props.map(_.update(event))
-      }
-      .zipWithPrevious
-      .collect { case (prev, Some(current)) if !prev.flatten.contains(current) =>
-        GameProps(
-          me.id,
-          current,
-          prev.flatten,
-          msg => pub.publish(me, roomId)(fs2.Stream(msg)).compile.drain.toCallback
-        )
-      }
-      .evalMap(props => $.setState(Some(props)).toIO)
-      .concurrently(runner)
-      .concurrently(p1).concurrently(p2).concurrently(p3)
-      .concurrently(pub.publish(me, roomId)(
-        fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinTable).delayBy(1.second) ++
-          fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartGame(gameType))
-      ))
-  } yield tables).compile.drain
+      tables <- sub.subscribe(me, roomId)
+        .scan[Option[TablePlayerView]](None) {
+          case (_, ToPlayer.Snapshot(table)) => Some(table)
+          case (props, ToPlayer.GameEvent(event)) => props.map(_.update(event))
+        }
+        .zipWithPrevious
+        .collect { case (prev, Some(current)) if !prev.flatten.contains(current) =>
+          GameState(
+            me.id,
+            current,
+            prev.flatten,
+            msg => pub.publish(me, roomId)(fs2.Stream(msg)).compile.drain.toCallback
+          )
+        }
+        .evalMap(gameState => $.modState(_.update(gameState)).toIO)
+        .concurrently(runner)
+        .concurrently(p1).concurrently(p2).concurrently(p3)
+        .concurrently(pub.publish(me, roomId)(
+          fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinTable).delayBy(1.second) ++
+            fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartGame(gameType))
+        ))
+    } yield tables).compile.drain

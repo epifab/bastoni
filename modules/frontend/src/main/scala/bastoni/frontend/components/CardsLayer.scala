@@ -52,7 +52,7 @@ object CardsLayer:
   case class Props(current: List[CardLayout | CardGroupLayout], previous: Map[Int, CardLayout], selectable: Map[Int, Callback])
 
   object Props:
-    def apply(props: GameProps, layout: GameLayout): Props =
+    def apply(props: GameState, layout: GameLayout): Props =
       def cardsFor(table: TablePlayerView): List[CardLayout | CardGroupLayout] =
         val players: Map[UserId, TablePlayer] =
           table.mySeat.map(_.player.id -> TablePlayer.MainPlayer).toMap ++
@@ -144,5 +144,5 @@ object CardsLayer:
       })
       .build
 
-  def apply(gameProps: GameProps, gameLayout: GameLayout): VdomNode =
+  def apply(gameProps: GameState, gameLayout: GameLayout): VdomNode =
     component(Props(gameProps, gameLayout))
