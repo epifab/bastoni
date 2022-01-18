@@ -12,7 +12,7 @@ case class GameLayout(
   player3: SeatLayout,
   table: TableLayout,
   renderBoard: BoardRenderer,
-  renderDeck: CardsRenderer
+  deck: DeckLayout
 )
 
 object GameLayout:
@@ -92,6 +92,6 @@ object GameLayout:
               )
           }
       },
-      renderDeck = DeckLayout(deckSize)
+      deck = DeckLayout(deckSize)
     )
   }

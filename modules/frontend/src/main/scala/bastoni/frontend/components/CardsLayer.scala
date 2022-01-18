@@ -60,7 +60,7 @@ object CardsLayer:
             table.opponent(1).flatMap(_.player).map(_.id -> TablePlayer.Player2).toMap ++
             table.opponent(2).flatMap(_.player).map(_.id -> TablePlayer.Player3).toMap
 
-        layout.renderDeck(table.deck.map(_.card)) ++
+        layout.deck.renderCards(table.deck.map(_.card)) ++
           renderPiles(table, layout) ++
           layout.renderBoard(table.board.map { case (user, card) => user.flatMap(players.get) -> card.card }) ++
           renderHands(table, layout)
