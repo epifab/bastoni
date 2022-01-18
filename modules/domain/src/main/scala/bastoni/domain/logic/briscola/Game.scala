@@ -113,7 +113,7 @@ object Game extends GameLogic[MatchState]:
 
       val (state, continue) =
         if (deck.isEmpty && winner.hand.isEmpty) WillComplete(updatedPlayers, trump) -> Continue.beforeGameOver
-        else if (deck.nonEmpty) DrawRound(updatedPlayers, Nil, deck, trump) -> Continue.afterPlayingCards
+        else if (deck.nonEmpty) DrawRound(updatedPlayers, Nil, deck, trump) -> Continue.afterTakingCards
         else WillPlay(PlayRound(updatedPlayers, Nil, deck, trump)) -> Continue.afterPlayingCards
 
       state -> List(TrickCompleted(winner.id), continue)

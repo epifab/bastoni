@@ -1208,7 +1208,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1388,7 +1388,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1568,7 +1568,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1748,7 +1748,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
@@ -1928,7 +1928,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2108,7 +2108,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2288,7 +2288,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2468,7 +2468,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2648,7 +2648,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
@@ -2828,7 +2828,7 @@
       "item" : {
         "type" : "Continue"
       },
-      "delay" : "AfterPlayCard",
+      "delay" : "AfterTakeCards",
       "supertype" : "Command"
     },
     {
