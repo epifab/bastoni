@@ -23,12 +23,13 @@ object GameLayout:
 
   def otherSeatLayout(handSize: CardSize, pileSize: CardSize, center: Point, rotation: Angle): SeatLayout =
     SeatLayout(
-      OtherPlayersHandRenderer(center, seatRadius, handSize, rotation),
-      seatRadius,
-      handSize,
-      pileSize,
-      center,
-      rotation
+      handRenderer = OtherPlayersHandRenderer(center, seatRadius, handSize, rotation),
+      seatRadius = seatRadius,
+      handSize = handSize,
+      pileSize = pileSize,
+      pileOffset = handSize.width * 1.2,
+      center = center,
+      rotation = rotation
     )
 
   def apply(canvasSize: Size, table: Option[TablePlayerView]): GameLayout = {
@@ -52,12 +53,13 @@ object GameLayout:
 
     GameLayout(
       mainPlayer = SeatLayout(
-        MainPlayerHandRenderer(mainPlayerHandSize, canvasSize),
-        seatRadius,
-        mainPlayerHandSize,
-        pileSize,
+        handRenderer = MainPlayerHandRenderer(mainPlayerHandSize, canvasSize),
+        seatRadius = seatRadius,
+        handSize = mainPlayerHandSize,
+        pileSize = pileSize,
+        pileOffset = -(canvasSize.width / 2) + pileSize.width,
         center = Point(canvasSize.width / 2, canvasSize.height - textHeight),
-        Angle(180)
+        rotation = Angle(180)
       ),
 
       player1 = otherSeatLayout(handSize, pileSize, Point(textHeight, canvasSize.height / 2), rotation = Angle(90)),
@@ -90,6 +92,6 @@ object GameLayout:
               )
           }
       },
-      renderDeck = DeckLayout(deckSize, Point(cardsMargin, cardsMargin))
+      renderDeck = DeckLayout(deckSize)
     )
   }

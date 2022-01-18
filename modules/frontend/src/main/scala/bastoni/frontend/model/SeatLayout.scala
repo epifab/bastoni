@@ -17,6 +17,7 @@ object SeatLayout:
     seatRadius: Int,
     handSize: CardSize,
     pileSize: CardSize,
+    pileOffset: Double,
     center: Point,
     rotation: Angle
   ): SeatLayout = {
@@ -29,18 +30,17 @@ object SeatLayout:
     new SeatLayout(
       center,
       seatRadius,
-      textRotation = -rotation,
-//      textRotation = rotation.normalised match {
-//        case a if a > 90 && a <= 270 => rotation
-//        case a => -rotation
-//      },
+      textRotation = rotation.normalised match {
+        case a if a > 90 && a <= 270 => Angle(180 - a)
+        case a => rotation
+      },
       barsRotation = -rotation,
       renderHand = handRenderer,
       renderPile = CardGroupRenderer(
         pileSize,
         Point(
-          x = center.x + (xangle.cos * handSize.width * 1.2) - yangle.cos * py1,
-          y = center.y + (xangle.sin * handSize.width * 1.2) - yangle.sin * py1
+          x = center.x + (xangle.cos * pileOffset) - yangle.cos * py1,
+          y = center.y + (xangle.sin * pileOffset) - yangle.sin * py1
         ),
         rotation = -rotation,
         margin = Margin.PerCard(.6)
