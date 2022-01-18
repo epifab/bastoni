@@ -78,4 +78,7 @@ object PlayerComponent:
       )
     }
 
-  def apply(state: PlayerState, layout: SeatLayout): VdomElement = component(state -> layout)
+  def apply(state: PlayerState, layout: SeatLayout): VdomElement =
+    component
+      .withKey(s"player-${state.id}")
+      .apply(state -> layout)

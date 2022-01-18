@@ -8,7 +8,7 @@ import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import konva.Konva
 import org.scalajs.dom.window
-import reactkonva.{KCircle, KGroup, KText}
+import reactkonva.{KCircle, KGroup, KLayer, KText}
 
 
 object CardsLayer:
@@ -97,45 +97,15 @@ object CardsLayer:
       .builder[Props]
       .stateless
       .render_P { (props: Props) =>
-        val renderedCards: List[VdomNode] =
+        val renderedCards: List[VdomElement] =
           props.current
-            .map {
-              case card: CardLayout => CardComponent(card, props.previous.get(card.card.ref), props.selectable.get(card.card.ref))
-              case group: CardGroupLayout =>
-                KGroup(
-                  KGroup(group.toCardLayout.map(card => CardComponent(card, props.previous.get(card.card.ref), props.selectable.get(card.card.ref))): _*),
-//                  KGroup(
-//                    { p =>
-//                      p.x = group.topLeft.x
-//                      p.y = group.topLeft.y
-//                    },
-//                    KCircle(
-//                      { p =>
-//                        p.radius = (group.cardSize.width - 5) / 2
-//                        p.x = group.cardSize.width / 2
-//                        p.y = group.cardSize.height / 2
-//                        p.fill = "#222"
-//                        p.stroke = "#FFF"
-//                        p.strokeWidth = 3
-//                      }
-//                    ),
-//                    KText(
-//                      { p =>
-//                        p.text = group.cards.length.toString
-//                        p.height = group.cardSize.height
-//                        p.width = group.cardSize.width
-//                        p.fontFamily = "'Open Sans', sans-serif"
-//                        p.fontStyle = "bold"
-//                        p.fill = "#FFF"
-//                        p.align = "center"
-//                        p.verticalAlign = "middle"
-//                      }
-//                    )
-//                  )
-                )
+            .flatMap {
+              case card: CardLayout => List(card)
+              case group: CardGroupLayout => group.toCardLayout
             }
+            .map(layout => CardComponent(layout, props.previous.get(layout.card.ref), props.selectable.get(layout.card.ref)))
 
-        KGroup(renderedCards: _*)
+        KLayer(renderedCards: _*)
       }
       .shouldComponentUpdate(c => CallbackTo {
         val layoutHasChanged = c.currentProps.current != c.nextProps.current

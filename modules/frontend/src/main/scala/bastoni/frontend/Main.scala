@@ -1,7 +1,7 @@
 package bastoni.frontend
 
 import bastoni.domain.model.GameType
-import bastoni.frontend.components.{CardComponent, GameComponent, TableComponent}
+import bastoni.frontend.components.{CardComponent, GameComponent, TableLayer}
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.scalajs.dom.html.Image
@@ -16,7 +16,7 @@ import scala.concurrent.duration.DurationInt
   val loadedCount: AtomicInteger = new AtomicInteger(0)
 
   val images =
-    TableComponent.backgroundImage ::
+    TableLayer.backgroundImage ::
     CardComponent.backOfCardImagePattern ::
     CardComponent.cardImages.values.toList
 

@@ -16,8 +16,6 @@ import org.scalajs.dom.html.Image
 import org.scalajs.dom.{HTMLCanvasElement, MouseEvent, document, window}
 import reactkonva.*
 
-import java.util.concurrent.atomic.AtomicReference
-import scala.collection.MapView
 import scala.concurrent.duration.DurationInt
 import scala.scalajs.js
 
@@ -30,9 +28,9 @@ object Image:
 object CardComponent:
 
   case class Props(current: CardLayout, previous: Option[CardLayout], selectable: Option[Callback]):
-    def initial: CardLayout = previous.getOrElse(current)
+    val initial: CardLayout = previous.getOrElse(current)
 
-  case class State(glowing: Double)
+  case class State(glowing: Boolean)
 
   val backOfCardImagePattern: Image = Image("/static/carte/cube.svg")
 
@@ -44,8 +42,7 @@ object CardComponent:
       card -> img
     }.toMap
 
-  class CardBackend($: BackendScope[Props, State]):
-    private val animations = new AtomicReference[List[CardLayout => Unit]](Nil)
+  private class CardBackend($: BackendScope[Props, State]):
     private val animationDuration = .6
 
     private def withShadow(p: ShapeProps)(shadow: Shadow): Unit =
@@ -54,33 +51,24 @@ object CardComponent:
       p.shadowOffset = Vector2d(shadow.offset.x, shadow.offset.y)
       p.shadowOpacity = .5
 
-    def cardAnimationRef: TweenRef => Unit = animationRef[TweenProps] { (p, current) =>
+    def cardSizeAnimation(current: CardLayout): TweenRef => Unit = animation[TweenProps] { p =>
       p.width = current.size.width
       p.height = current.size.height
       p.duration = animationDuration
     }
 
-    private val fadeGlow: Callback =
-      for {
-        state <- $.state
-        _ <- {
-          if (state.glowing <= 0) Callback.empty
-          else $.setState(State(state.glowing - .1), Utils.timeoutCallback(fadeGlow, 100.millis))
-        }
-      } yield ()
-
     private def renderCardBack(props: Props): VdomNode =
       KGroup(
         { p =>
-          p.ref = cardAnimationRef
+          p.ref = cardSizeAnimation(props.current)
           p.width = props.initial.size.width
           p.height = props.initial.size.height
         },
         KRect { p =>
-          p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
-            p.width = current.size.width
-            p.height = current.size.height
-            p.cornerRadius = current.size.cornerRadius
+          p.ref = animation[TweenProps & KRect.Props] { p =>
+            p.width = props.current.size.width
+            p.height = props.current.size.height
+            p.cornerRadius = props.current.size.cornerRadius
             p.duration = animationDuration
           }
           p.width = props.initial.size.width
@@ -90,14 +78,12 @@ object CardComponent:
           props.current.shadow.foreach(withShadow(p))
         },
         KRect { p =>
-          p.ref = animationRef[TweenProps & KRect.Props] { (p, current) =>
-            // fillPatternScale doesn't work here
-            // p.fillPatternScale = Vector2d(current.size.cornerRadius / 5, current.size.cornerRadius / 5)
-            p.cornerRadius = current.size.cornerRadius
-            p.x = current.size.cornerRadius * 2
-            p.y = current.size.cornerRadius * 2
-            p.width = current.size.width - (current.size.cornerRadius * 4)
-            p.height = current.size.height - (current.size.cornerRadius * 4)
+          p.ref = animation[TweenProps & KRect.Props] { p =>
+            p.cornerRadius = props.current.size.cornerRadius
+            p.x = props.current.size.cornerRadius * 2
+            p.y = props.current.size.cornerRadius * 2
+            p.width = props.current.size.width - (props.current.size.cornerRadius * 4)
+            p.height = props.current.size.height - (props.current.size.cornerRadius * 4)
             p.duration = animationDuration
           }
           p.fillPatternImage = backOfCardImagePattern
@@ -121,25 +107,26 @@ object CardComponent:
 
       KImage { p =>
         props.selectable.foreach { callback =>
-          p.onMouseOver = ref => setMousePointer(ref.target, "pointer")
-          p.onMouseOut = ref => setMousePointer(ref.target, "default")
-          p.onDblClick = ref => {
-            setMousePointer(ref.target, "default")
-            callback.runNow()
+          p.onMouseOver = ref => {
+            $.setState(State(glowing = true)).runNow()
+            setMousePointer(ref.target, "pointer")
           }
-          p.onDblTap = ref => {
+          p.onMouseOut = ref => {
+            $.setState(State(glowing = false)).runNow()
             setMousePointer(ref.target, "default")
-            callback.runNow()
           }
-          p.onTap = _ => $.setState(State(glowing = 1), fadeGlow).runNow()
-          p.onClick = _ => $.setState(State(glowing = 1), fadeGlow).runNow()
+          p.onClick = ref => {
+            setMousePointer(ref.target, "default")
+            $.setState(State(glowing = false), callback).runNow()
+          }
+          p.onTap = ref => callback.runNow()
         }
-        p.ref = cardAnimationRef
+        p.ref = cardSizeAnimation(props.current)
         p.image = cardImages(card)
         p.width = props.initial.size.width
         p.height = props.initial.size.height
-        if (state.glowing > 0) {
-          p.shadowBlur = 45 * state.glowing
+        if (state.glowing) {
+          p.shadowBlur = 45
           p.shadowColor = "#1dc1d4"
           p.shadowOffset = Vector2d(0, 0)
           p.shadowOpacity = 1
@@ -149,24 +136,16 @@ object CardComponent:
         }
       }
 
-    private def animationRef[P <: TweenProps](f: (P, CardLayout) => Unit): TweenRef => Unit = tween =>
-      val previousAnimations: List[CardLayout => Unit] = animations.get()
-      animations.set(((current: CardLayout) => tween.to(JsObject[P](p => f(p, current)))) :: previousAnimations)
-
-    val animate: Callback = for {
-      props <- $.props
-      _ <- if (props.previous.isEmpty) Callback.empty else Callback(animations.get.foreach(_(props.current)))
-    } yield ()
+    private def animation[P <: TweenProps](f: P => Unit): TweenRef => Unit = tween =>
+      Option(tween).foreach(_.to(JsObject[P](p => f(p))))
 
     def render(props: Props, state: State): VdomNode =
-      animations.set(Nil)
-
       KGroup(
         { p =>
-          p.ref = animationRef[TweenProps] { (p, current) =>
-            p.x = current.position.x
-            p.y = current.position.y
-            p.rotation = current.rotation.deg
+          p.ref = animation[TweenProps] { p =>
+            p.x = props.current.position.x
+            p.y = props.current.position.y
+            p.rotation = props.current.rotation.deg
             p.duration = animationDuration
           }
           p.x = props.initial.position.x
@@ -176,13 +155,19 @@ object CardComponent:
         props.current.card.toOption.map(_.simple).fold(renderCardBack(props))(renderCard(props, state))
       )
 
-  private def component =
+  private val component =
     ScalaComponent
       .builder[Props]
-      .initialState(State(0))
+      .initialState(State(glowing = false))
       .renderBackend[CardBackend]
-      .componentDidMount(_.backend.animate)
+      .shouldComponentUpdate(c => CallbackTo(
+        c.currentProps.current != c.nextProps.current ||
+          c.currentProps.selectable.isDefined != c.currentProps.selectable.isDefined ||
+          c.currentState != c.nextState
+      ))
       .build
 
   def apply(current: CardLayout, previous: Option[CardLayout], selectable: Option[Callback]): VdomElement =
-    component.withKey(s"card-${current.card.ref}${current.card.toOption.fold("")(c => s"-${c.rank}-${c.suit}")}")(Props(current, previous, selectable))
+    component
+      .withKey(s"card-${current.card.ref}")
+      .apply(Props(current, previous, selectable))

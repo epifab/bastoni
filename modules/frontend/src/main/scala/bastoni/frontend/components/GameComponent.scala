@@ -22,7 +22,7 @@ import scala.concurrent.duration.DurationInt
 
 extension[T](io: IO[T])
   def toCallback: Callback = Callback(io.unsafeRunAsync {
-    case Right(_) => console.debug("IO run successfully")
+    case Right(_) => ()
     case Left(error) => console.error(error.getMessage)
   })
 
@@ -30,9 +30,9 @@ extension(callback: Callback)
   def toIO: IO[Unit] = IO(callback.runNow())
 
 object GameComponent:
-  case class State(game: Option[GameState], currentLayout: GameLayout, previousLayout: GameLayout):
-    def refreshLayout: State = copy(currentLayout = GameLayout.fromWindow(game.map(_.currentTable)), previousLayout = currentLayout)
-    def update(state: GameState): State = copy(game = Some(state)).refreshLayout
+  case class State(gameState: Option[GameState], currentLayout: GameLayout, previousLayout: GameLayout):
+    def refreshLayout: State = copy(currentLayout = GameLayout.fromWindow(gameState.map(_.currentTable)), previousLayout = currentLayout)
+    def update(nextGameState: GameState): State = copy(gameState = Some(nextGameState)).refreshLayout
 
   object State:
     def initial: State =
@@ -50,15 +50,15 @@ object GameComponent:
   def apply(gameType: GameType): VdomElement = component(gameType)
 
   private class GameComponentBackend($: BackendScope[GameType, State]):
-    def render(state: State): VdomNode = state.game match
+    def render(state: State): VdomNode = state.gameState match
       case Some(gameState) =>
         KStage(
           { p =>
             p.width = window.innerWidth
             p.height = window.innerHeight
           },
-          KLayer(TableComponent(state.currentLayout.table)),
-          KLayer(CardsLayer(gameState, state.currentLayout, state.previousLayout)),
+          TableLayer(state.currentLayout.table),
+          CardsLayer(gameState, state.currentLayout, state.previousLayout),
           KLayer(
             List(
               gameState.currentTable.mySeat.map(_.player).map(PlayerComponent(_, state.currentLayout.mainPlayer)),

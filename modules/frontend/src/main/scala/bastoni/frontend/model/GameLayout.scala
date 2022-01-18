@@ -54,7 +54,7 @@ object GameLayout:
       mainPlayer = SeatLayout(
         MainPlayerHandRenderer(mainPlayerHandSize, canvasSize),
         seatRadius,
-        handSize,
+        mainPlayerHandSize,
         pileSize,
         center = Point(canvasSize.width / 2, canvasSize.height - textHeight),
         Angle(180)
