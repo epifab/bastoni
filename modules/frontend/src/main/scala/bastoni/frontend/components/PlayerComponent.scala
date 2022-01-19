@@ -5,7 +5,7 @@ import bastoni.frontend.Palette
 import bastoni.frontend.model.*
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.VdomElement
-import reactkonva.{KArc, KCircle, KGroup, KText}
+import reactkonva.{KArc, KCircle, KGroup, KStar, KText}
 
 object PlayerComponent:
   private val circleStrokeSize: Int = 15
@@ -54,13 +54,14 @@ object PlayerComponent:
               center = layout.center,
               timeout = timeout,
               angle = Angle(220),
-              rotation = layout.barsRotation,
+              rotation = layout.rotation,
               innerRadius = layout.radius,
               size = circleStrokeSize
             )
 
           case _ => KGroup()
         },
+
         KText { p =>
           p.text = state.name
           p.align = "center"
@@ -74,6 +75,34 @@ object PlayerComponent:
           p.width = layout.radius * 2
           p.height = layout.radius * 2
           p.rotation = layout.textRotation.deg
+        },
+
+        state match {
+          case active: PlayerState.SittingIn =>
+            val points = active.player.points
+            val innerRadius = 7
+            val outerRadius = 10
+            val starSize = 2 * outerRadius
+
+            val xangle = Angle(90 - layout.rotation.deg)
+            val xoffset = -(starSize * (points - 1) / 2)
+
+            KGroup(
+              (0 until points).map { index =>
+                KStar { p =>
+                  p.numPoints = 5
+                  p.innerRadius = 7
+                  p.outerRadius = 10
+                  p.fill = Palette.yellow2
+                  p.shadowBlur = 4
+                  p.shadowColor = Palette.grey2
+                  p.x = layout.center.x + layout.rotation.sin * 30 + xangle.sin * (xoffset + starSize * index)
+                  p.y = layout.center.y + layout.rotation.cos * 30 + xangle.cos * (xoffset + starSize * index)
+                }
+              }: _*
+            )
+
+          case _ => KGroup()
         }
       )
     }

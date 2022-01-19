@@ -6,7 +6,7 @@ case class SeatLayout private(
   center: Point,
   radius: Double,
   textRotation: Angle,
-  barsRotation: Angle,
+  rotation: Angle,
   renderHand: CardsRenderer,
   renderPile: CardsRenderer
 )
@@ -34,7 +34,7 @@ object SeatLayout:
         case a if a > 90 && a <= 270 => Angle(180 - a)
         case a => rotation
       },
-      barsRotation = -rotation,
+      rotation = rotation,
       renderHand = handRenderer,
       renderPile = CardGroupRenderer(
         pileSize,

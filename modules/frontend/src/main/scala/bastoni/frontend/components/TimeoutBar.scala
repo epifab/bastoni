@@ -58,7 +58,7 @@ object TimeoutBar:
               p.angle = ((props.angle.deg.toDouble / Timeout.Max.value) * (timeout.value - (1 - state.factor))).floor.toInt
               p.innerRadius = props.innerRadius
               p.outerRadius = props.innerRadius + props.size
-              p.rotation = props.rotation.deg - ((props.angle.deg - 180) / 2)
+              p.rotation = -props.rotation.deg - ((props.angle.deg - 180) / 2)
               p.fill = timeout match {
                 case Timeout.Max => Palette.green1
                 case Timeout.T9 => Palette.green2

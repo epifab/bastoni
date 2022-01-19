@@ -57,7 +57,7 @@ object GameLayout:
         seatRadius = seatRadius,
         handSize = mainPlayerHandSize,
         pileSize = pileSize,
-        pileOffset = -(canvasSize.width / 2) + pileSize.width,
+        pileOffset = canvasSize.width / 3,
         center = Point(canvasSize.width / 2, canvasSize.height - textHeight),
         rotation = Angle(180)
       ),
