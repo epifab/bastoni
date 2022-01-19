@@ -6,6 +6,7 @@ import org.scalajs.dom.window
 import javax.swing.text.TableView
 
 case class GameLayout(
+  canvas: Size,
   mainPlayer: SeatLayout,
   player1: SeatLayout,
   player2: SeatLayout,
@@ -33,18 +34,16 @@ object GameLayout:
     )
 
   def apply(canvasSize: Size, table: Option[TablePlayerView]): GameLayout = {
-    val pileSize = CardSize.scaleTo(Math.min(canvasSize.width / 8, canvasSize.height / 8 * CardSize.ratioW))
-    val deckSize = CardSize.scaleTo(Math.min(canvasSize.width / 8, canvasSize.height / 8 * CardSize.ratioW))
-    val handSize = CardSize.scaleTo(Math.min(canvasSize.width / 5, canvasSize.height / 5 * CardSize.ratioW))
-    val boardSize = CardSize.scaleTo(Math.min(canvasSize.width / 5, canvasSize.height / 5 * CardSize.ratioW))
+    val pileSize = CardSize.scaleTo(canvasSize.width / 8, canvasSize.height / 8)
+    val deckSize = pileSize
+    val handSize = CardSize.scaleTo(canvasSize.width / 5, canvasSize.height / 5)
+    val boardSize = handSize
     val mainPlayerHandSize: CardSize = table.flatMap(_.mySeat.flatMap { seat =>
       Some(seat.player).collect {
         case actor: PlayerState.ActingPlayer if actor.playing =>
           CardSize.scaleTo(
-            Math.min(
-              (canvasSize.height / 3) * CardSize.ratioW,
-              canvasSize.width / (1 + ((seat.hand.size - 1) * MainPlayerHandRenderer.horizontalOverlapFactor))
-            )
+            maxWidth = canvasSize.width / (1 + ((seat.hand.size - 1) * MainPlayerHandRenderer.horizontalOverlapFactor)),
+            maxHeight = canvasSize.height / 3
           )
       }
     }).getOrElse(handSize)
@@ -52,6 +51,7 @@ object GameLayout:
     val cardsMargin: Int = (boardSize.width / 4).floor.toInt
 
     GameLayout(
+      canvas = canvasSize,
       mainPlayer = SeatLayout(
         handRenderer = MainPlayerHandRenderer(mainPlayerHandSize, canvasSize),
         seatRadius = seatRadius,
@@ -92,6 +92,6 @@ object GameLayout:
               )
           }
       },
-      deck = DeckLayout(deckSize)
+      deck = DeckLayout(deckSize, canvasSize)
     )
   }

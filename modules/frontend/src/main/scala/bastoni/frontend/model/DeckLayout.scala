@@ -2,10 +2,10 @@ package bastoni.frontend.model
 
 import bastoni.domain.model.{VisibleCard, CardInstance, HiddenCard}
 
-case class DeckLayout(renderCards: CardsRenderer, topLeft: Point, radius: Double)
+case class DeckLayout(renderCards: CardsRenderer, topLeft: Point, radius: Double, controlLayout: CardLayout)
 
 object DeckLayout:
-  def apply(size: CardSize): DeckLayout =
+  def apply(size: CardSize, canvas: Size): DeckLayout =
     val rotation = Angle(45)
     val topLeft = Point(rotation.cos * size.height / 2, -rotation.sin * size.height / 2)
 
@@ -36,4 +36,20 @@ object DeckLayout:
             )
         }
 
-    new DeckLayout(renderer, Point(size.width / 2, size.width / 2), size.width / 2)
+    val controlSize = CardSize.scaleTo(canvas.width / 2, canvas.height / 2)
+
+    new DeckLayout(
+      renderer,
+      Point(size.width / 2, size.width / 2),
+      size.width / 2,
+      controlLayout = CardLayout(
+        HiddenCard(0),
+        controlSize,
+        Point(
+          (canvas.width - controlSize.width) / 2,
+          (canvas.height - controlSize.height) / 2
+        ),
+        Angle.zero,
+        None
+      )
+    )

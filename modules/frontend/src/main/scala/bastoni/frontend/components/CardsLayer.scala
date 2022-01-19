@@ -67,13 +67,20 @@ object CardsLayer:
 
       val cards = cardsFor(props.currentTable, currentLayout)
 
+      val deckOrigin =
+        props.currentTable.deck
+          .map(cardLayout => cardLayout.card.ref -> previousLayout.deck.controlLayout.copy(card = HiddenCard(cardLayout.card.ref)))
+          .toMap
+
       val previousCards: Map[Int, CardLayout] =
         props.previousTable.map { previousTable =>
-          cardsFor(previousTable, previousLayout).flatMap {
+          val allCards = cardsFor(previousTable, previousLayout).flatMap {
             case group: CardGroupLayout => group.toCardLayout
             case card: CardLayout => List(card)
-          }.map(layout => layout.card.ref -> layout).toMap
-        }.getOrElse(Map.empty)
+          }.map(layout => layout.card.ref -> layout)
+
+          if (allCards.isEmpty) deckOrigin else allCards.toMap
+        }.getOrElse(deckOrigin)
 
       val selectableCards: Map[Int, Callback] = props.currentTable.mySeat.fold(Map.empty)(seat => seat.player match {
         case PlayerState.ActingPlayer(_, Action.PlayCard, _) =>

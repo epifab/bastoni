@@ -9,6 +9,7 @@ case class CardSize(size: Size, cornerRadius: Double):
   def scaleTo(newWidth: Double): CardSize = scale(newWidth / size.width)
 
 object CardSize:
-  def scaleTo(width: Double): CardSize = full.scaleTo(width)
+  def fixedWidth(width: Double): CardSize = full.scaleTo(width)
+  def scaleTo(maxWidth: Double, maxHeight: Double): CardSize = full.scaleTo(Math.min(maxWidth, maxHeight * ratioW))
   val full: CardSize = CardSize(Size(87, 140), cornerRadius = 5)
   val ratioW: Double = full.width / full.height

@@ -57,28 +57,30 @@ object CardComponent:
       p.duration = animationDuration
     }
 
-    private def renderCardBack(props: Props): VdomNode =
+    private def renderCardBack(props: Props, state: State): VdomNode =
       KGroup(
         { p =>
           p.ref = cardSizeAnimation(props.current)
           p.width = props.initial.size.width
           p.height = props.initial.size.height
         },
-        KRect { p =>
-          p.ref = animation[TweenProps & KRect.Props] { p =>
+        KRect { rect =>
+          addSelectable(props)(rect)
+          addGlowingOrShadow(props, state)(rect)
+          rect.ref = animation[TweenProps & KRect.Props] { p =>
             p.width = props.current.size.width
             p.height = props.current.size.height
             p.cornerRadius = props.current.size.cornerRadius
             p.duration = animationDuration
           }
-          p.width = props.initial.size.width
-          p.height = props.initial.size.height
-          p.cornerRadius = props.initial.size.cornerRadius
-          p.fill = Palette.grey1
-          props.current.shadow.foreach(withShadow(p))
+          rect.width = props.initial.size.width
+          rect.height = props.initial.size.height
+          rect.cornerRadius = props.initial.size.cornerRadius
+          rect.fill = Palette.grey1
         },
-        KRect { p =>
-          p.ref = animation[TweenProps & KRect.Props] { p =>
+        KRect { rect =>
+          addSelectable(props)(rect)
+          rect.ref = animation[TweenProps & KRect.Props] { p =>
             p.cornerRadius = props.current.size.cornerRadius
             p.x = props.current.size.cornerRadius * 2
             p.y = props.current.size.cornerRadius * 2
@@ -86,55 +88,60 @@ object CardComponent:
             p.height = props.current.size.height - (props.current.size.cornerRadius * 4)
             p.duration = animationDuration
           }
-          p.fillPatternImage = backOfCardImagePattern
-          p.fillPatternRepeat = "repeat"
-          p.fillPatternRotation = 270
-          p.fillPatternScale = Vector2d(props.current.size.width / 400, props.current.size.width / 400)
-          p.stroke = Palette.grey2
-          p.strokeWidth = 2
-          p.cornerRadius = props.initial.size.cornerRadius
-          p.x = props.initial.size.cornerRadius * 2
-          p.y = props.initial.size.cornerRadius * 2
-          p.width = props.initial.size.width - (props.initial.size.cornerRadius * 4)
-          p.height = props.initial.size.height - (props.initial.size.cornerRadius * 4)
+          rect.fillPatternImage = backOfCardImagePattern
+          rect.fillPatternRepeat = "repeat"
+          rect.fillPatternRotation = 270
+          rect.fillPatternScale = Vector2d(props.current.size.width / 400, props.current.size.width / 400)
+          rect.stroke = Palette.grey2
+          rect.strokeWidth = 2
+          rect.cornerRadius = props.initial.size.cornerRadius
+          rect.x = props.initial.size.cornerRadius * 2
+          rect.y = props.initial.size.cornerRadius * 2
+          rect.width = props.initial.size.width - (props.initial.size.cornerRadius * 4)
+          rect.height = props.initial.size.height - (props.initial.size.cornerRadius * 4)
         }
       )
 
     private def renderCard(props: Props, state: State)(card: SimpleCard) =
-      def setMousePointer(target: NodeRef, style: "default" | "pointer"): Unit = {
-        target.getStage().container().style.cursor = style
-      }
-
       KImage { p =>
-        props.selectable.foreach { callback =>
-          p.onMouseOver = ref => {
-            $.setState(State(glowing = true)).runNow()
-            setMousePointer(ref.target, "pointer")
-          }
-          p.onMouseOut = ref => {
-            $.setState(State(glowing = false)).runNow()
-            setMousePointer(ref.target, "default")
-          }
-          p.onClick = ref => {
-            setMousePointer(ref.target, "default")
-            $.setState(State(glowing = false), callback).runNow()
-          }
-          p.onTap = ref => callback.runNow()
-        }
+        addSelectable(props)(p)
+        addGlowingOrShadow(props, state)(p)
         p.ref = cardSizeAnimation(props.current)
         p.image = cardImages(card)
         p.width = props.initial.size.width
         p.height = props.initial.size.height
-        if (state.glowing) {
-          p.shadowBlur = 45
-          p.shadowColor = "#1dc1d4"
-          p.shadowOffset = Vector2d(0, 0)
-          p.shadowOpacity = 1
-        }
-        else {
-          props.current.shadow.foreach(withShadow(p))
-        }
       }
+
+    private def addSelectable(props: Props)(p: NodeProps): Unit = {
+      def setMousePointer(target: NodeRef, style: "default" | "pointer"): Unit =
+        target.getStage().container().style.cursor = style
+
+      props.selectable.foreach { callback =>
+        p.onMouseEnter = ref => {
+          $.setState(State(glowing = true)).runNow()
+          setMousePointer(ref.target, "pointer")
+        }
+        p.onMouseOut = ref => {
+          $.setState(State(glowing = false)).runNow()
+          setMousePointer(ref.target, "default")
+        }
+        p.onClick = ref => {
+          setMousePointer(ref.target, "default")
+          $.setState(State(glowing = false), callback).runNow()
+        }
+        p.onTap = ref => callback.runNow()
+      }
+    }
+
+    private def addGlowing(state: State)(p: ShapeProps): Unit =
+      p.shadowBlur = 45
+      p.shadowColor = "#1dc1d4"
+      p.shadowOffset = Vector2d(0, 0)
+      p.shadowOpacity = 1
+
+    private def addGlowingOrShadow(props: Props, state: State)(p: ShapeProps): Unit =
+      if (state.glowing) addGlowing(state)(p)
+      else props.current.shadow.foreach(withShadow(p))
 
     private def animation[P <: TweenProps](f: P => Unit): TweenRef => Unit = tween =>
       Option(tween).foreach(_.to(JsObject[P](p => f(p))))
@@ -152,7 +159,7 @@ object CardComponent:
           p.y = props.initial.position.y
           p.rotation = props.initial.rotation.deg
         },
-        props.current.card.toOption.map(_.simple).fold(renderCardBack(props))(renderCard(props, state))
+        props.current.card.toOption.map(_.simple).fold(renderCardBack(props, state))(renderCard(props, state))
       )
 
   private val component =
@@ -167,7 +174,7 @@ object CardComponent:
       ))
       .build
 
-  def apply(current: CardLayout, previous: Option[CardLayout], selectable: Option[Callback]): VdomElement =
+  def apply(layout: CardLayout, previous: Option[CardLayout], selectable: Option[Callback]): VdomElement =
     component
-      .withKey(s"card-${current.card.ref}")
-      .apply(Props(current, previous, selectable))
+      .withKey(s"card-${layout.card.ref}")
+      .apply(Props(layout, previous, selectable))
