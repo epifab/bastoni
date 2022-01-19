@@ -18,12 +18,23 @@
       "seed" : 10,
       "type" : "ShuffleDeck",
       "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
+      "supertype" : "Command"
     }
   ],
   "output" : [
     {
       "type" : "GameAborted",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterGameOver",
+      "supertype" : "Command"
     },
     {
       "type" : "MatchAborted",

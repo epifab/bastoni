@@ -122,9 +122,9 @@ object Game extends GameLogic[MatchState]:
     case (WillComplete(players, trump), Continue) =>
       val teams = Teams(players)
 
-      val scores: List[GameScore] = teams.map(players => GameScore(players))
+      val scores: List[GameScore] = teams.map(players => GameScoreCalculator(players))
 
-      val winners: List[UserId] = scores.winners
+      val winners: List[UserId] = scores.bestTeam
 
       val matchPoints: List[MatchScore] = teams.flatMap(teamPlayers => teamPlayers.headOption.map {
         case winner if winners.exists(winner.is) => MatchScore(teamPlayers.map(_.id), winner.matchPlayer.win.points)
@@ -136,7 +136,7 @@ object Game extends GameLogic[MatchState]:
         case loser => loser.matchPlayer
       }
 
-      Completed(updatedPlayers) -> List(BriscolaGameCompleted(scores, matchPoints))
+      Completed(updatedPlayers) -> List(GameCompleted(scores, matchPoints))
   }
 
   override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
@@ -176,8 +176,8 @@ object Game extends GameLogic[MatchState]:
 
   extension(card: VisibleCard)
     def >(other: VisibleCard): Boolean =
-      val points = GameScore.pointsFor(card)
-      val otherPoints = GameScore.pointsFor(other)
+      val points = GameScoreCalculator.pointsFor(card)
+      val otherPoints = GameScoreCalculator.pointsFor(other)
       (points > otherPoints) || (points == otherPoints && card.rank.value > other.rank.value)
 
   private def completeTrick(players: List[(Player, VisibleCard)], trump: VisibleCard): List[Player] =

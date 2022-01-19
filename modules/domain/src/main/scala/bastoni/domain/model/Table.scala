@@ -138,7 +138,7 @@ trait Table[C <: CardView]:
                 EndOfGamePlayer(
                   player = active.player.copy(points = done.matchScores.pointsFor(active.player).getOrElse(active.player.points)),
                   points = done.scores.pointsFor(active.player).getOrElse(0),
-                  winner = done.winnerIds.exists(active.is)
+                  winner = done.scores.bestTeam.exists(active.is)
                 )
               case whatever => whatever
             },

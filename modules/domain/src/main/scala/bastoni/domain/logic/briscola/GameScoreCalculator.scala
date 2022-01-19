@@ -5,12 +5,7 @@ import bastoni.domain.model.*
 import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.deriveCodec
 
-case class GameScoreItem(card: VisibleCard, points: Int)
-
-case class GameScore(playerIds: List[UserId], items: List[GameScoreItem]) extends Score:
-  override val points: Int = items.foldRight(0)(_.points + _)
-
-object GameScore:
+object GameScoreCalculator:
   def pointsFor(card: VisibleCard): Int = card.rank match {
     case Rank.Asso => 11
     case Rank.Tre => 10
@@ -20,15 +15,12 @@ object GameScore:
     case _ => 0
   }
 
-  def apply(players: List[Player]): GameScore =
-    new GameScore(
+  def apply(players: List[Player]): BriscolaGameScore =
+    BriscolaGameScore(
       players.map(_.id),
       players
         .flatMap(_.taken)
         .map(card => card -> pointsFor(card))
-        .collect { case (card, points) if points > 0 => GameScoreItem(card, points) }
+        .collect { case (card, points) if points > 0 => BriscolaGameScoreItem(card, points) }
         .sortBy(-_.points)
     )
-
-  given Codec[GameScoreItem] = deriveCodec
-  given Codec[GameScore] = deriveCodec

@@ -142,7 +142,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       ShuffleDeck(shuffleSeed).toMessage(room2Id),
       Continue.toMessage(room2Id),
       LeaveTable(user1).toMessage(room1Id),
-      PlayerLeftTable(user1, 2).toMessage(room1Id)
+      PlayerLeftTable(user1, 2).toMessage(room1Id),
+      Continue.toMessage(room1Id)
     )
 
     gameService(inputStream).asserting(_ shouldBe List(
@@ -164,6 +165,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       Delayed(Continue.toMessage(room2Id), Delay.AfterDealCards),
       PlayerLeftTable(user1, 2).toMessage(room1Id),
       GameAborted.toMessage(room1Id),
+      Delayed(Continue.toMessage(room1Id), Delay.AfterGameOver),
       MatchAborted.toMessage(room1Id),
     ))
   }
@@ -266,7 +268,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
     val player1Collected = shuffledDeck.cards.filter(card => card != player1Card && card != player2Card)
 
     val initialContext = new GameContext(
-      table = new TableServerView(
+      table = TableServerView(
         seats = List(
           Seat(
             player = Some(ActingPlayer(player1, Action.PlayCard, Some(Timeout.Max))),
@@ -328,36 +330,36 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         oldMessage.data,
         CardPlayed(user1.id, player1Card),
         TrickCompleted(user2.id),
-        BriscolaGameCompleted(
+        GameCompleted(
           scores = List(
-            briscola.GameScore(
+            BriscolaGameScore(
               List(user2.id),
               List(
-                briscola.GameScoreItem(cardOf(Asso, Denari), 11),
-                briscola.GameScoreItem(cardOf(Tre, Denari), 10)
+                BriscolaGameScoreItem(cardOf(Asso, Denari), 11),
+                BriscolaGameScoreItem(cardOf(Tre, Denari), 10)
               )
             ),
-            briscola.GameScore(
+            BriscolaGameScore(
               List(user1.id),
               List(
-                briscola.GameScoreItem(cardOf(Asso, Spade), 11),
-                briscola.GameScoreItem(cardOf(Asso, Bastoni), 11),
-                briscola.GameScoreItem(cardOf(Asso, Coppe), 11),
-                briscola.GameScoreItem(cardOf(Tre, Spade), 10),
-                briscola.GameScoreItem(cardOf(Tre, Coppe), 10),
-                briscola.GameScoreItem(cardOf(Tre, Bastoni), 10),
-                briscola.GameScoreItem(cardOf(Re, Denari), 4),
-                briscola.GameScoreItem(cardOf(Re, Bastoni), 4),
-                briscola.GameScoreItem(cardOf(Re, Coppe), 4),
-                briscola.GameScoreItem(cardOf(Re, Spade), 4),
-                briscola.GameScoreItem(cardOf(Cavallo, Denari), 3),
-                briscola.GameScoreItem(cardOf(Cavallo, Bastoni), 3),
-                briscola.GameScoreItem(cardOf(Cavallo, Spade), 3),
-                briscola.GameScoreItem(cardOf(Cavallo, Coppe), 3),
-                briscola.GameScoreItem(cardOf(Fante, Bastoni), 2),
-                briscola.GameScoreItem(cardOf(Fante, Spade), 2),
-                briscola.GameScoreItem(cardOf(Fante, Coppe), 2),
-                briscola.GameScoreItem(cardOf(Fante, Denari), 2),
+                BriscolaGameScoreItem(cardOf(Asso, Spade), 11),
+                BriscolaGameScoreItem(cardOf(Asso, Bastoni), 11),
+                BriscolaGameScoreItem(cardOf(Asso, Coppe), 11),
+                BriscolaGameScoreItem(cardOf(Tre, Spade), 10),
+                BriscolaGameScoreItem(cardOf(Tre, Coppe), 10),
+                BriscolaGameScoreItem(cardOf(Tre, Bastoni), 10),
+                BriscolaGameScoreItem(cardOf(Re, Denari), 4),
+                BriscolaGameScoreItem(cardOf(Re, Bastoni), 4),
+                BriscolaGameScoreItem(cardOf(Re, Coppe), 4),
+                BriscolaGameScoreItem(cardOf(Re, Spade), 4),
+                BriscolaGameScoreItem(cardOf(Cavallo, Denari), 3),
+                BriscolaGameScoreItem(cardOf(Cavallo, Bastoni), 3),
+                BriscolaGameScoreItem(cardOf(Cavallo, Spade), 3),
+                BriscolaGameScoreItem(cardOf(Cavallo, Coppe), 3),
+                BriscolaGameScoreItem(cardOf(Fante, Bastoni), 2),
+                BriscolaGameScoreItem(cardOf(Fante, Spade), 2),
+                BriscolaGameScoreItem(cardOf(Fante, Coppe), 2),
+                BriscolaGameScoreItem(cardOf(Fante, Denari), 2),
               )
             ),
           ),

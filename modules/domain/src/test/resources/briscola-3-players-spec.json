@@ -756,6 +756,10 @@
     {
       "type" : "Continue",
       "supertype" : "Command"
+    },
+    {
+      "type" : "Continue",
+      "supertype" : "Command"
     }
   ],
   "output" : [
@@ -3302,7 +3306,8 @@
               },
               "points" : 2
             }
-          ]
+          ],
+          "type" : "Briscola"
         },
         {
           "playerIds" : [
@@ -3397,7 +3402,8 @@
               },
               "points" : 2
             }
-          ]
+          ],
+          "type" : "Briscola"
         },
         {
           "playerIds" : [
@@ -3420,7 +3426,8 @@
               },
               "points" : 2
             }
-          ]
+          ],
+          "type" : "Briscola"
         }
       ],
       "matchScores" : [
@@ -3444,8 +3451,14 @@
         }
       ],
       "type" : "GameCompleted",
-      "gameType" : "Briscola",
       "supertype" : "Event"
+    },
+    {
+      "item" : {
+        "type" : "Continue"
+      },
+      "delay" : "AfterGameOver",
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",

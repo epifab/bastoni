@@ -128,7 +128,7 @@ object Game extends GameLogic[MatchState]:
       // The last trick is called "rete" (net) which will add a point to the final score
       val rete = players.head.id
 
-      val scores: List[GameScore] = teams.map(players => GameScore(players, rete = players.exists(_.id == rete)))
+      val scores: List[GameScore] = teams.map(players => GameScoreCalculator(players, rete = players.exists(_.id == rete)))
 
       val matchScores: List[MatchScore] = teams.zip(scores).map {
         case (players, points) =>
@@ -141,7 +141,7 @@ object Game extends GameLogic[MatchState]:
           .map(pointsCount => matchPlayer.matchPlayer.win(pointsCount.points))
       }
 
-      Completed(updatedPlayers) -> List(TressetteGameCompleted(scores, matchScores))
+      Completed(updatedPlayers) -> List(GameCompleted(scores, matchScores))
   }
 
   override val playStep: (MatchState, ServerEvent | Command) => (MatchState, List[ServerEvent | Command | Delayed[Command]]) = {

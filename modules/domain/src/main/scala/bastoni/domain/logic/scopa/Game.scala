@@ -174,7 +174,7 @@ object Game extends GameLogic[MatchState]:
     case (WillComplete(players), Continue) =>
       val teams = Teams(players)
 
-      val scores: List[GameScore] = GameScore(teams)
+      val scores: List[GameScore] = GameScoreCalculator(teams)
 
       val matchScores: List[MatchScore] = teams.zip(scores).map {
         case (players, points) =>
@@ -187,7 +187,7 @@ object Game extends GameLogic[MatchState]:
           .map(pointsCount => matchPlayer.matchPlayer.win(pointsCount.points))
       }
 
-      Completed(updatedPlayers) -> List(ScopaGameCompleted(scores, matchScores))
+      Completed(updatedPlayers) -> List(GameCompleted(scores, matchScores))
   }
 
   override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
