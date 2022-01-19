@@ -2,6 +2,7 @@ package bastoni.domain.logic
 package briscola
 
 import bastoni.domain.logic.briscola.GameState.*
+import bastoni.domain.logic.briscola.MatchState.*
 import bastoni.domain.logic.generic.Timer
 import bastoni.domain.model.*
 import bastoni.domain.model.Delay.syntax.*
@@ -16,7 +17,7 @@ object Game extends GameLogic[MatchState]:
 
   override val gameType: GameType = GameType.Briscola
   override def initialState(users: List[User]): MatchState = MatchState(users)
-  override def isFinal(state: MatchState): Boolean = state == MatchState.Terminated
+  override def isFinal(state: MatchState): Boolean = state == Terminated
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
     val request = ActionRequested(player, action, Some(Timeout.Max))
@@ -140,30 +141,34 @@ object Game extends GameLogic[MatchState]:
 
   override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
 
-    case (MatchState.InProgress(matchPlayers, game, rounds), message) =>
+    case (InProgress(matchPlayers, game, rounds), message) =>
       playGameStep(game, message) match
         case (Completed(players), events) =>
 
-          def ready(updatedPlayers: List[MatchPlayer], rounds: Int) =
+          def newGame(updatedPlayers: List[MatchPlayer], rounds: Int) =
             val shiftedRound = updatedPlayers.slideUntil(_.is(matchPlayers.tail.head))
-            MatchState.InProgress(shiftedRound, Ready(shiftedRound), rounds) ->
-              (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck, timeout = None))
+            GameOver(
+              ActionRequested(shiftedRound.last.id, Action.ShuffleDeck, timeout = None),
+              InProgress(shiftedRound, Ready(shiftedRound), rounds)
+            ) -> (events :+ Continue.afterGameOver)
 
-          val teamSize = if (players.size == 4) 2 else 1
+          val teamSize = Teams.size(players)
 
           if (rounds == 0) {
             players.groupMap(_.points)(_.id).maxBy(_._1)._2 match {
-              case winners if winners.size == teamSize => MatchState.Terminated -> (events :+ MatchCompleted(winners))
-              case _ => ready(players.tail :+ players.head, 0)
+              case winners if winners.size == teamSize => GameOver(MatchCompleted(winners), Terminated) -> (events :+ Continue.afterGameOver)
+              case _ => newGame(players.tail :+ players.head, 0)
             }
           }
-          else ready(players.tail :+ players.head, rounds - 1)
+          else newGame(players.tail :+ players.head, rounds - 1)
 
         case (Aborted, events) =>
-          MatchState.Terminated -> (events :+ MatchAborted)
+          GameOver(MatchAborted, Terminated) -> (events :+ Continue.afterGameOver)
 
         case (newGameState, events) =>
-          MatchState.InProgress(matchPlayers, newGameState, rounds) -> events
+          InProgress(matchPlayers, newGameState, rounds) -> events
+
+    case (GameOver(event, newState), Continue) => newState -> List(event)
 
     case (state, _) => state -> uneventful
 

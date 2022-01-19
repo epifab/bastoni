@@ -3,6 +3,7 @@ package tressette
 
 import bastoni.domain.logic.generic.Timer
 import bastoni.domain.logic.tressette.GameState.*
+import bastoni.domain.logic.tressette.MatchState.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Delay.syntax.*
@@ -16,7 +17,7 @@ object Game extends GameLogic[MatchState]:
 
   override val gameType: GameType = GameType.Tressette
   override def initialState(users: List[User]): MatchState = MatchState(users)
-  override def isFinal(state: MatchState): Boolean = state == MatchState.Terminated
+  override def isFinal(state: MatchState): Boolean = state == Terminated
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
     val request = ActionRequested(player, action, Some(Timeout.Max))
@@ -145,28 +146,32 @@ object Game extends GameLogic[MatchState]:
 
   override val playStep: (MatchState, ServerEvent | Command) => (MatchState, List[ServerEvent | Command | Delayed[Command]]) = {
 
-    case (MatchState.InProgress(matchPlayers, gameState, pointsToWin), message) =>
+    case (InProgress(matchPlayers, gameState, pointsToWin), message) =>
       playGameStep(gameState, message) match
         case (Completed(players), events) =>
 
-          def ready(updatedPlayers: List[MatchPlayer], pointsToWin: Int) =
+          def newGame(updatedPlayers: List[MatchPlayer], pointsToWin: Int) =
             val shiftedRound = updatedPlayers.slideUntil(_.is(matchPlayers.tail.head))
-            MatchState.InProgress(shiftedRound, Ready(shiftedRound), pointsToWin) ->
-              (events :+ ActionRequested(shiftedRound.last.id, Action.ShuffleDeck, timeout = None))
+            GameOver(
+              ActionRequested(shiftedRound.last.id, Action.ShuffleDeck, timeout = None),
+              InProgress(shiftedRound, Ready(shiftedRound), pointsToWin)
+            ) -> (events :+ Continue.afterGameOver)
 
-          val teamSize = if (players.size == 4) 2 else 1
+          val teamSize = Teams.size(players)
 
           val winners: List[MatchPlayer] = players.groupBy(_.points).maxBy(_._1)._2
           val winnerPoints = winners.head.points
 
-          if (winnerPoints < pointsToWin || winners.size > teamSize) ready(players.tail :+ players.head, pointsToWin)
-          else MatchState.Terminated -> (events :+ MatchCompleted(winners.map(_.id)))
+          if (winnerPoints < pointsToWin || winners.size > teamSize) newGame(players.tail :+ players.head, pointsToWin)
+          else GameOver(MatchCompleted(winners.map(_.id)), Terminated) -> (events :+ Continue.afterGameOver)
 
         case (Aborted, events) =>
-          MatchState.Terminated -> (events :+ MatchAborted)
+          GameOver(MatchAborted, Terminated) -> (events :+ Continue.afterGameOver)
 
         case (newMatchState, events) =>
-          MatchState.InProgress(matchPlayers, newMatchState, pointsToWin) -> events
+          InProgress(matchPlayers, newMatchState, pointsToWin) -> events
+
+    case (GameOver(event, newState), _) => newState -> List(event)
 
     case (state, _) => state -> Nil
 

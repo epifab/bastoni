@@ -51,6 +51,7 @@ object GameService:
       case Delay.AfterTakeCards => 1.second
       case Delay.AfterPlayCard => 50.millis
       case Delay.BeforeGameOver => 3.seconds
+      case Delay.AfterGameOver => 3.seconds
       case Delay.ActionTimeout => 3.seconds // players get 10 * 3 = 30 seconds to act
     }
   ): ServiceRunner[F] =
