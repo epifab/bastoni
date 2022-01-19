@@ -171,9 +171,7 @@ object Game extends GameLogic[MatchState]:
       else WillComplete(updatedPlayers) -> List(event, Continue.beforeGameOver)
 
     case (WillComplete(players), Continue) =>
-      val teams = players match
-        case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
-        case _ => players.map(List(_))
+      val teams = Teams(players)
 
       val scores: List[GameScore] = GameScore(teams)
 

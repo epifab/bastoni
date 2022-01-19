@@ -119,9 +119,7 @@ object Game extends GameLogic[MatchState]:
       state -> List(TrickCompleted(winner.id), continue)
 
     case (WillComplete(players, trump), Continue) =>
-      val teams: List[List[Player]] = players match
-        case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
-        case ps => ps.map(List(_))
+      val teams = Teams(players)
 
       val scores: List[GameScore] = teams.map(players => GameScore(players))
 

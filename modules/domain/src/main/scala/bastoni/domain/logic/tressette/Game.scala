@@ -122,9 +122,7 @@ object Game extends GameLogic[MatchState]:
       state -> (TrickCompleted(winner.id) :: commands)
 
     case (WillComplete(players), Continue) =>
-      val teams = players match
-        case a :: b :: c :: d :: Nil => List(List(a, c), List(b, d))
-        case ps => ps.map(List(_))
+      val teams = Teams(players)
 
       // The last trick is called "rete" (net) which will add a point to the final score
       val rete = players.head.id
