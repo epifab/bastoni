@@ -5,12 +5,15 @@ import cats.Applicative
 
 import scala.annotation.tailrec
 
+trait ActiveMatch:
+  def players: List[MatchPlayer]
+
 trait GameLogic[State]:
 
   protected val uneventful: List[StateMachineOutput] = Nil
 
   val gameType: GameType
-  def initialState(users: List[User]): State
+  def initialState(users: List[User]): State & ActiveMatch
   def isFinal(state: State): Boolean
 
   val playStep: (State, StateMachineInput) => (State, List[StateMachineOutput])

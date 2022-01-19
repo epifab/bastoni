@@ -1,7 +1,7 @@
 package bastoni.domain.logic
 package generic
 
-import bastoni.domain.model.GameType
+import bastoni.domain.model.{GameType, MatchInfo, MatchScore}
 import io.circe.{Encoder, Json}
 
 class StateMachine[State: Encoder](gameLogic: GameLogic[State], state: State) extends GameStateMachine:

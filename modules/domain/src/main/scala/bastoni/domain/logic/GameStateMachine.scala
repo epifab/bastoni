@@ -6,7 +6,7 @@ import io.circe.*
 
 
 trait GameStateMachineFactory:
-  def apply(table: TableServerView): GameStateMachine
+  def apply(table: TableServerView): (GameStateMachine, List[StateMachineOutput])
   def decode(json: ACursor): Either[DecodingFailure, GameStateMachine]
 
 

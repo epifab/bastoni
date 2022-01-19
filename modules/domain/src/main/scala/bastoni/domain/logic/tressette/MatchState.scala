@@ -1,5 +1,6 @@
 package bastoni.domain.logic.tressette
 
+import bastoni.domain.logic.ActiveMatch
 import bastoni.domain.model.{MatchPlayer, ServerEvent, User}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
@@ -12,7 +13,7 @@ object MatchState:
     val players = users.map(MatchPlayer(_, 0))
     InProgress(players, GameState.Ready(players), pointsToWin)
 
-  case class  InProgress(players: List[MatchPlayer], game: GameState, pointsToWin: Int) extends MatchState
+  case class  InProgress(players: List[MatchPlayer], game: GameState, pointsToWin: Int) extends MatchState with ActiveMatch
   case class  GameOver(event: ServerEvent, next: MatchState) extends MatchState
   case object Terminated extends MatchState
 

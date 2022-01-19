@@ -16,7 +16,7 @@ import scala.util.Random
 object Game extends GameLogic[MatchState]:
 
   override val gameType: GameType = GameType.Briscola
-  override def initialState(users: List[User]): MatchState = MatchState(users)
+  override def initialState(users: List[User]): MatchState & ActiveMatch = MatchState(users)
   override def isFinal(state: MatchState): Boolean = state == Terminated
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
@@ -34,7 +34,7 @@ object Game extends GameLogic[MatchState]:
     case (active: Active, PlayerLeftTable(user, _)) if active.activePlayers.exists(_.is(user)) =>
       Aborted -> List(GameAborted)
 
-    case (Ready(players), GameStarted(_)) =>
+    case (Ready(players), MatchStarted(_, _)) =>
       Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
 
     case (Ready(players), ShuffleDeck(seed)) =>
@@ -120,23 +120,18 @@ object Game extends GameLogic[MatchState]:
       state -> List(TrickCompleted(winner.id), continue)
 
     case (WillComplete(players, trump), Continue) =>
-      val teams = Teams(players)
+      val gameScores: List[GameScore] = Teams(players).map(players => GameScoreCalculator(players))
+      val gameWinners: List[UserId] = gameScores.bestTeam
 
-      val scores: List[GameScore] = teams.map(players => GameScoreCalculator(players))
-
-      val winners: List[UserId] = scores.bestTeam
-
-      val matchPoints: List[MatchScore] = teams.flatMap(teamPlayers => teamPlayers.headOption.map {
-        case winner if winners.exists(winner.is) => MatchScore(teamPlayers.map(_.id), winner.matchPlayer.win.points)
-        case loser => MatchScore(teamPlayers.map(_.id), loser.matchPlayer.points)
-      })
-
-      val updatedPlayers = players.map {
-        case winner if winners.exists(winner.is) => winner.matchPlayer.win
+      val updatedPlayers: List[MatchPlayer] = players.map {
+        case winner if gameWinners.exists(winner.is) => winner.matchPlayer.win
         case loser => loser.matchPlayer
       }
 
-      Completed(updatedPlayers) -> List(GameCompleted(scores, matchPoints))
+      val updatedTeams: List[List[MatchPlayer]] = Teams(updatedPlayers)
+      val matchScores: List[MatchScore] = MatchScore.forTeams(updatedTeams)
+
+      Completed(updatedPlayers) -> List(GameCompleted(gameScores, matchScores))
   }
 
   override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {

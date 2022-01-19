@@ -13,7 +13,7 @@ object MatchState:
     val players = users.map(MatchPlayer(_, 0))
     InProgress(players, GameState.Ready(players), if (players.size == 4) 21 else 11)
 
-  case class  InProgress(players: List[MatchPlayer], game: GameState, pointsToWin: Int) extends MatchState
+  case class  InProgress(players: List[MatchPlayer], game: GameState, pointsToWin: Int) extends MatchState with ActiveMatch
   case class  GameOver(event: ServerEvent, next: MatchState) extends MatchState
   case object Terminated extends MatchState
 

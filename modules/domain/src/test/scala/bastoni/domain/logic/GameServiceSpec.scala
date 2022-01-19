@@ -104,7 +104,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
     "cannot start if only players is at the table" in {
       val commands = fs2.Stream(
         JoinTable(user1, joinSeed),
-        StartGame(user1.id, GameType.Briscola)
+        StartMatch(user1.id, GameType.Briscola)
       ).map(_.toMessage(room1Id))
 
       gameService(commands).asserting(_ shouldBe List(PlayerJoinedTable(user1, 3).toMessage(room1Id)))
@@ -114,13 +114,16 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       val commands = fs2.Stream(
         JoinTable(user1, joinSeed),
         JoinTable(user2, joinSeed),
-        StartGame(user1.id, GameType.Briscola)
+        StartMatch(user1.id, GameType.Briscola)
       ).map(_.toMessage(room1Id))
 
       gameService(commands).asserting(_ shouldBe List(
         PlayerJoinedTable(user1, 3).toMessage(room1Id),
         PlayerJoinedTable(user2, 2).toMessage(room1Id),
-        GameStarted(GameType.Briscola).toMessage(room1Id)
+        MatchStarted(GameType.Briscola, List(
+          MatchScore(List(user2.id), 0),
+          MatchScore(List(user1.id), 0)
+        )).toMessage(room1Id)
       ))
     }
 
@@ -134,8 +137,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       JoinTable(user3, joinSeed).toMessage(room2Id),
       JoinTable(user2, joinSeed).toMessage(room2Id),
 
-      StartGame(user2.id, GameType.Briscola).toMessage(room1Id),
-      StartGame(user2.id, GameType.Tressette).toMessage(room2Id),
+      StartMatch(user2.id, GameType.Briscola).toMessage(room1Id),
+      StartMatch(user2.id, GameType.Tressette).toMessage(room2Id),
 
       ShuffleDeck(shuffleSeed).toMessage(room1Id),
       Continue.toMessage(room1Id),
@@ -152,8 +155,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       PlayerJoinedTable(user3, 3).toMessage(room2Id),
       PlayerJoinedTable(user2, 2).toMessage(room2Id),
 
-      GameStarted(GameType.Briscola).toMessage(room1Id),
-      GameStarted(GameType.Tressette).toMessage(room2Id),
+      MatchStarted(GameType.Briscola, List(MatchScore(List(user1.id), 0), MatchScore(List(user2.id), 0))).toMessage(room1Id),
+      MatchStarted(GameType.Tressette, List(MatchScore(List(user2.id), 0), MatchScore(List(user3.id), 0))).toMessage(room2Id),
 
       DeckShuffled(shuffledDeck).toMessage(room1Id),
       Delayed(Continue.toMessage(room1Id), Delay.AfterShuffleDeck),
@@ -175,7 +178,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       JoinTable(user2, joinSeed),
       JoinTable(user1, joinSeed),
 
-      StartGame(user2.id, GameType.Briscola),
+      StartMatch(user2.id, GameType.Briscola),
       ShuffleDeck(shuffleSeed),
       Continue,
       Continue,
@@ -222,7 +225,14 @@ class GameServiceSpec extends AsyncIOFreeSpec:
               ),
               deck = shuffledDeck.cards.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
               board = Nil,
-              active = Some(GameType.Briscola)
+              matchInfo = Some(MatchInfo(
+                GameType.Briscola,
+                List(
+                  MatchScore(List(user1.id), 0),
+                  MatchScore(List(user2.id), 0),
+                ),
+                None
+              ))
             )
           ),
           Snapshot(
@@ -250,7 +260,14 @@ class GameServiceSpec extends AsyncIOFreeSpec:
               ),
               deck = shuffledDeck.cards.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
               board = List(Some(user1.id) -> CardServerView(cardOf(Due, Bastoni), Direction.Up)),
-              active = Some(GameType.Briscola)
+              matchInfo = Some(MatchInfo(
+                GameType.Briscola,
+                List(
+                  MatchScore(List(user1.id), 0),
+                  MatchScore(List(user2.id), 0),
+                ),
+                None
+              ))
             )
           )
         )
@@ -283,7 +300,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         ),
         deck = Nil,
         board = List(None -> CardServerView(player2Card, Direction.Up)),
-        active = Some(GameType.Briscola)
+        matchInfo = Some(MatchInfo(GameType.Briscola, Nil, None))
       ),
       stateMachine = Some(generic.StateMachine(
         briscola.Game,
@@ -387,7 +404,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           ),
           deck = Nil,
           board = Nil,
-          active = None
+          matchInfo = None
         ),
         stateMachine = None
       ))

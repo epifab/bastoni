@@ -5,7 +5,7 @@ case class TablePlayerView(
   override val seats: List[Seat[CardPlayerView]],
   override val deck: List[CardPlayerView],
   override val board: List[(Option[UserId], CardPlayerView)],
-  override val active: Option[GameType]
+  override val matchInfo: Option[MatchInfo]
 ) extends Table[CardPlayerView]:
 
   override type TableView = TablePlayerView
@@ -14,8 +14,8 @@ case class TablePlayerView(
     seats: List[Seat[CardPlayerView]] = this.seats,
     deck: List[CardPlayerView] = this.deck,
     board: List[(Option[UserId], CardPlayerView)] = this.board,
-    active: Option[GameType] = this.active
-  ): TablePlayerView = TablePlayerView(me, seats, deck, board, active)
+    matchInfo: Option[MatchInfo] = this.matchInfo
+  ): TablePlayerView = TablePlayerView(me, seats, deck, board, matchInfo)
 
   override protected def buildCard(card: VisibleCard, direction: Direction): CardPlayerView = CardPlayerView(direction match {
     case Direction.Up => card

@@ -16,7 +16,7 @@ import scala.util.Random
 object Game extends GameLogic[MatchState]:
 
   override val gameType: GameType = GameType.Tressette
-  override def initialState(users: List[User]): MatchState = MatchState(users)
+  override def initialState(users: List[User]): MatchState & ActiveMatch = MatchState(users)
   override def isFinal(state: MatchState): Boolean = state == Terminated
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
@@ -35,7 +35,7 @@ object Game extends GameLogic[MatchState]:
     case (active: Active, PlayerLeftTable(player, _)) if active.activePlayers.exists(_.is(player)) =>
       Aborted -> List(GameAborted)
 
-    case (Ready(players), GameStarted(_)) =>
+    case (Ready(players), MatchStarted(_, _)) =>
       Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
 
     case (Ready(players), ShuffleDeck(seed)) =>
@@ -123,25 +123,20 @@ object Game extends GameLogic[MatchState]:
       state -> (TrickCompleted(winner.id) :: commands)
 
     case (WillComplete(players), Continue) =>
-      val teams = Teams(players)
-
       // The last trick is called "rete" (net) which will add a point to the final score
       val rete = players.head.id
 
-      val scores: List[GameScore] = teams.map(players => GameScoreCalculator(players, rete = players.exists(_.id == rete)))
-
-      val matchScores: List[MatchScore] = teams.zip(scores).map {
-        case (players, points) =>
-          MatchScore(players.map(_.id), players.head.matchPlayer.win(points.points).points)
-      }
+      val gameScores: List[GameScore] = Teams(players).map(team => GameScoreCalculator(team, rete = team.exists(_.id == rete)))
 
       val updatedPlayers: List[MatchPlayer] = players.flatMap { matchPlayer =>
-        scores
+        gameScores
           .find(_.playerIds.exists(matchPlayer.is))
-          .map(pointsCount => matchPlayer.matchPlayer.win(pointsCount.points))
+          .map(score => matchPlayer.matchPlayer.win(score.points))
       }
 
-      Completed(updatedPlayers) -> List(GameCompleted(scores, matchScores))
+      val matchScores: List[MatchScore] = MatchScore.forTeams(Teams(updatedPlayers))
+
+      Completed(updatedPlayers) -> List(GameCompleted(gameScores, matchScores))
   }
 
   override val playStep: (MatchState, ServerEvent | Command) => (MatchState, List[ServerEvent | Command | Delayed[Command]]) = {

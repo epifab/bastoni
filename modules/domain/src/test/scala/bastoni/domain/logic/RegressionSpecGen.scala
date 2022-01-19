@@ -66,7 +66,7 @@ object RegressionSpecGen extends IOApp:
           seats = users.map(u => Seat(Some(WaitingPlayer(MatchPlayer(u, 0))), Nil, Nil)),
           deck = Nil,
           board = Nil,
-          active = None
+          matchInfo = None
         )
 
         inputPublisher <-

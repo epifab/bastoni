@@ -26,8 +26,9 @@ case class GameContext(table: TableServerView, stateMachine: Option[GameStateMac
     }
 
     val (newStateMachine, gameMessages) = (stateMachine, message) match
-      case (None, Command.StartGame(playerId, gameType)) if updatedTable.contains(playerId) && updatedTable.players.size > 1 =>
-        Some(GameStateMachineFactory(gameType)(updatedTable)) -> List(GameStarted(gameType))
+      case (None, Command.StartMatch(playerId, gameType)) if updatedTable.contains(playerId) && updatedTable.players.size > 1 =>
+        val (machine, initialEvents) = GameStateMachineFactory(gameType)(updatedTable)
+        Some(machine) -> initialEvents
       case (None, _) => stateMachine -> Nil
       case (Some(stateMachine), message) => stateMachine(message)
 

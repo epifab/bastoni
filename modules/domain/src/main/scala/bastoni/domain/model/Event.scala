@@ -16,7 +16,7 @@ object Event:
   // Public events
   case class  PlayerJoinedTable(user: User, seat: Int) extends PublicEvent
   case class  PlayerLeftTable(user: User, seat: Int) extends PublicEvent
-  case class  GameStarted(gameType: GameType) extends PublicEvent
+  case class  MatchStarted(gameType: GameType, matchScores: List[MatchScore]) extends PublicEvent
   case class  TrumpRevealed(card: VisibleCard) extends PublicEvent
   case class  BoardCardsDealt(cards: List[VisibleCard]) extends PublicEvent
   case class  CardPlayed(playerId: UserId, card: VisibleCard) extends PublicEvent
@@ -58,7 +58,7 @@ object Event:
   given publicEventEncoder: Encoder[PublicEvent] = Encoder.instance {
     case obj: PlayerJoinedTable => deriveEncoder[PlayerJoinedTable].mapJsonObject(_.add("type", "PlayerJoinedTable".asJson))(obj)
     case obj: PlayerLeftTable   => deriveEncoder[PlayerLeftTable].mapJsonObject(_.add("type", "PlayerLeftTable".asJson))(obj)
-    case obj: GameStarted       => deriveEncoder[GameStarted].mapJsonObject(_.add("type", "GameStarted".asJson))(obj)
+    case obj: MatchStarted      => deriveEncoder[MatchStarted].mapJsonObject(_.add("type", "MatchStarted".asJson))(obj)
     case obj: ActionRequested   => deriveEncoder[ActionRequested].mapJsonObject(_.add("type", "ActionRequested".asJson))(obj)
     case obj: TimedOut          => deriveEncoder[TimedOut].mapJsonObject(_.add("type", "TimedOut".asJson))(obj)
     case obj: TrumpRevealed     => deriveEncoder[TrumpRevealed].mapJsonObject(_.add("type", "TrumpRevealed".asJson))(obj)
@@ -89,7 +89,7 @@ object Event:
   given publicEventDecoder: Decoder[PublicEvent] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
     case "PlayerJoinedTable" => deriveDecoder[PlayerJoinedTable](obj)
     case "PlayerLeftTable"   => deriveDecoder[PlayerLeftTable](obj)
-    case "GameStarted"       => deriveDecoder[GameStarted](obj)
+    case "MatchStarted"      => deriveDecoder[MatchStarted](obj)
     case "ActionRequested"   => deriveDecoder[ActionRequested](obj)
     case "TimedOut"          => deriveDecoder[TimedOut](obj)
     case "TrumpRevealed"     => deriveDecoder[TrumpRevealed](obj)

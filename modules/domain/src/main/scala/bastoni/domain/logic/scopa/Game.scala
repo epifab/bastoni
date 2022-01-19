@@ -18,7 +18,7 @@ import scala.util.Random
 object Game extends GameLogic[MatchState]:
 
   override val gameType: GameType = GameType.Scopa
-  override def initialState(users: List[User]): MatchState = MatchState(users)
+  override def initialState(users: List[User]): MatchState & ActiveMatch = MatchState(users)
   override def isFinal(state: MatchState): Boolean = state == Terminated
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
@@ -36,7 +36,7 @@ object Game extends GameLogic[MatchState]:
     case (active: Active, PlayerLeftTable(player, _)) if active.activePlayers.exists(_.is(player)) =>
       Aborted -> List(GameAborted)
 
-    case (Ready(players), GameStarted(_)) =>
+    case (Ready(players), MatchStarted(_, _)) =>
       Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
 
     case (Ready(matchPlayers), ShuffleDeck(seed)) =>
@@ -172,22 +172,17 @@ object Game extends GameLogic[MatchState]:
       else WillComplete(updatedPlayers) -> List(event, Continue.beforeGameOver)
 
     case (WillComplete(players), Continue) =>
-      val teams = Teams(players)
-
-      val scores: List[GameScore] = GameScoreCalculator(teams)
-
-      val matchScores: List[MatchScore] = teams.zip(scores).map {
-        case (players, points) =>
-          MatchScore(players.map(_.id), players.head.matchPlayer.win(points.points).points)
-      }
+      val gameScores: List[GameScore] = GameScoreCalculator(Teams(players))
 
       val updatedPlayers: List[MatchPlayer] = players.flatMap { matchPlayer =>
-        scores
+        gameScores
           .find(_.playerIds.exists(matchPlayer.is))
-          .map(pointsCount => matchPlayer.matchPlayer.win(pointsCount.points))
+          .map(score => matchPlayer.matchPlayer.win(score.points))
       }
 
-      Completed(updatedPlayers) -> List(GameCompleted(scores, matchScores))
+      val matchScores: List[MatchScore] = MatchScore.forTeams(Teams(updatedPlayers))
+
+      Completed(updatedPlayers) -> List(GameCompleted(gameScores, matchScores))
   }
 
   override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {

@@ -127,3 +127,6 @@ case class MatchScore(playerIds: List[UserId], points: Int) extends Score
 object MatchScore:
   given Encoder[MatchScore] = deriveEncoder
   given Decoder[MatchScore] = deriveDecoder
+
+  def forTeams(teams: List[List[MatchPlayer]]): List[MatchScore] =
+    teams.map(players => MatchScore(players.map(_.id), players.headOption.fold(0)(_.points)))
