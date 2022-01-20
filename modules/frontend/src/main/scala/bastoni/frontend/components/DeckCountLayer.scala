@@ -1,7 +1,6 @@
 package bastoni.frontend.components
 
-import bastoni.frontend.Palette
-import bastoni.frontend.model.DeckLayout
+import bastoni.frontend.model.{DeckLayout, Palette}
 import japgolly.scalajs.react.component.ScalaFn
 import japgolly.scalajs.react.vdom.VdomNode
 import reactkonva.{KCircle, KGroup, KLayer, KText}

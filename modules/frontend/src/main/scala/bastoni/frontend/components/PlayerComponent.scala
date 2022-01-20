@@ -1,7 +1,6 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.*
-import bastoni.frontend.Palette
 import bastoni.frontend.model.*
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.VdomElement

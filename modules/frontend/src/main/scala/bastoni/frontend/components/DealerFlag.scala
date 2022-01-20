@@ -1,8 +1,7 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.HiddenCard
-import bastoni.frontend.Palette
-import bastoni.frontend.model.{Angle, CardLayout, CardSize, Point, SeatLayout, Shadow}
+import bastoni.frontend.model.{Angle, CardLayout, CardSize, Palette, Point, SeatLayout, Shadow}
 import japgolly.scalajs.react.component.ScalaFn
 import japgolly.scalajs.react.vdom.VdomNode
 import reactkonva.KGroup

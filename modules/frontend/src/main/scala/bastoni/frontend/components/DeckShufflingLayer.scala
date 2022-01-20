@@ -1,11 +1,10 @@
 package bastoni.frontend.components
 
-import bastoni.domain.model.{Action, HiddenCard, PlayerState, Seat, TablePlayerView}
+import bastoni.domain.model.*
 import bastoni.domain.view.FromPlayer
-import bastoni.frontend.Palette
-import bastoni.frontend.model.{Angle, CardLayout, CardSize, DeckLayout, GameLayout, Point, Size}
-import japgolly.scalajs.react.component.ScalaFn
+import bastoni.frontend.model.*
 import japgolly.scalajs.react.callback.Callback
+import japgolly.scalajs.react.component.ScalaFn
 import japgolly.scalajs.react.vdom.VdomNode
 import reactkonva.{KCircle, KGroup, KLayer, KText}
 

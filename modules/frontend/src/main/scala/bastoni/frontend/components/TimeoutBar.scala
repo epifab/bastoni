@@ -1,8 +1,8 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.Timeout
-import bastoni.frontend.model.{Angle, Point}
-import bastoni.frontend.{Palette, Utils}
+import bastoni.frontend.model.{Angle, Palette, Point}
+import bastoni.frontend.Utils
 import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.callback.Callback
 import japgolly.scalajs.react.component.Scala.BackendScope

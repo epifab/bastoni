@@ -3,7 +3,7 @@ package components
 
 import bastoni.domain.model.*
 import bastoni.frontend.JsObject
-import bastoni.frontend.model.{CardLayout, CardSize, Shadow, Size}
+import bastoni.frontend.model.{CardLayout, CardSize, Palette, Shadow, Size}
 import cats.effect
 import cats.effect.IO
 import japgolly.scalajs.react.*

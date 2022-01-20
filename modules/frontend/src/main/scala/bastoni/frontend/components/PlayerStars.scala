@@ -1,8 +1,7 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.PlayerState
-import bastoni.frontend.Palette
-import bastoni.frontend.model.{Angle, SeatLayout}
+import bastoni.frontend.model.{Angle, Palette, SeatLayout}
 import japgolly.scalajs.react.component.ScalaFn
 import japgolly.scalajs.react.vdom.VdomNode
 import reactkonva.{KGroup, KStar}

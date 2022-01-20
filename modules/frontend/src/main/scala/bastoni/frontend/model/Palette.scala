@@ -1,4 +1,4 @@
-package bastoni.frontend
+package bastoni.frontend.model
 
 object Palette:
   val white = "#FFF"
