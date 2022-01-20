@@ -1,6 +1,7 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.*
+import bastoni.frontend.Resources
 import bastoni.frontend.model.TableLayout
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.VdomElement
@@ -12,8 +13,6 @@ import reactkonva.{KLayer, KRect}
 import scala.util.chaining.*
 
 object TableLayer:
-  val backgroundImage: Image = Image("/static/table.jpg")
-
   private val component = ScalaFnComponent[TableLayout] { layout =>
     KLayer(
       KRect { p =>
@@ -23,7 +22,7 @@ object TableLayer:
         p.height = layout.size.height
         p.fillPatternX = layout.topLeft.x + (layout.size.width / 2)
         p.fillPatternY = layout.topLeft.y + (layout.size.height / 2)
-        p.fillPatternImage = backgroundImage
+        p.fillPatternImage = Resources.tablePatternImage
         p.fillPatternRepeat = "repeat"
         p.fillPriority = "pattern"
         p.fillPatternScale = Vector2d(1, 1)

@@ -70,6 +70,7 @@ object PlayerComponent:
           p.fontFamily = "'Open Sans', sans-serif"
           p.fontStyle = "bold"
           p.fontSize = 16
+          p.wrap = "none"
           p.x = textPosition.x
           p.y = textPosition.y
           p.width = layout.radius * 2

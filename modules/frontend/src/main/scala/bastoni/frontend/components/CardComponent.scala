@@ -9,21 +9,13 @@ import cats.effect.IO
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.callback.CallbackTo
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
+import konva.*
 import konva.Konva.KonvaEventObject
 import konva.KonvaHelper.Vector2d
-import konva.*
-import org.scalajs.dom.html.Image
-import org.scalajs.dom.{HTMLCanvasElement, MouseEvent, document, window}
 import reactkonva.*
 
 import scala.concurrent.duration.DurationInt
 import scala.scalajs.js
-
-object Image:
-  def apply(src: String): Image =
-    val img = document.createElement("img").asInstanceOf[Image]
-    img.src = src
-    img
 
 object CardComponent:
 
@@ -31,16 +23,6 @@ object CardComponent:
     val initial: CardLayout = previous.getOrElse(current)
 
   case class State(glowing: Boolean)
-
-  val backOfCardImagePattern: Image = Image("/static/carte/cube.svg")
-
-  val cardImages: Map[SimpleCard, Image] =
-    Deck.cards.map { card =>
-      val suit = card.suit.toString.toLowerCase
-      val rank = "%02d".format(card.rank.value)
-      val img = Image(s"/static/carte/napoletane/$suit/$rank.svg")
-      card -> img
-    }.toMap
 
   private class CardBackend($: BackendScope[Props, State]):
     private val animationDuration = .6
@@ -88,7 +70,7 @@ object CardComponent:
             p.height = props.current.size.height - (props.current.size.cornerRadius * 4)
             p.duration = animationDuration
           }
-          rect.fillPatternImage = backOfCardImagePattern
+          rect.fillPatternImage = Resources.backOfCardPatternImage
           rect.fillPatternRepeat = "repeat"
           rect.fillPatternRotation = 270
           rect.fillPatternScale = Vector2d(props.current.size.width / 400, props.current.size.width / 400)
@@ -107,7 +89,7 @@ object CardComponent:
         addSelectable(props)(p)
         addGlowingOrShadow(props, state)(p)
         p.ref = cardSizeAnimation(props.current)
-        p.image = cardImages(card)
+        p.image = Resources.cardImages(card)
         p.width = props.initial.size.width
         p.height = props.initial.size.height
       }

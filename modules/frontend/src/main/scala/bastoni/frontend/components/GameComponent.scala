@@ -86,9 +86,9 @@ object GameComponent:
       roomId = RoomId.newId
 
       me = User(UserId.newId, "ME")
-      p1 = DumbPlayer(User(UserId.newId, "Tizio"), roomId, sub, pub, pause = 500.millis)
-      p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub, pause = 500.millis)
-      p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub, pause = 500.millis)
+      p1 = DumbPlayer(User(UserId.newId, "Tizio"), roomId, sub, pub, pause = 1.second)
+      p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub, pause = 1.second)
+      p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub, pause = 1.second)
 
       tables <- sub.subscribe(me, roomId)
         .scan[Option[TablePlayerView]](None) {

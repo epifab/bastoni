@@ -45,7 +45,7 @@ object GameService:
     gameRepo: GameRepo[F],
     messageRepo: MessageRepo[F],
     delayDuration: Delay => FiniteDuration = {
-      case Delay.AfterShuffleDeck => 500.millis
+      case Delay.AfterShuffleDeck => 1.second
       case Delay.AfterDealCards => 500.millis
       case Delay.BeforeTakeCards => 2.seconds
       case Delay.AfterTakeCards => 1.second

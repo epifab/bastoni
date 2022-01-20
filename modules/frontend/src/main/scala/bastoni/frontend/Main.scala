@@ -13,23 +13,7 @@ import scala.concurrent.duration.DurationInt
 @main def run(): Unit =
   val root = document.getElementById("app-wrapper")
 
-  val loadedCount: AtomicInteger = new AtomicInteger(0)
-
-  val images =
-    TableLayer.backgroundImage ::
-    CardComponent.backOfCardImagePattern ::
-    CardComponent.cardImages.values.toList
-
-  images.foreach(_.onload = _ => loadedCount.incrementAndGet())
-
-  def onLoad(attempts: Int): IO[Unit] =
-    for {
-      _ <- if (attempts <= 0) IO.raiseError(RuntimeException("Images didn't load")) else IO.unit
-      count <- IO(loadedCount.get())
-      _ <- if (count == images.length) IO.unit else IO.sleep(50.millis) *> onLoad(attempts - 1)
-    } yield ()
-
-  onLoad(100).unsafeRunAsync {
+  Resources.onLoad(timeout = 5.seconds).unsafeRunAsync {
     case Right(_) => components.GameComponent(GameType.Briscola).renderIntoDOM(root)
-    case Left(error) => console.error("Troubles fetching images")
+    case Left(error) => console.error(error.getMessage)
   }
