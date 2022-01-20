@@ -42,8 +42,9 @@ case class TableServerView(
     TablePlayerView(
       me.id,
       seats = seats.map {
-        case Seat(player, hand, taken) =>
+        case Seat(index, player, hand, taken) =>
           Seat[CardPlayerView](
+            index = index,
             player = player,
             hand = hand.map(_.toPlayerView(me.id, player.map(_.id))),
             taken = taken.map(_.toPlayerView(me.id, player.map(_.id)))
@@ -55,7 +56,7 @@ case class TableServerView(
       dealerIndex = dealerIndex
     )
 
-  val players: List[User] = seats.collect { case Seat(Some(seated), _, _) => seated }
+  val players: List[User] = seats.flatMap(_.player)
   val size: Int = seats.size
   val isFull: Boolean = seats.forall(_.player.isDefined)
   val isEmpty: Boolean = seats.forall(_.player.isEmpty)
@@ -65,19 +66,20 @@ case class TableServerView(
   def contains(player: UserId): Boolean = seatIndexFor(player).isDefined
 
   def seatIndexFor(player: User): Option[Int] = seatIndexFor(player.id)
-  def seatIndexFor(id: UserId): Option[Int] = indexedSeats.collectFirst { case (Seat(Some(player), _, _), index) if player.is(id) => index }
+  def seatIndexFor(id: UserId): Option[Int] = seats.collectFirst { case Seat(index, Some(player), _, _) if player.is(id) => index }
 
   def join(player: User, seed: Int): Either[TableError, (TableServerView, Int)] =
     if (contains(player)) Left(TableError.DuplicatePlayer) else {
       new Random(seed)
-        .shuffle(indexedSeats)
-        .collectFirst { case (Seat(None, _, _), index) => index }
+        .shuffle(seats)
+        .collectFirst { case Seat(index, None, _, _) => index }
         .fold[Either[TableError, (TableServerView, Int)]](Left(TableError.FullTable)) { targetIndex =>
           Right(updateWith(
-            seats = indexedSeats.map {
-              case (oldSeat, index) if index == targetIndex => oldSeat.copy(player = Some(SittingOut(player)))
-              case (seat, _) => seat
-            }
+            seats = seats.map {
+              case oldSeat if oldSeat.index == targetIndex => oldSeat.copy(player = Some(SittingOut(player)))
+              case seat => seat
+            },
+            dealerIndex = dealerIndex.orElse(Some(targetIndex))
           ) -> targetIndex)
         }
     }
@@ -86,10 +88,11 @@ case class TableServerView(
     seatIndexFor(player) match
       case Some(targetIndex) =>
         Right(copy(
-          seats = indexedSeats.map {
-            case (oldSeat, index) if index == targetIndex => oldSeat.copy(player = None)
-            case (seat, _) => seat
-          }
+          seats = seats.map {
+            case oldSeat if oldSeat.index == targetIndex => oldSeat.copy(player = None)
+            case seat => seat
+          },
+          dealerIndex = if (dealerIndex.contains(targetIndex)) None else dealerIndex
         ) -> targetIndex)
 
       case None => Left(TableError.PlayerNotFound)

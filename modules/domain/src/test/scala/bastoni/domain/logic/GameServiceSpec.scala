@@ -196,9 +196,10 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           Snapshot(
             TableServerView(
               List(
-                Seat(None, Nil, Nil),
-                Seat(None, Nil, Nil),
+                Seat(0, None, Nil, Nil),
+                Seat(1, None, Nil, Nil),
                 Seat(
+                  2,
                   Some(
                     ActingPlayer(
                       MatchPlayer(user1, 0),
@@ -214,6 +215,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   taken = Nil
                 ),
                 Seat(
+                  3,
                   Some(WaitingPlayer(MatchPlayer(user2, 0))),
                   hand = List(
                     CardServerView(cardOf(Quattro, Spade), Direction.Player),
@@ -233,15 +235,16 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 ),
                 None
               )),
-              dealerIndex = None
+              dealerIndex = Some(3)
             )
           ),
           Snapshot(
             TableServerView(
               List(
-                Seat(None, Nil, Nil),
-                Seat(None, Nil, Nil),
+                Seat(0, None, Nil, Nil),
+                Seat(1, None, Nil, Nil),
                 Seat(
+                  2,
                   Some(WaitingPlayer(MatchPlayer(user1, 0))),
                   hand = List(
                     CardServerView(cardOf(Asso, Spade), Direction.Player),
@@ -250,6 +253,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   taken = Nil
                 ),
                 Seat(
+                  3,
                   Some(ActingPlayer(MatchPlayer(user2, 0), Action.PlayCard, Some(Timeout.Max))),
                   hand = List(
                     CardServerView(cardOf(Quattro, Spade), Direction.Player),
@@ -269,7 +273,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 ),
                 None
               )),
-              dealerIndex = None
+              dealerIndex = Some(3)
             )
           )
         )
@@ -280,9 +284,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
   "First player to join will be the dealer" in {
     val inputStream = fs2.Stream[fs2.Pure, StateMachineInput](
       JoinTable(user2, joinSeed),
-      PlayerJoinedTable(user2, 3),
       JoinTable(user1, joinSeed),
-      PlayerJoinedTable(user1, 2),
       Connect
     ).map(_.toMessage(room1))
 
@@ -292,14 +294,16 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           Snapshot(
             TableServerView(
               List(
-                Seat(None, Nil, Nil),
-                Seat(None, Nil, Nil),
+                Seat(0, None, Nil, Nil),
+                Seat(1, None, Nil, Nil),
                 Seat(
+                  2,
                   Some(SittingOut(user1)),
                   hand = Nil,
                   taken = Nil
                 ),
                 Seat(
+                  3,
                   Some(SittingOut(user2)),
                   hand = Nil,
                   taken = Nil
@@ -330,11 +334,13 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       table = TableServerView(
         seats = List(
           Seat(
+            0,
             player = Some(ActingPlayer(player1, Action.PlayCard, Some(Timeout.Max))),
             hand = List(CardServerView(player1Card, Direction.Player)),
             taken = player1Collected.map(card => CardServerView(card, Direction.Down))
           ),
           Seat(
+            1,
             player = Some(WaitingPlayer(player2)),
             hand = Nil,
             taken = Nil
@@ -435,11 +441,13 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         table = TableServerView(
           seats = List(
             Seat(
+              0,
               player = Some(EndOfMatchPlayer(player1.win, winner = true)),
               hand = Nil,
               taken = Nil
             ),
             Seat(
+              1,
               player = Some(EndOfMatchPlayer(player2, winner = false)),
               hand = Nil,
               taken = Nil

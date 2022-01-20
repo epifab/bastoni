@@ -4,6 +4,7 @@ import bastoni.domain.model.{Action, CardInstance, PlayerState, TablePlayerView}
 import org.scalajs.dom.window
 
 import javax.swing.text.TableView
+import scala.util.Random
 
 case class GameLayout(
   canvas: Size,
@@ -38,7 +39,7 @@ object GameLayout:
     val deckSize = pileSize
     val handSize = CardSize.scaleTo(canvasSize.width / 5, canvasSize.height / 5)
     val boardSize = handSize
-    val mainPlayerHandSize: CardSize = table.flatMap(_.mySeat.flatMap { seat =>
+    val mainPlayerHandSize: CardSize = table.flatMap(_.mainPlayer.flatMap { seat =>
       Some(seat.player).collect {
         case actor: PlayerState.ActingPlayer if actor.playing =>
           CardSize.scaleTo(
@@ -85,7 +86,12 @@ object GameLayout:
                     Point(canvasSize.width / 2 + cardsMargin, (canvasSize.height - boardSize.height) / 2)
                   case Some(TablePlayer.MainPlayer) =>
                     Point((canvasSize.width - boardSize.width) / 2, canvasSize.height / 2 + cardsMargin)
-                  case None => ???
+                  case None =>
+                    // todo: scopa might have N cards on the board, how to display them?
+                    Point(
+                      (canvasSize.width - boardSize.width) / 2,
+                      (canvasSize.height - boardSize.height) / 2
+                    ) + Point(Random.nextGaussian(), Random.nextGaussian())
                 },
                 rotation = Angle.zero,
                 shadow = Some(Shadow(3, Point(0, 0)))

@@ -15,10 +15,10 @@ object CardsLayer:
 
   def renderHands(table: TablePlayerView, layout: GameLayout): List[CardLayout | CardGroupLayout] = {
     val data: List[Option[List[CardInstance]]] = List(
-      table.opponent(0).map(_.hand.map(_.card)),
-      table.opponent(1).map(_.hand.map(_.card)),
-      table.opponent(2).map(_.hand.map(_.card)),
-      table.mySeat.map(_.hand.map(_.card))
+      table.opponent1.map(_.hand.map(_.card)),
+      table.opponent2.map(_.hand.map(_.card)),
+      table.opponent3.map(_.hand.map(_.card)),
+      table.mainPlayer.map(_.hand.map(_.card))
     )
 
     val renderers: List[CardsRenderer] = List(
@@ -33,17 +33,17 @@ object CardsLayer:
 
   def renderPiles(table: TablePlayerView, layout: GameLayout): List[CardLayout | CardGroupLayout] = {
     val data: List[Option[List[CardInstance]]] = List(
-      table.mySeat.map(_.taken.map(_.card)),
-      table.opponent(0).map(_.taken.map(_.card)),
-      table.opponent(1).map(_.taken.map(_.card)),
-      table.opponent(2).map(_.taken.map(_.card))
+      table.opponent1.map(_.taken.map(_.card)),
+      table.opponent2.map(_.taken.map(_.card)),
+      table.opponent3.map(_.taken.map(_.card),
+      table.mainPlayer.map(_.taken.map(_.card)),
     )
 
     val renderers: List[CardsRenderer] = List(
-      layout.mainPlayer.renderPile,
       layout.player1.renderPile,
       layout.player2.renderPile,
       layout.player3.renderPile,
+      layout.mainPlayer.renderPile,
     )
 
     data.zip(renderers).flatMap { case (d, f) => d.toList.flatMap(f) }
@@ -55,10 +55,10 @@ object CardsLayer:
     def apply(props: GameState, currentLayout: GameLayout, previousLayout: GameLayout): Props =
       def cardsFor(table: TablePlayerView, layout: GameLayout): List[CardLayout | CardGroupLayout] =
         val players: Map[UserId, TablePlayer] =
-          table.mySeat.map(_.player.id -> TablePlayer.MainPlayer).toMap ++
-            table.opponent(0).map(_.player.id -> TablePlayer.Player1).toMap ++
-            table.opponent(1).map(_.player.id -> TablePlayer.Player2).toMap ++
-            table.opponent(2).map(_.player.id -> TablePlayer.Player3).toMap
+          table.mainPlayer.map(_.player.id -> TablePlayer.MainPlayer).toMap ++
+            table.opponent1.map(_.player.id -> TablePlayer.Player1).toMap ++
+            table.opponent2.map(_.player.id -> TablePlayer.Player2).toMap ++
+            table.opponent3.map(_.player.id -> TablePlayer.Player3).toMap
 
         layout.deck.renderCards(table.deck.map(_.card)) ++
           renderPiles(table, layout) ++
@@ -82,7 +82,7 @@ object CardsLayer:
           if (allCards.isEmpty) deckOrigin else allCards.toMap
         }.getOrElse(deckOrigin)
 
-      val selectableCards: Map[Int, Callback] = props.currentTable.mySeat.fold(Map.empty)(seat => seat.player match {
+      val selectableCards: Map[Int, Callback] = props.currentTable.mainPlayer.fold(Map.empty)(seat => seat.player match {
         case PlayerState.ActingPlayer(_, Action.PlayCard, _) =>
           seat
             .hand.flatMap(_.card.toOption)

@@ -39,12 +39,12 @@ case class TablePlayerView(
     case event: PublicEvent => publicEventUpdate(event)
   }
 
-  val opponents: List[(Seat[CardPlayerView], Int)] =
-    indexedSeats
-      .slideUntil(_._1.player.exists(_.is(me)))
-      .filterNot { case (seat, index) => seat.player.exists(_.is(me)) }
+  val opponents: List[Seat[CardPlayerView]] =
+    seats
+      .slideUntil(_.player.exists(_.is(me)))
+      .filterNot(_.player.exists(_.is(me)))
     
-  def opponent(index: Int): Option[TakenSeat[CardView]] =
+  private def opponent(offset: Int): Option[TakenSeat[CardView]] =
     extension[T](list: List[T])
       def get(index: Int): Option[T] =
         list match {
@@ -52,9 +52,13 @@ case class TablePlayerView(
           case head :: tail if index == 0 => Some(head)
           case head :: tail => tail.get(index - 1)
         }
-        
-    opponents.get(index) collectFirst {
-      case (Seat(Some(player), hand, taken), index) => TakenSeat(player, hand, taken, dealerIndex.contains(index))
+
+    opponents.get(offset) collectFirst {
+      case Seat(index, Some(player), hand, taken) =>
+        TakenSeat(player, hand, taken, dealerIndex.contains(index))
     }
 
-  val mySeat: Option[TakenSeat[CardPlayerView]] = seatFor(me)
+  val opponent1: Option[TakenSeat[CardView]] = opponent(0)
+  val opponent2: Option[TakenSeat[CardView]] = opponent(1)
+  val opponent3: Option[TakenSeat[CardView]] = opponent(2)
+  val mainPlayer: Option[TakenSeat[CardPlayerView]] = seatFor(me)

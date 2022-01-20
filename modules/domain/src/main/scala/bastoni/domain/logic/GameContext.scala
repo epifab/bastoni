@@ -47,7 +47,16 @@ case class GameContext(table: TableServerView, stateMachine: Option[GameStateMac
 
 object GameContext:
 
-  def build(tableSize: Int): GameContext =
-    GameContext(TableServerView(List.fill(4)(Seat(None, Nil, Nil)), Nil, Nil, None, None), None)
+  def build(tableSize: 2 | 3 | 4): GameContext =
+    GameContext(
+      table = TableServerView(
+        seats = (0 until tableSize).map(index => Seat(index, None, Nil, Nil)).toList,
+        deck = Nil,
+        board = Nil,
+        matchInfo = None,
+        dealerIndex = None
+      ),
+      stateMachine = None
+    )
 
   given Codec[GameContext] = deriveCodec
