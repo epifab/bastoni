@@ -1,9 +1,8 @@
 package bastoni.frontend.components
 
-import bastoni.domain.model.{PlayerState, Timeout}
-import bastoni.frontend.{Palette, Utils}
-import bastoni.frontend.components.PlayerComponent.circleStrokeSize
+import bastoni.domain.model.Timeout
 import bastoni.frontend.model.{Angle, Point}
+import bastoni.frontend.{Palette, Utils}
 import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.callback.Callback
 import japgolly.scalajs.react.component.Scala.BackendScope

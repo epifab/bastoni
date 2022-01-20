@@ -63,10 +63,10 @@ object GameComponent:
           DeckShufflingLayer(gameState.currentTable, state.currentLayout, gameState.callback),
           KLayer(
             List(
-              gameState.currentTable.mySeat.map(_.player).map(PlayerComponent(_, state.currentLayout.mainPlayer)),
-              gameState.currentTable.opponent(0).flatMap(_.player).map(PlayerComponent(_, state.currentLayout.player1)),
-              gameState.currentTable.opponent(1).flatMap(_.player).map(PlayerComponent(_, state.currentLayout.player2)),
-              gameState.currentTable.opponent(2).flatMap(_.player).map(PlayerComponent(_, state.currentLayout.player3)),
+              gameState.currentTable.mySeat.map(seat => PlayerComponent(seat.player, state.currentLayout.mainPlayer, seat.dealer)),
+              gameState.currentTable.opponent(0).map(seat => PlayerComponent(seat.player, state.currentLayout.player1, seat.dealer)),
+              gameState.currentTable.opponent(1).map(seat => PlayerComponent(seat.player, state.currentLayout.player2, seat.dealer)),
+              gameState.currentTable.opponent(2).map(seat => PlayerComponent(seat.player, state.currentLayout.player3, seat.dealer)),
             ).flatten: _*
           )
         )

@@ -232,7 +232,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   MatchScore(List(user2.id), 0),
                 ),
                 None
-              ))
+              )),
+              dealerIndex = None
             )
           ),
           Snapshot(
@@ -267,12 +268,53 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   MatchScore(List(user2.id), 0),
                 ),
                 None
-              ))
+              )),
+              dealerIndex = None
             )
           )
         )
 
     }
+  }
+
+  "First player to join will be the dealer" in {
+    val inputStream = fs2.Stream[fs2.Pure, StateMachineInput](
+      JoinTable(user2, joinSeed),
+      PlayerJoinedTable(user2, 3),
+      JoinTable(user1, joinSeed),
+      PlayerJoinedTable(user1, 2),
+      Connect
+    ).map(_.toMessage(room1))
+
+    gameService(inputStream).asserting { events =>
+      events.collect { case Message(_, _, s: Snapshot) => s } shouldBe
+        List(
+          Snapshot(
+            TableServerView(
+              List(
+                Seat(None, Nil, Nil),
+                Seat(None, Nil, Nil),
+                Seat(
+                  Some(SittingOut(user1)),
+                  hand = Nil,
+                  taken = Nil
+                ),
+                Seat(
+                  Some(SittingOut(user2)),
+                  hand = Nil,
+                  taken = Nil
+                )
+              ),
+              deck = Nil,
+              board = Nil,
+              matchInfo = None,
+              dealerIndex = Some(3)
+            )
+          )
+        )
+
+    }
+
   }
 
   "A pre-existing game can be resumed and completed" in {
@@ -300,7 +342,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         ),
         deck = Nil,
         board = List(None -> CardServerView(player2Card, Direction.Up)),
-        matchInfo = Some(MatchInfo(GameType.Briscola, Nil, None))
+        matchInfo = Some(MatchInfo(GameType.Briscola, Nil, None)),
+        dealerIndex = None
       ),
       stateMachine = Some(generic.StateMachine(
         briscola.Game,
@@ -404,7 +447,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           ),
           deck = Nil,
           board = Nil,
-          matchInfo = None
+          matchInfo = None,
+          dealerIndex = None
         ),
         stateMachine = None
       ))

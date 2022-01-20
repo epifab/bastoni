@@ -25,18 +25,18 @@ object DumbPlayer:
             table -> table.seatFor(me).getOrElse(throw new IllegalStateException("I am not sat at this table"))
         }
         .collect {
-          case (table, TakenSeat(ActingPlayer(_, Action.PlayCard, _), hand, _)) =>
+          case (table, TakenSeat(ActingPlayer(_, Action.PlayCard, _), hand, _, _)) =>
             PlayCard(hand.flatMap(_.card.toOption).headOption.getOrElse(throw new IllegalStateException("No cards in hand")))
 
-          case (table, TakenSeat(ActingPlayer(_, Action.PlayCardOf(suit), _), hand, _)) =>
+          case (table, TakenSeat(ActingPlayer(_, Action.PlayCardOf(suit), _), hand, _, _)) =>
             PlayCard(hand.flatMap(_.card.toOption).pipe(hand => hand.find(_.suit == suit).orElse(hand.headOption)).getOrElse(throw new IllegalStateException("No cards in hand")))
 
-          case (table, TakenSeat(ActingPlayer(_, Action.TakeCards, _), hand, _)) =>
+          case (table, TakenSeat(ActingPlayer(_, Action.TakeCards, _), hand, _, _)) =>
             val cardToPlay = hand.flatMap(_.card.toOption).headOption.getOrElse(throw new IllegalStateException("No cards in hand"))
             val takes = bastoni.domain.logic.scopa.Game.takeCombinations(table.board.flatMap { case (_, c) => c.card.toOption }, cardToPlay).next()
             TakeCards(cardToPlay, takes.toList)
 
-          case (table, TakenSeat(ActingPlayer(_, Action.ShuffleDeck, _), _, _)) =>
+          case (table, TakenSeat(ActingPlayer(_, Action.ShuffleDeck, _), _, _, _)) =>
             ShuffleDeck
         }
         .evalMap(command => Sync[F].pure(command).delayBy(pause))

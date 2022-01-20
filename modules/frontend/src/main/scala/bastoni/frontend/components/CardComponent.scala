@@ -29,7 +29,7 @@ object CardComponent:
 
     private def withShadow(p: ShapeProps)(shadow: Shadow): Unit =
       p.shadowBlur = shadow.size
-      p.shadowColor = Palette.grey3
+      p.shadowColor = shadow.color
       p.shadowOffset = Vector2d(shadow.offset.x, shadow.offset.y)
       p.shadowOpacity = .5
 
@@ -73,7 +73,10 @@ object CardComponent:
           rect.fillPatternImage = Resources.backOfCardPatternImage
           rect.fillPatternRepeat = "repeat"
           rect.fillPatternRotation = 270
-          rect.fillPatternScale = Vector2d(props.current.size.width / 400, props.current.size.width / 400)
+          rect.fillPatternScale = Vector2d(
+            Math.max(props.current.size.width / 400, .1),
+            Math.max(props.current.size.width / 400, .1)
+          )
           rect.stroke = Palette.grey2
           rect.strokeWidth = 2
           rect.cornerRadius = props.initial.size.cornerRadius

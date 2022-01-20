@@ -17,7 +17,7 @@ object Seat:
   given playerView: Codec[Seat[CardPlayerView]] = deriveCodec
   given serverView: Codec[Seat[CardServerView]] = deriveCodec
 
-case class TakenSeat[C <: CardView](player: PlayerState, hand: List[C], taken: List[C])
+case class TakenSeat[C <: CardView](player: PlayerState, hand: List[C], taken: List[C], dealer: Boolean)
 
 trait Table[C <: CardView]:
   type TableView
@@ -26,8 +26,14 @@ trait Table[C <: CardView]:
   def deck: List[C]
   def board: List[(Option[UserId], C)]
   def matchInfo: Option[MatchInfo]
+  def dealerIndex: Option[Int]
 
   def activePlayers: List[UserId] = matchInfo.fold(Nil)(_.matchScore.flatMap(_.playerIds))
+
+  def dealer: Option[Seat[C]] =
+    dealerIndex.flatMap(dealerIndex => indexedSeats.collectFirst {
+      case (seat, index) if index == dealerIndex => seat
+    })
 
   lazy val indexedSeats: List[(Seat[C], Int)] = seats.zipWithIndex
 
@@ -49,7 +55,8 @@ trait Table[C <: CardView]:
     seats: List[Seat[C]] = this.seats,
     deck: List[C] = this.deck,
     board: List[(Option[UserId], C)] = this.board,
-    matchInfo: Option[MatchInfo] = matchInfo
+    matchInfo: Option[MatchInfo] = matchInfo,
+    dealerIndex: Option[Int] = dealerIndex
   ): TableView
 
   protected def publicEventUpdate(message: PublicEvent): TableView =
@@ -59,7 +66,8 @@ trait Table[C <: CardView]:
           seats = indexedSeats.map {
             case (seat, index) if targetIndex == index => seat.copy(Some(SittingOut(player)))
             case (whatever, _) => whatever
-          }
+          },
+          dealerIndex = dealerIndex.orElse(Some(targetIndex))
         )
 
       case Event.PlayerLeftTable(player, targetIndex) =>
@@ -187,7 +195,10 @@ trait Table[C <: CardView]:
             case seat@ Seat(Some(player), _, _) => seat.copy(player = Some(player.sitOut))
             case whatever => whatever
           },
-          matchInfo = matchInfo.map(_.copy(gameScore = None))
+          matchInfo = matchInfo.map(_.copy(gameScore = None)),
+//          dealerIndex = indexedSeats.collectFirst {
+//            case (seat, index) if seat.player.exists(_.is(playerId)) => index
+//          }
         )
 
       case Event.ActionRequested(playerId, action, timeout) =>
@@ -229,9 +240,9 @@ trait Table[C <: CardView]:
     )
 
   def seatFor(userId: UserId): Option[TakenSeat[C]] =
-    seats.collectFirst {
-      case Seat(Some(player), hand, taken) if player.is(userId) =>
-        TakenSeat(player, hand, taken)
+    indexedSeats.collectFirst {
+      case (Seat(Some(player), hand, taken), index) if player.is(userId) =>
+        TakenSeat(player, hand, taken, dealer = dealerIndex.contains(index))
     }
 
   def seatFor(user: User): Option[TakenSeat[C]] = seatFor(user.id)

@@ -12,16 +12,19 @@ case class GameContext(table: TableServerView, stateMachine: Option[GameStateMac
     val (updatedTable, tableEvents) = message match {
       case Command.Connect =>
         table -> List(Snapshot(table))
+
       case Command.JoinTable(user, seed) =>
         table.join(user, seed) match {
           case Right((newTable, seat)) => newTable -> List(PlayerJoinedTable(user, seat))
           case Left(error) => table -> Nil
         }
+
       case Command.LeaveTable(user) =>
         table.leave(user) match {
           case Right((newTable, seat)) => newTable -> List(PlayerLeftTable(user, seat))
           case Left(error) => table -> Nil
         }
+
       case _ => table -> Nil
     }
 
@@ -45,6 +48,6 @@ case class GameContext(table: TableServerView, stateMachine: Option[GameStateMac
 object GameContext:
 
   def build(tableSize: Int): GameContext =
-    GameContext(TableServerView(List.fill(4)(Seat(None, Nil, Nil)), Nil, Nil, None), None)
+    GameContext(TableServerView(List.fill(4)(Seat(None, Nil, Nil)), Nil, Nil, None, None), None)
 
   given Codec[GameContext] = deriveCodec

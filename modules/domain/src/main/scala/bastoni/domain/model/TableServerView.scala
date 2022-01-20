@@ -11,7 +11,8 @@ case class TableServerView(
   override val seats: List[Seat[CardServerView]],
   override val deck: List[CardServerView],
   override val board: List[(Option[UserId], CardServerView)],
-  override val matchInfo: Option[MatchInfo]
+  override val matchInfo: Option[MatchInfo],
+  override val dealerIndex: Option[Int]
 ) extends Table[CardServerView]:
 
   override type TableView = TableServerView
@@ -20,8 +21,9 @@ case class TableServerView(
     seats: List[Seat[CardServerView]] = this.seats,
     deck: List[CardServerView] = this.deck,
     board: List[(Option[UserId], CardServerView)] = this.board,
-    matchInfo: Option[MatchInfo] = this.matchInfo
-  ): TableServerView = TableServerView(seats, deck, board, matchInfo)
+    matchInfo: Option[MatchInfo] = this.matchInfo,
+    dealerIndex: Option[Int] = this.dealerIndex
+  ): TableServerView = TableServerView(seats, deck, board, matchInfo, dealerIndex)
 
   override protected def buildCard(card: VisibleCard, direction: Direction): CardServerView = CardServerView(card, direction)
   override protected def faceDown(card: CardServerView): CardServerView = card.copy(facing = Direction.Down)
@@ -49,7 +51,8 @@ case class TableServerView(
       },
       deck = deck.map(_.toPlayerView(me.id, None)),
       board = board.map { case (u, c) => u -> c.toPlayerView(me.id, None) },
-      matchInfo = matchInfo
+      matchInfo = matchInfo,
+      dealerIndex = dealerIndex
     )
 
   val players: List[User] = seats.collect { case Seat(Some(seated), _, _) => seated }

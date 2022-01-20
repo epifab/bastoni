@@ -56,9 +56,9 @@ object CardsLayer:
       def cardsFor(table: TablePlayerView, layout: GameLayout): List[CardLayout | CardGroupLayout] =
         val players: Map[UserId, TablePlayer] =
           table.mySeat.map(_.player.id -> TablePlayer.MainPlayer).toMap ++
-            table.opponent(0).flatMap(_.player).map(_.id -> TablePlayer.Player1).toMap ++
-            table.opponent(1).flatMap(_.player).map(_.id -> TablePlayer.Player2).toMap ++
-            table.opponent(2).flatMap(_.player).map(_.id -> TablePlayer.Player3).toMap
+            table.opponent(0).map(_.player.id -> TablePlayer.Player1).toMap ++
+            table.opponent(1).map(_.player.id -> TablePlayer.Player2).toMap ++
+            table.opponent(2).map(_.player.id -> TablePlayer.Player3).toMap
 
         layout.deck.renderCards(table.deck.map(_.card)) ++
           renderPiles(table, layout) ++

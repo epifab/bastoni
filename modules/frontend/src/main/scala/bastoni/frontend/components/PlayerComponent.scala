@@ -10,14 +10,35 @@ import reactkonva.{KArc, KCircle, KGroup, KStar, KText}
 object PlayerComponent:
   private val circleStrokeSize: Int = 15
 
+  case class Props(player: PlayerState, layout: SeatLayout, dealer: Boolean)
+
   private val component =
-    ScalaFnComponent[(PlayerState, SeatLayout)] { case (state: PlayerState, layout: SeatLayout) =>
+    ScalaFnComponent[Props] { case Props(playerState: PlayerState, layout: SeatLayout, dealer) =>
       val textRadius: Double = Math.sqrt(2 * layout.radius * layout.radius)
       val textTopLeftAngle: Angle = Angle(225 - layout.textRotation.deg)
       val textPosition: Point = Point(
         layout.center.x + textTopLeftAngle.sin * textRadius,
         layout.center.y + textTopLeftAngle.cos * textRadius
       )
+
+      val timeoutBars = Some(playerState).collect {
+        case PlayerState.ActingPlayer(_, _, timeout) =>
+          TimeoutBar(
+            center = layout.center,
+            timeout = timeout,
+            angle = Angle(220),
+            rotation = layout.rotation,
+            innerRadius = layout.radius,
+            size = circleStrokeSize
+          )
+      }
+
+      val stars = Some(playerState).collect {
+        case player: PlayerState.SittingIn =>
+          PlayerStars(player, layout)
+      }
+
+      val dealerFlag = Option.when(dealer)(DealerFlag(layout))
 
       KGroup(
         KCircle { p =>
@@ -26,7 +47,7 @@ object PlayerComponent:
           p.y = layout.center.y
           p.fill = Palette.desaturatedBlue
 
-          state match {
+          playerState match {
             case PlayerState.SittingOut(_) =>
               p.opacity = .4
 
@@ -48,22 +69,8 @@ object PlayerComponent:
           }
         },
 
-        state match {
-          case PlayerState.ActingPlayer(_, _, timeout) =>
-            TimeoutBar(
-              center = layout.center,
-              timeout = timeout,
-              angle = Angle(220),
-              rotation = layout.rotation,
-              innerRadius = layout.radius,
-              size = circleStrokeSize
-            )
-
-          case _ => KGroup()
-        },
-
         KText { p =>
-          p.text = state.name
+          p.text = playerState.name
           p.align = "center"
           p.verticalAlign = "middle"
           p.fill = Palette.white
@@ -78,37 +85,11 @@ object PlayerComponent:
           p.rotation = layout.textRotation.deg
         },
 
-        state match {
-          case active: PlayerState.SittingIn =>
-            val points = active.player.points
-            val innerRadius = 7
-            val outerRadius = 10
-            val starSize = 2 * outerRadius
-
-            val xangle = Angle(90 - layout.rotation.deg)
-            val xoffset = -(starSize * (points - 1) / 2)
-
-            KGroup(
-              (0 until points).map { index =>
-                KStar { p =>
-                  p.numPoints = 5
-                  p.innerRadius = 7
-                  p.outerRadius = 10
-                  p.fill = Palette.yellow2
-                  p.shadowBlur = 4
-                  p.shadowColor = Palette.grey2
-                  p.x = layout.center.x + layout.rotation.sin * 30 + xangle.sin * (xoffset + starSize * index)
-                  p.y = layout.center.y + layout.rotation.cos * 30 + xangle.cos * (xoffset + starSize * index)
-                }
-              }: _*
-            )
-
-          case _ => KGroup()
-        }
+        KGroup(timeoutBars.toList ++ dealerFlag.toList ++ stars.toList: _*)
       )
     }
 
-  def apply(state: PlayerState, layout: SeatLayout): VdomElement =
+  def apply(state: PlayerState, layout: SeatLayout, dealer: Boolean): VdomElement =
     component
       .withKey(s"player-${state.id}")
-      .apply(state -> layout)
+      .apply(Props(state, layout, dealer))

@@ -7,6 +7,8 @@ case class Angle(deg: Int):
   val cos: Double = Math.cos(rad)
   def +(offset: Int): Angle = Angle(deg + offset)
   def -(offset: Int): Angle = Angle(deg - offset)
+  def +(offset: Angle): Angle = Angle(deg + offset.deg)
+  def -(offset: Angle): Angle = Angle(deg - offset.deg)
   def *(scale: Double): Angle = Angle((deg * scale).floor.toInt)
   def unary_- : Angle = *(-1)
 

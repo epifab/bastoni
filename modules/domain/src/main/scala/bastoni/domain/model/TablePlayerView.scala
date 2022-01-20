@@ -5,7 +5,8 @@ case class TablePlayerView(
   override val seats: List[Seat[CardPlayerView]],
   override val deck: List[CardPlayerView],
   override val board: List[(Option[UserId], CardPlayerView)],
-  override val matchInfo: Option[MatchInfo]
+  override val matchInfo: Option[MatchInfo],
+  override val dealerIndex: Option[Int]
 ) extends Table[CardPlayerView]:
 
   override type TableView = TablePlayerView
@@ -14,8 +15,9 @@ case class TablePlayerView(
     seats: List[Seat[CardPlayerView]] = this.seats,
     deck: List[CardPlayerView] = this.deck,
     board: List[(Option[UserId], CardPlayerView)] = this.board,
-    matchInfo: Option[MatchInfo] = this.matchInfo
-  ): TablePlayerView = TablePlayerView(me, seats, deck, board, matchInfo)
+    matchInfo: Option[MatchInfo] = this.matchInfo,
+    dealerIndex: Option[Int] = this.dealerIndex
+  ): TablePlayerView = TablePlayerView(me, seats, deck, board, matchInfo, dealerIndex)
 
   override protected def buildCard(card: VisibleCard, direction: Direction): CardPlayerView = CardPlayerView(direction match {
     case Direction.Up => card
@@ -37,12 +39,12 @@ case class TablePlayerView(
     case event: PublicEvent => publicEventUpdate(event)
   }
 
-  val opponents: List[(Seat[CardPlayerView], Int)] = 
+  val opponents: List[(Seat[CardPlayerView], Int)] =
     indexedSeats
       .slideUntil(_._1.player.exists(_.is(me)))
       .filterNot { case (seat, index) => seat.player.exists(_.is(me)) }
     
-  def opponent(index: Int): Option[Seat[CardPlayerView]] =
+  def opponent(index: Int): Option[TakenSeat[CardView]] =
     extension[T](list: List[T])
       def get(index: Int): Option[T] =
         list match {
@@ -51,6 +53,8 @@ case class TablePlayerView(
           case head :: tail => tail.get(index - 1)
         }
         
-    opponents.get(index).map(_._1)
+    opponents.get(index) collectFirst {
+      case (Seat(Some(player), hand, taken), index) => TakenSeat(player, hand, taken, dealerIndex.contains(index))
+    }
 
   val mySeat: Option[TakenSeat[CardPlayerView]] = seatFor(me)
