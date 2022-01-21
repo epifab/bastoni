@@ -13,7 +13,7 @@ object DeckShufflingLayer:
 
   private val component = ScalaFn[Props] { case Props(table, layout, callback) =>
     KLayer(
-      table.seats.map(_.player).collectFirst {
+      table.seats.map(_.playerOption).collectFirst {
         case Some(PlayerState.ActingPlayer(me, Action.ShuffleDeck, _)) if me.is(table.me) =>
           CardComponent(
             layout = layout.deck.controlLayout,

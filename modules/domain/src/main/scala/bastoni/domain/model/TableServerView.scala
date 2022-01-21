@@ -41,14 +41,13 @@ case class TableServerView(
   def toPlayerView(me: User): TablePlayerView =
     TablePlayerView(
       me.id,
-      seats = seats.map {
-        case Seat(index, player, hand, taken) =>
-          Seat[CardPlayerView](
-            index = index,
-            player = player,
-            hand = hand.map(_.toPlayerView(me.id, player.map(_.id))),
-            taken = taken.map(_.toPlayerView(me.id, player.map(_.id)))
-          )
+      seats = seats.map { seat =>
+        val hand = seat.hand.map(_.toPlayerView(me.id, seat.playerOption.map(_.id)))
+        val taken = seat.taken.map(_.toPlayerView(me.id, seat.playerOption.map(_.id)))
+        seat match {
+          case seat: TakenSeat[CardServerView] => seat.copy(hand = hand, taken = taken)
+          case seat: EmptySeat[CardServerView] => seat.copy(hand = hand, taken = taken)
+        }
       },
       deck = deck.map(_.toPlayerView(me.id, None)),
       board = board.map { case (u, c) => u -> c.toPlayerView(me.id, None) },
@@ -56,27 +55,22 @@ case class TableServerView(
       dealerIndex = dealerIndex
     )
 
-  val players: List[User] = seats.flatMap(_.player)
-  val size: Int = seats.size
-  val isFull: Boolean = seats.forall(_.player.isDefined)
-  val isEmpty: Boolean = seats.forall(_.player.isEmpty)
-  val nonEmpty: Boolean = seats.exists(_.player.isDefined)
+  val isFull: Boolean = seats.forall(_.playerOption.isDefined)
+  val isEmpty: Boolean = seats.forall(_.playerOption.isEmpty)
+  val nonEmpty: Boolean = seats.exists(_.playerOption.isDefined)
 
   def contains(player: User): Boolean = contains(player.id)
-  def contains(player: UserId): Boolean = seatIndexFor(player).isDefined
-
-  def seatIndexFor(player: User): Option[Int] = seatIndexFor(player.id)
-  def seatIndexFor(id: UserId): Option[Int] = seats.collectFirst { case Seat(index, Some(player), _, _) if player.is(id) => index }
+  def contains(player: UserId): Boolean = seatFor(player).isDefined
 
   def join(player: User, seed: Int): Either[TableError, (TableServerView, Int)] =
     if (contains(player)) Left(TableError.DuplicatePlayer) else {
       new Random(seed)
         .shuffle(seats)
-        .collectFirst { case Seat(index, None, _, _) => index }
+        .collectFirst { case seat if seat.playerOption.isEmpty => seat.index }
         .fold[Either[TableError, (TableServerView, Int)]](Left(TableError.FullTable)) { targetIndex =>
           Right(updateWith(
             seats = seats.map {
-              case oldSeat if oldSeat.index == targetIndex => oldSeat.copy(player = Some(SittingOut(player)))
+              case oldSeat if oldSeat.index == targetIndex => oldSeat.occupiedBy(SittingOut(player))
               case seat => seat
             },
             dealerIndex = dealerIndex.orElse(Some(targetIndex))
@@ -85,14 +79,14 @@ case class TableServerView(
     }
 
   def leave(player: User): Either[TableError, (TableServerView, Int)] =
-    seatIndexFor(player) match
-      case Some(targetIndex) =>
+    seatFor(player) match
+      case Some(seat) =>
         Right(copy(
           seats = seats.map {
-            case oldSeat if oldSeat.index == targetIndex => oldSeat.copy(player = None)
+            case `seat` => seat.vacant
             case seat => seat
           },
-          dealerIndex = if (dealerIndex.contains(targetIndex)) None else dealerIndex
-        ) -> targetIndex)
+          dealerIndex = if (dealerIndex.contains(seat.index)) None else dealerIndex
+        ) -> seat.index)
 
       case None => Left(TableError.PlayerNotFound)

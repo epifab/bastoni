@@ -45,7 +45,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
         case 3 => dumbPlayer1.concurrently(dumbPlayer2).concurrently(dumbPlayer3)
         case 4 => dumbPlayer1.concurrently(dumbPlayer2).concurrently(dumbPlayer3).concurrently(dumbPlayer4)
 
-      activateStream = (fs2.Stream(StartGame(gameType)).delayBy[IO](500.millis) ++ extraMessages)
+      activateStream = (fs2.Stream(StartMatch(gameType)).delayBy[IO](500.millis) ++ extraMessages)
         .through(gamePub.publish(user1, roomId))
 
       gameServiceRunner <- fs2.Stream.resource(

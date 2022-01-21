@@ -7,7 +7,7 @@ import io.circe.{ACursor, Decoder, DecodingFailure, Encoder}
 
 class StateMachineFactory[State: Decoder: Encoder](gameLogic: GameLogic[State]) extends GameStateMachineFactory:
   override def apply(table: TableServerView): (GameStateMachine, List[StateMachineOutput]) =
-    val state = gameLogic.initialState(table.players)
+    val state: State & ActiveMatch = gameLogic.initialState(table.round.map(_.player))
     val machine = new generic.StateMachine(gameLogic, state)
     val event = MatchStarted(
       gameType = gameLogic.gameType,

@@ -136,7 +136,7 @@ object Game extends GameLogic[MatchState]:
 
   override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
 
-    case (InProgress(matchPlayers, game, rounds), message) =>
+    case (InProgress(matchPlayers, game, remainingGames), message) =>
       playGameStep(game, message) match
         case (Completed(players), events) =>
 
@@ -147,21 +147,20 @@ object Game extends GameLogic[MatchState]:
               InProgress(shiftedRound, Ready(shiftedRound), rounds)
             ) -> (events :+ Continue.afterGameOver)
 
-          val teamSize = Teams.size(players)
-
-          if (rounds == 0) {
-            players.groupMap(_.points)(_.id).maxBy(_._1)._2 match {
-              case winners if winners.size == teamSize => GameOver(MatchCompleted(winners), Terminated) -> (events :+ Continue.afterGameOver)
-              case _ => newGame(players.tail :+ players.head, 0)
-            }
+          val winners: Option[MatchScore] = MatchScore.forTeams(Teams(players)).sortBy(-_.points) match {
+            case winningTeam :: secondTeam :: _ if winningTeam.points > remainingGames + secondTeam.points => Some(winningTeam)
+            case _ => None
           }
-          else newGame(players.tail :+ players.head, rounds - 1)
+
+          winners.fold(newGame(players.tail :+ players.head, Math.max(0, remainingGames - 1))) { winners =>
+            GameOver(MatchCompleted(winners.playerIds), Terminated) -> (events :+ Continue.afterGameOver)
+          }
 
         case (Aborted, events) =>
           GameOver(MatchAborted, Terminated) -> (events :+ Continue.afterGameOver)
 
         case (newGameState, events) =>
-          InProgress(matchPlayers, newGameState, rounds) -> events
+          InProgress(matchPlayers, newGameState, remainingGames) -> events
 
     case (GameOver(event, newState), Continue) => newState -> List(event)
 

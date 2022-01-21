@@ -197,13 +197,16 @@ object Game extends GameLogic[MatchState]:
               InProgress(shiftedRound, Ready(shiftedRound), pointsToWin)
             ) -> (events :+ Continue.afterGameOver)
 
-          val teamSize = Teams.size(players)
+          val winners: Option[MatchScore] = MatchScore.forTeams(Teams(players)).sortBy(-_.points) match {
+            case winnerTeam :: secondTeam :: _
+              if winnerTeam.points >= pointsToWin && winnerTeam.points > secondTeam.points =>
+              Some(winnerTeam)
+            case _ => None
+          }
 
-          val winners: List[MatchPlayer] = players.groupBy(_.points).maxBy(_._1)._2
-          val winnerPoints = winners.head.points
-
-          if (winnerPoints < pointsToWin || winners.size > teamSize) newGame(players.tail :+ players.head, pointsToWin)
-          else GameOver(MatchCompleted(winners.map(_.id)), Terminated) -> (events :+ Continue.afterGameOver)
+          winners.fold(newGame(players, pointsToWin)) { score =>
+            GameOver(MatchCompleted(score.playerIds), Terminated) -> (events :+ Continue.afterGameOver)
+          }
 
         case (Aborted, events) =>
           GameOver(MatchAborted, Terminated) -> (events :+ Continue.afterGameOver)

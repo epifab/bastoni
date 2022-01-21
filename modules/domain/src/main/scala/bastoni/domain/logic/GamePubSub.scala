@@ -56,7 +56,7 @@ object GamePubSub:
       case (FromPlayer.Connect, _)                => Connect
       case (FromPlayer.JoinTable, seed)           => JoinTable(me, seed)
       case (FromPlayer.LeaveTable, _)             => LeaveTable(me)
-      case (FromPlayer.StartGame(gameType), _)    => StartMatch(me.id, gameType)
+      case (FromPlayer.StartMatch(gameType), _)   => StartMatch(me.id, gameType)
       case (FromPlayer.ShuffleDeck, seed)         => ShuffleDeck(seed)
       case (FromPlayer.PlayCard(card), _)         => PlayCard(me.id, card)
       case (FromPlayer.TakeCards(card, taken), _) => TakeCards(me.id, card, taken)

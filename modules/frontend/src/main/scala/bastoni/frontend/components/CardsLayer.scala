@@ -35,8 +35,8 @@ object CardsLayer:
     val data: List[Option[List[CardInstance]]] = List(
       table.opponent1.map(_.taken.map(_.card)),
       table.opponent2.map(_.taken.map(_.card)),
-      table.opponent3.map(_.taken.map(_.card),
-      table.mainPlayer.map(_.taken.map(_.card)),
+      table.opponent3.map(_.taken.map(_.card)),
+      table.mainPlayer.map(_.taken.map(_.card))
     )
 
     val renderers: List[CardsRenderer] = List(

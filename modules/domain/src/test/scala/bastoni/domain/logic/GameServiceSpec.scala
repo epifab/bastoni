@@ -196,16 +196,14 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           Snapshot(
             TableServerView(
               List(
-                Seat(0, None, Nil, Nil),
-                Seat(1, None, Nil, Nil),
-                Seat(
+                EmptySeat(0, Nil, Nil),
+                EmptySeat(1, Nil, Nil),
+                TakenSeat(
                   2,
-                  Some(
-                    ActingPlayer(
-                      MatchPlayer(user1, 0),
-                      Action.PlayCard,
-                      Some(Timeout.Max)
-                    )
+                  ActingPlayer(
+                    MatchPlayer(user1, 0),
+                    Action.PlayCard,
+                    Some(Timeout.Max)
                   ),
                   hand = List(
                     CardServerView(cardOf(Due, Bastoni), Direction.Player),
@@ -214,9 +212,9 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   ),
                   taken = Nil
                 ),
-                Seat(
+                TakenSeat(
                   3,
-                  Some(WaitingPlayer(MatchPlayer(user2, 0))),
+                  WaitingPlayer(MatchPlayer(user2, 0)),
                   hand = List(
                     CardServerView(cardOf(Quattro, Spade), Direction.Player),
                     CardServerView(cardOf(Sei, Denari), Direction.Player),
@@ -241,20 +239,20 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           Snapshot(
             TableServerView(
               List(
-                Seat(0, None, Nil, Nil),
-                Seat(1, None, Nil, Nil),
-                Seat(
+                EmptySeat(0, Nil, Nil),
+                EmptySeat(1, Nil, Nil),
+                TakenSeat(
                   2,
-                  Some(WaitingPlayer(MatchPlayer(user1, 0))),
+                  WaitingPlayer(MatchPlayer(user1, 0)),
                   hand = List(
                     CardServerView(cardOf(Asso, Spade), Direction.Player),
                     CardServerView(cardOf(Sette, Denari), Direction.Player)
                   ),
                   taken = Nil
                 ),
-                Seat(
+                TakenSeat(
                   3,
-                  Some(ActingPlayer(MatchPlayer(user2, 0), Action.PlayCard, Some(Timeout.Max))),
+                  ActingPlayer(MatchPlayer(user2, 0), Action.PlayCard, Some(Timeout.Max)),
                   hand = List(
                     CardServerView(cardOf(Quattro, Spade), Direction.Player),
                     CardServerView(cardOf(Sei, Denari), Direction.Player),
@@ -294,17 +292,17 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           Snapshot(
             TableServerView(
               List(
-                Seat(0, None, Nil, Nil),
-                Seat(1, None, Nil, Nil),
-                Seat(
+                EmptySeat(0, Nil, Nil),
+                EmptySeat(1, Nil, Nil),
+                TakenSeat(
                   2,
-                  Some(SittingOut(user1)),
+                  SittingOut(user1),
                   hand = Nil,
                   taken = Nil
                 ),
-                Seat(
+                TakenSeat(
                   3,
-                  Some(SittingOut(user2)),
+                  SittingOut(user2),
                   hand = Nil,
                   taken = Nil
                 )
@@ -333,15 +331,15 @@ class GameServiceSpec extends AsyncIOFreeSpec:
     val initialContext = new GameContext(
       table = TableServerView(
         seats = List(
-          Seat(
+          TakenSeat(
             0,
-            player = Some(ActingPlayer(player1, Action.PlayCard, Some(Timeout.Max))),
+            player = ActingPlayer(player1, Action.PlayCard, Some(Timeout.Max)),
             hand = List(CardServerView(player1Card, Direction.Player)),
             taken = player1Collected.map(card => CardServerView(card, Direction.Down))
           ),
-          Seat(
+          TakenSeat(
             1,
-            player = Some(WaitingPlayer(player2)),
+            player = WaitingPlayer(player2),
             hand = Nil,
             taken = Nil
           )
@@ -361,7 +359,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
             Nil.toDeck,
             player1Card
           ),
-          rounds = 0
+          remainingGames = 0
         )
       ))
     )
@@ -440,15 +438,15 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       newContext shouldBe Some(GameContext(
         table = TableServerView(
           seats = List(
-            Seat(
+            TakenSeat(
               0,
-              player = Some(EndOfMatchPlayer(player1.win, winner = true)),
+              player = EndOfMatchPlayer(player1.win, winner = true),
               hand = Nil,
               taken = Nil
             ),
-            Seat(
+            TakenSeat(
               1,
-              player = Some(EndOfMatchPlayer(player2, winner = false)),
+              player = EndOfMatchPlayer(player2, winner = false),
               hand = Nil,
               taken = Nil
             )

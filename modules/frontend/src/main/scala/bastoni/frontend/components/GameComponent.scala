@@ -63,10 +63,10 @@ object GameComponent:
           DeckShufflingLayer(gameState.currentTable, state.currentLayout, gameState.callback),
           KLayer(
             List(
-              gameState.currentTable.mainPlayer.map(seat => PlayerComponent(seat.player, state.currentLayout.mainPlayer, seat.dealer)),
-              gameState.currentTable.opponent1.map(seat => PlayerComponent(seat.player, state.currentLayout.player1, seat.dealer)),
-              gameState.currentTable.opponent2.map(seat => PlayerComponent(seat.player, state.currentLayout.player2, seat.dealer)),
-              gameState.currentTable.opponent3.map(seat => PlayerComponent(seat.player, state.currentLayout.player3, seat.dealer)),
+              gameState.currentTable.mainPlayer.map(seat => PlayerComponent(seat.player, state.currentLayout.mainPlayer, gameState.currentTable.dealerIndex.contains(seat.index))),
+              gameState.currentTable.opponent1.map(seat => PlayerComponent(seat.player, state.currentLayout.player1, gameState.currentTable.dealerIndex.contains(seat.index))),
+              gameState.currentTable.opponent2.map(seat => PlayerComponent(seat.player, state.currentLayout.player2, gameState.currentTable.dealerIndex.contains(seat.index))),
+              gameState.currentTable.opponent3.map(seat => PlayerComponent(seat.player, state.currentLayout.player3, gameState.currentTable.dealerIndex.contains(seat.index))),
             ).flatten: _*
           )
         )
@@ -109,6 +109,6 @@ object GameComponent:
         .concurrently(p1).concurrently(p2).concurrently(p3)
         .concurrently(pub.publish(me, roomId)(
           fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinTable).delayBy(1.second) ++
-            fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartGame(gameType))
+            fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartMatch(gameType))
         ))
     } yield tables).compile.drain

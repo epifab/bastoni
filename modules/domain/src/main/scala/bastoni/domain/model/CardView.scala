@@ -17,8 +17,7 @@ case class CardServerView(card: VisibleCard, facing: Direction) extends CardView
   }
 
 object CardPlayerView:
-  given Decoder[CardPlayerView] = deriveDecoder
-  given Encoder[CardPlayerView] = deriveEncoder
+  given Codec[CardPlayerView] = deriveCodec
 
 object CardServerView:
   given Codec[CardServerView] = deriveCodec

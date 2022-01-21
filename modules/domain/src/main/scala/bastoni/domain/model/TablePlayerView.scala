@@ -41,10 +41,10 @@ case class TablePlayerView(
 
   val opponents: List[Seat[CardPlayerView]] =
     seats
-      .slideUntil(_.player.exists(_.is(me)))
-      .filterNot(_.player.exists(_.is(me)))
+      .slideUntil(_.playerOption.exists(_.is(me)))
+      .filterNot(_.playerOption.exists(_.is(me)))
     
-  private def opponent(offset: Int): Option[TakenSeat[CardView]] =
+  private def opponent(offset: Int): Option[TakenSeat[CardPlayerView]] =
     extension[T](list: List[T])
       def get(index: Int): Option[T] =
         list match {
@@ -53,12 +53,9 @@ case class TablePlayerView(
           case head :: tail => tail.get(index - 1)
         }
 
-    opponents.get(offset) collectFirst {
-      case Seat(index, Some(player), hand, taken) =>
-        TakenSeat(player, hand, taken, dealerIndex.contains(index))
-    }
+    opponents.get(offset) collectFirst { case taken: TakenSeat[CardPlayerView] => taken }
 
-  val opponent1: Option[TakenSeat[CardView]] = opponent(0)
-  val opponent2: Option[TakenSeat[CardView]] = opponent(1)
-  val opponent3: Option[TakenSeat[CardView]] = opponent(2)
+  val opponent1: Option[TakenSeat[CardPlayerView]] = opponent(0)
+  val opponent2: Option[TakenSeat[CardPlayerView]] = opponent(1)
+  val opponent3: Option[TakenSeat[CardPlayerView]] = opponent(2)
   val mainPlayer: Option[TakenSeat[CardPlayerView]] = seatFor(me)

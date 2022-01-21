@@ -5,7 +5,6 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
 
 sealed trait PlayerState extends User:
-  def sitIn: PlayerState.SittingIn
   def sitOut: PlayerState.SittingOut
 
 object PlayerState:
@@ -15,7 +14,6 @@ object PlayerState:
 
   sealed abstract class SittingIn(val player: MatchPlayer) extends PlayerState with User(player.id, player.name):
     def mapPlayer(f: MatchPlayer => MatchPlayer): SittingIn
-    def sitIn: SittingIn = WaitingPlayer(player)
     def sitOut: SittingOut = SittingOut(player.basePlayer)
     def act(action: Action, timeout: Option[Timeout]): ActingPlayer = ActingPlayer(player, action, timeout)
 

@@ -29,7 +29,7 @@ case class GameContext(table: TableServerView, stateMachine: Option[GameStateMac
     }
 
     val (newStateMachine, gameMessages) = (stateMachine, message) match
-      case (None, Command.StartMatch(playerId, gameType)) if updatedTable.contains(playerId) && updatedTable.players.size > 1 =>
+      case (None, Command.StartMatch(playerId, gameType)) if updatedTable.contains(playerId) && updatedTable.round.size > 1 =>
         val (machine, initialEvents) = GameStateMachineFactory(gameType)(updatedTable)
         Some(machine) -> initialEvents
       case (None, _) => stateMachine -> Nil
@@ -50,7 +50,7 @@ object GameContext:
   def build(tableSize: 2 | 3 | 4): GameContext =
     GameContext(
       table = TableServerView(
-        seats = (0 until tableSize).map(index => Seat(index, None, Nil, Nil)).toList,
+        seats = (0 until tableSize).map(index => EmptySeat(index, Nil, Nil)).toList,
         deck = Nil,
         board = Nil,
         matchInfo = None,

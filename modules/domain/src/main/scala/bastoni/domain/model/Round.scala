@@ -8,3 +8,6 @@ extension[T](xs: Round[T])
       .dropWhile(!f(_))
       .take(xs.size)
       .toList
+
+  def shift: Round[T] = xs.drop(1) ++ xs.headOption.toList
+  def shiftBackwards: Round[T] = xs.lastOption.fold(xs)(last => last :: xs.init)

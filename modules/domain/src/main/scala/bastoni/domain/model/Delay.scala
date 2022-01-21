@@ -4,7 +4,15 @@ import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
 enum Delay:
-  case AfterShuffleDeck, AfterDealCards, AfterPlayCard, BeforeTakeCards, AfterTakeCards, BeforeGameOver, AfterGameOver, ActionTimeout
+  case
+  AfterShuffleDeck,
+  AfterDealCards,
+  AfterPlayCard,
+  BeforeTakeCards,
+  AfterTakeCards,
+  BeforeGameOver,
+  AfterGameOver,
+  ActionTimeout
 
 object Delay:
   given Encoder[Delay] = Encoder[String].contramap(_.toString)
