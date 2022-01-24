@@ -18,3 +18,4 @@ object Palette:
   val red2 = "#ba131a"
   val blue = "#1f34ba"
   val desaturatedBlue = "#2B5B79"
+  val cyan = "#1dc1d4"

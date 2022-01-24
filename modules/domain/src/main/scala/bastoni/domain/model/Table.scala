@@ -153,7 +153,7 @@ trait Table[C <: CardView]:
             case (remainingBoardCards, toRemove) => remainingBoardCards.filterNot {
               case (_, boardCard) => boardCard.card.ref == toRemove.ref
             }
-          }
+          }.map { case (_, card) => None -> card }  // who played what isn't important at this point
         )
 
       case Event.TrickCompleted(winnerId) =>
@@ -197,6 +197,18 @@ trait Table[C <: CardView]:
           matchInfo = matchInfo.map(_.copy(matchScore = matchScores, gameScore = Some(scores)))
         )
 
+      case Event.GameAborted =>
+        updateWith(
+          deck = Nil,
+          board = Nil,
+          seats = seats.map {
+            case taken: TakenSeat[C] =>
+              taken.copy(player = taken.player.sitOut, hand = Nil, taken = Nil)
+            case empty: EmptySeat[C] =>
+              empty.copy(hand = Nil, taken = Nil)
+          }
+        )
+
       case Event.MatchCompleted(winnerIds) =>
         updateWith(
           seats = mapTakenSeats {
@@ -207,16 +219,9 @@ trait Table[C <: CardView]:
           matchInfo = None
         )
 
-      case Event.GameAborted | Event.MatchAborted =>
+      case Event.MatchAborted =>
         updateWith(
-          seats = seats.map {
-            case taken: TakenSeat[C] =>
-              taken.copy(player = taken.player.sitOut, hand = Nil, taken = Nil)
-            case empty: EmptySeat[C] =>
-              empty.copy(hand = Nil, taken = Nil)
-          },
-          deck = Nil,
-          board = Nil,
+          dealerIndex = nextDealer.map(_.index),
           matchInfo = None
         )
 

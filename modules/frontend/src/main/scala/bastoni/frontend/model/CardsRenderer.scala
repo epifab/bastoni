@@ -1,42 +1,10 @@
 package bastoni.frontend.model
 
-import bastoni.domain.model.{CardInstance, HiddenCard, UserId, VisibleCard}
+import bastoni.domain.model.{CardInstance, HiddenCard, VisibleCard}
 
-case class CardLayout(
-  card: CardInstance,
-  size: CardSize,
-  position: Point,
-  rotation: Angle,
-  shadow: Option[Shadow]
-)
+type CardsRenderer = List[CardInstance] => List[CardLayout]
 
-case class CardGroupLayout(
-  cards: List[CardInstance],
-  cardSize: CardSize,
-  topLeft: Point,
-  rotation: Angle,
-  shadow: Option[Shadow],
-  margin: Margin
-):
-  def toCardLayout: List[CardLayout] = cards.zipWithIndex.map { case (card, index) =>
-    CardLayout(
-      card,
-      cardSize,
-      Point(
-        x = topLeft.x + (rotation.cos * index * margin.perCard(cards.length)),
-        y = topLeft.y + (rotation.sin * index * margin.perCard(cards.length))
-      ),
-      rotation,
-      shadow
-    )
-  }
-
-type CardsRenderer = List[CardInstance] => List[CardLayout | CardGroupLayout]
-
-enum TablePlayer:
-  case MainPlayer, Player1, Player2, Player3
-
-type BoardRenderer = List[(Option[TablePlayer], CardInstance)] => List[CardLayout | CardGroupLayout]
+type BoardRenderer = List[(Option[TablePlayer], CardInstance)] => List[CardLayout]
 
 object CardsRenderer:
   def collapseFaceDownCards(cx: List[CardInstance], collapsed: List[HiddenCard]): List[VisibleCard | List[HiddenCard]] =

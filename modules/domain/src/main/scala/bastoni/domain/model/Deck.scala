@@ -40,4 +40,4 @@ object Deck:
 
 
 extension (cards: List[SimpleCard])
-  def toDeck: Deck = Deck(cards.zipWithIndex.map { case (c, ref) => VisibleCard(c.rank, c.suit, ref) })
+  def toDeck: Deck = Deck(cards.zipWithIndex.map { case (c, ref) => VisibleCard(c.rank, c.suit, CardId(ref)) })

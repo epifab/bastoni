@@ -120,7 +120,7 @@ object CardComponent:
 
     private def addGlowing(state: State)(p: ShapeProps): Unit =
       p.shadowBlur = 45
-      p.shadowColor = "#1dc1d4"
+      p.shadowColor = Palette.cyan
       p.shadowOffset = Vector2d(0, 0)
       p.shadowOpacity = 1
 
@@ -135,13 +135,13 @@ object CardComponent:
       KGroup(
         { p =>
           p.ref = animation[TweenProps] { p =>
-            p.x = props.current.position.x
-            p.y = props.current.position.y
+            p.x = props.current.topLeft.x
+            p.y = props.current.topLeft.y
             p.rotation = props.current.rotation.deg
             p.duration = animationDuration
           }
-          p.x = props.initial.position.x
-          p.y = props.initial.position.y
+          p.x = props.initial.topLeft.x
+          p.y = props.initial.topLeft.y
           p.rotation = props.initial.rotation.deg
         },
         props.current.card.toOption.map(_.simple).fold(renderCardBack(props, state))(renderCard(props, state))
@@ -159,7 +159,7 @@ object CardComponent:
       ))
       .build
 
-  def apply(layout: CardLayout, previous: Option[CardLayout], selectable: Option[Callback]): VdomElement =
+  def apply(layout: CardLayout, previous: Option[CardLayout], selectable: Option[Callback], selected: Boolean = false): VdomElement =
     component
       .withKey(s"card-${layout.card.ref}")
       .apply(Props(layout, previous, selectable))

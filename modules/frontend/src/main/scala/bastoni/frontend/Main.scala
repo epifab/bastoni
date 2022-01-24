@@ -14,6 +14,6 @@ import scala.concurrent.duration.DurationInt
   val root = document.getElementById("app-wrapper")
 
   Resources.onLoad(timeout = 5.seconds).unsafeRunAsync {
-    case Right(_) => components.GameComponent(GameType.Briscola).renderIntoDOM(root)
+    case Right(_) => components.MainComponent().renderIntoDOM(root)
     case Left(error) => console.error(error.getMessage)
   }

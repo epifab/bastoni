@@ -1,7 +1,7 @@
 package bastoni.domain.model
 
-import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
-import io.circe.{Codec, Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.{Decoder, Encoder}
 
 enum Suit:
   case Denari, Coppe, Spade, Bastoni
@@ -30,8 +30,16 @@ sealed trait Card:
   def rank: Rank
   def suit: Suit
 
+opaque type CardId = Int
+
+object CardId:
+  def unknown: CardId = -1
+  def apply(id: Int): CardId = id
+  given Encoder[CardId] = Encoder.encodeInt
+  given Decoder[CardId] = Decoder.decodeInt
+
 sealed trait CardRef:
-  def ref: Int
+  def ref: CardId
 
 case class SimpleCard(rank: Rank, suit: Suit) extends Card
 
@@ -45,7 +53,7 @@ sealed trait CardInstance extends CardRef:
   def contains(card: SimpleCard): Boolean = toOption.map(_.simple).contains(card)
   def hidden: HiddenCard = HiddenCard(ref)
 
-case class VisibleCard(rank: Rank, suit: Suit, ref: Int) extends CardInstance with Card:
+case class VisibleCard(rank: Rank, suit: Suit, ref: CardId) extends CardInstance with Card:
   override def toOption: Option[VisibleCard] = Some(this)
   def simple: SimpleCard = SimpleCard(rank, suit)
 
@@ -53,7 +61,7 @@ object VisibleCard:
   given Encoder[VisibleCard] = deriveEncoder
   given Decoder[VisibleCard] = deriveDecoder
 
-case class HiddenCard(ref: Int) extends CardInstance:
+case class HiddenCard(ref: CardId) extends CardInstance:
   override def toOption: Option[VisibleCard] = None
 
 object HiddenCard:
@@ -62,8 +70,8 @@ object HiddenCard:
 
 object Card:
   def apply(rank: Rank, suit: Suit): SimpleCard = SimpleCard(rank, suit)
-  def apply(rank: Rank, suit: Suit, ref: Int): VisibleCard = VisibleCard(rank, suit, ref)
-  def apply(ref: Int): HiddenCard = HiddenCard(ref)
+  def apply(rank: Rank, suit: Suit, ref: CardId): VisibleCard = VisibleCard(rank, suit, ref)
+  def apply(ref: CardId): HiddenCard = HiddenCard(ref)
 
   given Encoder[CardInstance] = deriveEncoder
   given Decoder[CardInstance] = deriveDecoder

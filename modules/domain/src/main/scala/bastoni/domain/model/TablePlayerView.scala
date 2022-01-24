@@ -31,7 +31,7 @@ case class TablePlayerView(
       deckShuffledUpdate(
         (0 until numberOfCards)
           .toList
-          .map(position => CardPlayerView(HiddenCard(position)))
+          .map(position => CardPlayerView(HiddenCard(CardId(position))))
       )
 
     case event: Event.CardsDealtPlayerView => cardsDealtUpdate(event)

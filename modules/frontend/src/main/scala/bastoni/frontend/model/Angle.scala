@@ -10,7 +10,7 @@ case class Angle(deg: Int):
   def +(offset: Angle): Angle = Angle(deg + offset.deg)
   def -(offset: Angle): Angle = Angle(deg - offset.deg)
   def *(scale: Double): Angle = Angle((deg * scale).floor.toInt)
-  def unary_- : Angle = *(-1)
+  def unary_- : Angle = Angle(-deg)
 
 object Angle:
   val zero: Angle = Angle(0)

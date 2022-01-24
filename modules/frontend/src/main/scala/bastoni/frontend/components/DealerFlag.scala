@@ -1,6 +1,6 @@
 package bastoni.frontend.components
 
-import bastoni.domain.model.HiddenCard
+import bastoni.domain.model.{CardId, HiddenCard}
 import bastoni.frontend.model.{Angle, CardLayout, CardSize, Palette, Point, SeatLayout, Shadow}
 import japgolly.scalajs.react.component.ScalaFn
 import japgolly.scalajs.react.vdom.VdomNode
@@ -24,14 +24,15 @@ object DealerFlag:
 
     CardComponent(
       CardLayout(
-        card = HiddenCard(0),
+        card = HiddenCard(CardId.unknown),
         size = tinyDeckSize,
-        position = layout.center - offset1 + offset2,
+        topLeft = layout.center - offset1 + offset2,
         rotation = tinyDeckRotation,
-        shadow = Some(Shadow(10, Point(0, 0), Palette.white))
+        shadow = None
       ),
       previous = None,
-      selectable = None
+      selectable = None,
+      selected = true
     )
   }
 

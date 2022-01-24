@@ -32,8 +32,8 @@ object DeckShufflingLayer:
             KCircle { p =>
               val size = layout.deck.controlLayout.size
               p.radius = size.width / 2
-              p.x = layout.deck.controlLayout.position.x + size.width / 2
-              p.y = layout.deck.controlLayout.position.y + size.height / 2
+              p.x = layout.deck.controlLayout.topLeft.x + size.width / 2
+              p.y = layout.deck.controlLayout.topLeft.y + size.height / 2
               p.fill = Palette.black
             },
             KText { p =>
@@ -44,8 +44,8 @@ object DeckShufflingLayer:
               p.fontFamily = "'Open Sans', sans-serif"
               p.fontStyle = "bold"
               p.fontSize = 28
-              p.x = layout.deck.controlLayout.position.x
-              p.y = layout.deck.controlLayout.position.y
+              p.x = layout.deck.controlLayout.topLeft.x
+              p.y = layout.deck.controlLayout.topLeft.y
               p.width = layout.deck.controlLayout.size.width
               p.height = layout.deck.controlLayout.size.height
             }

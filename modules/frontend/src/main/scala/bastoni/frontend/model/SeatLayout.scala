@@ -36,14 +36,15 @@ object SeatLayout:
       },
       rotation = rotation,
       renderHand = handRenderer,
-      renderPile = CardGroupRenderer(
+      renderPile = (pile: List[CardInstance]) => CardLayout.group(
+        pile,
         pileSize,
-        Point(
-          x = center.x + (xangle.cos * pileOffset) - yangle.cos * py1,
-          y = center.y + (xangle.sin * pileOffset) - yangle.sin * py1
-        ),
+        position = center +
+          Point(yangle.cos * 15, yangle.sin * 15) +
+          Point(yangle.sin * pileOffset, -yangle.cos * pileOffset),
         rotation = -rotation,
-        margin = Margin.PerCard(.6)
+        hMargin = Margin.PerCard(.6),
+        vAlign = Align.Vertical.Bottom
       )
     )
   }
@@ -56,43 +57,40 @@ object MainPlayerHandRenderer:
 
   def apply(cardSize: CardSize, canvasSize: Size): CardsRenderer = (hand: List[CardInstance]) =>
 
-    val horizontalOverlap: Double = cardSize.width * horizontalOverlapFactor
     val verticalOverlap: Double = cardSize.height * verticalOverlapFactor
 
-    val cardsPerRow: Int = ((canvasSize.width - cardSize.width) / horizontalOverlap).floor.toInt + 1
-    val numberOfRows: Int = (hand.size / cardsPerRow.toDouble).ceil.toInt
-    val verticalOffset: Double = canvasSize.height - cardSize.height - ((numberOfRows - 1) * verticalOverlap)
+    val cardsPerRow: Int = ((canvasSize.width - cardSize.width) / (cardSize.width * horizontalOverlapFactor)).floor.toInt + 1
 
-    hand
-      .grouped(cardsPerRow)
-      .zipWithIndex
-      .flatMap { case (cards, row) =>
-        val rowSize: Double = cardSize.width + (horizontalOverlap * (cards.size - 1))
-        val horizontalOffset: Double = Math.max(0, canvasSize.width - rowSize) / 2.0
-        cards.zipWithIndex
-          .map { case (card, col) =>
-            CardLayout(
-              card,
-              cardSize,
-              Point(
-                horizontalOffset + (horizontalOverlap * col),
-                verticalOffset + (verticalOverlap * row)
-              ),
-              rotation = Angle.zero,
-              shadow = Some(Shadow(8, Point(-6, 0)))
-            )
-          }
-      }
-      .toList
+    CardLayout.group(
+      hand,
+      cardSize,
+      Point(
+        canvasSize.width / 2,
+        canvasSize.height
+      ),
+      vAlign = Align.Vertical.Bottom,
+      hAlign = Align.Horizontal.Center,
+      hMargin = Margin.PerCard(cardSize.width * horizontalOverlapFactor),
+      vMargin = Margin.PerCard(cardSize.height * verticalOverlapFactor),
+      shadow = Some(Shadow(10, Point(-10, 0))),
+      cardsPerRow = Some(cardsPerRow)
+    )
 
 object OtherPlayersHandRenderer:
   def apply(center: Point, radius: Double, handSize: CardSize, rotation: Angle): CardsRenderer =
-    val hy1 = handSize.height - radius - 15
     val yangle = Angle(90 - rotation.deg)
 
-    CardGroupRenderer(
-      handSize,
-      Point(center.x - yangle.cos * hy1, center.y - yangle.sin * hy1),
-      rotation = -rotation,
-      margin = Margin.Shared(handSize.width / 4)
-    )
+    (hand: List[CardInstance]) =>
+      CardLayout.group(
+        cards = hand,
+        size = handSize,
+        position = Point(
+          center.x + yangle.cos * (radius + 10),
+          center.y + yangle.sin * (radius + 10)
+        ),
+        rotation = -rotation,
+        vAlign = Align.Vertical.Bottom,
+        hAlign = Align.Horizontal.Center,
+        hMargin = Margin.Total(handSize.width / 2),
+        shadow = Some(Shadow(4, Point(-4, 0)))
+      )

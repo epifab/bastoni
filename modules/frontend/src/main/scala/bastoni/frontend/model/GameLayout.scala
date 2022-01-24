@@ -43,7 +43,7 @@ object GameLayout:
       Some(seat.player).collect {
         case actor: PlayerState.ActingPlayer if actor.playing =>
           CardSize.scaleTo(
-            maxWidth = canvasSize.width / (1 + ((seat.hand.size - 1) * MainPlayerHandRenderer.horizontalOverlapFactor)),
+            maxWidth = canvasSize.width / (1 + (Math.min(4, seat.hand.size - 1) * MainPlayerHandRenderer.horizontalOverlapFactor)).floor,
             maxHeight = canvasSize.height / 3
           )
       }
@@ -69,34 +69,39 @@ object GameLayout:
 
       table = TableLayout(Point(0, 0), canvasSize),  // topLeftTable, tableSize),
       renderBoard = (cards: List[(Option[TablePlayer], CardInstance)]) => {
-        cards
-          .reverse
-          .zipWithIndex
-          .map {
-            case ((player, card), col) =>
+
+        val boardCards: List[CardLayout] =
+          CardLayout.group(
+            cards.collect { case (None, card) => card },
+            boardSize,
+            Point(canvasSize.width / 2, canvasSize.height / 2),
+            vAlign = Align.Vertical.Middle,
+            hAlign = Align.Horizontal.Center,
+            cardsPerRow = Some(((canvasSize.width - 100) / (boardSize.width + 4)).floor.toInt)
+          )
+
+        val boardCardsByPlayers: List[CardLayout] = cards
+          .collect {
+            case (Some(player), card) =>
               CardLayout(
                 card,
                 boardSize,
                 player match {
-                  case Some(TablePlayer.Player1) =>
+                  case TablePlayer.Player1 =>
                     Point(canvasSize.width / 2 - boardSize.width - cardsMargin, (canvasSize.height - boardSize.height) / 2)
-                  case Some(TablePlayer.Player2) =>
+                  case TablePlayer.Player2 =>
                     Point((canvasSize.width - boardSize.width) / 2, canvasSize.height / 2 - boardSize.height - cardsMargin)
-                  case Some(TablePlayer.Player3) =>
+                  case TablePlayer.Player3 =>
                     Point(canvasSize.width / 2 + cardsMargin, (canvasSize.height - boardSize.height) / 2)
-                  case Some(TablePlayer.MainPlayer) =>
+                  case TablePlayer.MainPlayer =>
                     Point((canvasSize.width - boardSize.width) / 2, canvasSize.height / 2 + cardsMargin)
-                  case None =>
-                    // todo: scopa might have N cards on the board, how to display them?
-                    Point(
-                      (canvasSize.width - boardSize.width) / 2,
-                      (canvasSize.height - boardSize.height) / 2
-                    ) + Point(Random.nextGaussian(), Random.nextGaussian())
                 },
                 rotation = Angle.zero,
-                shadow = Some(Shadow(3, Point(0, 0)))
+                shadow = Some(Shadow(4, Point(0, 0)))
               )
           }
+
+        boardCards ++ boardCardsByPlayers
       },
       deck = DeckLayout(deckSize, canvasSize)
     )

@@ -58,7 +58,7 @@ object GameComponent:
             p.height = window.innerHeight
           },
           TableLayer(state.currentLayout.table),
-          CardsLayer(gameState, state.currentLayout, state.previousLayout),
+          CardsLayerWrapper(gameState, state.currentLayout, state.previousLayout),
           DeckCountLayer(gameState, state.currentLayout.deck),
           DeckShufflingLayer(gameState.currentTable, state.currentLayout, gameState.callback),
           KLayer(

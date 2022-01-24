@@ -13,8 +13,8 @@ class JsonSpec extends AnyFreeSpec with Matchers:
     val player = Player(
       MatchPlayer(User(UserId.newId, "John"), 15),
       List(
-        VisibleCard(Rank.Asso, Suit.Denari, 5),
-        VisibleCard(Rank.Sette, Suit.Denari, 7)
+        VisibleCard(Rank.Asso, Suit.Denari, CardId(5)),
+        VisibleCard(Rank.Sette, Suit.Denari, CardId(7))
       ),
       Nil
     )
@@ -56,7 +56,7 @@ class JsonSpec extends AnyFreeSpec with Matchers:
   "Server events are encoded / decoded with a discriminant property" - {
     "case class" in {
       val expectedJson = parse("""{"type": "DeckShuffled", "cards": [{"rank": "Asso", "suit": "Denari", "ref": 0},{"rank": "Due", "suit": "Coppe", "ref": 1}]}""").getOrElse(fail("Invalid json"))
-      val event: ServerEvent = Event.DeckShuffled(List(Card(Rank.Asso, Suit.Denari, 0), Card(Rank.Due, Suit.Coppe, 1)))
+      val event: ServerEvent = Event.DeckShuffled(List(Card(Rank.Asso, Suit.Denari, CardId(0)), Card(Rank.Due, Suit.Coppe, CardId(1))))
 
       event.asJson shouldBe expectedJson
       expectedJson.as[ServerEvent] shouldBe Right(event)
