@@ -33,7 +33,7 @@ object Game extends GameLogic[MatchState]:
   val playGameStepPF: PartialFunction[(GameState, StateMachineInput), (GameState, List[StateMachineOutput])] = {
 
     case (active: Active, PlayerLeftTable(player, _)) if active.activePlayers.exists(_.is(player)) =>
-      Aborted -> List(GameAborted)
+      Aborted -> uneventful
 
     case (Ready(players), MatchStarted(_, _)) =>
       Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
@@ -48,7 +48,7 @@ object Game extends GameLogic[MatchState]:
           deck
         ) -> List(DeckShuffled(deck), Continue.afterShufflingDeck)
       }
-      else Aborted -> List(GameAborted)
+      else Aborted -> uneventful
 
     case (DealRound(player :: Nil, done, 0, deck), Continue) =>
       deck.dealOrDie(5) { (cards, tail) =>
@@ -164,7 +164,7 @@ object Game extends GameLogic[MatchState]:
           }
 
         case (Aborted, events) =>
-          GameOver(MatchAborted, Terminated) -> (events :+ Continue.afterGameOver)
+          GameOver(MatchAborted, Terminated) -> (events :+ Event.GameAborted :+ Continue.afterGameOver)
 
         case (newMatchState, events) =>
           InProgress(matchPlayers, newMatchState, pointsToWin) -> events
