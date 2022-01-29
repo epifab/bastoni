@@ -31,7 +31,7 @@ object DealerFlag:
         shadow = None
       ),
       previous = None,
-      selectable = None,
+      eventHandlers = None,
       selected = true
     )
   }

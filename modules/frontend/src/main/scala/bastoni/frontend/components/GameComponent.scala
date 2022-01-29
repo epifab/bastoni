@@ -60,7 +60,7 @@ object GameComponent:
           TableLayer(state.currentLayout.table),
           CardsLayerWrapper(gameState, state.currentLayout, state.previousLayout),
           DeckCountLayer(gameState, state.currentLayout.deck),
-          DeckShufflingLayer(gameState.currentTable, state.currentLayout, gameState.callback),
+          DeckShufflingLayer(gameState.currentTable, state.currentLayout, gameState.sendMessage),
           KLayer(
             List(
               gameState.currentTable.mainPlayer.map(seat => PlayerComponent(seat.player, state.currentLayout.mainPlayer, gameState.currentTable.dealerIndex.contains(seat.index))),

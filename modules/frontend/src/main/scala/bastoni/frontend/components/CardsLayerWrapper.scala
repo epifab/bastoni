@@ -11,8 +11,9 @@ import japgolly.scalajs.react.component.Scala.BackendScope
 import japgolly.scalajs.react.vdom.VdomNode
 
 object CardsLayerWrapper:
-  case class TakingCardsState(played: VisibleCard, selected: List[VisibleCard], options: List[Set[VisibleCard]])
-  case class State(takingCards: Option[TakingCardsState])
+  case class TakingCardsState(played: VisibleCard, selected: List[VisibleCard], options: Set[Set[VisibleCard]])
+
+  case class State(takingCards: Option[TakingCardsState], mouseOver: Option[CardId] = None)
 
   case class Props(game: GameState, currentLayout: GameLayout, previousLayout: GameLayout)
 
@@ -64,6 +65,64 @@ object CardsLayerWrapper:
       data.zip(renderers).flatMap { case (d, f) => d.toList.flatMap(f) }
     }
 
+    private def selectable(game: GameState, state: State): Map[CardId, Callback] = {
+      game.currentTable.mainPlayer.fold(Map.empty)(seat => seat.player match {
+        case PlayerState.ActingPlayer(_, Action.PlayCard, timeout) if !timeout.contains(Timeout.TimedOut) =>
+          seat
+            .hand.flatMap(_.card.toOption)
+            .map { (card: VisibleCard) => card.ref -> game.sendMessage(FromPlayer.PlayCard(card)) }
+            .toMap
+
+        case PlayerState.ActingPlayer(_, Action.PlayCardOf(suit), timeout) if !timeout.contains(Timeout.TimedOut) =>
+          val hand: List[VisibleCard] = seat.hand.flatMap(_.card.toOption)
+          val anyCard: Boolean = hand.forall(_.suit != suit)
+          hand.collect {
+            case card if card.suit == suit || anyCard =>
+              card.ref -> game.sendMessage(FromPlayer.PlayCard(card))
+          }.toMap
+
+        case PlayerState.ActingPlayer(_, Action.TakeCards, timeout) if !timeout.contains(Timeout.TimedOut)=>
+          state.takingCards match {
+            case None =>
+              seat.hand.flatMap(_.card.toOption).map { cardInHand =>
+                val takeCombinations: Set[Set[VisibleCard]] = scopa.Game.takeCombinations(
+                  game.currentTable.board.flatMap(_._2.card.toOption),
+                  cardInHand
+                ).toSet
+
+                cardInHand.ref -> {
+                  if (takeCombinations.size == 1) game.sendMessage(TakeCards(cardInHand, takeCombinations.head.toList))
+                  else $.modState(_.copy(takingCards = Some(TakingCardsState(played = cardInHand, selected = Nil, options = takeCombinations))))
+                }
+              }.toMap
+
+            case Some(TakingCardsState(played, selected, options)) =>
+              Map(played.ref -> $.modState(_.copy(takingCards = None))) ++ game.currentTable.board.flatMap {
+                case (_, CardPlayerView(card: VisibleCard)) if !selected.contains(card) =>
+                  val selectedComb: Set[VisibleCard] = (card :: selected).toSet
+                  val matchingCombs: Set[Set[VisibleCard]] = options.filter(_.intersect(selectedComb) == selectedComb)
+                  val completedComb: Boolean = matchingCombs.contains(selectedComb)
+
+                  Option.when(matchingCombs.nonEmpty) {
+                    card.ref -> {
+                      if (completedComb) $.modState(_.copy(takingCards = None), game.sendMessage(FromPlayer.TakeCards(played, selectedComb.toList)))
+                      else $.modState(_.copy(takingCards = Some(TakingCardsState(played, card :: selected, options))))
+                    }
+                  }
+
+                case (_, CardPlayerView(card: VisibleCard)) =>
+                  Some(card.ref -> $.modState(_.copy(takingCards = Some(TakingCardsState(played, selected.filterNot(_ == card), options)))))
+
+                case _ => None  // practically impossible
+              }.toMap
+
+          }
+
+        case _ => Map.empty
+      })
+
+    }
+
     def render(props: Props, state: State): VdomNode = {
       val Props(game, currentLayout, previousLayout) = props
 
@@ -90,62 +149,20 @@ object CardsLayerWrapper:
           Option.when(allCards.nonEmpty)(allCards.toMap)
         }.getOrElse(deckOrigin)
 
-      val selectableCards: Map[CardId, Callback] = game.currentTable.mainPlayer.fold(Map.empty)(seat => seat.player match {
-        case PlayerState.ActingPlayer(_, Action.PlayCard, _) =>
-          seat
-            .hand.flatMap(_.card.toOption)
-            .map { (card: VisibleCard) => card.ref -> game.callback(FromPlayer.PlayCard(card)) }
-            .toMap
+      val cardsEventHandlers: Map[CardId, CardEventHandlers] = selectable(game, state).map {
+        case (cardId, callback) => cardId -> CardEventHandlers(
+          onSelect = $.modState(_.copy(mouseOver = None), callback),
+          onMouseOver = $.modState(_.copy(mouseOver = Some(cardId))),
+          onMouseOut = $.modState(_.copy(mouseOver = None))
+        )
+      }
 
-        case PlayerState.ActingPlayer(_, Action.PlayCardOf(suit), _) =>
-          val hand: List[VisibleCard] = seat.hand.flatMap(_.card.toOption)
-          val anyCard: Boolean = hand.forall(_.suit != suit)
-          hand.collect {
-            case card if card.suit == suit || anyCard =>
-              card.ref -> game.callback(FromPlayer.PlayCard(card))
-          }.toMap
-
-        case PlayerState.ActingPlayer(_, Action.TakeCards, _) =>
-          state.takingCards match {
-            case None =>
-              seat.hand.flatMap(_.card.toOption).map { cardInHand =>
-                val takeCombinations = scopa.Game.takeCombinations(
-                  game.currentTable.board.flatMap(_._2.card.toOption),
-                  cardInHand
-                ).toList
-
-                cardInHand.ref -> {
-                  if (takeCombinations == List(Set.empty)) game.callback(TakeCards(cardInHand, Nil))
-                  else $.modState(_.copy(takingCards = Some(TakingCardsState(played = cardInHand, selected = Nil, options = takeCombinations))))
-                }
-              }.toMap
-
-            case Some(TakingCardsState(played, selected, options)) =>
-              val board: Map[CardId, Callback] = game.currentTable.board.flatMap {
-                case (_, CardPlayerView(card: VisibleCard)) if !selected.contains(card) =>
-                  val selectedCombination: Set[VisibleCard] = (card :: selected).toSet
-                  val combinations: List[Set[VisibleCard]] = options.filter(c => selectedCombination.forall(c.contains))
-                  val completedCombination: Boolean = combinations.contains(selectedCombination)
-                  Option.when(combinations.nonEmpty) {
-                    card.ref -> {
-                      if (completedCombination) game.callback(FromPlayer.TakeCards(played, selectedCombination.toList))
-                      else $.modState(_.copy(takingCards = Some(TakingCardsState(played, card :: selected, options))))
-                    }
-                  }
-
-                case (_, CardPlayerView(card: VisibleCard)) =>
-                  Some(card.ref -> $.modState(_.copy(takingCards = Some(TakingCardsState(played, selected.filterNot(_ == card), options)))))
-
-                case _ => None  // practically impossible
-              }.toMap
-
-              Map(played.ref -> $.modState(_.copy(takingCards = None))) ++ board
-          }
-
-        case _ => Map.empty
-      })
-
-      CardsLayer(cards, previousCards, selectableCards, Set.empty)
+      CardsLayer(
+        cards,
+        previousCards,
+        cardsEventHandlers,
+        selected = state.mouseOver.toSet ++ state.takingCards.fold(Set.empty) { s => s.selected.map(_.ref).toSet + s.played.ref }
+      )
     }
 
   private val component =

@@ -8,5 +8,5 @@ case class GameState(
   me: UserId,
   currentTable: TablePlayerView,
   previousTable: Option[TablePlayerView],
-  callback: FromPlayer => Callback
+  sendMessage: FromPlayer => Callback
 )

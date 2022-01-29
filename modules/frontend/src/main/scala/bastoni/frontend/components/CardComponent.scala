@@ -7,7 +7,7 @@ import bastoni.frontend.model.{CardLayout, CardSize, Palette, Shadow, Size}
 import cats.effect
 import cats.effect.IO
 import japgolly.scalajs.react.*
-import japgolly.scalajs.react.callback.CallbackTo
+import japgolly.scalajs.react.callback.Callback
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import konva.*
 import konva.Konva.KonvaEventObject
@@ -19,19 +19,11 @@ import scala.scalajs.js
 
 object CardComponent:
 
-  case class Props(current: CardLayout, previous: Option[CardLayout], selectable: Option[Callback]):
+  case class Props(current: CardLayout, previous: Option[CardLayout], eventHandlers: Option[CardEventHandlers], selected: Boolean):
     val initial: CardLayout = previous.getOrElse(current)
 
-  case class State(glowing: Boolean)
-
-  private class CardBackend($: BackendScope[Props, State]):
+  private class CardBackend($: BackendScope[Props, Unit]):
     private val animationDuration = .6
-
-    private def withShadow(p: ShapeProps)(shadow: Shadow): Unit =
-      p.shadowBlur = shadow.size
-      p.shadowColor = shadow.color
-      p.shadowOffset = Vector2d(shadow.offset.x, shadow.offset.y)
-      p.shadowOpacity = .5
 
     def cardSizeAnimation(current: CardLayout): TweenRef => Unit = animation[TweenProps] { p =>
       p.width = current.size.width
@@ -39,7 +31,7 @@ object CardComponent:
       p.duration = animationDuration
     }
 
-    private def renderCardBack(props: Props, state: State): VdomNode =
+    private def renderCardBack(props: Props): VdomNode =
       KGroup(
         { p =>
           p.ref = cardSizeAnimation(props.current)
@@ -48,7 +40,7 @@ object CardComponent:
         },
         KRect { rect =>
           addSelectable(props)(rect)
-          addGlowingOrShadow(props, state)(rect)
+          addGlowingOrShadow(props)(rect)
           rect.ref = animation[TweenProps & KRect.Props] { p =>
             p.width = props.current.size.width
             p.height = props.current.size.height
@@ -87,10 +79,10 @@ object CardComponent:
         }
       )
 
-    private def renderCard(props: Props, state: State)(card: SimpleCard) =
+    private def renderCard(props: Props)(card: SimpleCard) =
       KImage { p =>
         addSelectable(props)(p)
-        addGlowingOrShadow(props, state)(p)
+        addGlowingOrShadow(props)(p)
         p.ref = cardSizeAnimation(props.current)
         p.image = Resources.cardImages(card)
         p.width = props.initial.size.width
@@ -98,40 +90,38 @@ object CardComponent:
       }
 
     private def addSelectable(props: Props)(p: NodeProps): Unit = {
-      def setMousePointer(target: NodeRef, style: "default" | "pointer"): Unit =
-        target.getStage().container().style.cursor = style
+      def setMousePointer(target: NodeRef, style: "default" | "pointer"): Callback =
+        Callback(target.getStage().container().style.cursor = style)
 
-      props.selectable.foreach { callback =>
-        p.onMouseEnter = ref => {
-          $.setState(State(glowing = true)).runNow()
-          setMousePointer(ref.target, "pointer")
-        }
-        p.onMouseOut = ref => {
-          $.setState(State(glowing = false)).runNow()
-          setMousePointer(ref.target, "default")
-        }
-        p.onClick = ref => {
-          setMousePointer(ref.target, "default")
-          $.setState(State(glowing = false), callback).runNow()
-        }
-        p.onTap = ref => callback.runNow()
+      props.eventHandlers.foreach { handlers =>
+        p.onMouseEnter = ref => (setMousePointer(ref.target, "pointer") *> handlers.onMouseOver).runNow()
+        p.onMouseOut = ref => (setMousePointer(ref.target, "default") *> handlers.onMouseOut).runNow()
+        p.onClick = ref => (setMousePointer(ref.target, "default") *> handlers.onSelect).runNow()
+        p.onTap = ref => handlers.onSelect.runNow()
       }
     }
 
-    private def addGlowing(state: State)(p: ShapeProps): Unit =
-      p.shadowBlur = 45
-      p.shadowColor = Palette.cyan
-      p.shadowOffset = Vector2d(0, 0)
-      p.shadowOpacity = 1
-
-    private def addGlowingOrShadow(props: Props, state: State)(p: ShapeProps): Unit =
-      if (state.glowing) addGlowing(state)(p)
-      else props.current.shadow.foreach(withShadow(p))
+    private def addGlowingOrShadow(props: Props)(p: ShapeProps): Unit = {
+      if (props.selected) {
+        p.shadowBlur = 45
+        p.shadowColor = Palette.cyan
+        p.shadowOffset = Vector2d(0, 0)
+        p.shadowOpacity = 1
+      }
+      else {
+        props.current.shadow.foreach { shadow =>
+          p.shadowBlur = shadow.size
+          p.shadowColor = shadow.color
+          p.shadowOffset = Vector2d(shadow.offset.x, shadow.offset.y)
+          p.shadowOpacity = .5
+        }
+      }
+    }
 
     private def animation[P <: TweenProps](f: P => Unit): TweenRef => Unit = tween =>
       Option(tween).foreach(_.to(JsObject[P](p => f(p))))
 
-    def render(props: Props, state: State): VdomNode =
+    def render(props: Props): VdomNode =
       KGroup(
         { p =>
           p.ref = animation[TweenProps] { p =>
@@ -144,22 +134,35 @@ object CardComponent:
           p.y = props.initial.topLeft.y
           p.rotation = props.initial.rotation.deg
         },
-        props.current.card.toOption.map(_.simple).fold(renderCardBack(props, state))(renderCard(props, state))
+        props.current.card.toOption.map(_.simple).fold(renderCardBack(props))(renderCard(props))
       )
 
   private val component =
     ScalaComponent
       .builder[Props]
-      .initialState(State(glowing = false))
+      .stateless
       .renderBackend[CardBackend]
       .shouldComponentUpdate(c => CallbackTo(
         c.currentProps.current != c.nextProps.current ||
-          c.currentProps.selectable.isDefined != c.currentProps.selectable.isDefined ||
+          c.currentProps.eventHandlers.isDefined != c.nextProps.eventHandlers.isDefined ||
+          c.currentProps.selected != c.nextProps.selected ||
           c.currentState != c.nextState
       ))
       .build
 
-  def apply(layout: CardLayout, previous: Option[CardLayout], selectable: Option[Callback], selected: Boolean = false): VdomElement =
+  def apply(
+    layout: CardLayout,
+    previous: Option[CardLayout],
+    eventHandlers: Option[CardEventHandlers],
+    selected: Boolean = false
+  ): VdomElement =
     component
       .withKey(s"card-${layout.card.ref}")
-      .apply(Props(layout, previous, selectable))
+      .apply(Props(layout, previous, eventHandlers, selected))
+
+
+case class CardEventHandlers(
+  onSelect: Callback,
+  onMouseOver: Callback = Callback.empty,
+  onMouseOut: Callback = Callback.empty
+)

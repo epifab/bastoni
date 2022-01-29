@@ -3,7 +3,7 @@ package bastoni.frontend.components
 import bastoni.domain.model.*
 import bastoni.frontend.model.*
 import japgolly.scalajs.react.*
-import japgolly.scalajs.react.vdom.VdomElement
+import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import reactkonva.{KArc, KCircle, KGroup, KStar, KText}
 
 object PlayerComponent:
@@ -20,8 +20,17 @@ object PlayerComponent:
         layout.center.y + textTopLeftAngle.cos * textRadius
       )
 
-      val timeoutBars = Some(playerState).collect {
-        case PlayerState.ActingPlayer(_, _, timeout) =>
+      val timedOut = playerState match {
+        case PlayerState.ActingPlayer(_, _, Some(Timeout.TimedOut)) => true
+        case _ => false
+      }
+
+      val timeoutBars: Option[VdomNode] = Some(playerState)
+        .collect {
+          case PlayerState.ActingPlayer(_, _, Some(timeout: Timeout.Active)) => Some(timeout)
+          case PlayerState.ActingPlayer(_, _, None) => None
+        }
+        .map { timeout =>
           TimeoutBar(
             center = layout.center,
             timeout = timeout,
@@ -30,58 +39,59 @@ object PlayerComponent:
             innerRadius = layout.radius,
             size = circleStrokeSize
           )
-      }
+        }
 
-      val stars = Some(playerState).collect {
+      val stars: Option[VdomNode] = Some(playerState).collect {
         case player: PlayerState.SittingIn =>
           PlayerStars(player, layout)
       }
 
-      val dealerFlag = Option.when(dealer)(DealerFlag(layout))
+      val dealerFlag: Option[VdomNode] = Option.when(dealer)(DealerFlag(layout))
 
       KGroup(
-        KCircle { p =>
-          p.radius = layout.radius
-          p.x = layout.center.x
-          p.y = layout.center.y
-          p.fill = Palette.desaturatedBlue
+        { group => if (timedOut) group.opacity = .5 },
+        KCircle { circle =>
+          circle.radius = layout.radius
+          circle.x = layout.center.x
+          circle.y = layout.center.y
+          circle.fill = Palette.desaturatedBlue
 
           playerState match {
             case PlayerState.SittingOut(_) =>
-              p.opacity = .4
+              circle.opacity = .4
 
             case PlayerState.EndOfMatchPlayer(_, true) =>
-              p.stroke = Palette.yellow1
-              p.strokeWidth = 10
-              p.shadowColor = Palette.blue
-              p.shadowBlur = 30
-              p.shadowOpacity = 1
+              circle.stroke = Palette.yellow1
+              circle.strokeWidth = 10
+              circle.shadowColor = Palette.blue
+              circle.shadowBlur = 30
+              circle.shadowOpacity = 1
 
             case PlayerState.EndOfGamePlayer(_, _, true) =>
-              p.stroke = Palette.yellow1
-              p.strokeWidth = circleStrokeSize
-              p.shadowColor = Palette.blue
-              p.shadowBlur = circleStrokeSize
-              p.shadowOpacity = 1
+              circle.stroke = Palette.yellow1
+              circle.strokeWidth = circleStrokeSize
+              circle.shadowColor = Palette.blue
+              circle.shadowBlur = circleStrokeSize
+              circle.shadowOpacity = 1
 
             case _ => ()
           }
         },
 
-        KText { p =>
-          p.text = playerState.name
-          p.align = "center"
-          p.verticalAlign = "middle"
-          p.fill = Palette.white
-          p.fontFamily = "'Open Sans', sans-serif"
-          p.fontStyle = "bold"
-          p.fontSize = 16
-          p.wrap = "none"
-          p.x = textPosition.x
-          p.y = textPosition.y
-          p.width = layout.radius * 2
-          p.height = layout.radius * 2
-          p.rotation = layout.textRotation.deg
+        KText { text =>
+          text.text = playerState.name
+          text.align = "center"
+          text.verticalAlign = "middle"
+          text.fill = Palette.white
+          text.fontFamily = "'Open Sans', sans-serif"
+          text.fontStyle = "bold"
+          text.fontSize = 16
+          text.wrap = "none"
+          text.x = textPosition.x
+          text.y = textPosition.y
+          text.width = layout.radius * 2
+          text.height = layout.radius * 2
+          text.rotation = layout.textRotation.deg
         },
 
         KGroup(timeoutBars.toList ++ dealerFlag.toList ++ stars.toList: _*)

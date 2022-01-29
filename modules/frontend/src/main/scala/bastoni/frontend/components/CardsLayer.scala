@@ -14,7 +14,7 @@ import reactkonva.{KCircle, KGroup, KLayer, KText}
 
 object CardsLayer:
 
-  case class Props(current: List[CardLayout], previous: Map[CardId, CardLayout], selectable: Map[CardId, Callback], selected: Set[CardId])
+  case class Props(current: List[CardLayout], previous: Map[CardId, CardLayout], selectable: Map[CardId, CardEventHandlers], selected: Set[CardId])
 
   class Backend($: BackendScope[Props, Unit]):
 
@@ -25,7 +25,7 @@ object CardsLayer:
           .map(layout => CardComponent(
             layout = layout,
             previous = props.previous.get(layout.card.ref),
-            selectable = props.selectable.get(layout.card.ref),
+            eventHandlers = props.selectable.get(layout.card.ref),
             selected = props.selected.contains(layout.card.ref)
           ))
 
@@ -37,13 +37,7 @@ object CardsLayer:
       .builder[Props]
       .stateless
       .renderBackend[Backend]
-      .shouldComponentUpdate(c => CallbackTo {
-        val layoutHasChanged = c.currentProps.current != c.nextProps.current
-        val selectableHasChanged = c.currentProps.selectable.keys.toSet != c.nextProps.selectable.keys.toSet
-        val selectedHasCHanged = c.currentProps.selected != c.nextProps.selected
-        layoutHasChanged || selectableHasChanged
-      })
       .build
 
-  def apply(current: List[CardLayout], previous: Map[CardId, CardLayout], selectable: Map[CardId, Callback], selected: Set[CardId]): VdomNode =
+  def apply(current: List[CardLayout], previous: Map[CardId, CardLayout], selectable: Map[CardId, CardEventHandlers], selected: Set[CardId]): VdomNode =
     component(Props(current, previous, selectable, selected))
