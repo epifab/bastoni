@@ -17,8 +17,8 @@ object GameState:
   case class   Deal5Round(players: List[Player], deck: Deck) extends Active(players.map(_.matchPlayer))
   case class   WillDealBoardCards(players: List[Player], deck: Deck) extends Active(players.map(_.matchPlayer))
   case class   WillPlay(round: PlayRound) extends Active(round.activePlayers)
-  case class   DrawRound(todo: List[Player], done: List[Player], deck: Deck, boardCards: List[VisibleCard]) extends Active((done ++ todo).map(_.matchPlayer))
-  case class   PlayRound(players: List[Player], deck: Deck, board: List[VisibleCard]) extends Active(players.map(_.matchPlayer))
+  case class   DrawRound(todo: List[Player], done: List[Player], deck: Deck, boardCards: List[VisibleCard], lastTake: Option[UserId]) extends Active((done ++ todo).map(_.matchPlayer))
+  case class   PlayRound(players: List[Player], deck: Deck, board: List[VisibleCard], lastTake: Option[UserId]) extends Active(players.map(_.matchPlayer))
   case class   WillTakeCards(state: PlayRound, command: Command.TakeCards) extends Active(state.activePlayers)
   case class   WillComplete(players: List[Player]) extends Active(players.map(_.matchPlayer))
 

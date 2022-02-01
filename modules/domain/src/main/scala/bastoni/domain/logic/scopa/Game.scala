@@ -66,7 +66,7 @@ object Game extends GameLogic[MatchState]:
 
         if (newDeck.isEmpty)
           withTimeout(
-            PlayRound(players, newDeck, board = Nil),
+            PlayRound(players, newDeck, board = Nil, lastTake = None),
             done.head.id,
             Action.TakeCards,
             List(cardsDealt)
@@ -76,22 +76,22 @@ object Game extends GameLogic[MatchState]:
 
     case (WillDealBoardCards(players, deck), Continue) =>
       deck.dealOrDie(4) { (boardCards, newDeck) =>
-        WillPlay(PlayRound(players, newDeck, boardCards)) ->
+        WillPlay(PlayRound(players, newDeck, boardCards, lastTake = None)) ->
           List(BoardCardsDealt(boardCards), Continue.afterDealingCards)
       }
 
-    case (DrawRound(player :: Nil, done, deck, board), Continue) =>
+    case (DrawRound(player :: Nil, done, deck, board, lastTake), Continue) =>
       deck.dealOrDie(3) { (cards, newDeck) =>
         val players = done :+ player.draw(cards)
-        WillPlay(PlayRound(players, newDeck, board)) -> List(
+        WillPlay(PlayRound(players, newDeck, board, lastTake)) -> List(
           CardsDealt(player.id, cards, Direction.Player),
           Continue.afterDealingCards
         )
       }
 
-    case (DrawRound(player :: todo, done, deck, trump), Continue) =>
+    case (DrawRound(player :: todo, done, deck, trump, lastTake), Continue) =>
       deck.dealOrDie(3) { (cards, newDeck) =>
-        DrawRound(todo, done :+ player.draw(cards), newDeck, trump) ->
+        DrawRound(todo, done :+ player.draw(cards), newDeck, trump, lastTake) ->
           List(CardsDealt(player.id, cards, Direction.Player), Continue.afterDealingCards)
       }
 
@@ -106,14 +106,15 @@ object Game extends GameLogic[MatchState]:
         action = Action.TakeCards
       )
 
-    case (state@ PlayRound(player :: _, _, board), command@ TakeCards(playerId, played, taken)) if player.is(playerId) && player.has(played) && legalPlay(board, played, taken) =>
+    case (state@ PlayRound(player :: _, _, board, _), command@ TakeCards(playerId, played, taken)) if player.is(playerId) && player.has(played) && legalPlay(board, played, taken) =>
       WillTakeCards(state, command) -> List(CardPlayed(playerId, played), Continue.beforeTakingCards)
 
-    case (WillTakeCards(PlayRound(player :: nextPlayer :: others, deck, board), TakeCards(_, played, taken)), Continue) =>
+    case (WillTakeCards(PlayRound(player :: nextPlayer :: others, deck, board, lastTake), TakeCards(_, played, taken)), Continue) =>
 
       val isLastPlay = nextPlayer.hand.isEmpty && deck.isEmpty
+      val updatedLastTake = Option.when(taken.nonEmpty)(player.id).orElse(lastTake)
 
-      val (updatedPlayer, updatedBoard, event) =
+      val (updatedPlayers, updatedBoard, event) =
         if (taken.nonEmpty && board.forall(taken.contains)) {
           // The player has cleared the board
           // This is worth a point if:
@@ -121,7 +122,7 @@ object Game extends GameLogic[MatchState]:
           // - there are 4 players at the table ("scopone scientifico" variant)
           val scopa: Option[VisibleCard] = Option.when(!isLastPlay || (others.size == 2))(played)
           (
-            player.play(played).take(played :: board).addExtraPoints(if (scopa.isDefined) 1 else 0),
+            (nextPlayer :: others) :+ player.play(played).take(played :: board).addExtraPoints(if (scopa.isDefined) 1 else 0),
             Nil,
             CardsTaken(
               playerId = player.id,
@@ -130,10 +131,10 @@ object Game extends GameLogic[MatchState]:
             )
           )
         }
-        else if (isLastPlay) {
+        else if (isLastPlay && (lastTake.contains(player.id) || taken.nonEmpty)) {
           // The player takes all remaining cards regardless
           (
-            player.play(played).take(played :: board),
+            (nextPlayer :: others) :+ player.play(played).take(played :: board),
             Nil,
             CardsTaken(
               playerId = player.id,
@@ -142,9 +143,23 @@ object Game extends GameLogic[MatchState]:
             )
           )
         }
+        else if (isLastPlay) {
+          (
+            (nextPlayer :: (others :+ player.play(played))).map {
+              case winner if updatedLastTake.contains(winner.id) => winner.take(played :: board)
+              case someoneElse => someoneElse
+            },
+            Nil,
+            CardsTaken(
+              playerId = updatedLastTake.getOrElse(player.id),
+              taken = if (updatedLastTake.isDefined) played :: board else Nil,
+              scopa = None
+            )
+          )
+        }
         else if (taken.nonEmpty) {
           (
-            player.play(played).take(played :: taken),
+            (nextPlayer :: others) :+ player.play(played).take(played :: taken),
             board.filterNot(taken.contains),
             CardsTaken(
               playerId = player.id,
@@ -155,7 +170,7 @@ object Game extends GameLogic[MatchState]:
         }
         else {
           (
-            player.play(played),
+            (nextPlayer :: others) :+ player.play(played),
             played :: board,
             CardsTaken(
               player.id,
@@ -165,11 +180,10 @@ object Game extends GameLogic[MatchState]:
           )
         }
 
-      val updatedPlayers = (nextPlayer :: others) :+ updatedPlayer
+      if (isLastPlay) WillComplete(updatedPlayers) -> List(event, Continue.beforeGameOver)
+      else if (nextPlayer.hand.nonEmpty) WillPlay(PlayRound(updatedPlayers, deck, updatedBoard, updatedLastTake)) -> List(event, Continue.afterTakingCards)
+      else DrawRound(updatedPlayers, Nil, deck, updatedBoard, updatedLastTake) -> List(event, Continue.afterTakingCards)
 
-      if (nextPlayer.hand.nonEmpty) WillPlay(PlayRound(updatedPlayers, deck, updatedBoard)) -> List(event, Continue.afterTakingCards)
-      else if (deck.nonEmpty) DrawRound(updatedPlayers, Nil, deck, updatedBoard) -> List(event, Continue.afterTakingCards)
-      else WillComplete(updatedPlayers) -> List(event, Continue.beforeGameOver)
 
     case (WillComplete(players), Continue) =>
       val gameScores: List[GameScore] = GameScoreCalculator(Teams(players))
