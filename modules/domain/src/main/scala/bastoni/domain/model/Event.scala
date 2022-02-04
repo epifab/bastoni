@@ -14,8 +14,8 @@ sealed trait PublicEvent extends ServerEvent with PlayerEvent
 
 object Event:
   // Public events
-  case class  PlayerJoinedTable(user: User, seat: Int) extends PublicEvent
-  case class  PlayerLeftTable(user: User, seat: Int) extends PublicEvent
+  case class  PlayerJoinedRoom(user: User, seat: Int) extends PublicEvent
+  case class  PlayerLeftRoom(user: User, seat: Int) extends PublicEvent
   case class  MatchStarted(gameType: GameType, matchScores: List[MatchScore]) extends PublicEvent
   case class  TrumpRevealed(card: VisibleCard) extends PublicEvent
   case class  BoardCardsDealt(cards: List[VisibleCard]) extends PublicEvent
@@ -53,11 +53,11 @@ object Event:
     def apply(cards: List[VisibleCard]): DeckShuffledServerView = DeckShuffledServerView(cards)
     def apply(numberOfCards: Int): DeckShuffledPlayerView = DeckShuffledPlayerView(numberOfCards)
 
-  case class Snapshot(table: TableServerView) extends ServerEvent
+  case class Snapshot(room: RoomServerView) extends ServerEvent
 
   given publicEventEncoder: Encoder[PublicEvent] = Encoder.instance {
-    case obj: PlayerJoinedTable => deriveEncoder[PlayerJoinedTable].mapJsonObject(_.add("type", "PlayerJoinedTable".asJson))(obj)
-    case obj: PlayerLeftTable   => deriveEncoder[PlayerLeftTable].mapJsonObject(_.add("type", "PlayerLeftTable".asJson))(obj)
+    case obj: PlayerJoinedRoom  => deriveEncoder[PlayerJoinedRoom].mapJsonObject(_.add("type", "PlayerJoinedRoom".asJson))(obj)
+    case obj: PlayerLeftRoom    => deriveEncoder[PlayerLeftRoom].mapJsonObject(_.add("type", "PlayerLeftRoom".asJson))(obj)
     case obj: MatchStarted      => deriveEncoder[MatchStarted].mapJsonObject(_.add("type", "MatchStarted".asJson))(obj)
     case obj: ActionRequested   => deriveEncoder[ActionRequested].mapJsonObject(_.add("type", "ActionRequested".asJson))(obj)
     case obj: TimedOut          => deriveEncoder[TimedOut].mapJsonObject(_.add("type", "TimedOut".asJson))(obj)
@@ -87,8 +87,8 @@ object Event:
   }
 
   given publicEventDecoder: Decoder[PublicEvent] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
-    case "PlayerJoinedTable" => deriveDecoder[PlayerJoinedTable](obj)
-    case "PlayerLeftTable"   => deriveDecoder[PlayerLeftTable](obj)
+    case "PlayerJoinedRoom"  => deriveDecoder[PlayerJoinedRoom](obj)
+    case "PlayerLeftRoom"    => deriveDecoder[PlayerLeftRoom](obj)
     case "MatchStarted"      => deriveDecoder[MatchStarted](obj)
     case "ActionRequested"   => deriveDecoder[ActionRequested](obj)
     case "TimedOut"          => deriveDecoder[TimedOut](obj)

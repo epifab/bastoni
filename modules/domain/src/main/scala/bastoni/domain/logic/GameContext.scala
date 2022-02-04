@@ -5,52 +5,52 @@ import bastoni.domain.model.Event.*
 import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec
 
-case class GameContext(table: TableServerView, stateMachine: Option[GameStateMachine]) extends StateMachine[GameContext]:
+case class GameContext(room: RoomServerView, stateMachine: Option[GameStateMachine]) extends StateMachine[GameContext]:
 
   override def apply(message: ServerEvent | Command): (Option[GameContext], List[ServerEvent | Command | Delayed[Command]]) =
 
-    val (updatedTable, tableEvents) = message match {
+    val (updatedRoom, roomEvents) = message match {
       case Command.Connect =>
-        table -> List(Snapshot(table))
+        room -> List(Snapshot(room))
 
-      case Command.JoinTable(user, seed) =>
-        table.join(user, seed) match {
-          case Right((newTable, seat)) => newTable -> List(PlayerJoinedTable(user, seat))
-          case Left(error) => table -> Nil
+      case Command.JoinRoom(user, seed) =>
+        room.join(user, seed) match {
+          case Right((newRoom, seat)) => newRoom -> List(PlayerJoinedRoom(user, seat))
+          case Left(error) => room -> Nil
         }
 
-      case Command.LeaveTable(user) =>
-        table.leave(user) match {
-          case Right((newTable, seat)) => newTable -> List(PlayerLeftTable(user, seat))
-          case Left(error) => table -> Nil
+      case Command.LeaveRoom(user) =>
+        room.leave(user) match {
+          case Right((newRoom, seat)) => newRoom -> List(PlayerLeftRoom(user, seat))
+          case Left(error) => room -> Nil
         }
 
-      case _ => table -> Nil
+      case _ => room -> Nil
     }
 
     val (newStateMachine, gameMessages) = (stateMachine, message) match
-      case (None, Command.StartMatch(playerId, gameType)) if updatedTable.contains(playerId) && updatedTable.round.size > 1 =>
-        val (machine, initialEvents) = GameStateMachineFactory(gameType)(updatedTable)
+      case (None, Command.StartMatch(playerId, gameType)) if updatedRoom.contains(playerId) && updatedRoom.round.size > 1 =>
+        val (machine, initialEvents) = GameStateMachineFactory(gameType)(updatedRoom)
         Some(machine) -> initialEvents
       case (None, _) => stateMachine -> Nil
       case (Some(stateMachine), message) => stateMachine(message)
 
-    // Play all game events to the table
-    val latestTable = gameMessages
+    // Play all game events to the room
+    val latestRoom = gameMessages
       .collect { case event: ServerEvent => event }
-      .foldLeft(updatedTable)(_ update _)
+      .foldLeft(updatedRoom)(_ update _)
 
-    val allEvents = tableEvents ++ gameMessages
+    val allEvents = roomEvents ++ gameMessages
 
-    Option.when(latestTable.nonEmpty || newStateMachine.isDefined)(GameContext(latestTable, newStateMachine)) -> allEvents
+    Option.when(latestRoom.nonEmpty || newStateMachine.isDefined)(GameContext(latestRoom, newStateMachine)) -> allEvents
 
 
 object GameContext:
 
-  def build(tableSize: 2 | 3 | 4): GameContext =
+  def build(roomSize: 2 | 3 | 4): GameContext =
     GameContext(
-      table = TableServerView(
-        seats = (0 until tableSize).map(index => EmptySeat(index, Nil, Nil)).toList,
+      room = RoomServerView(
+        seats = (0 until roomSize).map(index => EmptySeat(index, Nil, Nil)).toList,
         deck = Nil,
         board = Nil,
         matchInfo = None,

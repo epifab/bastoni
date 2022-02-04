@@ -62,7 +62,7 @@ object RegressionSpecGen extends IOApp:
         inputBus <- fs2.Stream.eval(Fs2Bus[IO, StateMachineInput])
         outputBus <- fs2.Stream.eval(Fs2Bus[IO, StateMachineOutput])
 
-        initialTable = TableServerView(
+        initialRoom = RoomServerView(
           seats = users.zipWithIndex.map { case (u, index) => TakenSeat(index, WaitingPlayer(MatchPlayer(u, 0)), Nil, Nil) },
           deck = Nil,
           board = Nil,
@@ -73,9 +73,9 @@ object RegressionSpecGen extends IOApp:
         inputPublisher <-
           fs2.Stream.resource(outputBus.subscribeAwait).map(_
             // .evalTap(x => IO(println(x.getClass.getSimpleName)))
-            .zipWithScan[TableServerView](initialTable) {
-              case (table, event: ServerEvent) => table.update(event)
-              case (table, _) => table
+            .zipWithScan[RoomServerView](initialRoom) {
+              case (room, event: ServerEvent) => room.update(event)
+              case (room, _) => room
             }
             .collect {
               case (Command.Continue, _) =>
@@ -84,26 +84,26 @@ object RegressionSpecGen extends IOApp:
               case (Delayed(Command.Continue, _), _) =>
                 Command.Continue
 
-              case (Event.ActionRequested(playerId, Action.PlayCard, _), table) =>
-                val card = table
+              case (Event.ActionRequested(playerId, Action.PlayCard, _), room) =>
+                val card = room
                   .seatFor(playerId)
                   .flatMap(_.hand.headOption.map(_.card))
                   .getOrElse(throw IllegalStateException("Player not there or empty hand"))
                 Command.PlayCard(playerId, card)
 
-              case (Event.ActionRequested(playerId, Action.PlayCardOf(suit), _), table) =>
-                val card = table
+              case (Event.ActionRequested(playerId, Action.PlayCardOf(suit), _), room) =>
+                val card = room
                   .seatFor(playerId)
                   .flatMap { player => player.hand.find(_.card.suit == suit).orElse(player.hand.headOption).map(_.card) }
                   .getOrElse(throw IllegalStateException("Player not there or empty hand"))
                 Command.PlayCard(playerId, card)
 
-              case (Event.ActionRequested(playerId, Action.TakeCards, _), table) =>
-                val card = table
+              case (Event.ActionRequested(playerId, Action.TakeCards, _), room) =>
+                val card = room
                   .seatFor(playerId)
                   .flatMap(_.hand.headOption.map(_.card))
                   .getOrElse(throw IllegalStateException("Player not there or empty hand"))
-                val taken = scopa.Game.takeCombinations(table.board.map { case (_, c) => c.card }, card).next().toList
+                val taken = scopa.Game.takeCombinations(room.board.map { case (_, c) => c.card }, card).next().toList
                 Command.TakeCards(playerId, card, taken)
             }
             .through(inputBus.publish)

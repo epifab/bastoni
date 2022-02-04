@@ -110,6 +110,6 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       4,
       GameType.Tressette,
       realSpeed = true,
-      extraMessages = fs2.Stream.awakeEvery[IO](2.seconds).map(_ => LeaveTable)
+      extraMessages = fs2.Stream.awakeEvery[IO](2.seconds).map(_ => LeaveRoom)
     ).asserting(_ shouldBe Event.MatchAborted)
   }

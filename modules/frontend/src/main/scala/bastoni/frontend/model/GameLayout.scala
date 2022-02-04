@@ -1,9 +1,8 @@
 package bastoni.frontend.model
 
-import bastoni.domain.model.{Action, CardInstance, PlayerState, TablePlayerView}
+import bastoni.domain.model.{Action, CardInstance, PlayerState, RoomPlayerView}
 import org.scalajs.dom.window
 
-import javax.swing.text.TableView
 import scala.util.Random
 
 case class GameLayout(
@@ -21,7 +20,7 @@ object GameLayout:
   private val textHeight: Int = 10
   private val seatRadius = 45
 
-  def fromWindow(table: Option[TablePlayerView]): GameLayout = GameLayout(Size(window.innerWidth, window.innerHeight), table)
+  def fromWindow(room: Option[RoomPlayerView]): GameLayout = GameLayout(Size(window.innerWidth, window.innerHeight), room)
 
   def otherSeatLayout(handSize: CardSize, pileSize: CardSize, center: Point, rotation: Angle): SeatLayout =
     SeatLayout(
@@ -34,12 +33,12 @@ object GameLayout:
       rotation = rotation
     )
 
-  def apply(canvasSize: Size, table: Option[TablePlayerView]): GameLayout = {
+  def apply(canvasSize: Size, room: Option[RoomPlayerView]): GameLayout = {
     val pileSize = CardSize.scaleTo(canvasSize.width / 8, canvasSize.height / 8)
     val deckSize = pileSize
     val handSize = CardSize.scaleTo(canvasSize.width / 5, canvasSize.height / 5)
     val boardSize = handSize
-    val mainPlayerHandSize: CardSize = table.flatMap(_.mainPlayer.flatMap { seat =>
+    val mainPlayerHandSize: CardSize = room.flatMap(_.mainPlayer.flatMap { seat =>
       Some(seat.player).collect {
         case actor: PlayerState.ActingPlayer if actor.playing =>
           CardSize.scaleTo(
@@ -67,8 +66,8 @@ object GameLayout:
       player2 = otherSeatLayout(handSize, pileSize, Point(canvasSize.width / 2, textHeight), rotation = Angle.zero),
       player3 = otherSeatLayout(handSize, pileSize, Point(canvasSize.width - textHeight, canvasSize.height / 2), rotation = Angle(-90)),
 
-      table = TableLayout(Point(0, 0), canvasSize),  // topLeftTable, tableSize),
-      renderBoard = (cards: List[(Option[TablePlayer], CardInstance)]) => {
+      table = TableLayout(Point(0, 0), canvasSize),
+      renderBoard = (cards: List[(Option[RoomPlayer], CardInstance)]) => {
 
         val boardCards: List[CardLayout] =
           CardLayout.group(
@@ -87,13 +86,13 @@ object GameLayout:
                 card,
                 boardSize,
                 player match {
-                  case TablePlayer.Player1 =>
+                  case RoomPlayer.Player1 =>
                     Point(canvasSize.width / 2 - boardSize.width - cardsMargin, (canvasSize.height - boardSize.height) / 2)
-                  case TablePlayer.Player2 =>
+                  case RoomPlayer.Player2 =>
                     Point((canvasSize.width - boardSize.width) / 2, canvasSize.height / 2 - boardSize.height - cardsMargin)
-                  case TablePlayer.Player3 =>
+                  case RoomPlayer.Player3 =>
                     Point(canvasSize.width / 2 + cardsMargin, (canvasSize.height - boardSize.height) / 2)
-                  case TablePlayer.MainPlayer =>
+                  case RoomPlayer.MainPlayer =>
                     Point((canvasSize.width - boardSize.width) / 2, canvasSize.height / 2 + cardsMargin)
                 },
                 rotation = Angle.zero,

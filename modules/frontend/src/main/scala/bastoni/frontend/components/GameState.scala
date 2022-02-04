@@ -5,8 +5,7 @@ import bastoni.domain.view.FromPlayer
 import japgolly.scalajs.react.callback.Callback
 
 case class GameState(
-  me: UserId,
-  currentTable: TablePlayerView,
-  previousTable: Option[TablePlayerView],
+  currentRoom: RoomPlayerView,
+  previousRoom: Option[RoomPlayerView],
   sendMessage: FromPlayer => Callback
 )

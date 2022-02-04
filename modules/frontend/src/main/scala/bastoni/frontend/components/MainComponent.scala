@@ -14,6 +14,6 @@ object MainComponent:
       .build
 
   class Backend($: BackendScope[Unit, Unit]):
-    def render(): VdomNode = GameComponent(GameType.Scopa)
+    def render(): VdomNode = GameComponent(GameType.Briscola)
 
   def apply(): VdomNode = component()

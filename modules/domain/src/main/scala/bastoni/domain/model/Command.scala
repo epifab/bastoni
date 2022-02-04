@@ -10,8 +10,8 @@ sealed trait Command
 object Command:
 
   case object Connect extends Command
-  case class  JoinTable(user: User, seed: Int) extends Command
-  case class  LeaveTable(user: User) extends Command
+  case class  JoinRoom(user: User, seed: Int) extends Command
+  case class  LeaveRoom(user: User) extends Command
   case class  StartMatch(playerId: UserId, gameType: GameType) extends Command
   case class  ShuffleDeck(seed: Int) extends Command
   case class  PlayCard(playerId: UserId, card: VisibleCard) extends Command
@@ -20,9 +20,9 @@ object Command:
   case class  Tick(ref: Int) extends Command
 
   given Encoder[Command] = Encoder.instance {
-    case obj: JoinTable     => deriveEncoder[JoinTable].mapJsonObject(_.add("type", "JoinTable".asJson))(obj)
-    case obj: LeaveTable    => deriveEncoder[LeaveTable].mapJsonObject(_.add("type", "LeaveRoom".asJson))(obj)
-    case obj: StartMatch     => deriveEncoder[StartMatch].mapJsonObject(_.add("type", "StartMatch".asJson))(obj)
+    case obj: JoinRoom      => deriveEncoder[JoinRoom].mapJsonObject(_.add("type", "JoinRoom".asJson))(obj)
+    case obj: LeaveRoom     => deriveEncoder[LeaveRoom].mapJsonObject(_.add("type", "LeaveRoom".asJson))(obj)
+    case obj: StartMatch    => deriveEncoder[StartMatch].mapJsonObject(_.add("type", "StartMatch".asJson))(obj)
     case obj: ShuffleDeck   => deriveEncoder[ShuffleDeck].mapJsonObject(_.add("type", "ShuffleDeck".asJson))(obj)
     case obj: PlayCard      => deriveEncoder[PlayCard].mapJsonObject(_.add("type", "PlayCard".asJson))(obj)
     case obj: TakeCards     => deriveEncoder[TakeCards].mapJsonObject(_.add("type", "TakeCards".asJson))(obj)
@@ -32,8 +32,8 @@ object Command:
   }
 
   given Decoder[Command] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
-    case "JoinTable"     => deriveDecoder[JoinTable](obj)
-    case "LeaveTable"    => deriveDecoder[LeaveTable](obj)
+    case "JoinRoom"      => deriveDecoder[JoinRoom](obj)
+    case "LeaveRoom"     => deriveDecoder[LeaveRoom](obj)
     case "StartMatch"    => deriveDecoder[StartMatch](obj)
     case "ShuffleDeck"   => deriveDecoder[ShuffleDeck](obj)
     case "PlayCard"      => deriveDecoder[PlayCard](obj)

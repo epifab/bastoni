@@ -9,17 +9,17 @@ import japgolly.scalajs.react.vdom.VdomNode
 import reactkonva.{KCircle, KGroup, KLayer, KText}
 
 object DeckShufflingLayer:
-  case class Props(table: TablePlayerView, layout: GameLayout, sendMessage: FromPlayer => Callback)
+  case class Props(room: RoomPlayerView, layout: GameLayout, sendMessage: FromPlayer => Callback)
   case class State(mouseOver: Boolean)
 
   private val component = ScalaComponent
     .builder[Props]
     .initialState(State(mouseOver = false))
     .noBackend
-    .renderPS { case (scope, Props(table, layout, sendMessage), State(mouseOver)) =>
+    .renderPS { case (scope, Props(room, layout, sendMessage), State(mouseOver)) =>
       KLayer(
-        table.seats.map(_.playerOption).collectFirst {
-          case Some(PlayerState.ActingPlayer(me, Action.ShuffleDeck, _)) if me.is(table.me) =>
+        room.seats.map(_.playerOption).collectFirst {
+          case Some(PlayerState.ActingPlayer(me, Action.ShuffleDeck, _)) if me.is(room.me) =>
             CardComponent(
               layout = layout.deck.controlLayout,
               previous = None,
@@ -65,5 +65,5 @@ object DeckShufflingLayer:
     }
     .build
 
-  def apply(table: TablePlayerView, layout: GameLayout, sendMessage: FromPlayer => Callback): VdomNode =
-    component(Props(table, layout, sendMessage))
+  def apply(room: RoomPlayerView, layout: GameLayout, sendMessage: FromPlayer => Callback): VdomNode =
+    component(Props(room, layout, sendMessage))

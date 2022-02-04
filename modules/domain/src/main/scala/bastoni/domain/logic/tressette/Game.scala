@@ -32,7 +32,7 @@ object Game extends GameLogic[MatchState]:
 
   val playGameStepPF: PartialFunction[(GameState, StateMachineInput), (GameState, List[StateMachineOutput])] = {
 
-    case (active: Active, PlayerLeftTable(player, _)) if active.activePlayers.exists(_.is(player)) =>
+    case (active: Active, PlayerLeftRoom(player, _)) if active.activePlayers.exists(_.is(player)) =>
       Aborted -> uneventful
 
     case (Ready(players), MatchStarted(_, _)) =>

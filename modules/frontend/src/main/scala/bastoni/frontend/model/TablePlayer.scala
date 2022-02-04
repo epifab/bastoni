@@ -1,4 +1,4 @@
 package bastoni.frontend.model
 
-enum TablePlayer:
+enum RoomPlayer:
   case MainPlayer, Player1, Player2, Player3

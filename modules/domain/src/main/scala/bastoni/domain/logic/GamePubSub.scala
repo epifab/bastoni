@@ -27,7 +27,7 @@ object GamePubSub:
         case event: PublicEvent => ToPlayer.GameEvent(event)
         case CardsDealtServerView(playerId, cards) => ToPlayer.GameEvent(CardsDealtPlayerView(playerId, cards.map(_.toPlayerView(me.id, Some(playerId)))))
         case DeckShuffledServerView(deck) => ToPlayer.GameEvent(DeckShuffledPlayerView(deck.size))
-        case Snapshot(table) => ToPlayer.Snapshot(table.toPlayerView(me))
+        case Snapshot(room) => ToPlayer.Snapshot(room.toPlayerView(me))
       }
 
   def publisher[F[_]](
@@ -54,8 +54,8 @@ object GamePubSub:
   private def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Command =
     eventAndSeed match
       case (FromPlayer.Connect, _)                => Connect
-      case (FromPlayer.JoinTable, seed)           => JoinTable(me, seed)
-      case (FromPlayer.LeaveTable, _)             => LeaveTable(me)
+      case (FromPlayer.JoinRoom, seed)            => JoinRoom(me, seed)
+      case (FromPlayer.LeaveRoom, _)              => LeaveRoom(me)
       case (FromPlayer.StartMatch(gameType), _)   => StartMatch(me.id, gameType)
       case (FromPlayer.ShuffleDeck, seed)         => ShuffleDeck(seed)
       case (FromPlayer.PlayCard(card), _)         => PlayCard(me.id, card)

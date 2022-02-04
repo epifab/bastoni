@@ -19,12 +19,12 @@ object CardsLayerWrapper:
 
   class Backend($: BackendScope[Props, State]):
 
-    private def pilesLayout(table: TablePlayerView, layout: GameLayout): List[CardLayout] = {
+    private def pilesLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] = {
       val data: List[Option[List[CardInstance]]] = List(
-        table.opponent1.map(_.taken.map(_.card)),
-        table.opponent2.map(_.taken.map(_.card)),
-        table.opponent3.map(_.taken.map(_.card)),
-        table.mainPlayer.map(_.taken.map(_.card))
+        room.opponent1.map(_.taken.map(_.card)),
+        room.opponent2.map(_.taken.map(_.card)),
+        room.opponent3.map(_.taken.map(_.card)),
+        room.mainPlayer.map(_.taken.map(_.card))
       )
 
       val renderers: List[CardsRenderer] = List(
@@ -37,22 +37,22 @@ object CardsLayerWrapper:
       data.zip(renderers).flatMap { case (d, f) => d.toList.flatMap(f) }
     }
 
-    private def boardLayout(table: TablePlayerView, layout: GameLayout): List[CardLayout] = {
-      val players: Map[UserId, TablePlayer] =
-        table.mainPlayer.map(_.player.id -> TablePlayer.MainPlayer).toMap ++
-          table.opponent1.map(_.player.id -> TablePlayer.Player1).toMap ++
-          table.opponent2.map(_.player.id -> TablePlayer.Player2).toMap ++
-          table.opponent3.map(_.player.id -> TablePlayer.Player3).toMap
+    private def boardLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] = {
+      val players: Map[UserId, RoomPlayer] =
+        room.mainPlayer.map(_.player.id -> RoomPlayer.MainPlayer).toMap ++
+          room.opponent1.map(_.player.id -> RoomPlayer.Player1).toMap ++
+          room.opponent2.map(_.player.id -> RoomPlayer.Player2).toMap ++
+          room.opponent3.map(_.player.id -> RoomPlayer.Player3).toMap
 
-      layout.renderBoard(table.board.map { case (user, card) => user.flatMap(players.get) -> card.card })
+      layout.renderBoard(room.board.map { case (user, card) => user.flatMap(players.get) -> card.card })
     }
 
-    private def handsLayout(table: TablePlayerView, layout: GameLayout): List[CardLayout] = {
+    private def handsLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] = {
       val data: List[Option[List[CardInstance]]] = List(
-        table.opponent1.map(_.hand.map(_.card)),
-        table.opponent2.map(_.hand.map(_.card)),
-        table.opponent3.map(_.hand.map(_.card)),
-        table.mainPlayer.map(_.hand.map(_.card))
+        room.opponent1.map(_.hand.map(_.card)),
+        room.opponent2.map(_.hand.map(_.card)),
+        room.opponent3.map(_.hand.map(_.card)),
+        room.mainPlayer.map(_.hand.map(_.card))
       )
 
       val renderers: List[CardsRenderer] = List(
@@ -66,7 +66,7 @@ object CardsLayerWrapper:
     }
 
     private def selectable(game: GameState, state: State): Map[CardId, Callback] = {
-      game.currentTable.mainPlayer.fold(Map.empty)(seat => seat.player match {
+      game.currentRoom.mainPlayer.fold(Map.empty)(seat => seat.player match {
         case PlayerState.ActingPlayer(_, Action.PlayCard, timeout) if !timeout.contains(Timeout.TimedOut) =>
           seat
             .hand.flatMap(_.card.toOption)
@@ -86,7 +86,7 @@ object CardsLayerWrapper:
             case None =>
               seat.hand.flatMap(_.card.toOption).map { cardInHand =>
                 val takeCombinations: Set[Set[VisibleCard]] = scopa.Game.takeCombinations(
-                  game.currentTable.board.flatMap(_._2.card.toOption),
+                  game.currentRoom.board.flatMap(_._2.card.toOption),
                   cardInHand
                 ).toSet
 
@@ -97,7 +97,7 @@ object CardsLayerWrapper:
               }.toMap
 
             case Some(TakingCardsState(played, selected, options)) =>
-              Map(played.ref -> $.modState(_.copy(takingCards = None))) ++ game.currentTable.board.flatMap {
+              Map(played.ref -> $.modState(_.copy(takingCards = None))) ++ game.currentRoom.board.flatMap {
                 case (_, CardPlayerView(card: VisibleCard)) if !selected.contains(card) =>
                   val selectedComb: Set[VisibleCard] = (card :: selected).toSet
                   val matchingCombs: Set[Set[VisibleCard]] = options.filter(_.intersect(selectedComb) == selectedComb)
@@ -126,24 +126,24 @@ object CardsLayerWrapper:
     def render(props: Props, state: State): VdomNode = {
       val Props(game, currentLayout, previousLayout) = props
 
-      def cardsFor(table: TablePlayerView, layout: GameLayout): List[CardLayout] = {
-        layout.deck.renderCards(table.deck.map(_.card)) ++
-          pilesLayout(table, layout) ++
-          boardLayout(table, layout) ++
-          handsLayout(table, layout)
+      def cardsFor(room: RoomPlayerView, layout: GameLayout): List[CardLayout] = {
+        layout.deck.renderCards(room.deck.map(_.card)) ++
+          pilesLayout(room, layout) ++
+          boardLayout(room, layout) ++
+          handsLayout(room, layout)
       }
 
-      val cards = cardsFor(game.currentTable, currentLayout)
+      val cards = cardsFor(game.currentRoom, currentLayout)
 
       val deckOrigin =
-        game.currentTable.deck
+        game.currentRoom.deck
           .map(cardLayout => cardLayout.card.ref -> previousLayout.deck.controlLayout.copy(card = HiddenCard(cardLayout.card.ref)))
           .toMap
 
       val previousCards: Map[CardId, CardLayout] =
-        game.previousTable.flatMap { previousTable =>
+        game.previousRoom.flatMap { previousRoom =>
           val allCards: List[(CardId, CardLayout)] =
-            cardsFor(previousTable, previousLayout)
+            cardsFor(previousRoom, previousLayout)
               .map(layout => layout.card.ref -> layout)
 
           Option.when(allCards.nonEmpty)(allCards.toMap)

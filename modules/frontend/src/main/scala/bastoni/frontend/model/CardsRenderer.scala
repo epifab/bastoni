@@ -4,7 +4,7 @@ import bastoni.domain.model.{CardInstance, HiddenCard, VisibleCard}
 
 type CardsRenderer = List[CardInstance] => List[CardLayout]
 
-type BoardRenderer = List[(Option[TablePlayer], CardInstance)] => List[CardLayout]
+type BoardRenderer = List[(Option[RoomPlayer], CardInstance)] => List[CardLayout]
 
 object CardsRenderer:
   def collapseFaceDownCards(cx: List[CardInstance], collapsed: List[HiddenCard]): List[VisibleCard | List[HiddenCard]] =

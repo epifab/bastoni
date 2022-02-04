@@ -7,7 +7,7 @@ import reactkonva.{KCircle, KGroup, KLayer, KText}
 
 object DeckCountLayer:
   private val component = ScalaFn[(GameState, DeckLayout)] { case (gameState, layout) =>
-    Some(gameState).filter(_.currentTable.deck.nonEmpty).fold(KLayer()) { game =>
+    Some(gameState).filter(_.currentRoom.deck.nonEmpty).fold(KLayer()) { game =>
       KLayer(
         KGroup(
           KCircle(
@@ -24,7 +24,7 @@ object DeckCountLayer:
             { p =>
               p.x = layout.topLeft.x - layout.radius
               p.y = layout.topLeft.y - layout.radius
-              p.text = game.currentTable.deck.size.toString
+              p.text = game.currentRoom.deck.size.toString
               p.height = layout.radius * 2
               p.width = layout.radius * 2
               p.fontFamily = "'Open Sans', sans-serif"

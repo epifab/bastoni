@@ -1,15 +1,15 @@
 package bastoni.domain.model
 
-case class TablePlayerView(
+case class RoomPlayerView(
   me: UserId,
   override val seats: List[Seat[CardPlayerView]],
   override val deck: List[CardPlayerView],
   override val board: List[(Option[UserId], CardPlayerView)],
   override val matchInfo: Option[MatchInfo],
   override val dealerIndex: Option[Int]
-) extends Table[CardPlayerView]:
+) extends Room[CardPlayerView]:
 
-  override type TableView = TablePlayerView
+  override type RoomView = RoomPlayerView
 
   override protected def updateWith(
     seats: List[Seat[CardPlayerView]] = this.seats,
@@ -17,7 +17,7 @@ case class TablePlayerView(
     board: List[(Option[UserId], CardPlayerView)] = this.board,
     matchInfo: Option[MatchInfo] = this.matchInfo,
     dealerIndex: Option[Int] = this.dealerIndex
-  ): TablePlayerView = TablePlayerView(me, seats, deck, board, matchInfo, dealerIndex)
+  ): RoomPlayerView = RoomPlayerView(me, seats, deck, board, matchInfo, dealerIndex)
 
   override protected def buildCard(card: VisibleCard, direction: Direction): CardPlayerView = CardPlayerView(direction match {
     case Direction.Up => card
@@ -26,7 +26,7 @@ case class TablePlayerView(
 
   override protected def faceDown(card: CardPlayerView): CardPlayerView = card.copy(card = card.card.hidden)
 
-  def update(event: PlayerEvent): TablePlayerView = event match {
+  def update(event: PlayerEvent): RoomPlayerView = event match {
     case Event.DeckShuffledPlayerView(numberOfCards) =>
       deckShuffledUpdate(
         (0 until numberOfCards)

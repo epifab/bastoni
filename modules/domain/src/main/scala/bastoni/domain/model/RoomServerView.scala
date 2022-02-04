@@ -4,18 +4,18 @@ import bastoni.domain.model.PlayerState.*
 
 import scala.util.Random
 
-enum TableError:
-  case FullTable, PlayerNotFound, DuplicatePlayer
+enum RoomError:
+  case FullRoom, PlayerNotFound, DuplicatePlayer
 
-case class TableServerView(
+case class RoomServerView(
   override val seats: List[Seat[CardServerView]],
   override val deck: List[CardServerView],
   override val board: List[(Option[UserId], CardServerView)],
   override val matchInfo: Option[MatchInfo],
   override val dealerIndex: Option[Int]
-) extends Table[CardServerView]:
+) extends Room[CardServerView]:
 
-  override type TableView = TableServerView
+  override type RoomView = RoomServerView
 
   override protected def updateWith(
     seats: List[Seat[CardServerView]] = this.seats,
@@ -23,23 +23,23 @@ case class TableServerView(
     board: List[(Option[UserId], CardServerView)] = this.board,
     matchInfo: Option[MatchInfo] = this.matchInfo,
     dealerIndex: Option[Int] = this.dealerIndex
-  ): TableServerView = TableServerView(seats, deck, board, matchInfo, dealerIndex)
+  ): RoomServerView = RoomServerView(seats, deck, board, matchInfo, dealerIndex)
 
   override protected def buildCard(card: VisibleCard, direction: Direction): CardServerView = CardServerView(card, direction)
   override protected def faceDown(card: CardServerView): CardServerView = card.copy(facing = Direction.Down)
 
-  def update(event: ServerEvent): TableServerView = event match {
+  def update(event: ServerEvent): RoomServerView = event match {
     case Event.DeckShuffledServerView(cards) => deckShuffledUpdate(cards.map(card => CardServerView(card, Direction.Down)))
 
     case event: Event.CardsDealtServerView => cardsDealtUpdate(event)
 
-    case Event.Snapshot(table) => table
+    case Event.Snapshot(room) => room
 
     case event: PublicEvent => publicEventUpdate(event)
   }
 
-  def toPlayerView(me: User): TablePlayerView =
-    TablePlayerView(
+  def toPlayerView(me: User): RoomPlayerView =
+    RoomPlayerView(
       me.id,
       seats = seats.map { seat =>
         val hand = seat.hand.map(_.toPlayerView(me.id, seat.playerOption.map(_.id)))
@@ -62,12 +62,12 @@ case class TableServerView(
   def contains(player: User): Boolean = contains(player.id)
   def contains(player: UserId): Boolean = seatFor(player).isDefined
 
-  def join(player: User, seed: Int): Either[TableError, (TableServerView, Int)] =
-    if (contains(player)) Left(TableError.DuplicatePlayer) else {
+  def join(player: User, seed: Int): Either[RoomError, (RoomServerView, Int)] =
+    if (contains(player)) Left(RoomError.DuplicatePlayer) else {
       new Random(seed)
         .shuffle(seats)
         .collectFirst { case seat if seat.playerOption.isEmpty => seat.index }
-        .fold[Either[TableError, (TableServerView, Int)]](Left(TableError.FullTable)) { targetIndex =>
+        .fold[Either[RoomError, (RoomServerView, Int)]](Left(RoomError.FullRoom)) { targetIndex =>
           Right(updateWith(
             seats = seats.map {
               case oldSeat if oldSeat.index == targetIndex => oldSeat.occupiedBy(SittingOut(player))
@@ -78,7 +78,7 @@ case class TableServerView(
         }
     }
 
-  def leave(player: User): Either[TableError, (TableServerView, Int)] =
+  def leave(player: User): Either[RoomError, (RoomServerView, Int)] =
     seatFor(player) match
       case Some(seat) =>
         Right(copy(
@@ -89,4 +89,4 @@ case class TableServerView(
           dealerIndex = if (dealerIndex.contains(seat.index)) None else dealerIndex
         ) -> seat.index)
 
-      case None => Left(TableError.PlayerNotFound)
+      case None => Left(RoomError.PlayerNotFound)

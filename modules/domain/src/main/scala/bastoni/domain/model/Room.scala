@@ -7,36 +7,9 @@ import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
 import scala.util.Random
 
-sealed trait Seat[C <: CardView]:
-  def index: Int
-  def hand: List[C]
-  def taken: List[C]
-  def playerOption: Option[PlayerState]
-  def occupiedBy(player: PlayerState): TakenSeat[C] = TakenSeat(index, player, hand, taken)
-  def vacant: EmptySeat[C] = EmptySeat(index, hand, taken)
 
-case class EmptySeat[C <: CardView](index: Int, hand: List[C], taken: List[C]) extends Seat[C]:
-  override val playerOption: Option[PlayerState] = None
-
-case class TakenSeat[C <: CardView](index: Int, player: PlayerState, hand: List[C], taken: List[C]) extends Seat[C]:
-  override val playerOption: Option[PlayerState] = Some(player)
-
-object Seat:
-  given[C <: CardView: Decoder]: Decoder[Seat[C]] = Decoder.instance { cursor =>
-    for {
-      emptySeat <- deriveDecoder[EmptySeat[C]].tryDecode(cursor)
-      player <- cursor.downField("player").as[Option[PlayerState]]
-    } yield player.fold(emptySeat)(emptySeat.occupiedBy)
-  }
-
-  given[C <: CardView: Encoder]: Encoder[Seat[C]] = Encoder.instance {
-    case seat: TakenSeat[C] => deriveEncoder[TakenSeat[C]](seat)
-    case seat: EmptySeat[C] => deriveEncoder[EmptySeat[C]](seat)
-  }
-
-
-trait Table[C <: CardView]:
-  type TableView
+trait Room[C <: CardView]:
+  type RoomView
 
   val seats: List[Seat[C]]
   val deck: List[C]
@@ -56,7 +29,6 @@ trait Table[C <: CardView]:
     seats.collectFirst { case seat: TakenSeat[C] if seat.player.is(userId) => seat }
 
   def seatFor(user: User): Option[TakenSeat[C]] = seatFor(user.id)
-
 
   val round: List[TakenSeat[C]] =
     dealerIndex.fold(Nil)(dealer => seats.slideUntil(_.index == dealer)
@@ -87,11 +59,11 @@ trait Table[C <: CardView]:
     board: List[(Option[UserId], C)] = this.board,
     matchInfo: Option[MatchInfo] = matchInfo,
     dealerIndex: Option[Int] = dealerIndex
-  ): TableView
+  ): RoomView
 
-  protected def publicEventUpdate(message: PublicEvent): TableView =
+  protected def publicEventUpdate(message: PublicEvent): RoomView =
     message match
-      case Event.PlayerJoinedTable(player, targetIndex) =>
+      case Event.PlayerJoinedRoom(player, targetIndex) =>
         updateWith(
           seats = seats.map {
             case seat if seat.index == targetIndex => seat.occupiedBy(SittingOut(player))
@@ -100,7 +72,7 @@ trait Table[C <: CardView]:
           dealerIndex = dealerIndex.orElse(Some(targetIndex))
         )
 
-      case Event.PlayerLeftTable(player, targetIndex) =>
+      case Event.PlayerLeftRoom(player, targetIndex) =>
         updateWith(
           seats = seats.map {
             case seat if seat.index == targetIndex => seat.vacant
@@ -251,7 +223,7 @@ trait Table[C <: CardView]:
           }
         )
 
-  protected def cardsDealtUpdate(event: Event.CardsDealt[C]): TableView =
+  protected def cardsDealtUpdate(event: Event.CardsDealt[C]): RoomView =
     updateWith(
       seats = mapTakenSeats {
         case player if player.is(event.playerId) =>
@@ -260,7 +232,7 @@ trait Table[C <: CardView]:
       deck = deck.drop(event.cards.size)
     )
 
-  protected def deckShuffledUpdate(newDeck: List[C]): TableView =
+  protected def deckShuffledUpdate(newDeck: List[C]): RoomView =
     updateWith(
       seats = mapTakenSeats {
         case acting@ ActingPlayer(targetPlayer, Action.ShuffleDeck, _) =>
@@ -270,6 +242,6 @@ trait Table[C <: CardView]:
     )
 
 
-object Table:
-  given serverTableViewCodec: Codec[TableServerView] = deriveCodec
-  given playerTableViewCodec: Codec[TablePlayerView] = deriveCodec
+object Room:
+  given serverRoomViewCodec: Codec[RoomServerView] = deriveCodec
+  given playerRoomViewCodec: Codec[RoomPlayerView] = deriveCodec

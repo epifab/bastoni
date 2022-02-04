@@ -1,7 +1,6 @@
 package bastoni.frontend
 
 import bastoni.domain.model.GameType
-import bastoni.frontend.components.{CardComponent, GameComponent, TableLayer}
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import org.scalajs.dom.html.Image

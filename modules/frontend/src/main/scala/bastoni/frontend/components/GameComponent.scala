@@ -31,7 +31,7 @@ extension(callback: Callback)
 
 object GameComponent:
   case class State(gameState: Option[GameState], currentLayout: GameLayout, previousLayout: GameLayout):
-    def refreshLayout: State = copy(currentLayout = GameLayout.fromWindow(gameState.map(_.currentTable)), previousLayout = currentLayout)
+    def refreshLayout: State = copy(currentLayout = GameLayout.fromWindow(gameState.map(_.currentRoom)), previousLayout = currentLayout)
     def update(nextGameState: GameState): State = copy(gameState = Some(nextGameState)).refreshLayout
 
   object State:
@@ -60,13 +60,13 @@ object GameComponent:
           TableLayer(state.currentLayout.table),
           CardsLayerWrapper(gameState, state.currentLayout, state.previousLayout),
           DeckCountLayer(gameState, state.currentLayout.deck),
-          DeckShufflingLayer(gameState.currentTable, state.currentLayout, gameState.sendMessage),
+          DeckShufflingLayer(gameState.currentRoom, state.currentLayout, gameState.sendMessage),
           KLayer(
             List(
-              gameState.currentTable.mainPlayer.map(seat => PlayerComponent(seat.player, state.currentLayout.mainPlayer, gameState.currentTable.dealerIndex.contains(seat.index))),
-              gameState.currentTable.opponent1.map(seat => PlayerComponent(seat.player, state.currentLayout.player1, gameState.currentTable.dealerIndex.contains(seat.index))),
-              gameState.currentTable.opponent2.map(seat => PlayerComponent(seat.player, state.currentLayout.player2, gameState.currentTable.dealerIndex.contains(seat.index))),
-              gameState.currentTable.opponent3.map(seat => PlayerComponent(seat.player, state.currentLayout.player3, gameState.currentTable.dealerIndex.contains(seat.index))),
+              gameState.currentRoom.mainPlayer.map(seat => PlayerComponent(seat.player, state.currentLayout.mainPlayer, gameState.currentRoom.dealerIndex.contains(seat.index))),
+              gameState.currentRoom.opponent1.map(seat => PlayerComponent(seat.player, state.currentLayout.player1, gameState.currentRoom.dealerIndex.contains(seat.index))),
+              gameState.currentRoom.opponent2.map(seat => PlayerComponent(seat.player, state.currentLayout.player2, gameState.currentRoom.dealerIndex.contains(seat.index))),
+              gameState.currentRoom.opponent3.map(seat => PlayerComponent(seat.player, state.currentLayout.player3, gameState.currentRoom.dealerIndex.contains(seat.index))),
             ).flatten: _*
           )
         )
@@ -90,15 +90,14 @@ object GameComponent:
       p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub, pause = 1.second)
       p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub, pause = 1.second)
 
-      tables <- sub.subscribe(me, roomId)
-        .scan[Option[TablePlayerView]](None) {
-          case (_, ToPlayer.Snapshot(table)) => Some(table)
+      rooms <- sub.subscribe(me, roomId)
+        .scan[Option[RoomPlayerView]](None) {
+          case (_, ToPlayer.Snapshot(room)) => Some(room)
           case (props, ToPlayer.GameEvent(event)) => props.map(_.update(event))
         }
         .zipWithPrevious
         .collect { case (prev, Some(current)) if !prev.flatten.contains(current) =>
           GameState(
-            me.id,
             current,
             prev.flatten,
             msg => pub.publish(me, roomId)(fs2.Stream(msg)).compile.drain.toCallback
@@ -108,7 +107,7 @@ object GameComponent:
         .concurrently(runner)
         .concurrently(p1).concurrently(p2).concurrently(p3)
         .concurrently(pub.publish(me, roomId)(
-          fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinTable).delayBy(1.second) ++
+          fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinRoom).delayBy(1.second) ++
             fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartMatch(gameType))
         ))
-    } yield tables).compile.drain
+    } yield rooms).compile.drain
