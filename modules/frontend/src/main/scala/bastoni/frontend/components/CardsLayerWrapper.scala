@@ -44,7 +44,7 @@ object CardsLayerWrapper:
           room.opponent2.map(_.player.id -> RoomPlayer.Player2).toMap ++
           room.opponent3.map(_.player.id -> RoomPlayer.Player3).toMap
 
-      layout.renderBoard(room.board.map { case (user, card) => user.flatMap(players.get) -> card.card })
+      layout.renderBoard(room.board.reverse.map { case (user, card) => user.flatMap(players.get) -> card.card })
     }
 
     private def handsLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] = {
