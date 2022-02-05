@@ -76,7 +76,7 @@ object Fixtures:
   ).toDeck
 
   def cardOf(rank: Rank, suit: Suit): VisibleCard =
-    shuffledDeck.cards
+    shuffledDeck.asList
       .find(c => c.rank == rank && c.suit == suit)
       .getOrElse(throw new IllegalStateException("Card not found"))
 

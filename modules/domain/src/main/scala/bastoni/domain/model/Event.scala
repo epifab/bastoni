@@ -9,7 +9,7 @@ sealed trait Event
 
 sealed trait ServerEvent extends Event
 sealed trait PlayerEvent extends Event
-sealed trait PublicEvent extends ServerEvent with PlayerEvent
+sealed trait PublicEvent extends ServerEvent, PlayerEvent
 
 
 object Event:
@@ -45,12 +45,11 @@ object Event:
       CardsDealtPlayerView(playerId, cards.map(CardPlayerView(_)))
 
   sealed trait DeckShuffled
-  case class DeckShuffledServerView(cards: List[VisibleCard]) extends DeckShuffled with ServerEvent
+  case class DeckShuffledServerView(deck: Deck) extends DeckShuffled with ServerEvent
   case class DeckShuffledPlayerView(numberOfCards: Int) extends DeckShuffled with PlayerEvent
 
   object DeckShuffled:
-    def apply(deck: Deck): DeckShuffledServerView = DeckShuffledServerView(deck.cards)
-    def apply(cards: List[VisibleCard]): DeckShuffledServerView = DeckShuffledServerView(cards)
+    def apply(deck: Deck): DeckShuffledServerView = DeckShuffledServerView(deck)
     def apply(numberOfCards: Int): DeckShuffledPlayerView = DeckShuffledPlayerView(numberOfCards)
 
   case class Snapshot(room: RoomServerView) extends ServerEvent

@@ -666,7 +666,7 @@
   ],
   "output" : [
     {
-      "cards" : [
+      "deck" : [
         {
           "rank" : "Due",
           "suit" : "Bastoni",

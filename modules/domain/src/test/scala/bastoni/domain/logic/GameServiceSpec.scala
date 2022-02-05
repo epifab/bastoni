@@ -223,7 +223,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   taken = Nil
                 )
               ),
-              deck = shuffledDeck.cards.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
+              deck = shuffledDeck.asList.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
               board = Nil,
               matchInfo = Some(MatchInfo(
                 GameType.Briscola,
@@ -261,7 +261,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   taken = Nil
                 )
               ),
-              deck = shuffledDeck.cards.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
+              deck = shuffledDeck.asList.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
               board = List(Some(user1.id) -> CardServerView(cardOf(Due, Bastoni), Direction.Up)),
               matchInfo = Some(MatchInfo(
                 GameType.Briscola,
@@ -326,7 +326,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
     val player1Card = cardOf(Rank.Tre, Suit.Denari)
     val player2Card = cardOf(Rank.Asso, Suit.Denari)
 
-    val player1Collected = shuffledDeck.cards.filter(card => card != player1Card && card != player2Card)
+    val player1Collected = shuffledDeck.asList.filter(card => card != player1Card && card != player2Card)
 
     val initialContext = new GameContext(
       room = RoomServerView(
