@@ -61,6 +61,26 @@ trait Room[C <: CardView]:
     dealerIndex: Option[Int] = dealerIndex
   ): RoomView
 
+  def withRequest(command: Command.Act): RoomView = command.action match {
+    case Action.ShuffleDeck =>
+      updateWith(
+        seats = mapTakenSeats {
+          case player: SittingIn if player.is(command.playerId) => _.copy(player = player.act(Action.ShuffleDeck, command.timeout))
+          case player: SittingIn => _.copy(player = WaitingPlayer(player.player))
+        },
+        matchInfo = matchInfo.map(_.copy(gameScore = None)),
+        dealerIndex = seats.collectFirst { case seat if seat.playerOption.exists(_.is(command.playerId)) => seat.index }
+      )
+
+    case action =>
+      updateWith(
+        seats = mapTakenSeats {
+          case player: SittingIn if player.is(command.playerId) =>
+            _.copy(player = player.act(action, command.timeout))
+        }
+      )
+  }
+
   protected def publicEventUpdate(message: PublicEvent): RoomView =
     message match
       case Event.PlayerJoinedRoom(player, targetIndex) =>
@@ -195,24 +215,6 @@ trait Room[C <: CardView]:
         updateWith(
           dealerIndex = nextDealer.map(_.index),
           matchInfo = None
-        )
-
-      case Event.ActionRequested(playerId, Action.ShuffleDeck, timeout) =>
-        updateWith(
-          seats = mapTakenSeats {
-            case player: SittingIn if player.is(playerId) => _.copy(player = player.act(Action.ShuffleDeck, timeout))
-            case player: SittingIn => _.copy(player = WaitingPlayer(player.player))
-          },
-          matchInfo = matchInfo.map(_.copy(gameScore = None)),
-          dealerIndex = seats.collectFirst { case seat if seat.playerOption.exists(_.is(playerId)) => seat.index }
-        )
-
-      case Event.ActionRequested(playerId, action, timeout) =>
-        updateWith(
-          seats = mapTakenSeats {
-            case player: SittingIn if player.is(playerId) =>
-              _.copy(player = player.act(action, timeout))
-          }
         )
 
       case Event.TimedOut(playerId, _) =>

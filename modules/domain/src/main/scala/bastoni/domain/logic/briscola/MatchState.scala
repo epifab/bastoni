@@ -1,7 +1,7 @@
 package bastoni.domain.logic.briscola
 
-import bastoni.domain.logic.ActiveMatch
-import bastoni.domain.model.{MatchPlayer, ServerEvent, User}
+import bastoni.domain.logic.{ActiveMatch, StateMachineOutput}
+import bastoni.domain.model.{Command, MatchPlayer, ServerEvent, User}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
@@ -14,8 +14,10 @@ object MatchState:
     InProgress(matchPlayers, GameState.Ready(matchPlayers), 2)
 
   case class  InProgress(players: List[MatchPlayer], game: GameState, remainingGames: Int) extends MatchState with ActiveMatch
-  case class  GameOver(event: ServerEvent, next: MatchState) extends MatchState
+  case class  GameOver(output: StateMachineOutput, next: MatchState) extends MatchState
   case object Terminated extends MatchState
+
+  import StateMachineOutput.{encoder, decoder}
 
   given Encoder[MatchState] = Encoder.instance {
     case s: InProgress => deriveEncoder[InProgress].mapJsonObject(_.add("stage", "InProgress".asJson))(s)

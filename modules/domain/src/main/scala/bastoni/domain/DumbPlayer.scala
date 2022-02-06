@@ -18,10 +18,11 @@ object DumbPlayer:
         .subscribe(me, roomId)
         .zipWithScan1(Option.empty[RoomPlayerView]) {
           case (_, ToPlayer.Snapshot(room)) => Some(room)
+          case (room, ToPlayer.Request(request)) => room.map(_.withRequest(request))
           case (room, ToPlayer.GameEvent(event)) => room.map(_.update(event))
         }
         .collect {
-          case (ToPlayer.GameEvent(Event.ActionRequested(playerId, _, _)), Some(room)) if me.is(playerId) =>
+          case (ToPlayer.Request(Command.Act(playerId, _, _)), Some(room)) if me.is(playerId) =>
             room -> room.seatFor(me).getOrElse(throw new IllegalStateException("I am not sat at this table"))
         }
         .collect {

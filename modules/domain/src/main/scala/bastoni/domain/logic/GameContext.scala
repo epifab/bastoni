@@ -37,8 +37,11 @@ case class GameContext(room: RoomServerView, stateMachine: Option[GameStateMachi
 
     // Play all game events to the room
     val latestRoom = gameMessages
-      .collect { case event: ServerEvent => event }
-      .foldLeft(updatedRoom)(_ update _)
+      .collect { case event: (ServerEvent | Command.Act) => event }
+      .foldLeft(updatedRoom) {
+        case (room, event: ServerEvent) => room.update(event)
+        case (room, command: Command.Act) => room.withRequest(command)
+      }
 
     val allEvents = roomEvents ++ gameMessages
 

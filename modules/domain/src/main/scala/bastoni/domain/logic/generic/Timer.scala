@@ -1,4 +1,5 @@
-package bastoni.domain.logic.generic
+package bastoni.domain.logic
+package generic
 
 import bastoni.domain.logic.briscola.GameState
 import bastoni.domain.logic.briscola.GameState.{Aborted, PlayRound, WaitingForPlayer}
@@ -9,13 +10,13 @@ import io.circe.generic.semiauto.deriveEncoder
 trait Timer[State, Self <: Timer[State, Self]]:
   this: State =>
     def timeout: Timeout.Active
-    def request: Event.ActionRequested
+    def request: Command.Act
     def ref: Int
 
     def timedOut: State
-    def update(timeout: Timeout.Active, request: Event.ActionRequested): Self & State
+    def update(timeout: Timeout.Active, request: Command.Act): Self & State
 
-    def ticked(tick: Command.Tick): (State, List[ServerEvent | Delayed[Command]]) =
+    def ticked(tick: Command.Tick): (State, List[StateMachineOutput]) =
       if (tick.ref != ref) (this -> Nil)
       else {
         timeout.next match

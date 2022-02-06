@@ -22,8 +22,9 @@ object GamePubSub:
   def subscriber[F[_]](messageBus: MessageBus[F]): GameSubscriber[F] =
     (me: User, roomId: RoomId) => messageBus
       .subscribe
-      .collect { case Message(_, `roomId`, event: Event) => event }
+      .collect { case Message(_, `roomId`, event: (Event | Command)) => event }
       .collect {
+        case command: Command.Act => ToPlayer.Request(command)
         case event: PublicEvent => ToPlayer.GameEvent(event)
         case CardsDealtServerView(playerId, cards) => ToPlayer.GameEvent(CardsDealtPlayerView(playerId, cards.map(_.toPlayerView(me.id, Some(playerId)))))
         case DeckShuffledServerView(deck) => ToPlayer.GameEvent(DeckShuffledPlayerView(deck.size))

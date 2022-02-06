@@ -93,6 +93,7 @@ object GameComponent:
       rooms <- sub.subscribe(me, roomId)
         .scan[Option[RoomPlayerView]](None) {
           case (_, ToPlayer.Snapshot(room)) => Some(room)
+          case (props, ToPlayer.Request(command)) => props.map(_.withRequest(command))
           case (props, ToPlayer.GameEvent(event)) => props.map(_.update(event))
         }
         .zipWithPrevious

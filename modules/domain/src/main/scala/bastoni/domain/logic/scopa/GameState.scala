@@ -2,7 +2,7 @@ package bastoni.domain.logic
 package scopa
 
 import bastoni.domain.model.*
-import bastoni.domain.model.Event.{ActionRequested, GameAborted, TimedOut}
+import bastoni.domain.model.Event.{GameAborted, TimedOut}
 import bastoni.domain.logic.generic.Timer
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
@@ -22,9 +22,9 @@ object GameState:
   case class   WillTakeCards(state: PlayRound, command: Command.TakeCards) extends Active(state.activePlayers)
   case class   WillComplete(players: List[Player]) extends Active(players.map(_.matchPlayer))
 
-  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: ActionRequested, state: PlayRound) extends Active(state.activePlayers) with Timer[GameState, WaitingForPlayer]:
+  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[GameState, WaitingForPlayer]:
     override val timedOut: GameState = GameState.Aborted
-    override def update(timeout: Timeout.Active, request: ActionRequested): WaitingForPlayer = copy(timeout = timeout, request = request)
+    override def update(timeout: Timeout.Active, request: Command.Act): WaitingForPlayer = copy(timeout = timeout, request = request)
 
   sealed trait Terminated extends GameState
   case class   Completed(players: List[MatchPlayer]) extends Terminated

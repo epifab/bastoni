@@ -63,7 +63,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
           .concurrently(gameServiceRunner)
           .concurrently(playStreams)
           .concurrently(activateStream)
-          // .evalTap(message => IO(println(message.data.getClass.getSimpleName)))
+          .evalTap(message => IO(println(message.data.getClass.getSimpleName)))
           .collect[Event] {
             case Message(_, `roomId`, e: Event.MatchCompleted) => e
             case Message(_, `roomId`, Event.MatchAborted) => Event.MatchAborted

@@ -20,7 +20,7 @@ object Game extends GameLogic[MatchState]:
   override def isFinal(state: MatchState): Boolean = state == Terminated
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
-    val request = ActionRequested(player, action, Some(Timeout.Max))
+    val request = Act(player, action, Some(Timeout.Max))
     val newState = WaitingForPlayer(Timer.ref[GameState](state), Timeout.Max, request, state)
     newState -> (before ++ List(request, newState.nextTick))
 
@@ -35,7 +35,7 @@ object Game extends GameLogic[MatchState]:
       Aborted -> uneventful
 
     case (Ready(players), MatchStarted(_, _)) =>
-      Ready(players) -> List(ActionRequested(players.last.id, Action.ShuffleDeck, timeout = None))
+      Ready(players) -> List(Act(players.last.id, Action.ShuffleDeck, timeout = None))
 
     case (Ready(players), ShuffleDeck(seed)) =>
       val shuffledDeck: Deck = Deck.shuffled(seed)
@@ -143,7 +143,7 @@ object Game extends GameLogic[MatchState]:
           def newGame(updatedPlayers: List[MatchPlayer], rounds: Int) =
             val shiftedRound = updatedPlayers.slideUntil(_.is(matchPlayers.tail.head))
             GameOver(
-              ActionRequested(shiftedRound.last.id, Action.ShuffleDeck, timeout = None),
+              Act(shiftedRound.last.id, Action.ShuffleDeck, timeout = None),
               InProgress(shiftedRound, Ready(shiftedRound), rounds)
             ) -> (events :+ Continue.afterGameOver)
 

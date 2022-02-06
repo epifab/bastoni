@@ -1,8 +1,7 @@
 package bastoni.domain.logic.briscola
 
-import bastoni.domain.model.*
-import bastoni.domain.model.Event.{ActionRequested, GameAborted, TimedOut}
 import bastoni.domain.logic.generic.Timer
+import bastoni.domain.model.*
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
@@ -20,9 +19,9 @@ object GameState:
   case class   WillCompleteTrick(players: List[(Player, VisibleCard)], deck: Deck, trump: VisibleCard) extends Active(players.map(_._1.matchPlayer))
   case class   WillComplete(players: List[Player], trump: VisibleCard) extends Active(players.map(_.matchPlayer))
 
-  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: ActionRequested, state: PlayRound) extends Active(state.activePlayers) with Timer[GameState, WaitingForPlayer]:
+  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[GameState, WaitingForPlayer]:
     override val timedOut: GameState = GameState.Aborted
-    override def update(timeout: Timeout.Active, request: ActionRequested): WaitingForPlayer = copy(timeout = timeout, request = request)
+    override def update(timeout: Timeout.Active, request: Command.Act): WaitingForPlayer = copy(timeout = timeout, request = request)
 
   sealed trait Terminated extends GameState
   case class   Completed(players: List[MatchPlayer]) extends Terminated

@@ -21,27 +21,8 @@ case class RegressionSpecContent(
 )
 
 object RegressionSpecContent:
-  given inputEncoder: Encoder[StateMachineInput] = Encoder.instance {
-    case e: ServerEvent => Encoder[ServerEvent].mapJson(_.mapObject(_.add("supertype", "Event".asJson)))(e)
-    case c: Command => Encoder[Command].mapJson(_.mapObject(_.add("supertype", "Command".asJson)))(c)
-  }
-
-  given inputDecoder: Decoder[StateMachineInput] = Decoder.instance(obj => obj.downField("supertype").as[String].flatMap {
-    case "Event" => Decoder[ServerEvent].tryDecode(obj)
-    case "Command" => Decoder[Command].tryDecode(obj)
-  })
-
-  given outputEncoder: Encoder[StateMachineOutput] = Encoder.instance {
-    case e: ServerEvent => Encoder[ServerEvent].mapJson(_.mapObject(_.add("supertype", "Event".asJson)))(e)
-    case c: Command => PotentiallyDelayed.commandEncoder.mapJson(_.mapObject(_.add("supertype", "Command".asJson)))(c)
-    case Delayed(c: Command, d) => PotentiallyDelayed.commandEncoder.mapJson(_.mapObject(_.add("supertype", "Command".asJson)))(Delayed(c, d))
-  }
-
-  given outputDecoder: Decoder[StateMachineOutput] = Decoder.instance(obj => obj.downField("supertype").as[String].flatMap {
-    case "Event" => Decoder[ServerEvent].tryDecode(obj)
-    case "Command" => PotentiallyDelayed.decoder[Command].tryDecode(obj)
-  })
-
+  import StateMachineInput.{encoder, decoder}
+  import StateMachineOutput.{encoder, decoder}
   given Codec[RegressionSpecContent] = deriveCodec
 
 
@@ -75,6 +56,7 @@ object RegressionSpecGen extends IOApp:
             // .evalTap(x => IO(println(x.getClass.getSimpleName)))
             .zipWithScan[RoomServerView](initialRoom) {
               case (room, event: ServerEvent) => room.update(event)
+              case (room, command: Command.Act) => room.withRequest(command)
               case (room, _) => room
             }
             .collect {
@@ -84,21 +66,21 @@ object RegressionSpecGen extends IOApp:
               case (Delayed(Command.Continue, _), _) =>
                 Command.Continue
 
-              case (Event.ActionRequested(playerId, Action.PlayCard, _), room) =>
+              case (Command.Act(playerId, Action.PlayCard, _), room) =>
                 val card = room
                   .seatFor(playerId)
                   .flatMap(_.hand.headOption.map(_.card))
                   .getOrElse(throw IllegalStateException("Player not there or empty hand"))
                 Command.PlayCard(playerId, card)
 
-              case (Event.ActionRequested(playerId, Action.PlayCardOf(suit), _), room) =>
+              case (Command.Act(playerId, Action.PlayCardOf(suit), _), room) =>
                 val card = room
                   .seatFor(playerId)
                   .flatMap { player => player.hand.find(_.card.suit == suit).orElse(player.hand.headOption).map(_.card) }
                   .getOrElse(throw IllegalStateException("Player not there or empty hand"))
                 Command.PlayCard(playerId, card)
 
-              case (Event.ActionRequested(playerId, Action.TakeCards, _), room) =>
+              case (Command.Act(playerId, Action.TakeCards, _), room) =>
                 val card = room
                   .seatFor(playerId)
                   .flatMap(_.hand.headOption.map(_.card))
@@ -115,7 +97,7 @@ object RegressionSpecGen extends IOApp:
             .evalTap(x => inputRef.update(_ :+ x))
             .through(gameLogic.playStream(users))
             .takeThrough {
-              case Event.ActionRequested(_, Action.ShuffleDeck, _) => false
+              case Command.Act(_, Action.ShuffleDeck, _) => false
               case Event.MatchAborted => false
               case _: Event.MatchCompleted => false
               case _ => true

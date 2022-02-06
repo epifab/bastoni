@@ -1,9 +1,9 @@
 package bastoni.domain.model
 
-import bastoni.domain.logic.{briscola, tressette, scopa}
+import bastoni.domain.logic.{briscola, scopa, tressette}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 
 sealed trait Event
 
@@ -21,7 +21,6 @@ object Event:
   case class  BoardCardsDealt(cards: List[VisibleCard]) extends PublicEvent
   case class  CardPlayed(playerId: UserId, card: VisibleCard) extends PublicEvent
   case class  CardsTaken(playerId: UserId, taken: List[VisibleCard], scopa: Option[VisibleCard]) extends PublicEvent
-  case class  ActionRequested(playerId: UserId, action: Action, timeout: Option[Timeout.Active]) extends PublicEvent
   case class  TimedOut(playerId: UserId, action: Action) extends PublicEvent
   case class  TrickCompleted(winnerId: UserId) extends PublicEvent
 
@@ -58,7 +57,6 @@ object Event:
     case obj: PlayerJoinedRoom  => deriveEncoder[PlayerJoinedRoom].mapJsonObject(_.add("type", "PlayerJoinedRoom".asJson))(obj)
     case obj: PlayerLeftRoom    => deriveEncoder[PlayerLeftRoom].mapJsonObject(_.add("type", "PlayerLeftRoom".asJson))(obj)
     case obj: MatchStarted      => deriveEncoder[MatchStarted].mapJsonObject(_.add("type", "MatchStarted".asJson))(obj)
-    case obj: ActionRequested   => deriveEncoder[ActionRequested].mapJsonObject(_.add("type", "ActionRequested".asJson))(obj)
     case obj: TimedOut          => deriveEncoder[TimedOut].mapJsonObject(_.add("type", "TimedOut".asJson))(obj)
     case obj: TrumpRevealed     => deriveEncoder[TrumpRevealed].mapJsonObject(_.add("type", "TrumpRevealed".asJson))(obj)
     case obj: BoardCardsDealt   => deriveEncoder[BoardCardsDealt].mapJsonObject(_.add("type", "BoardCardsDealt".asJson))(obj)
@@ -85,22 +83,25 @@ object Event:
     case obj: PublicEvent            => publicEventEncoder(obj)
   }
 
-  given publicEventDecoder: Decoder[PublicEvent] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
-    case "PlayerJoinedRoom"  => deriveDecoder[PlayerJoinedRoom](obj)
-    case "PlayerLeftRoom"    => deriveDecoder[PlayerLeftRoom](obj)
-    case "MatchStarted"      => deriveDecoder[MatchStarted](obj)
-    case "ActionRequested"   => deriveDecoder[ActionRequested](obj)
-    case "TimedOut"          => deriveDecoder[TimedOut](obj)
-    case "TrumpRevealed"     => deriveDecoder[TrumpRevealed](obj)
-    case "BoardCardsDealt"   => deriveDecoder[BoardCardsDealt](obj)
-    case "CardPlayed"        => deriveDecoder[CardPlayed](obj)
-    case "CardsTaken"        => deriveDecoder[CardsTaken](obj)
-    case "TrickCompleted"    => deriveDecoder[TrickCompleted](obj)
+  given publicEventDecoder: Decoder[PublicEvent] = Decoder.instance(obj => {
+    val typeCursor = obj.downField("type")
 
-    case "GameCompleted"     => deriveDecoder[GameCompleted](obj)
-    case "MatchCompleted"    => deriveDecoder[MatchCompleted](obj)
-    case "GameAborted"       => Right(GameAborted)
-    case "MatchAborted"      => Right(MatchAborted)
+    typeCursor.as[String].flatMap {
+      case "PlayerJoinedRoom" => deriveDecoder[PlayerJoinedRoom](obj)
+      case "PlayerLeftRoom"   => deriveDecoder[PlayerLeftRoom](obj)
+      case "MatchStarted"     => deriveDecoder[MatchStarted](obj)
+      case "TimedOut"         => deriveDecoder[TimedOut](obj)
+      case "TrumpRevealed"    => deriveDecoder[TrumpRevealed](obj)
+      case "BoardCardsDealt"  => deriveDecoder[BoardCardsDealt](obj)
+      case "CardPlayed"       => deriveDecoder[CardPlayed](obj)
+      case "CardsTaken"       => deriveDecoder[CardsTaken](obj)
+      case "TrickCompleted"   => deriveDecoder[TrickCompleted](obj)
+      case "GameCompleted"    => deriveDecoder[GameCompleted](obj)
+      case "MatchCompleted"   => deriveDecoder[MatchCompleted](obj)
+      case "GameAborted"      => Right(GameAborted)
+      case "MatchAborted"     => Right(MatchAborted)
+      case unknown            => Left(DecodingFailure(s"Unrecognised event $unknown", typeCursor.history))
+    }
   })
 
   given serverEventDecoder: Decoder[ServerEvent] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {

@@ -1,7 +1,7 @@
 package bastoni.domain.model
 
 import bastoni.domain.model.Command.PlayCard
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
 
@@ -17,6 +17,7 @@ object Command:
   case class  PlayCard(playerId: UserId, card: VisibleCard) extends Command
   case class  TakeCards(playerId: UserId, played: VisibleCard, taken: List[VisibleCard]) extends Command
   case object Continue extends Command
+  case class  Act(playerId: UserId, action: Action, timeout: Option[Timeout.Active]) extends Command
   case class  Tick(ref: Int) extends Command
 
   given Encoder[Command] = Encoder.instance {
@@ -27,18 +28,25 @@ object Command:
     case obj: PlayCard      => deriveEncoder[PlayCard].mapJsonObject(_.add("type", "PlayCard".asJson))(obj)
     case obj: TakeCards     => deriveEncoder[TakeCards].mapJsonObject(_.add("type", "TakeCards".asJson))(obj)
     case obj: Tick          => deriveEncoder[Tick].mapJsonObject(_.add("type", "Tick".asJson))(obj)
+    case obj: Act           => deriveEncoder[Act].mapJsonObject(_.add("type", "Act".asJson))(obj)
     case Connect            => Json.obj("type" -> "Connect".asJson)
     case Continue           => Json.obj("type" -> "Continue".asJson)
   }
 
-  given Decoder[Command] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
-    case "JoinRoom"      => deriveDecoder[JoinRoom](obj)
-    case "LeaveRoom"     => deriveDecoder[LeaveRoom](obj)
-    case "StartMatch"    => deriveDecoder[StartMatch](obj)
-    case "ShuffleDeck"   => deriveDecoder[ShuffleDeck](obj)
-    case "PlayCard"      => deriveDecoder[PlayCard](obj)
-    case "TakeCards"     => deriveDecoder[TakeCards](obj)
-    case "Tick"          => deriveDecoder[Tick](obj)
-    case "Connect"       => Right(Connect)
-    case "Continue"      => Right(Continue)
+  given Decoder[Command] = Decoder.instance(obj => {
+    val typeCursor = obj.downField("type")
+
+    typeCursor.as[String].flatMap {
+      case "JoinRoom"    => deriveDecoder[JoinRoom](obj)
+      case "LeaveRoom"   => deriveDecoder[LeaveRoom](obj)
+      case "StartMatch"  => deriveDecoder[StartMatch](obj)
+      case "ShuffleDeck" => deriveDecoder[ShuffleDeck](obj)
+      case "PlayCard"    => deriveDecoder[PlayCard](obj)
+      case "TakeCards"   => deriveDecoder[TakeCards](obj)
+      case "Tick"        => deriveDecoder[Tick](obj)
+      case "Act"         => deriveDecoder[Act](obj)
+      case "Connect"     => Right(Connect)
+      case "Continue"    => Right(Continue)
+      case unknown       => Left(DecodingFailure(s"Unrecognised command $unknown", typeCursor.history))
+    }
   })
