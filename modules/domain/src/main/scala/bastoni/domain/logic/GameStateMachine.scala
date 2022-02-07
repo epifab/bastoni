@@ -13,9 +13,9 @@ trait GameStateMachineFactory:
 object GameStateMachineFactory:
   def apply(gameType: GameType): GameStateMachineFactory =
     gameType match
-      case GameType.Briscola => briscola.StateMachine
-      case GameType.Tressette => tressette.StateMachine
-      case GameType.Scopa => scopa.StateMachine
+      case GameType.Briscola => briscola.BriscolaStateMachine
+      case GameType.Tressette => tressette.TressetteStateMachine
+      case GameType.Scopa => scopa.ScopaStateMachine
 
 
 trait GameStateMachine extends StateMachine[GameStateMachine]:

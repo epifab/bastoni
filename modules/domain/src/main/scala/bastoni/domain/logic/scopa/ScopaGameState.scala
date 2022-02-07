@@ -8,10 +8,10 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
 
-sealed trait GameState
+sealed trait ScopaGameState
 
-object GameState:
-  sealed trait Active(val activePlayers: List[MatchPlayer]) extends GameState
+object ScopaGameState:
+  sealed trait Active(val activePlayers: List[MatchPlayer]) extends ScopaGameState
   case class   Ready(players: List[MatchPlayer]) extends Active(players)
   case class   Deal3Round(todo: List[Player], done: List[Player], deck: Deck) extends Active((done ++ todo).map(_.matchPlayer))
   case class   Deal5Round(players: List[Player], deck: Deck) extends Active(players.map(_.matchPlayer))
@@ -22,15 +22,15 @@ object GameState:
   case class   WillTakeCards(state: PlayRound, command: Command.TakeCards) extends Active(state.activePlayers)
   case class   WillComplete(players: List[Player]) extends Active(players.map(_.matchPlayer))
 
-  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[GameState, WaitingForPlayer]:
-    override val timedOut: GameState = GameState.Aborted
+  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[ScopaGameState, WaitingForPlayer]:
+    override val timedOut: ScopaGameState = ScopaGameState.Aborted
     override def update(timeout: Timeout.Active, request: Command.Act): WaitingForPlayer = copy(timeout = timeout, request = request)
 
-  sealed trait Terminated extends GameState
+  sealed trait Terminated extends ScopaGameState
   case class   Completed(players: List[MatchPlayer]) extends Terminated
   case object  Aborted extends Terminated
 
-  given Encoder[GameState] = Encoder.instance {
+  given Encoder[ScopaGameState] = Encoder.instance {
     case s: Ready              => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
     case s: Deal3Round         => deriveEncoder[Deal3Round].mapJsonObject(_.add("stage", "Deal3Round".asJson))(s)
     case s: Deal5Round         => deriveEncoder[Deal5Round].mapJsonObject(_.add("stage", "Deal5Round".asJson))(s)
@@ -45,7 +45,7 @@ object GameState:
     case Aborted               => Json.obj("stage" -> "Aborted".asJson)
   }
 
-  given Decoder[GameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
+  given Decoder[ScopaGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
     case "Ready"              => deriveDecoder[Ready](cursor)
     case "Deal3Round"         => deriveDecoder[Deal3Round](cursor)
     case "Deal5Round"         => deriveDecoder[Deal5Round](cursor)

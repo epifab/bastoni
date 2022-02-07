@@ -6,7 +6,7 @@ import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 import io.circe.{Codec, Decoder, Encoder, Json}
 import io.circe.syntax.*
 
-object GameScoreCalculator:
+object TressetteGameScoreCalculator:
   def apply(team: List[Player], rete: Boolean): TressetteGameScore =
     TressetteGameScore(
       team.map(_.id),

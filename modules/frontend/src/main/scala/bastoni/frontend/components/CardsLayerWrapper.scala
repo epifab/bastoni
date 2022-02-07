@@ -85,7 +85,7 @@ object CardsLayerWrapper:
           state.takingCards match {
             case None =>
               seat.hand.flatMap(_.card.toOption).map { cardInHand =>
-                val takeCombinations: Set[Set[VisibleCard]] = scopa.Game.takeCombinations(
+                val takeCombinations: Set[Set[VisibleCard]] = scopa.ScopaGame.takeCombinations(
                   game.currentRoom.board.flatMap(_._2.card.toOption),
                   cardInHand
                 ).toSet

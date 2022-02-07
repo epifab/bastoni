@@ -11,9 +11,9 @@ class RegressionSpec extends AsyncIOFreeSpec:
 
   for {
     (gameType, gameLogic) <- List(
-      (GameType.Briscola, briscola.Game),
-      (GameType.Tressette, tressette.Game),
-      (GameType.Scopa, scopa.Game)
+      (GameType.Briscola, briscola.BriscolaGame),
+      (GameType.Tressette, tressette.TressetteGame),
+      (GameType.Scopa, scopa.ScopaGame)
     )
     numberOfPlayers <- List(2, 3, 4)
   } yield {

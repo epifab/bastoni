@@ -2,6 +2,7 @@ package bastoni.domain.logic
 
 import bastoni.domain.AsyncIOFreeSpec
 import bastoni.domain.logic.Fixtures.*
+import bastoni.domain.logic.briscola.{BriscolaGameScore, BriscolaGameScoreItem}
 import bastoni.domain.logic.{GameContext, GamePubSub}
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.PlayerState.*
@@ -350,10 +351,10 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         dealerIndex = None
       ),
       stateMachine = Some(generic.StateMachine(
-        briscola.Game,
-        briscola.MatchState.InProgress(
+        briscola.BriscolaGame,
+        briscola.BriscolaMatchState.InProgress(
           List(player1, player2),
-          briscola.GameState.PlayRound(
+          briscola.BriscolaGameState.PlayRound(
             List(Player(player1, List(player1Card), player1Collected)),
             List(Player(player2, Nil, Nil) -> player2Card),
             Nil.toDeck,
@@ -426,7 +427,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 BriscolaGameScoreItem(cardOf(Fante, Denari), 2),
               )
             ),
-          ),
+          ).map(_.generify),
           matchScores = List(
             MatchScore(List(user2.id), 1),
             MatchScore(List(user1.id), 3)

@@ -34,7 +34,7 @@ object DumbPlayer:
 
           case (room, TakenSeat(_, ActingPlayer(_, Action.TakeCards, _), hand, _)) =>
             val cardToPlay = hand.flatMap(_.card.toOption).headOption.getOrElse(throw new IllegalStateException("No cards in hand"))
-            val takes = bastoni.domain.logic.scopa.Game.takeCombinations(room.board.flatMap { case (_, c) => c.card.toOption }, cardToPlay).next()
+            val takes = bastoni.domain.logic.scopa.ScopaGame.takeCombinations(room.board.flatMap { case (_, c) => c.card.toOption }, cardToPlay).next()
             TakeCards(cardToPlay, takes.toList)
 
           case (room, TakenSeat(_, ActingPlayer(_, Action.ShuffleDeck, _), _, _)) => ShuffleDeck

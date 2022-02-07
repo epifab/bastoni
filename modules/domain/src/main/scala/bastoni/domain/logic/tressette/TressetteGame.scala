@@ -2,8 +2,8 @@ package bastoni.domain.logic
 package tressette
 
 import bastoni.domain.logic.generic.Timer
-import bastoni.domain.logic.tressette.GameState.*
-import bastoni.domain.logic.tressette.MatchState.*
+import bastoni.domain.logic.tressette.TressetteGameState.*
+import bastoni.domain.logic.tressette.TressetteMatchState.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Delay.syntax.*
@@ -13,24 +13,24 @@ import cats.Applicative
 import scala.annotation.tailrec
 import scala.util.Random
 
-object Game extends GameLogic[MatchState]:
+object TressetteGame extends GameLogic[TressetteMatchState]:
 
   override val gameType: GameType = GameType.Tressette
-  override def initialState(users: List[User]): MatchState & ActiveMatch = MatchState(users)
-  override def isFinal(state: MatchState): Boolean = state == Terminated
+  override def initialState(users: List[User]): TressetteMatchState & ActiveMatch = TressetteMatchState(users)
+  override def isFinal(state: TressetteMatchState): Boolean = state == Terminated
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
     val request = Act(player, action, Some(Timeout.Max))
-    val newState = WaitingForPlayer(Timer.ref[GameState](state), Timeout.Max, request, state)
+    val newState = WaitingForPlayer(Timer.ref[TressetteGameState](state), Timeout.Max, request, state)
     newState -> (before ++ List(request, newState.nextTick))
 
-  val playGameStep: (GameState, StateMachineInput) => (GameState, List[StateMachineOutput]) =
+  val playGameStep: (TressetteGameState, StateMachineInput) => (TressetteGameState, List[StateMachineOutput]) =
     (state, event) =>
       playGameStepPF match
         case partialFunction if partialFunction.isDefinedAt(state -> event) => partialFunction(state -> event)
         case _ => state -> uneventful
 
-  val playGameStepPF: PartialFunction[(GameState, StateMachineInput), (GameState, List[StateMachineOutput])] = {
+  val playGameStepPF: PartialFunction[(TressetteGameState, StateMachineInput), (TressetteGameState, List[StateMachineOutput])] = {
 
     case (active: Active, PlayerLeftRoom(player, _)) if active.activePlayers.exists(_.is(player)) =>
       Aborted -> uneventful
@@ -126,7 +126,7 @@ object Game extends GameLogic[MatchState]:
       // The last trick is called "rete" (net) which will add a point to the final score
       val rete = players.head.id
 
-      val gameScores: List[GameScore] = Teams(players).map(team => GameScoreCalculator(team, rete = team.exists(_.id == rete)))
+      val gameScores: List[TressetteGameScore] = Teams(players).map(team => TressetteGameScoreCalculator(team, rete = team.exists(_.id == rete)))
 
       val updatedPlayers: List[MatchPlayer] = players.flatMap { matchPlayer =>
         gameScores
@@ -136,10 +136,10 @@ object Game extends GameLogic[MatchState]:
 
       val matchScores: List[MatchScore] = MatchScore.forTeams(Teams(updatedPlayers))
 
-      Completed(updatedPlayers) -> List(GameCompleted(gameScores, matchScores))
+      Completed(updatedPlayers) -> List(GameCompleted(gameScores.map(_.generify), matchScores))
   }
 
-  override val playStep: (MatchState, ServerEvent | Command) => (MatchState, List[ServerEvent | Command | Delayed[Command]]) = {
+  override val playStep: (TressetteMatchState, ServerEvent | Command) => (TressetteMatchState, List[ServerEvent | Command | Delayed[Command]]) = {
 
     case (InProgress(matchPlayers, gameState, pointsToWin), message) =>
       playGameStep(gameState, message) match

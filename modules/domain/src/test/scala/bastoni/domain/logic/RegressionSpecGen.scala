@@ -85,7 +85,7 @@ object RegressionSpecGen extends IOApp:
                   .seatFor(playerId)
                   .flatMap(_.hand.headOption.map(_.card))
                   .getOrElse(throw IllegalStateException("Player not there or empty hand"))
-                val taken = scopa.Game.takeCombinations(room.board.map { case (_, c) => c.card }, card).next().toList
+                val taken = scopa.ScopaGame.takeCombinations(room.board.map { case (_, c) => c.card }, card).next().toList
                 Command.TakeCards(playerId, card, taken)
             }
             .through(inputBus.publish)
@@ -122,9 +122,9 @@ object RegressionSpecGen extends IOApp:
     } yield (input, output)
 
   val logicFor: Map[GameType, GameLogic[_]] = Map(
-    GameType.Briscola -> briscola.Game,
-    GameType.Tressette -> tressette.Game,
-    GameType.Scopa -> scopa.Game
+    GameType.Briscola -> briscola.BriscolaGame,
+    GameType.Tressette -> tressette.TressetteGame,
+    GameType.Scopa -> scopa.ScopaGame
   )
 
   def output(gameType: GameType, players: List[User]): IO[Unit] =

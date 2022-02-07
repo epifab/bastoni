@@ -3335,7 +3335,8 @@
           "playerIds" : [
             "6517fc2f-6fed-4169-8c77-17d21492d450"
           ],
-          "items" : [
+          "points" : 3,
+          "details" : [
             {
               "count" : 0,
               "type" : "Scope"
@@ -3373,20 +3374,19 @@
             {
               "type" : "SetteBello"
             }
-          ],
-          "type" : "Scopa"
+          ]
         },
         {
           "playerIds" : [
             "dc5d9b78-e403-4431-b6f2-92c31d397db9"
           ],
-          "items" : [
+          "points" : 0,
+          "details" : [
             {
               "count" : 0,
               "type" : "Scope"
             }
-          ],
-          "type" : "Scopa"
+          ]
         }
       ],
       "matchScores" : [

@@ -6,10 +6,10 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
 
-sealed trait GameState
+sealed trait BriscolaGameState
 
-object GameState:
-  sealed trait Active(val activePlayers: List[MatchPlayer]) extends GameState
+object BriscolaGameState:
+  sealed trait Active(val activePlayers: List[MatchPlayer]) extends BriscolaGameState
   case class   Ready(players: List[MatchPlayer]) extends Active(players)
   case class   DealRound(todo: List[Player], done: List[Player], deck: Deck) extends Active((done ++ todo).map(_.matchPlayer))
   case class   WillDealTrump(players: List[Player], deck: Deck) extends Active(players.map(_.matchPlayer))
@@ -19,15 +19,15 @@ object GameState:
   case class   WillCompleteTrick(players: List[(Player, VisibleCard)], deck: Deck, trump: VisibleCard) extends Active(players.map(_._1.matchPlayer))
   case class   WillComplete(players: List[Player], trump: VisibleCard) extends Active(players.map(_.matchPlayer))
 
-  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[GameState, WaitingForPlayer]:
-    override val timedOut: GameState = GameState.Aborted
+  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[BriscolaGameState, WaitingForPlayer]:
+    override val timedOut: BriscolaGameState = BriscolaGameState.Aborted
     override def update(timeout: Timeout.Active, request: Command.Act): WaitingForPlayer = copy(timeout = timeout, request = request)
 
-  sealed trait Terminated extends GameState
+  sealed trait Terminated extends BriscolaGameState
   case class   Completed(players: List[MatchPlayer]) extends Terminated
   case object  Aborted extends Terminated
 
-  given Encoder[GameState] = Encoder.instance {
+  given Encoder[BriscolaGameState] = Encoder.instance {
     case s: Ready             => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
     case s: DealRound         => deriveEncoder[DealRound].mapJsonObject(_.add("stage", "DealRound".asJson))(s)
     case s: WillDealTrump     => deriveEncoder[WillDealTrump].mapJsonObject(_.add("stage", "WillDealTrump".asJson))(s)
@@ -41,7 +41,7 @@ object GameState:
     case Aborted              => Json.obj("stage" -> "Aborted".asJson)
   }
 
-  given Decoder[GameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
+  given Decoder[BriscolaGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
     case "Ready"             => deriveDecoder[Ready](cursor)
     case "DealRound"         => deriveDecoder[DealRound](cursor)
     case "WillDealTrump"     => deriveDecoder[WillDealTrump](cursor)

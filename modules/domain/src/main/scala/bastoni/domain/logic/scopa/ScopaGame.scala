@@ -2,8 +2,8 @@ package bastoni.domain.logic
 package scopa
 
 import bastoni.domain.logic.generic.Timer
-import bastoni.domain.logic.scopa.GameState.*
-import bastoni.domain.logic.scopa.MatchState.*
+import bastoni.domain.logic.scopa.ScopaGameState.*
+import bastoni.domain.logic.scopa.ScopaMatchState.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Delay.syntax.*
@@ -15,24 +15,24 @@ import cats.Applicative
 import scala.annotation.tailrec
 import scala.util.Random
 
-object Game extends GameLogic[MatchState]:
+object ScopaGame extends GameLogic[ScopaMatchState]:
 
   override val gameType: GameType = GameType.Scopa
-  override def initialState(users: List[User]): MatchState & ActiveMatch = MatchState(users)
-  override def isFinal(state: MatchState): Boolean = state == Terminated
+  override def initialState(users: List[User]): ScopaMatchState & ActiveMatch = ScopaMatchState(users)
+  override def isFinal(state: ScopaMatchState): Boolean = state == Terminated
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
     val request = Act(player, action, Some(Timeout.Max))
-    val newState = WaitingForPlayer(Timer.ref[GameState](state), Timeout.Max, request, state)
+    val newState = WaitingForPlayer(Timer.ref[ScopaGameState](state), Timeout.Max, request, state)
     newState -> (before ++ List(request, newState.nextTick))
 
-  val playGameStep: (GameState, StateMachineInput) => (GameState, List[StateMachineOutput]) =
+  val playGameStep: (ScopaGameState, StateMachineInput) => (ScopaGameState, List[StateMachineOutput]) =
     (state, event) =>
       playGameStepPF match
         case partialFunction if partialFunction.isDefinedAt(state -> event) => partialFunction(state -> event)
         case _ => state -> uneventful
 
-  val playGameStepPF: PartialFunction[(GameState, StateMachineInput), (GameState, List[StateMachineOutput])] = {
+  val playGameStepPF: PartialFunction[(ScopaGameState, StateMachineInput), (ScopaGameState, List[StateMachineOutput])] = {
     case (active: Active, PlayerLeftRoom(player, _)) if active.activePlayers.exists(_.is(player)) =>
       Aborted -> uneventful
 
@@ -186,7 +186,7 @@ object Game extends GameLogic[MatchState]:
 
 
     case (WillComplete(players), Continue) =>
-      val gameScores: List[GameScore] = GameScoreCalculator(Teams(players))
+      val gameScores: List[ScopaGameScore] = ScopaGameScoreCalculator(Teams(players))
 
       val updatedPlayers: List[MatchPlayer] = players.flatMap { matchPlayer =>
         gameScores
@@ -196,10 +196,10 @@ object Game extends GameLogic[MatchState]:
 
       val matchScores: List[MatchScore] = MatchScore.forTeams(Teams(updatedPlayers))
 
-      Completed(updatedPlayers) -> List(GameCompleted(gameScores, matchScores))
+      Completed(updatedPlayers) -> List(GameCompleted(gameScores.map(_.generify), matchScores))
   }
 
-  override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
+  override val playStep: (ScopaMatchState, StateMachineInput) => (ScopaMatchState, List[StateMachineOutput]) = {
 
     case (InProgress(matchPlayers, gameState, pointsToWin), message) =>
       playGameStep(gameState, message) match

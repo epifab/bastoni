@@ -8,7 +8,7 @@ import io.circe.syntax.*
 import io.circe.{Codec, Decoder, Encoder, Json}
 
 
-object GameScoreCalculator:
+object ScopaGameScoreCalculator:
 
   def apply(teams: List[List[Player]]): List[ScopaGameScore] =
     val teamWithCards: Map[List[Player], List[VisibleCard]] = teams.map(team => team -> team.flatMap(_.taken)).toMap

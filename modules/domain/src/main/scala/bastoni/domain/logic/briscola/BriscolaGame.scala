@@ -1,8 +1,8 @@
 package bastoni.domain.logic
 package briscola
 
-import bastoni.domain.logic.briscola.GameState.*
-import bastoni.domain.logic.briscola.MatchState.*
+import bastoni.domain.logic.briscola.BriscolaGameState.*
+import bastoni.domain.logic.briscola.BriscolaMatchState.*
 import bastoni.domain.logic.generic.Timer
 import bastoni.domain.model.*
 import bastoni.domain.model.Delay.syntax.*
@@ -13,24 +13,24 @@ import cats.Applicative
 import scala.annotation.tailrec
 import scala.util.Random
 
-object Game extends GameLogic[MatchState]:
+object BriscolaGame extends GameLogic[BriscolaMatchState]:
 
   override val gameType: GameType = GameType.Briscola
-  override def initialState(users: List[User]): MatchState & ActiveMatch = MatchState(users)
-  override def isFinal(state: MatchState): Boolean = state == Terminated
+  override def initialState(users: List[User]): BriscolaMatchState & ActiveMatch = BriscolaMatchState(users)
+  override def isFinal(state: BriscolaMatchState): Boolean = state == Terminated
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
     val request = Act(player, action, Some(Timeout.Max))
-    val newState = WaitingForPlayer(Timer.ref[GameState](state), Timeout.Max, request, state)
+    val newState = WaitingForPlayer(Timer.ref[BriscolaGameState](state), Timeout.Max, request, state)
     newState -> (before ++ List(request, newState.nextTick))
 
-  val playGameStep: (GameState, StateMachineInput) => (GameState, List[StateMachineOutput]) =
+  val playGameStep: (BriscolaGameState, StateMachineInput) => (BriscolaGameState, List[StateMachineOutput]) =
     (state, event) =>
       playGameStepPF match
         case partialFunction if partialFunction.isDefinedAt(state -> event) => partialFunction(state -> event)
         case _ => state -> uneventful
 
-  val playGameStepPF: PartialFunction[(GameState, StateMachineInput), (GameState, List[StateMachineOutput])] = {
+  val playGameStepPF: PartialFunction[(BriscolaGameState, StateMachineInput), (BriscolaGameState, List[StateMachineOutput])] = {
     case (active: Active, PlayerLeftRoom(user, _)) if active.activePlayers.exists(_.is(user)) =>
       Aborted -> uneventful
 
@@ -120,7 +120,7 @@ object Game extends GameLogic[MatchState]:
       state -> List(TrickCompleted(winner.id), continue)
 
     case (WillComplete(players, trump), Continue) =>
-      val gameScores: List[GameScore] = Teams(players).map(players => GameScoreCalculator(players))
+      val gameScores: List[BriscolaGameScore] = Teams(players).map(players => BriscolaGameScoreCalculator(players))
       val gameWinners: List[UserId] = gameScores.bestTeam
 
       val updatedPlayers: List[MatchPlayer] = players.map {
@@ -131,10 +131,10 @@ object Game extends GameLogic[MatchState]:
       val updatedTeams: List[List[MatchPlayer]] = Teams(updatedPlayers)
       val matchScores: List[MatchScore] = MatchScore.forTeams(updatedTeams)
 
-      Completed(updatedPlayers) -> List(GameCompleted(gameScores, matchScores))
+      Completed(updatedPlayers) -> List(GameCompleted(gameScores.map(_.generify), matchScores))
   }
 
-  override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
+  override val playStep: (BriscolaMatchState, StateMachineInput) => (BriscolaMatchState, List[StateMachineOutput]) = {
 
     case (InProgress(matchPlayers, game, remainingGames), message) =>
       playGameStep(game, message) match
@@ -170,8 +170,8 @@ object Game extends GameLogic[MatchState]:
 
   extension(card: VisibleCard)
     def >(other: VisibleCard): Boolean =
-      val points = GameScoreCalculator.pointsFor(card)
-      val otherPoints = GameScoreCalculator.pointsFor(other)
+      val points = BriscolaGameScoreCalculator.pointsFor(card)
+      val otherPoints = BriscolaGameScoreCalculator.pointsFor(other)
       (points > otherPoints) || (points == otherPoints && card.rank.value > other.rank.value)
 
   private def completeTrick(players: List[(Player, VisibleCard)], trump: VisibleCard): List[Player] =

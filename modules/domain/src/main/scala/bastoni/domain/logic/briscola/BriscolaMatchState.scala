@@ -6,26 +6,26 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
 
-sealed trait MatchState
+sealed trait BriscolaMatchState
 
-object MatchState:
+object BriscolaMatchState:
   def apply(players: List[User]): InProgress =
     val matchPlayers = players.map(MatchPlayer(_, 0))
-    InProgress(matchPlayers, GameState.Ready(matchPlayers), 2)
+    InProgress(matchPlayers, BriscolaGameState.Ready(matchPlayers), 2)
 
-  case class  InProgress(players: List[MatchPlayer], game: GameState, remainingGames: Int) extends MatchState with ActiveMatch
-  case class  GameOver(output: StateMachineOutput, next: MatchState) extends MatchState
-  case object Terminated extends MatchState
+  case class  InProgress(players: List[MatchPlayer], game: BriscolaGameState, remainingGames: Int) extends BriscolaMatchState with ActiveMatch
+  case class  GameOver(output: StateMachineOutput, next: BriscolaMatchState) extends BriscolaMatchState
+  case object Terminated extends BriscolaMatchState
 
   import StateMachineOutput.{encoder, decoder}
 
-  given Encoder[MatchState] = Encoder.instance {
+  given Encoder[BriscolaMatchState] = Encoder.instance {
     case s: InProgress => deriveEncoder[InProgress].mapJsonObject(_.add("stage", "InProgress".asJson))(s)
     case s: GameOver => deriveEncoder[GameOver].mapJsonObject(_.add("stage", "GameOver".asJson))(s)
     case Terminated    => Json.obj("stage" -> "Terminated".asJson)
   }
 
-  given Decoder[MatchState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
+  given Decoder[BriscolaMatchState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
     case "InProgress" => deriveDecoder[InProgress](cursor)
     case "GameOver" => deriveDecoder[GameOver](cursor)
     case "Terminated" => Right(Terminated)

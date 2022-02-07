@@ -1,17 +1,17 @@
 package bastoni.domain.logic.tressette
 
 import bastoni.domain.logic.generic.Timer
-import bastoni.domain.logic.scopa.GameState
-import bastoni.domain.logic.scopa.GameState.{Active, PlayRound}
+import bastoni.domain.logic.scopa.ScopaGameState
+import bastoni.domain.logic.scopa.ScopaGameState.{Active, PlayRound}
 import bastoni.domain.model.*
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
 
-sealed trait GameState
+sealed trait TressetteGameState
 
-object GameState:
-  sealed trait Active(val activePlayers: List[MatchPlayer]) extends GameState
+object TressetteGameState:
+  sealed trait Active(val activePlayers: List[MatchPlayer]) extends TressetteGameState
   case class   Ready(players: List[MatchPlayer]) extends Active(players)
   case class   DealRound(todo: List[Player], done: List[Player], remaining: Int, deck: Deck) extends Active((done ++ todo).map(_.matchPlayer))
   case class   DrawRound(todo: List[Player], done: List[Player], deck: Deck) extends Active((done ++ todo).map(_.matchPlayer))
@@ -20,15 +20,15 @@ object GameState:
   case class   WillCompleteTrick(players: List[(Player, VisibleCard)], deck: Deck) extends Active(players.map(_._1.matchPlayer))
   case class   WillComplete(players: List[Player]) extends Active(players.map(_.matchPlayer))
 
-  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[GameState, WaitingForPlayer]:
-    override val timedOut: GameState = GameState.Aborted
+  case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[TressetteGameState, WaitingForPlayer]:
+    override val timedOut: TressetteGameState = TressetteGameState.Aborted
     override def update(timeout: Timeout.Active, request: Command.Act): WaitingForPlayer = copy(timeout = timeout, request = request)
 
-  sealed trait Terminated extends GameState
+  sealed trait Terminated extends TressetteGameState
   case class   Completed(points: List[MatchPlayer]) extends Terminated
   case object  Aborted extends Terminated
 
-  given Encoder[GameState] = Encoder.instance {
+  given Encoder[TressetteGameState] = Encoder.instance {
     case s: Ready             => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
     case s: DealRound         => deriveEncoder[DealRound].mapJsonObject(_.add("stage", "DealRound".asJson))(s)
     case s: DrawRound         => deriveEncoder[DrawRound].mapJsonObject(_.add("stage", "DrawRound".asJson))(s)
@@ -41,7 +41,7 @@ object GameState:
     case Aborted              => Json.obj("stage" -> "Aborted".asJson)
   }
 
-  given Decoder[GameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
+  given Decoder[TressetteGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
     case "Ready"             => deriveDecoder[Ready](cursor)
     case "DealRound"         => deriveDecoder[DealRound](cursor)
     case "DrawRound"         => deriveDecoder[DrawRound](cursor)
