@@ -25,7 +25,7 @@ object TressetteGameState:
     override def update(timeout: Timeout.Active, request: Command.Act): WaitingForPlayer = copy(timeout = timeout, request = request)
 
   sealed trait Terminated extends TressetteGameState
-  case class   Completed(points: List[MatchPlayer]) extends Terminated
+  case class   Completed(players: List[MatchPlayer]) extends Terminated
   case object  Aborted extends Terminated
 
   given Encoder[TressetteGameState] = Encoder.instance {

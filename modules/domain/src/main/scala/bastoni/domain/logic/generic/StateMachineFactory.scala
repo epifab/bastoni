@@ -2,12 +2,12 @@ package bastoni.domain.logic
 package generic
 
 import bastoni.domain.model.Event.MatchStarted
-import bastoni.domain.model.{MatchInfo, MatchScore, RoomServerView, Teams}
+import bastoni.domain.model.*
 import io.circe.{ACursor, Decoder, DecodingFailure, Encoder}
 
 class StateMachineFactory[State: Decoder: Encoder](gameLogic: GameLogic[State]) extends GameStateMachineFactory:
   override def apply(room: RoomServerView): (GameStateMachine, List[StateMachineOutput]) =
-    val state: State & ActiveMatch = gameLogic.initialState(room.round.map(_.player))
+    val state: MatchState.InProgress = gameLogic.newMatch(room.round.map(_.player).map(MatchPlayer(_, 0)))
     val machine = new generic.StateMachine(gameLogic, state)
     val event = MatchStarted(
       gameType = gameLogic.gameType,
@@ -16,4 +16,4 @@ class StateMachineFactory[State: Decoder: Encoder](gameLogic: GameLogic[State]) 
     machine -> List(event)
 
   override def decode(json: ACursor): Either[DecodingFailure, GameStateMachine] =
-    Decoder[State].tryDecode(json).map(new generic.StateMachine(gameLogic, _))
+    Decoder[MatchState].tryDecode(json).map(new generic.StateMachine(gameLogic, _))

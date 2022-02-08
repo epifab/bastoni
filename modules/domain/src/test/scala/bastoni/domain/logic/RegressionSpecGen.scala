@@ -32,8 +32,8 @@ object RegressionSpecGen extends IOApp:
     case 3 => List(user1, user2, user3)
     case 4 => List(user1, user2, user3, user4)
 
-  def gameIO[MatchState](
-    gameLogic: GameLogic[MatchState],
+  def gameIO[GameState](
+    gameLogic: GameLogic[GameState],
     users: List[User]
   ): IO[(List[StateMachineInput], List[StateMachineOutput])] =
     for {

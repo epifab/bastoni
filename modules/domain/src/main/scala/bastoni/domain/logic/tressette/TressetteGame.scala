@@ -1,30 +1,39 @@
 package bastoni.domain.logic
 package tressette
 
+import bastoni.domain.logic.briscola.BriscolaGameState
 import bastoni.domain.logic.generic.Timer
+import bastoni.domain.logic.scopa.ScopaGameState
 import bastoni.domain.logic.tressette.TressetteGameState.*
-import bastoni.domain.logic.tressette.TressetteMatchState.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Delay.syntax.*
 import bastoni.domain.model.Event.*
 import cats.Applicative
+import io.circe.syntax.EncoderOps
 
 import scala.annotation.tailrec
 import scala.util.Random
 
-object TressetteGame extends GameLogic[TressetteMatchState]:
+object TressetteGame extends GameLogic[TressetteGameState]:
 
   override val gameType: GameType = GameType.Tressette
-  override def initialState(users: List[User]): TressetteMatchState & ActiveMatch = TressetteMatchState(users)
-  override def isFinal(state: TressetteMatchState): Boolean = state == Terminated
+
+  override def newMatch(players: List[MatchPlayer]): MatchState.InProgress = MatchState.InProgress(players, newGame(players).asJson, MatchType.PointsBased(21))
+  override def newGame(players: List[MatchPlayer]): TressetteGameState = TressetteGameState.Ready(players)
+
+  override def statusFor(state: TressetteGameState): GameStatus = state match {
+    case _: TressetteGameState.Active => GameStatus.InProgress
+    case TressetteGameState.Completed(players) => GameStatus.Completed(players)
+    case TressetteGameState.Aborted => GameStatus.Aborted
+  }
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
     val request = Act(player, action, Some(Timeout.Max))
     val newState = WaitingForPlayer(Timer.ref[TressetteGameState](state), Timeout.Max, request, state)
     newState -> (before ++ List(request, newState.nextTick))
 
-  val playGameStep: (TressetteGameState, StateMachineInput) => (TressetteGameState, List[StateMachineOutput]) =
+  override val playGameStep: (TressetteGameState, StateMachineInput) => (TressetteGameState, List[StateMachineOutput]) =
     (state, event) =>
       playGameStepPF match
         case partialFunction if partialFunction.isDefinedAt(state -> event) => partialFunction(state -> event)
@@ -137,42 +146,6 @@ object TressetteGame extends GameLogic[TressetteMatchState]:
       val matchScores: List[MatchScore] = MatchScore.forTeams(Teams(updatedPlayers))
 
       Completed(updatedPlayers) -> List(GameCompleted(gameScores.map(_.generify), matchScores))
-  }
-
-  override val playStep: (TressetteMatchState, ServerEvent | Command) => (TressetteMatchState, List[ServerEvent | Command | Delayed[Command]]) = {
-
-    case (InProgress(matchPlayers, gameState, pointsToWin), message) =>
-      playGameStep(gameState, message) match
-        case (Completed(players), events) =>
-
-          def newGame(updatedPlayers: List[MatchPlayer], pointsToWin: Int) =
-            val shiftedRound = updatedPlayers.slideUntil(_.is(matchPlayers.tail.head))
-            GameOver(
-              Act(shiftedRound.last.id, Action.ShuffleDeck, timeout = None),
-              InProgress(shiftedRound, Ready(shiftedRound), pointsToWin)
-            ) -> (events :+ Continue.afterGameOver)
-
-          val winners = MatchScore.forTeams(Teams(players)).sortBy(-_.points) match {
-            case winnerTeam :: secondTeam :: _
-              if winnerTeam.points >= pointsToWin && winnerTeam.points > secondTeam.points =>
-              Some(winnerTeam)
-            case _ => None
-          }
-
-          winners.fold(newGame(players.tail :+ players.head, pointsToWin)) { score =>
-            GameOver(MatchCompleted(score.playerIds), Terminated) -> (events :+ Continue.afterGameOver)
-          }
-
-        case (Aborted, events) =>
-          GameOver(MatchAborted, Terminated) -> (events :+ Event.GameAborted :+ Continue.afterGameOver)
-
-        case (newMatchState, events) =>
-          InProgress(matchPlayers, newMatchState, pointsToWin) -> events
-
-    case (GameOver(event, newState), _) => newState -> List(event)
-
-    case (state, _) => state -> Nil
-
   }
 
   extension(card: Card)

@@ -56,42 +56,42 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       Continue.afterDealingCards,
 
       Act(user1.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-110145523),
+      willTick(1215977239),
       CardPlayed(user1.id, cardOf(Sette, Denari)),
       Continue.beforeTakingCards,
       CardsTaken(user1.id, List(cardOf(Sette, Denari), cardOf(Asso, Bastoni), cardOf(Sei, Bastoni)), scopa = None),
       Continue.afterTakingCards,
 
       Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-925792483),
+      willTick(1358241511),
       CardPlayed(user2.id, cardOf(Quattro, Spade)),
       Continue.beforeTakingCards,
       CardsTaken(user2.id, Nil, None),
       Continue.afterTakingCards,
 
       Act(user1.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-287295459),
+      willTick(-161735769),
       CardPlayed(user1.id, cardOf(Asso, Spade)),
       Continue.beforeTakingCards,
       CardsTaken(user1.id, Nil, None),
       Continue.afterTakingCards,
 
       Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-1707315543),
+      willTick(121586655),
       CardPlayed(user2.id, cardOf(Sei,Denari)),
       Continue.beforeTakingCards,
       CardsTaken(user2.id, List(cardOf(Sei,Denari), cardOf(Asso,Spade), cardOf(Cinque,Coppe)), None),
       Continue.afterTakingCards,
 
       Act(user1.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(1780524436),
+      willTick(413378932),
       CardPlayed(user1.id, cardOf(Due,Bastoni)),
       Continue.beforeTakingCards,
       CardsTaken(user1.id, Nil, None),
       Continue.afterTakingCards,
 
       Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(1851175366),
+      willTick(1414415910),
       CardPlayed(user2.id, cardOf(Re,Denari)),
       Continue.beforeTakingCards,
       CardsTaken(user2.id, Nil, None),
@@ -103,7 +103,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       Continue.afterDealingCards,
 
       Act(user1.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(496176866),
+      willTick(1364654232),
     )
   }
 
@@ -203,7 +203,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     val (newState, e3) = ScopaGame.playGameStep(state2, Continue)
 
     newState shouldBe WaitingForPlayer(
-      -784099055,
+      -1046079801,
       Timeout.Max,
       Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
       PlayRound(
@@ -230,7 +230,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       ),
       Continue.afterTakingCards,
       Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-784099055)
+      willTick(-1046079801)
     )
   }
 
@@ -253,7 +253,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     val (finalState, e3) = ScopaGame.playGameStep(state2, Continue)
 
     finalState shouldBe WaitingForPlayer(
-      -1783690296,
+      -1379981441,
       Timeout.Max,
       Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
       PlayRound(
@@ -280,7 +280,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       ),
       Continue.afterTakingCards,
       Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
-      willTick(-1783690296)
+      willTick(-1379981441)
     )
   }
 

@@ -3,7 +3,6 @@ package scopa
 
 import bastoni.domain.logic.generic.Timer
 import bastoni.domain.logic.scopa.ScopaGameState.*
-import bastoni.domain.logic.scopa.ScopaMatchState.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Delay.syntax.*
@@ -11,22 +10,30 @@ import bastoni.domain.model.Event.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
 import cats.Applicative
+import io.circe.syntax.EncoderOps
 
 import scala.annotation.tailrec
 import scala.util.Random
 
-object ScopaGame extends GameLogic[ScopaMatchState]:
+object ScopaGame extends GameLogic[ScopaGameState]:
 
   override val gameType: GameType = GameType.Scopa
-  override def initialState(users: List[User]): ScopaMatchState & ActiveMatch = ScopaMatchState(users)
-  override def isFinal(state: ScopaMatchState): Boolean = state == Terminated
+
+  override def newMatch(players: List[MatchPlayer]): MatchState.InProgress = MatchState.InProgress(players, newGame(players).asJson, MatchType.PointsBased(if (players.size == 2) 11 else 21))
+  override def newGame(players: List[MatchPlayer]): ScopaGameState = ScopaGameState.Ready(players)
+
+  override def statusFor(state: ScopaGameState): GameStatus = state match {
+    case _: ScopaGameState.Active => GameStatus.InProgress
+    case ScopaGameState.Completed(players) => GameStatus.Completed(players)
+    case ScopaGameState.Aborted => GameStatus.Aborted
+  }
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
     val request = Act(player, action, Some(Timeout.Max))
     val newState = WaitingForPlayer(Timer.ref[ScopaGameState](state), Timeout.Max, request, state)
     newState -> (before ++ List(request, newState.nextTick))
 
-  val playGameStep: (ScopaGameState, StateMachineInput) => (ScopaGameState, List[StateMachineOutput]) =
+  override val playGameStep: (ScopaGameState, StateMachineInput) => (ScopaGameState, List[StateMachineOutput]) =
     (state, event) =>
       playGameStepPF match
         case partialFunction if partialFunction.isDefinedAt(state -> event) => partialFunction(state -> event)
@@ -197,41 +204,6 @@ object ScopaGame extends GameLogic[ScopaMatchState]:
       val matchScores: List[MatchScore] = MatchScore.forTeams(Teams(updatedPlayers))
 
       Completed(updatedPlayers) -> List(GameCompleted(gameScores.map(_.generify), matchScores))
-  }
-
-  override val playStep: (ScopaMatchState, StateMachineInput) => (ScopaMatchState, List[StateMachineOutput]) = {
-
-    case (InProgress(matchPlayers, gameState, pointsToWin), message) =>
-      playGameStep(gameState, message) match
-        case (Completed(players), events) =>
-          def newGame(updatedPlayers: List[MatchPlayer], pointsToWin: Int) =
-            val shiftedRound = updatedPlayers.slideUntil(_.is(matchPlayers.tail.head))
-            GameOver(
-              Act(shiftedRound.last.id, Action.ShuffleDeck, timeout = None),
-              InProgress(shiftedRound, Ready(shiftedRound), pointsToWin)
-            ) -> (events :+ Continue.afterGameOver)
-
-          val winners: Option[MatchScore] = MatchScore.forTeams(Teams(players)).sortBy(-_.points) match {
-            case winnerTeam :: secondTeam :: _
-              if winnerTeam.points >= pointsToWin && winnerTeam.points > secondTeam.points =>
-              Some(winnerTeam)
-            case _ => None
-          }
-
-          winners.fold(newGame(players, pointsToWin)) { score =>
-            GameOver(MatchCompleted(score.playerIds), Terminated) -> (events :+ Continue.afterGameOver)
-          }
-
-        case (Aborted, events) =>
-          GameOver(MatchAborted, Terminated) -> (events :+ Event.GameAborted :+ Continue.afterGameOver)
-
-        case (newGameState, events) =>
-          InProgress(matchPlayers, newGameState, pointsToWin) -> events
-
-    case (GameOver(event, state), Continue) => state -> List(event)
-
-    case (state, _) => state -> uneventful
-
   }
 
   def legalPlay(board: List[VisibleCard], played: VisibleCard, taken: List[VisibleCard]): Boolean =

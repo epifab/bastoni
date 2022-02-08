@@ -18,7 +18,7 @@ case class Player(matchPlayer: MatchPlayer, hand: List[VisibleCard], taken: List
     copy(taken = taken ++ cards)
 
 object Player:
-  private case class EncodablePlayer(id: UserId, name: String, points: Int, hand: List[VisibleCard], taken: List[VisibleCard])
+  private case class EncodablePlayer(id: UserId, name: String, points: Int, hand: List[VisibleCard], taken: List[VisibleCard], extraPoints: Int)
 
   given Encoder[Player] = deriveEncoder[EncodablePlayer].contramap[Player](player =>
     EncodablePlayer(
@@ -26,7 +26,8 @@ object Player:
       player.name,
       player.matchPlayer.points,
       player.hand,
-      player.taken
+      player.taken,
+      player.extraPoints
     )
   )
 
@@ -37,6 +38,7 @@ object Player:
         player.points
       ),
       player.hand,
-      player.taken
+      player.taken,
+      player.extraPoints
     )
   )

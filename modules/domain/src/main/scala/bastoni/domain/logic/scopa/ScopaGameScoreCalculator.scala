@@ -41,7 +41,7 @@ object ScopaGameScoreCalculator:
 
       ScopaGameScore(
         team.map(_.id),
-        ScopaGameScoreItem.Scope(team.foldRight(0)(_.extraPoints + _)) :: points
+        Some(ScopaGameScoreItem.Scope(team.foldRight(0)(_.extraPoints + _))).filterNot(_.count == 0).toList ++ points
       )
     )
 

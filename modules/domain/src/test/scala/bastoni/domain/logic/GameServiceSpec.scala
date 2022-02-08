@@ -4,15 +4,16 @@ import bastoni.domain.AsyncIOFreeSpec
 import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.logic.briscola.{BriscolaGameScore, BriscolaGameScoreItem}
 import bastoni.domain.logic.{GameContext, GamePubSub}
+import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
-import bastoni.domain.model.PlayerState.*
 import bastoni.domain.model.Event.*
+import bastoni.domain.model.PlayerState.*
 import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
-import bastoni.domain.model.*
 import bastoni.domain.repos.{GameRepo, MessageRepo}
 import bastoni.domain.view.FromPlayer
 import cats.effect.IO
+import io.circe.syntax.EncoderOps
 
 import scala.concurrent.duration.DurationInt
 
@@ -352,15 +353,15 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       ),
       stateMachine = Some(generic.StateMachine(
         briscola.BriscolaGame,
-        briscola.BriscolaMatchState.InProgress(
+        MatchState.InProgress(
           List(player1, player2),
-          briscola.BriscolaGameState.PlayRound(
+          (briscola.BriscolaGameState.PlayRound(
             List(Player(player1, List(player1Card), player1Collected)),
             List(Player(player2, Nil, Nil) -> player2Card),
             Nil.toDeck,
             player1Card
-          ),
-          remainingGames = 0
+          ): briscola.BriscolaGameState).asJson,
+          MatchType.FixedRounds(0)
         )
       ))
     )

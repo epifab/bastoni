@@ -2,22 +2,32 @@ package bastoni.domain.logic
 package briscola
 
 import bastoni.domain.logic.briscola.BriscolaGameState.*
-import bastoni.domain.logic.briscola.BriscolaMatchState.*
 import bastoni.domain.logic.generic.Timer
 import bastoni.domain.model.*
 import bastoni.domain.model.Delay.syntax.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.model.Command.*
 import cats.Applicative
+import io.circe.syntax.EncoderOps
 
 import scala.annotation.tailrec
 import scala.util.Random
 
-object BriscolaGame extends GameLogic[BriscolaMatchState]:
+object BriscolaGame extends GameLogic[BriscolaGameState]:
 
   override val gameType: GameType = GameType.Briscola
-  override def initialState(users: List[User]): BriscolaMatchState & ActiveMatch = BriscolaMatchState(users)
-  override def isFinal(state: BriscolaMatchState): Boolean = state == Terminated
+
+  override def newMatch(players: List[MatchPlayer]): MatchState.InProgress = 
+    MatchState.InProgress(players, newGame(players).asJson, MatchType.FixedRounds(2))
+
+  override def newGame(players: List[MatchPlayer]): BriscolaGameState =
+    BriscolaGameState.Ready(players)
+
+  override def statusFor(state: BriscolaGameState): GameStatus = state match {
+    case _: BriscolaGameState.Active => GameStatus.InProgress
+    case BriscolaGameState.Completed(players) => GameStatus.Completed(players)
+    case BriscolaGameState.Aborted => GameStatus.Aborted
+  }
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
     val request = Act(player, action, Some(Timeout.Max))
@@ -132,40 +142,6 @@ object BriscolaGame extends GameLogic[BriscolaMatchState]:
       val matchScores: List[MatchScore] = MatchScore.forTeams(updatedTeams)
 
       Completed(updatedPlayers) -> List(GameCompleted(gameScores.map(_.generify), matchScores))
-  }
-
-  override val playStep: (BriscolaMatchState, StateMachineInput) => (BriscolaMatchState, List[StateMachineOutput]) = {
-
-    case (InProgress(matchPlayers, game, remainingGames), message) =>
-      playGameStep(game, message) match
-        case (Completed(players), events) =>
-
-          def newGame(updatedPlayers: List[MatchPlayer], rounds: Int) =
-            val shiftedRound = updatedPlayers.slideUntil(_.is(matchPlayers.tail.head))
-            GameOver(
-              Act(shiftedRound.last.id, Action.ShuffleDeck, timeout = None),
-              InProgress(shiftedRound, Ready(shiftedRound), rounds)
-            ) -> (events :+ Continue.afterGameOver)
-
-          val winners: Option[MatchScore] = MatchScore.forTeams(Teams(players)).sortBy(-_.points) match {
-            case winningTeam :: secondTeam :: _ if winningTeam.points > remainingGames + secondTeam.points => Some(winningTeam)
-            case _ => None
-          }
-
-          winners.fold(newGame(players.tail :+ players.head, Math.max(0, remainingGames - 1))) { winners =>
-            GameOver(MatchCompleted(winners.playerIds), Terminated) -> (events :+ Continue.afterGameOver)
-          }
-
-        case (Aborted, events) =>
-          GameOver(MatchAborted, Terminated) -> (events :+ Event.GameAborted :+ Continue.afterGameOver)
-
-        case (newGameState, events) =>
-          InProgress(matchPlayers, newGameState, remainingGames) -> events
-
-    case (GameOver(event, newState), Continue) => newState -> List(event)
-
-    case (state, _) => state -> uneventful
-
   }
 
   extension(card: VisibleCard)
