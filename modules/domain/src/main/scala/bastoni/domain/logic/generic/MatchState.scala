@@ -1,5 +1,7 @@
-package bastoni.domain.logic
+package bastoni.domain.logic.generic
 
+import bastoni.domain.logic.StateMachineOutput
+import bastoni.domain.logic.StateMachineOutput.{decoder, encoder}
 import bastoni.domain.logic.generic.*
 import bastoni.domain.model.{MatchPlayer, MatchScore, Teams}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -41,8 +43,8 @@ object MatchState:
         }
       )
 
-  case class   GameOver(output: StateMachineOutput, next: MatchState) extends MatchState
-  case object  Terminated extends MatchState
+  case class GameOver(output: StateMachineOutput, next: MatchState) extends MatchState
+  case object Terminated extends MatchState
 
   import StateMachineOutput.{decoder, encoder}
 

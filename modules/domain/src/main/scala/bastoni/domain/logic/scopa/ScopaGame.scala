@@ -1,7 +1,7 @@
 package bastoni.domain.logic
 package scopa
 
-import bastoni.domain.logic.generic.Timer
+import bastoni.domain.logic.generic.*
 import bastoni.domain.logic.scopa.ScopaGameState.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
@@ -11,11 +11,16 @@ import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
 import cats.Applicative
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder}
 
 import scala.annotation.tailrec
 import scala.util.Random
 
-object ScopaGame extends GameLogic[ScopaGameState]:
+object ScopaGame extends GenericGameLogic:
+
+  override type GameState = ScopaGameState
+  override given stateEncoder: Encoder[ScopaGameState] = ScopaGameState.encoder
+  override given stateDecoder: Decoder[ScopaGameState] = ScopaGameState.decoder
 
   override val gameType: GameType = GameType.Scopa
 

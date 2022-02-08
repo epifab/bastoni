@@ -3,6 +3,7 @@ package bastoni.domain.logic
 import bastoni.domain.AsyncIOFreeSpec
 import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.logic.briscola.{BriscolaGameScore, BriscolaGameScoreItem}
+import bastoni.domain.logic.generic.{MatchState, MatchType}
 import bastoni.domain.logic.{GameContext, GamePubSub}
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*

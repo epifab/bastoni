@@ -2,22 +2,27 @@ package bastoni.domain.logic
 package briscola
 
 import bastoni.domain.logic.briscola.BriscolaGameState.*
-import bastoni.domain.logic.generic.Timer
+import bastoni.domain.logic.generic.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Delay.syntax.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.model.Command.*
 import cats.Applicative
+import io.circe.{Encoder, Decoder}
 import io.circe.syntax.EncoderOps
 
 import scala.annotation.tailrec
 import scala.util.Random
 
-object BriscolaGame extends GameLogic[BriscolaGameState]:
+object BriscolaGame extends GenericGameLogic:
+
+  override type GameState = BriscolaGameState
+  override given stateEncoder: Encoder[BriscolaGameState] = BriscolaGameState.encoder
+  override given stateDecoder: Decoder[BriscolaGameState] = BriscolaGameState.decoder
 
   override val gameType: GameType = GameType.Briscola
 
-  override def newMatch(players: List[MatchPlayer]): MatchState.InProgress = 
+  override def newMatch(players: List[MatchPlayer]): MatchState.InProgress =
     MatchState.InProgress(players, newGame(players).asJson, MatchType.FixedRounds(2))
 
   override def newGame(players: List[MatchPlayer]): BriscolaGameState =

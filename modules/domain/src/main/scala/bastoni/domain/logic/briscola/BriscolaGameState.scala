@@ -27,7 +27,7 @@ object BriscolaGameState:
   case class   Completed(players: List[MatchPlayer]) extends Terminated
   case object  Aborted extends Terminated
 
-  given Encoder[BriscolaGameState] = Encoder.instance {
+  given encoder: Encoder[BriscolaGameState] = Encoder.instance {
     case s: Ready             => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
     case s: DealRound         => deriveEncoder[DealRound].mapJsonObject(_.add("stage", "DealRound".asJson))(s)
     case s: WillDealTrump     => deriveEncoder[WillDealTrump].mapJsonObject(_.add("stage", "WillDealTrump".asJson))(s)
@@ -41,7 +41,7 @@ object BriscolaGameState:
     case Aborted              => Json.obj("stage" -> "Aborted".asJson)
   }
 
-  given Decoder[BriscolaGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
+  given decoder: Decoder[BriscolaGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
     case "Ready"             => deriveDecoder[Ready](cursor)
     case "DealRound"         => deriveDecoder[DealRound](cursor)
     case "WillDealTrump"     => deriveDecoder[WillDealTrump](cursor)

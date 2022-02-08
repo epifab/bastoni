@@ -30,7 +30,7 @@ object ScopaGameState:
   case class   Completed(players: List[MatchPlayer]) extends Terminated
   case object  Aborted extends Terminated
 
-  given Encoder[ScopaGameState] = Encoder.instance {
+  given encoder: Encoder[ScopaGameState] = Encoder.instance {
     case s: Ready              => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
     case s: Deal3Round         => deriveEncoder[Deal3Round].mapJsonObject(_.add("stage", "Deal3Round".asJson))(s)
     case s: Deal5Round         => deriveEncoder[Deal5Round].mapJsonObject(_.add("stage", "Deal5Round".asJson))(s)
@@ -45,7 +45,7 @@ object ScopaGameState:
     case Aborted               => Json.obj("stage" -> "Aborted".asJson)
   }
 
-  given Decoder[ScopaGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
+  given decoder: Decoder[ScopaGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
     case "Ready"              => deriveDecoder[Ready](cursor)
     case "Deal3Round"         => deriveDecoder[Deal3Round](cursor)
     case "Deal5Round"         => deriveDecoder[Deal5Round](cursor)

@@ -28,7 +28,7 @@ object TressetteGameState:
   case class   Completed(players: List[MatchPlayer]) extends Terminated
   case object  Aborted extends Terminated
 
-  given Encoder[TressetteGameState] = Encoder.instance {
+  given encoder: Encoder[TressetteGameState] = Encoder.instance {
     case s: Ready             => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
     case s: DealRound         => deriveEncoder[DealRound].mapJsonObject(_.add("stage", "DealRound".asJson))(s)
     case s: DrawRound         => deriveEncoder[DrawRound].mapJsonObject(_.add("stage", "DrawRound".asJson))(s)
@@ -41,7 +41,7 @@ object TressetteGameState:
     case Aborted              => Json.obj("stage" -> "Aborted".asJson)
   }
 
-  given Decoder[TressetteGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
+  given decoder: Decoder[TressetteGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
     case "Ready"             => deriveDecoder[Ready](cursor)
     case "DealRound"         => deriveDecoder[DealRound](cursor)
     case "DrawRound"         => deriveDecoder[DrawRound](cursor)

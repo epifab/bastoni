@@ -1,4 +1,4 @@
 package bastoni.domain.logic
 package tressette
 
-object TressetteStateMachine extends generic.StateMachineFactory[TressetteGameState](TressetteGame)
+object TressetteStateMachine extends generic.StateMachineFactory(TressetteGame)

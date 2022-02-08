@@ -1,9 +1,7 @@
 package bastoni.domain.logic
 package tressette
 
-import bastoni.domain.logic.briscola.BriscolaGameState
-import bastoni.domain.logic.generic.Timer
-import bastoni.domain.logic.scopa.ScopaGameState
+import bastoni.domain.logic.generic.*
 import bastoni.domain.logic.tressette.TressetteGameState.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
@@ -11,11 +9,16 @@ import bastoni.domain.model.Delay.syntax.*
 import bastoni.domain.model.Event.*
 import cats.Applicative
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder}
 
 import scala.annotation.tailrec
 import scala.util.Random
 
-object TressetteGame extends GameLogic[TressetteGameState]:
+object TressetteGame extends GenericGameLogic:
+
+  override type GameState = TressetteGameState
+  override given stateEncoder: Encoder[TressetteGameState] = TressetteGameState.encoder
+  override given stateDecoder: Decoder[TressetteGameState] = TressetteGameState.decoder
 
   override val gameType: GameType = GameType.Tressette
 

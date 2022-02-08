@@ -1,4 +1,4 @@
-package bastoni.domain.logic
+package bastoni.domain.logic.generic
 
 import bastoni.domain.model.MatchPlayer
 
