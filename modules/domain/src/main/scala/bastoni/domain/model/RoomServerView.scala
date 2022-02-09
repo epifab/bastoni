@@ -38,19 +38,19 @@ case class RoomServerView(
     case event: PublicEvent => publicEventUpdate(event)
   }
 
-  def toPlayerView(me: User): RoomPlayerView =
+  def toPlayerView(me: UserId): RoomPlayerView =
     RoomPlayerView(
-      me.id,
+      me,
       seats = seats.map { seat =>
-        val hand = seat.hand.map(_.toPlayerView(me.id, seat.playerOption.map(_.id)))
-        val taken = seat.taken.map(_.toPlayerView(me.id, seat.playerOption.map(_.id)))
+        val hand = seat.hand.map(_.toPlayerView(me, seat.playerOption.map(_.id)))
+        val taken = seat.taken.map(_.toPlayerView(me, seat.playerOption.map(_.id)))
         seat match {
           case seat: TakenSeat[CardServerView] => seat.copy(hand = hand, taken = taken)
           case seat: EmptySeat[CardServerView] => seat.copy(hand = hand, taken = taken)
         }
       },
-      deck = deck.map(_.toPlayerView(me.id, None)),
-      board = board.map { case (u, c) => u -> c.toPlayerView(me.id, None) },
+      deck = deck.map(_.toPlayerView(me, None)),
+      board = board.map { case (u, c) => u -> c.toPlayerView(me, None) },
       matchInfo = matchInfo,
       dealerIndex = dealerIndex
     )

@@ -16,6 +16,7 @@ object Command:
   case class  ShuffleDeck(seed: Int) extends Command
   case class  PlayCard(playerId: UserId, card: VisibleCard) extends Command
   case class  TakeCards(playerId: UserId, played: VisibleCard, taken: List[VisibleCard]) extends Command
+  case class  Ok(playerId: UserId) extends Command
   case object Continue extends Command
   case class  Act(playerId: UserId, action: Action, timeout: Option[Timeout.Active]) extends Command
   case class  Tick(ref: Int) extends Command
@@ -27,6 +28,7 @@ object Command:
     case obj: ShuffleDeck   => deriveEncoder[ShuffleDeck].mapJsonObject(_.add("type", "ShuffleDeck".asJson))(obj)
     case obj: PlayCard      => deriveEncoder[PlayCard].mapJsonObject(_.add("type", "PlayCard".asJson))(obj)
     case obj: TakeCards     => deriveEncoder[TakeCards].mapJsonObject(_.add("type", "TakeCards".asJson))(obj)
+    case obj: Ok            => deriveEncoder[Ok].mapJsonObject(_.add("type", "Ok".asJson))(obj)
     case obj: Tick          => deriveEncoder[Tick].mapJsonObject(_.add("type", "Tick".asJson))(obj)
     case obj: Act           => deriveEncoder[Act].mapJsonObject(_.add("type", "Act".asJson))(obj)
     case Connect            => Json.obj("type" -> "Connect".asJson)
@@ -43,6 +45,7 @@ object Command:
       case "ShuffleDeck" => deriveDecoder[ShuffleDeck](obj)
       case "PlayCard"    => deriveDecoder[PlayCard](obj)
       case "TakeCards"   => deriveDecoder[TakeCards](obj)
+      case "Ok"          => deriveDecoder[Ok](obj)
       case "Tick"        => deriveDecoder[Tick](obj)
       case "Act"         => deriveDecoder[Act](obj)
       case "Connect"     => Right(Connect)

@@ -1,9 +1,11 @@
 package bastoni.domain.logic
 package generic
 
+import bastoni.domain.logic.generic.MatchState.WaitingForPlayers
 import bastoni.domain.model.*
-import bastoni.domain.model.Command.{Act, Continue}
+import bastoni.domain.model.Command.{Act, Continue, Ok}
 import bastoni.domain.model.Delay.syntax.afterGameOver
+import bastoni.domain.model.Event.PlayerConfirmed
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder}
 
@@ -35,13 +37,12 @@ abstract class GenericGameLogic extends GameLogic[MatchState]:
 
       statusFor(updatedGameState) match {
 
-        case GameStatus.Completed(updatedPlayers) =>
+        case GameStatus.Completed(playersUpdate) =>
+
+          val updatedPlayers = inProgress.players.map(possiblyOutdated => playersUpdate.find(_.is(possiblyOutdated)).getOrElse(possiblyOutdated))
 
           def nextGame: MatchState.GameOver = {
-            val shiftedRound = inProgress.players
-              .shift
-              .map(possiblyOutdated => updatedPlayers.find(_.is(possiblyOutdated)).getOrElse(possiblyOutdated))
-
+            val shiftedRound = updatedPlayers.shift
             MatchState.GameOver(
               Act(shiftedRound.last.id, Action.ShuffleDeck, timeout = None),
               inProgress.nextGame(newGame(shiftedRound).asJson, shiftedRound)
@@ -66,13 +67,19 @@ abstract class GenericGameLogic extends GameLogic[MatchState]:
               }
           }
 
-          winners.fold(nextGame)(score => MatchState.GameOver(Event.MatchCompleted(score.playerIds), MatchState.Terminated)) -> (events :+ Continue.afterGameOver)
-
+          val nextState = winners.fold(nextGame)(score => MatchState.GameOver(Event.MatchCompleted(score.playerIds), MatchState.Terminated))
+          val playerIds = updatedPlayers.map(_.id)
+          WaitingForPlayers(playerIds.toSet, nextState) -> (events ++ playerIds.map(id => Command.Act(id, Action.Confirm, timeout = None)))
 
         case GameStatus.Aborted => MatchState.GameOver(Event.MatchAborted, MatchState.Terminated) -> (events :+ Event.GameAborted :+ Continue.afterGameOver)
 
         case GameStatus.InProgress => inProgress.copy(gameState = updatedGameState.asJson) -> events
       }
+
+    case (MatchState.WaitingForPlayers(players, next), Ok(playerId)) if players.contains(playerId) =>
+      val remainingPlayers = players - playerId
+      val newState = if (remainingPlayers.isEmpty) next else WaitingForPlayers(remainingPlayers, next)
+      newState -> (PlayerConfirmed(playerId) :: Option.when(remainingPlayers.isEmpty)(Continue).toList)
 
     case (MatchState.GameOver(event, state), Continue) => state -> List(event)
 

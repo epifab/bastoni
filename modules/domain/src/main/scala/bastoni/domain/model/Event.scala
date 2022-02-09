@@ -21,6 +21,7 @@ object Event:
   case class  BoardCardsDealt(cards: List[VisibleCard]) extends PublicEvent
   case class  CardPlayed(playerId: UserId, card: VisibleCard) extends PublicEvent
   case class  CardsTaken(playerId: UserId, taken: List[VisibleCard], scopa: Option[VisibleCard]) extends PublicEvent
+  case class  PlayerConfirmed(playerId: UserId) extends PublicEvent
   case class  TimedOut(playerId: UserId, action: Action) extends PublicEvent
   case class  TrickCompleted(winnerId: UserId) extends PublicEvent
 
@@ -62,6 +63,7 @@ object Event:
     case obj: BoardCardsDealt   => deriveEncoder[BoardCardsDealt].mapJsonObject(_.add("type", "BoardCardsDealt".asJson))(obj)
     case obj: CardPlayed        => deriveEncoder[CardPlayed].mapJsonObject(_.add("type", "CardPlayed".asJson))(obj)
     case obj: CardsTaken        => deriveEncoder[CardsTaken].mapJsonObject(_.add("type", "CardsTaken".asJson))(obj)
+    case obj: PlayerConfirmed   => deriveEncoder[PlayerConfirmed].mapJsonObject(_.add("type", "PlayerConfirmed".asJson))(obj)
     case obj: TrickCompleted    => deriveEncoder[TrickCompleted].mapJsonObject(_.add("type", "TrickCompleted".asJson))(obj)
 
     case obj: GameCompleted     => deriveEncoder[GameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson))(obj)
@@ -95,6 +97,7 @@ object Event:
       case "BoardCardsDealt"  => deriveDecoder[BoardCardsDealt](obj)
       case "CardPlayed"       => deriveDecoder[CardPlayed](obj)
       case "CardsTaken"       => deriveDecoder[CardsTaken](obj)
+      case "PlayerConfirmed"  => deriveDecoder[PlayerConfirmed](obj)
       case "TrickCompleted"   => deriveDecoder[TrickCompleted](obj)
       case "GameCompleted"    => deriveDecoder[GameCompleted](obj)
       case "MatchCompleted"   => deriveDecoder[MatchCompleted](obj)

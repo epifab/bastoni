@@ -3,7 +3,7 @@ package bastoni.domain.logic.generic
 import bastoni.domain.logic.StateMachineOutput
 import bastoni.domain.logic.StateMachineOutput.{decoder, encoder}
 import bastoni.domain.logic.generic.*
-import bastoni.domain.model.{MatchPlayer, MatchScore, Teams}
+import bastoni.domain.model.{MatchPlayer, MatchScore, Teams, UserId}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
 import io.circe.{Decoder, DecodingFailure, Encoder, Json}
@@ -43,6 +43,7 @@ object MatchState:
         }
       )
 
+  case class WaitingForPlayers(players: Set[UserId], next: MatchState) extends MatchState
   case class GameOver(output: StateMachineOutput, next: MatchState) extends MatchState
   case object Terminated extends MatchState
 
@@ -57,8 +58,9 @@ object MatchState:
         "matchType" -> s.matchType.asJson
       )
 
-    case s: GameOver => deriveEncoder[GameOver].mapJsonObject(_.add("stage", "GameOver".asJson))(s)
-    case Terminated    => Json.obj("stage" -> "Terminated".asJson)
+    case s: WaitingForPlayers => deriveEncoder[WaitingForPlayers].mapJsonObject(_.add("stage", "WaitingForPlayers".asJson))(s)
+    case s: GameOver          => deriveEncoder[GameOver].mapJsonObject(_.add("stage", "GameOver".asJson))(s)
+    case Terminated           => Json.obj("stage" -> "Terminated".asJson)
   }
 
   given Decoder[MatchState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
@@ -68,6 +70,7 @@ object MatchState:
         gameState <- cursor.downField("gameState").focus.toRight(DecodingFailure("Game state not found", cursor.history))
         matchType <- cursor.downField("matchType").as[MatchType]
       } yield InProgress(players, gameState, matchType)
+    case "WaitingForPlayers" => deriveDecoder[WaitingForPlayers](cursor)
     case "GameOver" => deriveDecoder[GameOver](cursor)
     case "Terminated" => Right(Terminated)
   })

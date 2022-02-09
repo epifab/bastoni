@@ -1,7 +1,7 @@
 package bastoni.frontend
 package components
 
-import bastoni.domain.DumbPlayer
+import bastoni.domain.ai.DumbPlayer
 import bastoni.domain.logic.Services
 import bastoni.domain.model.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}

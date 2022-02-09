@@ -28,7 +28,7 @@ object GamePubSub:
         case event: PublicEvent => ToPlayer.GameEvent(event)
         case CardsDealtServerView(playerId, cards) => ToPlayer.GameEvent(CardsDealtPlayerView(playerId, cards.map(_.toPlayerView(me.id, Some(playerId)))))
         case DeckShuffledServerView(deck) => ToPlayer.GameEvent(DeckShuffledPlayerView(deck.size))
-        case Snapshot(room) => ToPlayer.Snapshot(room.toPlayerView(me))
+        case Snapshot(room) => ToPlayer.Snapshot(room.toPlayerView(me.id))
       }
 
   def publisher[F[_]](
@@ -52,12 +52,13 @@ object GamePubSub:
       fs2.Stream.repeatEval(Sync[F].delay(MessageId.newId))
     )
 
-  private def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Command =
+  def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Command =
     eventAndSeed match
       case (FromPlayer.Connect, _)                => Connect
       case (FromPlayer.JoinRoom, seed)            => JoinRoom(me, seed)
       case (FromPlayer.LeaveRoom, _)              => LeaveRoom(me)
       case (FromPlayer.StartMatch(gameType), _)   => StartMatch(me.id, gameType)
       case (FromPlayer.ShuffleDeck, seed)         => ShuffleDeck(seed)
+      case (FromPlayer.Ok, _)                     => Ok(me.id)
       case (FromPlayer.PlayCard(card), _)         => PlayCard(me.id, card)
       case (FromPlayer.TakeCards(card, taken), _) => TakeCards(me.id, card, taken)

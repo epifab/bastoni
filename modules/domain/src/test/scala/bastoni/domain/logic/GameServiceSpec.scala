@@ -378,13 +378,14 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       events <- (for {
         subscription <- fs2.Stream.resource(messageBus.subscribeAwait)
         gameServiceRunner <- fs2.Stream.resource(GameService.runner[IO](messageBus, gameRepo, messageRepo, _ => 2.millis))
+        pub1 = GamePubSub.publisher(messageBus).publish(user1, room1Id)
+        pub2 = GamePubSub.publisher(messageBus).publish(user2, room1Id)
         event <- subscription
           .concurrently(messageBus.run)
           .concurrently(gameServiceRunner)
-          .concurrently(
-            fs2.Stream(FromPlayer.PlayCard(player1Card)).delayBy[IO](100.millis)
-              .through(GamePubSub.publisher(messageBus).publish(user1, room1Id))
-          )
+          .concurrently(fs2.Stream(FromPlayer.PlayCard(player1Card)).delayBy[IO](100.millis).through(pub1))
+          .concurrently(fs2.Stream(FromPlayer.Ok).delayBy[IO](200.millis).through(pub1))
+          .concurrently(fs2.Stream(FromPlayer.Ok).delayBy[IO](300.millis).through(pub2))
           .collect { case Message(_, _, event: Event) => event }
           .interruptAfter(2.seconds)
       } yield event).compile.toList
@@ -435,6 +436,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
             MatchScore(List(user1.id), 3)
           )
         ),
+        PlayerConfirmed(user1.id),
+        PlayerConfirmed(user2.id),
         MatchCompleted(List(user1.id))
       )
 

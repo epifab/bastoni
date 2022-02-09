@@ -1,5 +1,6 @@
 package bastoni.domain.logic
 
+import bastoni.domain.ai.DumbPlayer
 import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.model.*
 import bastoni.domain.model.PlayerState.*
@@ -66,27 +67,11 @@ object RegressionSpecGen extends IOApp:
               case (Delayed(Command.Continue, _), _) =>
                 Command.Continue
 
-              case (Command.Act(playerId, Action.PlayCard, _), room) =>
-                val card = room
-                  .seatFor(playerId)
-                  .flatMap(_.hand.headOption.map(_.card))
-                  .getOrElse(throw IllegalStateException("Player not there or empty hand"))
-                Command.PlayCard(playerId, card)
-
-              case (Command.Act(playerId, Action.PlayCardOf(suit), _), room) =>
-                val card = room
-                  .seatFor(playerId)
-                  .flatMap { player => player.hand.find(_.card.suit == suit).orElse(player.hand.headOption).map(_.card) }
-                  .getOrElse(throw IllegalStateException("Player not there or empty hand"))
-                Command.PlayCard(playerId, card)
-
-              case (Command.Act(playerId, Action.TakeCards, _), room) =>
-                val card = room
-                  .seatFor(playerId)
-                  .flatMap(_.hand.headOption.map(_.card))
-                  .getOrElse(throw IllegalStateException("Player not there or empty hand"))
-                val taken = scopa.ScopaGame.takeCombinations(room.board.map { case (_, c) => c.card }, card).next().toList
-                Command.TakeCards(playerId, card, taken)
+              case (Command.Act(playerId, action, _), room) =>
+                val playerRoom = room.toPlayerView(playerId)
+                val seat = playerRoom.seatFor(playerId).getOrElse(throw IllegalStateException("Player not there"))
+                val user: User = users.find(_.is(playerId)).getOrElse(throw IllegalStateException("Unknown player"))
+                GamePubSub.buildCommand(user)(DumbPlayer.act(playerRoom, action, seat) -> 0)
             }
             .through(inputBus.publish)
           )

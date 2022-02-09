@@ -8,6 +8,7 @@ enum Action:
   case PlayCardOf(suit: Suit)
   case TakeCards
   case ShuffleDeck
+  case Confirm
 
 object Action:
   given Encoder[Action] = Encoder.instance {
@@ -15,6 +16,7 @@ object Action:
     case TakeCards        => Json.obj("type" -> "TakeCards".asJson)
     case PlayCardOf(suit) => Json.obj("type" -> "PlayCardOf".asJson, "suit" -> suit.asJson)
     case ShuffleDeck      => Json.obj("type" -> "ShuffleDeck".asJson)
+    case Confirm          => Json.obj("type" -> "Confirm".asJson)
   }
 
   given Decoder[Action] = Decoder.instance(obj => obj.downField("type").as[String].flatMap {
@@ -22,4 +24,5 @@ object Action:
     case "TakeCards"   => Right(TakeCards)
     case "PlayCardOf"  => obj.downField("suit").as[Suit].map(suit => PlayCardOf(suit))
     case "ShuffleDeck" => Right(ShuffleDeck)
+    case "Confirm"     => Right(Confirm)
   })

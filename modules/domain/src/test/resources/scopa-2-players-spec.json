@@ -902,6 +902,16 @@
       "supertype" : "Command"
     },
     {
+      "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
+      "type" : "Ok",
+      "supertype" : "Command"
+    },
+    {
+      "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
+      "type" : "Ok",
+      "supertype" : "Command"
+    },
+    {
       "type" : "Continue",
       "supertype" : "Command"
     }
@@ -3399,9 +3409,36 @@
       "supertype" : "Event"
     },
     {
+      "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
+      "action" : {
+        "type" : "Confirm"
+      },
+      "timeout" : null,
+      "type" : "Act",
+      "supertype" : "Command"
+    },
+    {
+      "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
+      "action" : {
+        "type" : "Confirm"
+      },
+      "timeout" : null,
+      "type" : "Act",
+      "supertype" : "Command"
+    },
+    {
+      "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
+      "type" : "PlayerConfirmed",
+      "supertype" : "Event"
+    },
+    {
+      "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
+      "type" : "PlayerConfirmed",
+      "supertype" : "Event"
+    },
+    {
       "type" : "Continue",
-      "supertype" : "Command",
-      "delay" : "AfterGameOver"
+      "supertype" : "Command"
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",

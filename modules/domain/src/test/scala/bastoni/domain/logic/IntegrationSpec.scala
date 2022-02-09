@@ -1,6 +1,7 @@
 package bastoni.domain
 package logic
 
+import bastoni.domain.ai.DumbPlayer
 import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.Continue

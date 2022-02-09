@@ -137,15 +137,20 @@ trait Room[C <: CardView]:
         updateWith(
           seats = mapTakenSeats {
             case player: SittingIn if player.is(playerId) =>
-              seat => seat.copy(
-                taken = taken.map(card => buildCard(card, if (scopa.contains(card)) Direction.Up else Direction.Down)) ++ seat.taken
-              )
+              seat => seat.copy(taken = taken.map(card => buildCard(card, if (scopa.contains(card)) Direction.Up else Direction.Down)) ++ seat.taken)
           },
           board = taken.foldLeft(board) {
             case (remainingBoardCards, toRemove) => remainingBoardCards.filterNot {
               case (_, boardCard) => boardCard.card.ref == toRemove.ref
             }
           }.map { case (_, card) => None -> card }  // who played what isn't important at this point
+        )
+
+      case Event.PlayerConfirmed(playerId) =>
+        updateWith(
+          seats = mapTakenSeats {
+            case player: ActingPlayer if player.is(playerId) => _.copy(player = player.done)
+          }
         )
 
       case Event.TrickCompleted(winnerId) =>
