@@ -1123,7 +1123,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1153,7 +1157,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1233,7 +1241,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1263,7 +1275,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1343,7 +1359,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1373,7 +1393,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1453,7 +1477,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1483,7 +1511,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1563,7 +1595,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1593,7 +1629,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1673,7 +1713,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1703,7 +1747,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1783,7 +1831,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1813,7 +1865,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1893,7 +1949,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -1923,7 +1983,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2003,7 +2067,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2033,7 +2101,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2113,7 +2185,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2143,7 +2219,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2223,7 +2303,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2253,7 +2337,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2333,7 +2421,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2363,7 +2455,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2443,7 +2539,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2473,7 +2573,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2553,7 +2657,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2583,7 +2691,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2663,7 +2775,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2693,7 +2809,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2773,7 +2893,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2803,7 +2927,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2883,7 +3011,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2913,7 +3045,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -2993,7 +3129,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -3023,7 +3163,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -3063,7 +3207,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -3093,7 +3241,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -3133,7 +3285,11 @@
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",
@@ -3163,7 +3319,11 @@
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
-        "type" : "PlayCard"
+        "type" : "PlayCard",
+        "context" : {
+          "type" : "Briscola",
+          "trump" : "Coppe"
+        }
       },
       "timeout" : 10,
       "type" : "Act",

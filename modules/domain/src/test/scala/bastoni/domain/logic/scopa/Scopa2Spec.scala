@@ -55,42 +55,42 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       BoardCardsDealt(List(cardOf(Cinque, Coppe), cardOf(Asso, Bastoni), cardOf(Cinque, Spade), cardOf(Sei, Bastoni))),
       Continue.afterDealingCards,
 
-      Act(user1.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user1.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(1215977239),
       CardPlayed(user1.id, cardOf(Sette, Denari)),
       Continue.beforeTakingCards,
       CardsTaken(user1.id, List(cardOf(Sette, Denari), cardOf(Asso, Bastoni), cardOf(Sei, Bastoni)), scopa = None),
       Continue.afterTakingCards,
 
-      Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(1358241511),
       CardPlayed(user2.id, cardOf(Quattro, Spade)),
       Continue.beforeTakingCards,
       CardsTaken(user2.id, Nil, None),
       Continue.afterTakingCards,
 
-      Act(user1.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user1.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(-161735769),
       CardPlayed(user1.id, cardOf(Asso, Spade)),
       Continue.beforeTakingCards,
       CardsTaken(user1.id, Nil, None),
       Continue.afterTakingCards,
 
-      Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(121586655),
       CardPlayed(user2.id, cardOf(Sei,Denari)),
       Continue.beforeTakingCards,
       CardsTaken(user2.id, List(cardOf(Sei,Denari), cardOf(Asso,Spade), cardOf(Cinque,Coppe)), None),
       Continue.afterTakingCards,
 
-      Act(user1.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user1.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(413378932),
       CardPlayed(user1.id, cardOf(Due,Bastoni)),
       Continue.beforeTakingCards,
       CardsTaken(user1.id, Nil, None),
       Continue.afterTakingCards,
 
-      Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(1414415910),
       CardPlayed(user2.id, cardOf(Re,Denari)),
       Continue.beforeTakingCards,
@@ -102,7 +102,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       CardsDealt(user2.id, List(cardOf(Fante,Bastoni), cardOf(Due,Denari), cardOf(Fante,Spade)), Direction.Player),
       Continue.afterDealingCards,
 
-      Act(user1.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user1.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(1364654232),
     )
   }
@@ -205,7 +205,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     newState shouldBe WaitingForPlayer(
       -1046079801,
       Timeout.Max,
-      Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       PlayRound(
         players = List(
           Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0),
@@ -229,7 +229,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
         scopa = None
       ),
       Continue.afterTakingCards,
-      Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(-1046079801)
     )
   }
@@ -255,7 +255,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
     finalState shouldBe WaitingForPlayer(
       -1379981441,
       Timeout.Max,
-      Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       PlayRound(
         players = List(
           Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0),
@@ -279,7 +279,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
         scopa = Some(cardOf(Sette, Denari))
       ),
       Continue.afterTakingCards,
-      Act(user2.id, Action.TakeCards, Some(Timeout.Max)),
+      Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(-1379981441)
     )
   }

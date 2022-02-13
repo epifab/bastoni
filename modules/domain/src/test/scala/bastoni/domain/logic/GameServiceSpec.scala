@@ -205,7 +205,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   2,
                   ActingPlayer(
                     MatchPlayer(user1, 0),
-                    Action.PlayCard,
+                    Action.PlayCard(PlayContext.Briscola(Coppe)),
                     Some(Timeout.Max)
                   ),
                   hand = List(
@@ -255,7 +255,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 ),
                 TakenSeat(
                   3,
-                  ActingPlayer(MatchPlayer(user2, 0), Action.PlayCard, Some(Timeout.Max)),
+                  ActingPlayer(MatchPlayer(user2, 0), Action.PlayCard(PlayContext.Briscola(Coppe)), Some(Timeout.Max)),
                   hand = List(
                     CardServerView(cardOf(Quattro, Spade), Direction.Player),
                     CardServerView(cardOf(Sei, Denari), Direction.Player),
@@ -336,7 +336,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         seats = List(
           TakenSeat(
             0,
-            player = ActingPlayer(player1, Action.PlayCard, Some(Timeout.Max)),
+            player = ActingPlayer(player1, Action.PlayCard(PlayContext.Briscola(Denari)), Some(Timeout.Max)),
             hand = List(CardServerView(player1Card, Direction.Player)),
             taken = player1Collected.map(card => CardServerView(card, Direction.Down))
           ),

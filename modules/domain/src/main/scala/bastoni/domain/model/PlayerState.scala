@@ -24,9 +24,7 @@ object PlayerState:
     def mapPlayer(f: MatchPlayer => MatchPlayer): ActingPlayer  = copy(player = f(player))
     def done: WaitingPlayer = WaitingPlayer(player)
     def playing: Boolean = action match {
-      case Action.PlayCard => true
-      case Action.PlayCardOf(_) => true
-      case Action.TakeCards => true
+      case Action.PlayCard(_) => true
       case _ => false
     }
 

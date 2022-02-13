@@ -92,7 +92,7 @@ object BriscolaGame extends GenericGameLogic:
       withTimeout(
         state = playRound,
         player = playRound.todo.head.id,
-        action = Action.PlayCard
+        action = Action.PlayCard(PlayContext.Briscola(playRound.trump.suit))
       )
 
     case (DrawRound(player :: todo, done, deck, trump), Continue) =>
@@ -105,7 +105,7 @@ object BriscolaGame extends GenericGameLogic:
       withTimeout(
         state = PlayRound(done, Nil, deck, trump),
         player = done.head.id,
-        action = Action.PlayCard,
+        action = Action.PlayCard(PlayContext.Briscola(trump.suit)),
         before = Nil
       )
 

@@ -110,7 +110,7 @@ object TressetteGame extends GenericGameLogic:
       withTimeout(
         state = round,
         player = round.todo.head.id,
-        action = round.done.headOption.map(_._2.suit).fold(Action.PlayCard)(Action.PlayCardOf.apply)
+        action = Action.PlayCard(PlayContext.Tressette(round.done.headOption.map(_._2.suit)))
       )
 
     case (PlayRound(player :: next :: players, Nil, deck), PlayCard(p, card)) if player.is(p) && player.canPlay(card) =>

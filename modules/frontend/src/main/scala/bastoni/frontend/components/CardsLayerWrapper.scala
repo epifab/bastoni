@@ -67,13 +67,13 @@ object CardsLayerWrapper:
 
     private def selectable(game: GameState, state: State): Map[CardId, Callback] = {
       game.currentRoom.mainPlayer.fold(Map.empty)(seat => seat.player match {
-        case PlayerState.ActingPlayer(_, Action.PlayCard, timeout) if !timeout.contains(Timeout.TimedOut) =>
+        case PlayerState.ActingPlayer(_, Action.PlayCard(PlayContext.Briscola(_) | PlayContext.Tressette(None)), timeout) if !timeout.contains(Timeout.TimedOut) =>
           seat
             .hand.flatMap(_.card.toOption)
             .map { (card: VisibleCard) => card.ref -> game.sendMessage(FromPlayer.PlayCard(card)) }
             .toMap
 
-        case PlayerState.ActingPlayer(_, Action.PlayCardOf(suit), timeout) if !timeout.contains(Timeout.TimedOut) =>
+        case PlayerState.ActingPlayer(_, Action.PlayCard(PlayContext.Tressette(Some(suit))), timeout) if !timeout.contains(Timeout.TimedOut) =>
           val hand: List[VisibleCard] = seat.hand.flatMap(_.card.toOption)
           val anyCard: Boolean = hand.forall(_.suit != suit)
           hand.collect {
@@ -81,7 +81,7 @@ object CardsLayerWrapper:
               card.ref -> game.sendMessage(FromPlayer.PlayCard(card))
           }.toMap
 
-        case PlayerState.ActingPlayer(_, Action.TakeCards, timeout) if !timeout.contains(Timeout.TimedOut)=>
+        case PlayerState.ActingPlayer(_, Action.PlayCard(PlayContext.Scopa), timeout) if !timeout.contains(Timeout.TimedOut)=>
           state.takingCards match {
             case None =>
               seat.hand.flatMap(_.card.toOption).map { cardInHand =>

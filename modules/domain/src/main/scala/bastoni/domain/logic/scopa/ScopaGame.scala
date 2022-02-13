@@ -80,7 +80,7 @@ object ScopaGame extends GenericGameLogic:
           withTimeout(
             PlayRound(players, newDeck, board = Nil, lastTake = None),
             done.head.id,
-            Action.TakeCards,
+            Action.PlayCard(PlayContext.Scopa),
             List(cardsDealt)
           )
         else Deal5Round(players, newDeck) -> List(cardsDealt, Continue.afterDealingCards)
@@ -115,7 +115,7 @@ object ScopaGame extends GenericGameLogic:
       withTimeout(
         state = playRound,
         player = playRound.players.head.id,
-        action = Action.TakeCards
+        action = Action.PlayCard(PlayContext.Scopa)
       )
 
     case (state@ PlayRound(player :: _, _, board, _), command@ TakeCards(playerId, played, taken)) if player.is(playerId) && player.has(played) && legalPlay(board, played, taken) =>
