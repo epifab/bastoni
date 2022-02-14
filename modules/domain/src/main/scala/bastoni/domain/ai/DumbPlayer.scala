@@ -13,11 +13,11 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.chaining.*
 
 object DumbPlayer extends ActStrategy:
-  def apply[F[_]: Sync: Temporal](me: User, roomId: RoomId, subscriber: GameSubscriber[F], publisher: GamePublisher[F], pause: FiniteDuration = 0.millis): fs2.Stream[F, Unit] =
-    VirtualPlayer(me, roomId, subscriber, publisher, strategy = DumbPlayer, pause)
+  def apply[F[_]: Sync: Temporal](publisher: GamePublisher[F], subscriber: GameSubscriber[F], pause: FiniteDuration = 0.millis): VirtualPlayer[F] =
+    VirtualPlayer(publisher, subscriber, DumbPlayer, pause)
 
   def act(context: ActContext, action: Action): FromPlayer =
-    act(context.room, context.seat, action)
+    act(context.room, context.mySeat, action)
 
   def act(room: Room[CardPlayerView], seat: TakenSeat[CardPlayerView], action: Action): FromPlayer = {
     val hand: List[VisibleCard] = seat.hand.flatMap(_.card.toOption)
@@ -34,7 +34,7 @@ object DumbPlayer extends ActStrategy:
 
       case Action.PlayCard(PlayContext.Scopa) =>
         val cardToPlay: VisibleCard = hand.pickFirst
-        val board: List[VisibleCard] = room.board.flatMap { case (_, c) => c.card.toOption }
+        val board: List[VisibleCard] = room.board.flatMap(_.card.toOption)
         val takes = ScopaGame.takeCombinations(board, cardToPlay).next().toList
         TakeCards(cardToPlay, takes)
 

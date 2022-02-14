@@ -6,7 +6,7 @@ import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.deriveCodec
 
 object BriscolaGameScoreCalculator:
-  def pointsFor(card: VisibleCard): Int = card.rank match {
+  def pointsFor(card: Card): Int = card.rank match {
     case Rank.Asso => 11
     case Rank.Tre => 10
     case Rank.Re => 4

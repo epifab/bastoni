@@ -13,14 +13,14 @@ import scala.concurrent.duration.DurationInt
 case class ActContext(
   matchInfo: MatchInfo,
   room: Room[CardPlayerView],
-  seat: TakenSeat[CardPlayerView]
+  mySeat: TakenSeat[CardPlayerView]
 )
 
 trait ActStrategy:
   def act(context: ActContext, action: Action): FromPlayer
 
-object VirtualPlayer:
-  def apply[F[_]: Sync: Temporal](me: User, roomId: RoomId, subscriber: GameSubscriber[F], publisher: GamePublisher[F], strategy: ActStrategy, pause: FiniteDuration = 0.millis): fs2.Stream[F, Unit] =
+class VirtualPlayer[F[_]: Sync: Temporal](publisher: GamePublisher[F], subscriber: GameSubscriber[F], strategy: ActStrategy, pause: FiniteDuration = 0.millis):
+  def play(me: User, roomId: RoomId): fs2.Stream[F, Unit] =
     val actions = fs2.Stream(Connect, JoinRoom) ++ subscriber
       .subscribe(me, roomId)
       .zipWithScan1(Option.empty[RoomPlayerView]) {

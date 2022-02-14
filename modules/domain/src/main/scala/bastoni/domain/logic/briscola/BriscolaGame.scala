@@ -149,24 +149,31 @@ object BriscolaGame extends GenericGameLogic:
       Completed(updatedPlayers) -> List(GameCompleted(gameScores.map(_.generify), matchScores))
   }
 
-  extension(card: VisibleCard)
-    def >(other: VisibleCard): Boolean =
-      val points = BriscolaGameScoreCalculator.pointsFor(card)
-      val otherPoints = BriscolaGameScoreCalculator.pointsFor(other)
-      (points > otherPoints) || (points == otherPoints && card.rank.value > other.rank.value)
+  given order: Ordering[Card] with
+    def compare(a: Card, b: Card): Int = {
+      val points = BriscolaGameScoreCalculator.pointsFor(a)
+      val otherPoints = BriscolaGameScoreCalculator.pointsFor(b)
+      (points - otherPoints) match
+        case 0 => a.rank.value - b.rank.value
+        case x => x
+    }
+
+  extension(card: Card)
+    def >(other: Card): Boolean = order.compare(card, other) > 0
+
+  def bestCard[C <: Card](trump: Suit, round: List[C]): C =
+    @tailrec
+    def bestRec(l: List[C], c: Option[C]): C = (l, c) match {
+      case (Nil, Some(best)) => best
+      case (Nil, None) => throw new IllegalArgumentException("Empty list of cards")
+      case (head :: tail, None) => bestRec(tail, Some(head))
+      case (head :: tail, Some(best)) if head.suit == best.suit && head > best => bestRec(tail, Some(head))
+      case (head :: tail, Some(best)) if head.suit != best.suit && head.suit == trump => bestRec(tail, Some(head))
+      case (head :: tail, better) => bestRec(tail, better)
+    }
+    bestRec(round, None)
 
   private def completeTrick(players: List[(Player, VisibleCard)], trump: VisibleCard): List[Player] =
-    @tailrec
-    def trickWinner(winner: Option[(Player, VisibleCard)], opponents: List[(Player, VisibleCard)]): Player =
-      (winner, opponents) match {
-        case (Some((winner, card)), Nil) => winner
-        case (None, Nil) => throw new IllegalArgumentException("Can't detect the winner for an empty list of players")
-        case (None, head :: tail) => trickWinner(Some(head), tail)
-        case (Some((winner, winnerCard)), (opponent, opponentCard) :: tail) if winnerCard.suit == opponentCard.suit && opponentCard > winnerCard =>
-          trickWinner(Some((opponent, opponentCard)), tail)
-        case (Some((winner, winnerCard)), (opponent, opponentCard) :: tail) if winnerCard.suit != opponentCard.suit && opponentCard.suit == trump.suit =>
-          trickWinner(Some((opponent -> opponentCard)), tail)
-        case (winner, _ :: tail) => trickWinner(winner, tail)
-      }
-    val winner: Player = trickWinner(None, players).take(players.map(_(1)))
-    winner :: players.map(_(0)).slideUntil(_.is(winner)).tail
+    val best: VisibleCard = bestCard(trump.suit, players.map(_._2))
+    val winner: Player = players.collectFirst { case (player, card) if best == card => player }.get
+    winner.take(players.map(_(1))) :: players.map(_(0)).slideUntil(_.is(winner)).tail

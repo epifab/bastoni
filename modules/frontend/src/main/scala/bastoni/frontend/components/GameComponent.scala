@@ -1,7 +1,8 @@
 package bastoni.frontend
 package components
 
-import bastoni.domain.ai.DumbPlayer
+import bastoni.domain.ai
+import bastoni.domain.ai.{GreedyPlayer, VirtualPlayer}
 import bastoni.domain.logic.Services
 import bastoni.domain.model.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
@@ -10,15 +11,15 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.component.Scala.BackendScope
-import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import japgolly.scalajs.react.vdom.html_<^.*
+import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import org.scalajs.dom
 import org.scalajs.dom.html.Image
 import org.scalajs.dom.{Console, HTMLImageElement, console, window}
 import reactkonva.{KGroup, KLayer, KStage}
 
-import scala.scalajs.js
 import scala.concurrent.duration.DurationInt
+import scala.scalajs.js
 
 extension[T](io: IO[T])
   def toCallback: Callback = Callback(io.unsafeRunAsync {
@@ -85,10 +86,11 @@ object GameComponent:
       (pub, sub, runner) = backend
       roomId = RoomId.newId
 
+      virtualPlayer = VirtualPlayer(pub, sub, GreedyPlayer, pause = 1.second)
       me = User(UserId.newId, "ME")
-      p1 = DumbPlayer(User(UserId.newId, "Tizio"), roomId, sub, pub, pause = 1.second)
-      p2 = DumbPlayer(User(UserId.newId, "Caio"), roomId, sub, pub, pause = 1.second)
-      p3 = DumbPlayer(User(UserId.newId, "Sempronio"), roomId, sub, pub, pause = 1.second)
+      p1 = virtualPlayer.play(User(UserId.newId, "Tizio"), roomId)
+      p2 = virtualPlayer.play(User(UserId.newId, "Caio"), roomId)
+      p3 = virtualPlayer.play(User(UserId.newId, "Sempronio"), roomId)
 
       rooms <- sub.subscribe(me, roomId)
         .scan[Option[RoomPlayerView]](None) {

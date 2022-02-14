@@ -5,6 +5,8 @@ import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
 sealed trait CardView:
   def card: CardInstance
+  def ref: CardId = card.ref
+  def toOption: Option[VisibleCard] = card.toOption
 
 case class CardPlayerView(card: CardInstance) extends CardView
 

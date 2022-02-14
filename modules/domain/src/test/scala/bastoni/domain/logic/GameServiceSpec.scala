@@ -265,7 +265,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 )
               ),
               deck = shuffledDeck.asList.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
-              board = List(Some(user1.id) -> CardServerView(cardOf(Due, Bastoni), Direction.Up)),
+              board = List(BoardCard(CardServerView(cardOf(Due, Bastoni), Direction.Up), playedBy = Some(user1.id))),
               matchInfo = Some(MatchInfo(
                 GameType.Briscola,
                 List(
@@ -348,7 +348,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           )
         ),
         deck = Nil,
-        board = List(None -> CardServerView(player2Card, Direction.Up)),
+        board = List(BoardCard(CardServerView(player2Card, Direction.Up), playedBy = None)),
         matchInfo = Some(MatchInfo(GameType.Briscola, Nil, None)),
         dealerIndex = None
       ),

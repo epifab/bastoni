@@ -10,7 +10,7 @@ enum RoomError:
 case class RoomServerView(
   override val seats: List[Seat[CardServerView]],
   override val deck: List[CardServerView],
-  override val board: List[(Option[UserId], CardServerView)],
+  override val board: List[BoardCard[CardServerView]],
   override val matchInfo: Option[MatchInfo],
   override val dealerIndex: Option[Int]
 ) extends Room[CardServerView]:
@@ -20,7 +20,7 @@ case class RoomServerView(
   override protected def updateWith(
     seats: List[Seat[CardServerView]] = this.seats,
     deck: List[CardServerView] = this.deck,
-    board: List[(Option[UserId], CardServerView)] = this.board,
+    board: List[BoardCard[CardServerView]] = this.board,
     matchInfo: Option[MatchInfo] = this.matchInfo,
     dealerIndex: Option[Int] = this.dealerIndex
   ): RoomServerView = RoomServerView(seats, deck, board, matchInfo, dealerIndex)
@@ -50,7 +50,7 @@ case class RoomServerView(
         }
       },
       deck = deck.map(_.toPlayerView(me, None)),
-      board = board.map { case (u, c) => u -> c.toPlayerView(me, None) },
+      board = board.map(boardCard => BoardCard(boardCard.card.toPlayerView(me, None), boardCard.playedBy)),
       matchInfo = matchInfo,
       dealerIndex = dealerIndex
     )

@@ -44,7 +44,7 @@ object CardsLayerWrapper:
           room.opponent2.map(_.player.id -> RoomPlayer.Player2).toMap ++
           room.opponent3.map(_.player.id -> RoomPlayer.Player3).toMap
 
-      layout.renderBoard(room.board.reverse.map { case (user, card) => user.flatMap(players.get) -> card.card })
+      layout.renderBoard(room.board.reverse.map { case BoardCard(card, user) => user.flatMap(players.get) -> card.card })
     }
 
     private def handsLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] = {
@@ -86,7 +86,7 @@ object CardsLayerWrapper:
             case None =>
               seat.hand.flatMap(_.card.toOption).map { cardInHand =>
                 val takeCombinations: Set[Set[VisibleCard]] = scopa.ScopaGame.takeCombinations(
-                  game.currentRoom.board.flatMap(_._2.card.toOption),
+                  game.currentRoom.board.flatMap(_.card.toOption),
                   cardInHand
                 ).toSet
 
@@ -98,7 +98,7 @@ object CardsLayerWrapper:
 
             case Some(TakingCardsState(played, selected, options)) =>
               Map(played.ref -> $.modState(_.copy(takingCards = None))) ++ game.currentRoom.board.flatMap {
-                case (_, CardPlayerView(card: VisibleCard)) if !selected.contains(card) =>
+                case BoardCard(CardPlayerView(card: VisibleCard), _) if !selected.contains(card) =>
                   val selectedComb: Set[VisibleCard] = (card :: selected).toSet
                   val matchingCombs: Set[Set[VisibleCard]] = options.filter(_.intersect(selectedComb) == selectedComb)
                   val completedComb: Boolean = matchingCombs.contains(selectedComb)
@@ -110,7 +110,7 @@ object CardsLayerWrapper:
                     }
                   }
 
-                case (_, CardPlayerView(card: VisibleCard)) =>
+                case BoardCard(CardPlayerView(card: VisibleCard), _) =>
                   Some(card.ref -> $.modState(_.copy(takingCards = Some(TakingCardsState(played, selected.filterNot(_ == card), options)))))
 
                 case _ => None  // practically impossible

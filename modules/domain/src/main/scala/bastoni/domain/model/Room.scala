@@ -8,12 +8,17 @@ import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 import scala.util.Random
 
 
+case class BoardCard[C <: CardView](card: C, playedBy: Option[UserId])
+
+object BoardCard:
+  given codec[C <: CardView: Codec]: Codec[BoardCard[C]] = deriveCodec
+
 trait Room[C <: CardView]:
   type RoomView
 
   val seats: List[Seat[C]]
   val deck: List[C]
-  val board: List[(Option[UserId], C)]
+  val board: List[BoardCard[C]]
   val matchInfo: Option[MatchInfo]
   val dealerIndex: Option[Int]
 
@@ -56,7 +61,7 @@ trait Room[C <: CardView]:
   protected def updateWith(
     seats: List[Seat[C]] = this.seats,
     deck: List[C] = this.deck,
-    board: List[(Option[UserId], C)] = this.board,
+    board: List[BoardCard[C]] = this.board,
     matchInfo: Option[MatchInfo] = matchInfo,
     dealerIndex: Option[Int] = dealerIndex
   ): RoomView
@@ -119,7 +124,7 @@ trait Room[C <: CardView]:
         )
 
       case Event.BoardCardsDealt(board) =>
-        updateWith(board = board.map(c => None -> buildCard(c, Direction.Up)))
+        updateWith(board = board.map(c => BoardCard(buildCard(c, Direction.Up), playedBy = None)))
 
       case Event.CardPlayed(playerId, card) =>
         updateWith(
@@ -130,7 +135,7 @@ trait Room[C <: CardView]:
                 hand = removeCard(seat.hand, card)
               )
           },
-          board = Some(playerId) -> buildCard(card, Direction.Up) :: board
+          board = BoardCard(buildCard(card, Direction.Up), playedBy = Some(playerId)) :: board
         )
 
       case Event.CardsTaken(playerId, taken, scopa) =>
@@ -140,10 +145,9 @@ trait Room[C <: CardView]:
               seat => seat.copy(taken = taken.map(card => buildCard(card, if (scopa.contains(card)) Direction.Up else Direction.Down)) ++ seat.taken)
           },
           board = taken.foldLeft(board) {
-            case (remainingBoardCards, toRemove) => remainingBoardCards.filterNot {
-              case (_, boardCard) => boardCard.card.ref == toRemove.ref
-            }
-          }.map { case (_, card) => None -> card }  // who played what isn't important at this point
+            case (remainingBoardCards, toRemove) =>
+              remainingBoardCards.filterNot(_.card.ref == toRemove.ref)
+          }.map(_.copy(playedBy = None))  // who played what isn't important at this point
         )
 
       case Event.PlayerConfirmed(playerId) =>
@@ -157,7 +161,7 @@ trait Room[C <: CardView]:
         updateWith(
           seats = mapTakenSeats {
             case player if player.is(winnerId) =>
-              seat => seat.copy(taken = seat.taken ++ board.map { case (_, card) => faceDown(card) })
+              seat => seat.copy(taken = seat.taken ++ board.map(_.card).map(faceDown))
           },
           board = Nil
         )
