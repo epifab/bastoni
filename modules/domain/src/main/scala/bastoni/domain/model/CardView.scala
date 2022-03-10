@@ -14,8 +14,8 @@ case class CardServerView(card: VisibleCard, facing: Direction) extends CardView
 
   def toPlayerView(me: UserId, context: Option[UserId]): CardPlayerView = facing match {
     case Direction.Up => CardPlayerView(card)
-    case Direction.Down => CardPlayerView(card.hidden)
-    case _ => CardPlayerView(if (context.contains(me)) card else card.hidden)
+    case Direction.Down => CardPlayerView(card.hide)
+    case _ => CardPlayerView(if (context.contains(me)) card else card.hide)
   }
 
 object CardPlayerView:

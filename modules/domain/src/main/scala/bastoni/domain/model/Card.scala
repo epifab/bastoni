@@ -49,20 +49,22 @@ object SimpleCard:
 
 sealed trait CardInstance extends CardRef:
   def toOption: Option[VisibleCard]
+  def hide: HiddenCard
   def isHidden: Boolean = toOption.isEmpty
   def contains(card: SimpleCard): Boolean = toOption.map(_.simple).contains(card)
-  def hidden: HiddenCard = HiddenCard(ref)
 
 case class VisibleCard(rank: Rank, suit: Suit, ref: CardId) extends CardInstance with Card:
-  override def toOption: Option[VisibleCard] = Some(this)
   def simple: SimpleCard = SimpleCard(rank, suit)
+  override def toOption: Option[VisibleCard] = Some(this)
+  override def hide: HiddenCard = HiddenCard(ref, Some(simple))
 
 object VisibleCard:
   given Encoder[VisibleCard] = deriveEncoder
   given Decoder[VisibleCard] = deriveDecoder
 
-case class HiddenCard(ref: CardId) extends CardInstance:
+case class HiddenCard(ref: CardId, card: Option[Card] = None) extends CardInstance:
   override def toOption: Option[VisibleCard] = None
+  override def hide: HiddenCard = this
 
 object HiddenCard:
   given Encoder[HiddenCard] = deriveEncoder

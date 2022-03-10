@@ -21,10 +21,10 @@ case class RoomPlayerView(
 
   override protected def buildCard(card: VisibleCard, direction: Direction): CardPlayerView = CardPlayerView(direction match {
     case Direction.Up => card
-    case _ => card.hidden
+    case _ => card.hide
   })
 
-  override protected def faceDown(card: CardPlayerView): CardPlayerView = card.copy(card = card.card.hidden)
+  override protected def faceDown(card: CardPlayerView): CardPlayerView = card.copy(card = card.card.hide)
 
   def update(event: PlayerEvent): RoomPlayerView = event match {
     case Event.DeckShuffledPlayerView(numberOfCards) =>

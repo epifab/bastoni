@@ -28,9 +28,13 @@ object GreedyPlayer extends ActStrategy:
 
         PlayCard(toPlay)
 
-      case Action.PlayCard(PlayContext.Tressette(_)) => ???
+      case Action.PlayCard(PlayContext.Tressette(_)) =>
+        // todo: implement me
+        DumbPlayer.act(context, action)
 
-      case Action.PlayCard(PlayContext.Scopa) => ???
+      case Action.PlayCard(PlayContext.Scopa) =>
+        // todo: implement me
+        DumbPlayer.act(context, action)
 
       case Action.ShuffleDeck => ShuffleDeck
 
