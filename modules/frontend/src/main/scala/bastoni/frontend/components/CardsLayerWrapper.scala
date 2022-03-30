@@ -21,9 +21,9 @@ object CardsLayerWrapper:
 
     private def pilesLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] = {
       val data: List[Option[List[CardInstance]]] = List(
-        room.opponent1.map(_.taken.map(_.card)),
-        room.opponent2.map(_.taken.map(_.card)),
-        room.opponent3.map(_.taken.map(_.card)),
+        room.opponentLeft.map(_.taken.map(_.card)),
+        room.opponentFront.map(_.taken.map(_.card)),
+        room.opponentRight.map(_.taken.map(_.card)),
         room.mainPlayer.map(_.taken.map(_.card))
       )
 
@@ -40,18 +40,18 @@ object CardsLayerWrapper:
     private def boardLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] = {
       val players: Map[UserId, RoomPlayer] =
         room.mainPlayer.map(_.player.id -> RoomPlayer.MainPlayer).toMap ++
-          room.opponent1.map(_.player.id -> RoomPlayer.Player1).toMap ++
-          room.opponent2.map(_.player.id -> RoomPlayer.Player2).toMap ++
-          room.opponent3.map(_.player.id -> RoomPlayer.Player3).toMap
+          room.opponentLeft.map(_.player.id -> RoomPlayer.Player1).toMap ++
+          room.opponentFront.map(_.player.id -> RoomPlayer.Player2).toMap ++
+          room.opponentRight.map(_.player.id -> RoomPlayer.Player3).toMap
 
       layout.renderBoard(room.board.reverse.map { case BoardCard(card, user) => user.flatMap(players.get) -> card.card })
     }
 
     private def handsLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] = {
       val data: List[Option[List[CardInstance]]] = List(
-        room.opponent1.map(_.hand.map(_.card)),
-        room.opponent2.map(_.hand.map(_.card)),
-        room.opponent3.map(_.hand.map(_.card)),
+        room.opponentLeft.map(_.hand.map(_.card)),
+        room.opponentFront.map(_.hand.map(_.card)),
+        room.opponentRight.map(_.hand.map(_.card)),
         room.mainPlayer.map(_.hand.map(_.card))
       )
 

@@ -65,9 +65,9 @@ object GameComponent:
           KLayer(
             List(
               gameState.currentRoom.mainPlayer.map(seat => PlayerComponent(seat.player, state.currentLayout.mainPlayer, gameState.currentRoom.dealerIndex.contains(seat.index))),
-              gameState.currentRoom.opponent1.map(seat => PlayerComponent(seat.player, state.currentLayout.player1, gameState.currentRoom.dealerIndex.contains(seat.index))),
-              gameState.currentRoom.opponent2.map(seat => PlayerComponent(seat.player, state.currentLayout.player2, gameState.currentRoom.dealerIndex.contains(seat.index))),
-              gameState.currentRoom.opponent3.map(seat => PlayerComponent(seat.player, state.currentLayout.player3, gameState.currentRoom.dealerIndex.contains(seat.index))),
+              gameState.currentRoom.opponentLeft.map(seat => PlayerComponent(seat.player, state.currentLayout.player1, gameState.currentRoom.dealerIndex.contains(seat.index))),
+              gameState.currentRoom.opponentFront.map(seat => PlayerComponent(seat.player, state.currentLayout.player2, gameState.currentRoom.dealerIndex.contains(seat.index))),
+              gameState.currentRoom.opponentRight.map(seat => PlayerComponent(seat.player, state.currentLayout.player3, gameState.currentRoom.dealerIndex.contains(seat.index))),
             ).flatten: _*
           )
         )
@@ -108,7 +108,7 @@ object GameComponent:
         }
         .evalMap(gameState => $.modState(_.update(gameState)).toIO)
         .concurrently(runner)
-        .concurrently(p1).concurrently(p2).concurrently(p3)
+        .concurrently(p1)  // .concurrently(p2).concurrently(p3)
         .concurrently(pub.publish(me, roomId)(
           fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinRoom).delayBy(1.second) ++
             fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartMatch(gameType))

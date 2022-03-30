@@ -39,23 +39,25 @@ case class RoomPlayerView(
     case event: PublicEvent => publicEventUpdate(event)
   }
 
-  val opponents: List[Seat[CardPlayerView]] =
+  val opponents: List[TakenSeat[CardPlayerView]] =
     seats
       .slideUntil(_.playerOption.exists(_.is(me)))
       .filterNot(_.playerOption.exists(_.is(me)))
-    
-  private def opponent(offset: Int): Option[TakenSeat[CardPlayerView]] =
-    extension[T](list: List[T])
-      def get(index: Int): Option[T] =
-        list match {
-          case Nil => None
-          case head :: tail if index == 0 => Some(head)
-          case head :: tail => tail.get(index - 1)
-        }
+      .collect { case taken: TakenSeat[CardPlayerView] => taken }
 
-    opponents.get(offset) collectFirst { case taken: TakenSeat[CardPlayerView] => taken }
-
-  val opponent1: Option[TakenSeat[CardPlayerView]] = opponent(0)
-  val opponent2: Option[TakenSeat[CardPlayerView]] = opponent(1)
-  val opponent3: Option[TakenSeat[CardPlayerView]] = opponent(2)
+  val opponentLeft: Option[TakenSeat[CardPlayerView]] = opponents match {
+    case left :: _ :: _ :: Nil => Some(left)
+    case left :: _ :: Nil => Some(left)
+    case _ => None
+  }
+  val opponentFront: Option[TakenSeat[CardPlayerView]] = opponents match {
+    case _ :: center :: _ :: Nil => Some(center)
+    case center :: Nil => Some(center)
+    case _ => None
+  }
+  val opponentRight: Option[TakenSeat[CardPlayerView]] = opponents match {
+    case _ :: _ :: right :: Nil => Some(right)
+    case _ :: right :: Nil => Some(right)
+    case _ => None
+  }
   val mainPlayer: Option[TakenSeat[CardPlayerView]] = seatFor(me)
