@@ -17,7 +17,7 @@ object App extends IOApp:
   val webServer: ServerBuilder[IO] = {
     BlazeServerBuilder[IO]
       .withHttpApp(GZip(router).orNotFound)
-      .bindHttp(9001, "0.0.0.0")
+      .bindHttp(9090, "0.0.0.0")
   }
 
   override def run(args: List[String]): IO[ExitCode] =

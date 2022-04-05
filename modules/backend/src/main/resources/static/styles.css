@@ -11,15 +11,10 @@ body {
 
 h1 {
     text-align: center;
-    padding: 10px;
-    margin: 0 0 20px 0;
-    background-color: #222;
 }
 
 h1 img {
-    max-width: 150px;
-    background-color: #eec61e;
-    border-radius: 50px;
+    width: 90%;
 }
 
 .spinning {
@@ -31,146 +26,50 @@ h1 img {
     to { transform: rotate(360deg); }
 }
 
-
-.hand .cards {
+.game-score-info {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 2;
     text-align: center;
+    padding: 0;
 }
 
-.card {
-    background-image: url('/static/carte/retro.jpg');
-    background-size: 100%;
-    display: inline-block;
+.game-score-info table {
+    width: 100%;
+    margin-top: 40px;
+    padding: 0;
 }
 
-.card.lg {
-    box-shadow: -10px 0 15px -4px #222;
-    margin: 0 3px;
-    width: 90px;
-    height: 148px;
-    border-radius: 5px;
+.game-score-info table th {
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    margin: 4px;
 }
 
-.card.md {
-    box-shadow: -5px 0 2px -4px #222;
-    margin: 0 1px;
-    width: 45px;
-    height: 74px;
-    border-radius: 2px;
-}
-
-.card.sm {
-    box-shadow: -2px 0 1px -2px #222;
-    margin: 0;
-    width: 27px;
-    height: 45px;
-    border-radius: 1px;
-}
-
-.card.denari.asso { background-image: url('/static/carte/denari/01.jpg') }
-.card.denari.due { background-image: url('/static/carte/denari/02.jpg') }
-.card.denari.tre { background-image: url('/static/carte/denari/03.jpg') }
-.card.denari.quattro { background-image: url('/static/carte/denari/04.jpg') }
-.card.denari.cinque { background-image: url('/static/carte/denari/05.jpg') }
-.card.denari.sei { background-image: url('/static/carte/denari/06.jpg') }
-.card.denari.sette { background-image: url('/static/carte/denari/07.jpg') }
-.card.denari.fante { background-image: url('/static/carte/denari/08.jpg') }
-.card.denari.cavallo { background-image: url('/static/carte/denari/09.jpg') }
-.card.denari.re { background-image: url('/static/carte/denari/10.jpg') }
-
-.card.coppe.asso { background-image: url('/static/carte/coppe/01.jpg') }
-.card.coppe.due { background-image: url('/static/carte/coppe/02.jpg') }
-.card.coppe.tre { background-image: url('/static/carte/coppe/03.jpg') }
-.card.coppe.quattro { background-image: url('/static/carte/coppe/04.jpg') }
-.card.coppe.cinque { background-image: url('/static/carte/coppe/05.jpg') }
-.card.coppe.sei { background-image: url('/static/carte/coppe/06.jpg') }
-.card.coppe.sette { background-image: url('/static/carte/coppe/07.jpg') }
-.card.coppe.fante { background-image: url('/static/carte/coppe/08.jpg') }
-.card.coppe.cavallo { background-image: url('/static/carte/coppe/09.jpg') }
-.card.coppe.re { background-image: url('/static/carte/coppe/10.jpg') }
-
-.card.spade.asso { background-image: url('/static/carte/spade/01.jpg') }
-.card.spade.due { background-image: url('/static/carte/spade/02.jpg') }
-.card.spade.tre { background-image: url('/static/carte/spade/03.jpg') }
-.card.spade.quattro { background-image: url('/static/carte/spade/04.jpg') }
-.card.spade.cinque { background-image: url('/static/carte/spade/05.jpg') }
-.card.spade.sei { background-image: url('/static/carte/spade/06.jpg') }
-.card.spade.sette { background-image: url('/static/carte/spade/07.jpg') }
-.card.spade.fante { background-image: url('/static/carte/spade/08.jpg') }
-.card.spade.cavallo { background-image: url('/static/carte/spade/09.jpg') }
-.card.spade.re { background-image: url('/static/carte/spade/10.jpg') }
-
-.card.bastoni.asso { background-image: url('/static/carte/bastoni/01.jpg') }
-.card.bastoni.due { background-image: url('/static/carte/bastoni/02.jpg') }
-.card.bastoni.tre { background-image: url('/static/carte/bastoni/03.jpg') }
-.card.bastoni.quattro { background-image: url('/static/carte/bastoni/04.jpg') }
-.card.bastoni.cinque { background-image: url('/static/carte/bastoni/05.jpg') }
-.card.bastoni.sei { background-image: url('/static/carte/bastoni/06.jpg') }
-.card.bastoni.sette { background-image: url('/static/carte/bastoni/07.jpg') }
-.card.bastoni.fante { background-image: url('/static/carte/bastoni/08.jpg') }
-.card.bastoni.cavallo { background-image: url('/static/carte/bastoni/09.jpg') }
-.card.bastoni.re { background-image: url('/static/carte/bastoni/10.jpg') }
-
-.card.lg { margin-left: -10px; }
-.card.md { margin-left: -7px; }
-.card.sm { margin-left: -4px; }
-
-.board .card { margin-left: 2px }
-
-.card {
-    position: relative;
-}
-
-.card .occurrences {
-    position: absolute;
-    background-color: #FFF;
-    border-radius: 20px;
-    font-weight: bold;
-    color: #000;
-    border: 2px solid #AAA;
-}
-
-.card.md .occurrences {
-    top: 20px;
-    left: 6px;
-    padding: 5px 10px;
-}
-
-.card.sm .occurrences {
-    top: 5px;
-    left: 2px;
-    padding: 5px 10px;
-}
-
-.table, .opponents {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-}
-
-.seat {
-    grid-column: span 4;
-}
-
-.seat .player {
-    border-radius: 40px 40px 0 0;
+.game-score-info table td {
+    padding: 10px;
+    background-color: #222;
     text-align: center;
-    background-color: #274558;
-    padding: 5px;
-    margin: 0 2px;
+    margin: 4px;
 }
 
-.table {
-    margin: 10px 0;
-    min-height: 50px;
-    padding: 30px 0;
-    background: rgb(37,90,52);
-    background: radial-gradient(circle, rgba(8,166,53,1) 9%, rgba(19,108,39,1) 65%, rgba(17,70,29,1) 91%);
-    border-radius: 30px;
+button {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 0;
+    padding: 10px 20px;
+    cursor: pointer;
+    width: 80%;
+    margin: 20px 20px 20px;
 }
 
-.board {
-    grid-column: span 8;
-}
-
-.deck {
-    grid-column: span 4;
+button:hover {
+    background-color: #ffe200;
 }

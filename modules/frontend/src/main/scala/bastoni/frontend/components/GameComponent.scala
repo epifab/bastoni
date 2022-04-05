@@ -53,26 +53,29 @@ object GameComponent:
   private class GameComponentBackend($: BackendScope[GameType, State]):
     def render(state: State): VdomNode = state.gameState match
       case Some(gameState) =>
-        KStage(
-          { p =>
-            p.width = window.innerWidth
-            p.height = window.innerHeight
-          },
-          TableLayer(state.currentLayout.table),
-          CardsLayerWrapper(gameState, state.currentLayout, state.previousLayout),
-          DeckCountLayer(gameState, state.currentLayout.deck),
-          DeckShufflingLayer(gameState.currentRoom, state.currentLayout, gameState.sendMessage),
-          KLayer(
-            List(
-              gameState.currentRoom.mainPlayer.map(seat => PlayerComponent(seat.player, state.currentLayout.mainPlayer, gameState.currentRoom.dealerIndex.contains(seat.index))),
-              gameState.currentRoom.opponentLeft.map(seat => PlayerComponent(seat.player, state.currentLayout.player1, gameState.currentRoom.dealerIndex.contains(seat.index))),
-              gameState.currentRoom.opponentFront.map(seat => PlayerComponent(seat.player, state.currentLayout.player2, gameState.currentRoom.dealerIndex.contains(seat.index))),
-              gameState.currentRoom.opponentRight.map(seat => PlayerComponent(seat.player, state.currentLayout.player3, gameState.currentRoom.dealerIndex.contains(seat.index))),
-            ).flatten: _*
+        <.div(
+          GameScoreDiv(gameState),
+          KStage(
+            { p =>
+              p.width = window.innerWidth
+              p.height = window.innerHeight
+            },
+            TableLayer(state.currentLayout.table),
+            CardsLayerWrapper(gameState, state.currentLayout, state.previousLayout),
+            DeckCountLayer(gameState, state.currentLayout.deck),
+            DeckShufflingLayer(gameState.currentRoom, state.currentLayout, gameState.sendMessage),
+            KLayer(
+              List(
+                gameState.currentRoom.mainPlayer.map(seat => PlayerComponent(seat.player, state.currentLayout.mainPlayer, gameState.currentRoom.dealerIndex.contains(seat.index))),
+                gameState.currentRoom.opponentLeft.map(seat => PlayerComponent(seat.player, state.currentLayout.player1, gameState.currentRoom.dealerIndex.contains(seat.index))),
+                gameState.currentRoom.opponentFront.map(seat => PlayerComponent(seat.player, state.currentLayout.player2, gameState.currentRoom.dealerIndex.contains(seat.index))),
+                gameState.currentRoom.opponentRight.map(seat => PlayerComponent(seat.player, state.currentLayout.player3, gameState.currentRoom.dealerIndex.contains(seat.index))),
+              ).flatten: _*
+            )
           )
         )
 
-      case None => <.div("Waiting...")
+      case None => <.h1(<.img(^.src := "/static/denari.svg", ^.className := "spinning main-logo"))
 
     val start: Callback =
       for {
