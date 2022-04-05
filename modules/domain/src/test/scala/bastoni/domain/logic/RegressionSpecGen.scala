@@ -49,7 +49,8 @@ object RegressionSpecGen extends IOApp:
           deck = Nil,
           board = Nil,
           matchInfo = None,
-          dealerIndex = None
+          dealerIndex = None,
+          players = users.map(user => user.id -> user).toMap
         )
 
         inputPublisher <-

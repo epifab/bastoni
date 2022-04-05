@@ -2,7 +2,7 @@ package bastoni.domain.model
 
 import java.util.UUID
 import scala.util.Try
-import io.circe.{Codec, Decoder, Encoder}
+import io.circe.{Codec, Decoder, Encoder, KeyEncoder, KeyDecoder}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
 opaque type UserId = UUID
@@ -13,6 +13,8 @@ object UserId:
   def unsafeParse(s: String): UserId = UUID.fromString(s)
   given Encoder[UserId] = Encoder[String].contramap(_.toString)
   given Decoder[UserId] = Decoder[String].emap(tryParse(_).toRight("Not a valid ID"))
+  given KeyEncoder[UserId] = KeyEncoder.encodeKeyUUID
+  given KeyDecoder[UserId] = KeyDecoder.decodeKeyUUID
 
 trait User(val id: UserId, val name: String):
   def is(other: User): Boolean = other.id == id

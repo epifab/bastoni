@@ -12,18 +12,26 @@ case class RoomServerView(
   override val deck: List[CardServerView],
   override val board: List[BoardCard[CardServerView]],
   override val matchInfo: Option[MatchInfo],
-  override val dealerIndex: Option[Int]
+  override val dealerIndex: Option[Int],
+  override val players: Map[UserId, User]
 ) extends Room[CardServerView]:
 
   override type RoomView = RoomServerView
 
   override protected def updateWith(
-    seats: List[Seat[CardServerView]] = this.seats,
+    seats: List[Seat[CardServerView]],
     deck: List[CardServerView] = this.deck,
     board: List[BoardCard[CardServerView]] = this.board,
     matchInfo: Option[MatchInfo] = this.matchInfo,
     dealerIndex: Option[Int] = this.dealerIndex
-  ): RoomServerView = RoomServerView(seats, deck, board, matchInfo, dealerIndex)
+  ): RoomServerView = RoomServerView(
+    seats = seats,
+    deck = deck,
+    board = board,
+    matchInfo = matchInfo,
+    dealerIndex = dealerIndex,
+    players = updatedPlayers(seats)
+  )
 
   override protected def buildCard(card: VisibleCard, direction: Direction): CardServerView = CardServerView(card, direction)
   override protected def faceDown(card: CardServerView): CardServerView = card.copy(facing = Direction.Down)
@@ -52,7 +60,8 @@ case class RoomServerView(
       deck = deck.map(_.toPlayerView(me, None)),
       board = board.map(boardCard => BoardCard(boardCard.card.toPlayerView(me, None), boardCard.playedBy)),
       matchInfo = matchInfo,
-      dealerIndex = dealerIndex
+      dealerIndex = dealerIndex,
+      players = players
     )
 
   val isFull: Boolean = seats.forall(_.playerOption.isDefined)

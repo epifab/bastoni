@@ -236,7 +236,11 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 ),
                 None
               )),
-              dealerIndex = Some(3)
+              dealerIndex = Some(3),
+              players = Map(
+                user1.id -> user1,
+                user2.id -> user2
+              )
             )
           ),
           Snapshot(
@@ -274,7 +278,11 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 ),
                 None
               )),
-              dealerIndex = Some(3)
+              dealerIndex = Some(3),
+              players = Map(
+                user1.id -> user1,
+                user2.id -> user2
+              )
             )
           )
         )
@@ -313,7 +321,11 @@ class GameServiceSpec extends AsyncIOFreeSpec:
               deck = Nil,
               board = Nil,
               matchInfo = None,
-              dealerIndex = Some(3)
+              dealerIndex = Some(3),
+              players = Map(
+                user1.id -> user1,
+                user2.id -> user2
+              )
             )
           )
         )
@@ -350,7 +362,11 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         deck = Nil,
         board = List(BoardCard(CardServerView(player2Card, Direction.Up), playedBy = None)),
         matchInfo = Some(MatchInfo(GameType.Briscola, Nil, None)),
-        dealerIndex = None
+        dealerIndex = None,
+        players = Map(
+          user1.id -> user1,
+          user2.id -> user2
+        )
       ),
       stateMachine = Some(generic.StateMachine(
         briscola.BriscolaGame,
@@ -460,7 +476,11 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           deck = Nil,
           board = Nil,
           matchInfo = None,
-          dealerIndex = None
+          dealerIndex = None,
+          players = Map(
+            user1.id -> user1,
+            user2.id -> user2
+          )
         ),
         stateMachine = None
       ))

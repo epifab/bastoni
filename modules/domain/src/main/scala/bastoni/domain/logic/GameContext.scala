@@ -57,7 +57,8 @@ object GameContext:
         deck = Nil,
         board = Nil,
         matchInfo = None,
-        dealerIndex = None
+        dealerIndex = None,
+        players = Map.empty
       ),
       stateMachine = None
     )

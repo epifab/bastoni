@@ -21,6 +21,7 @@ trait Room[C <: CardView]:
   val board: List[BoardCard[C]]
   val matchInfo: Option[MatchInfo]
   val dealerIndex: Option[Int]
+  val players: Map[UserId, User]
 
   val size: Int = seats.size
 
@@ -46,6 +47,9 @@ trait Room[C <: CardView]:
 
   protected def buildCard(card: VisibleCard, direction: Direction): C
   protected def faceDown(card: C): C
+
+  protected def updatedPlayers(updatedSeats: List[Seat[C]]): Map[UserId, User] =
+    players ++ updatedSeats.collect { case TakenSeat(_, player, _, _) => player.id -> User(player.id, player.name) }
 
   extension[T](list: List[T])
     def removeFirst(cond: T => Boolean): List[T] =

@@ -6,7 +6,8 @@ case class RoomPlayerView(
   override val deck: List[CardPlayerView],
   override val board: List[BoardCard[CardPlayerView]],
   override val matchInfo: Option[MatchInfo],
-  override val dealerIndex: Option[Int]
+  override val dealerIndex: Option[Int],
+  override val players: Map[UserId, User]
 ) extends Room[CardPlayerView]:
 
   override type RoomView = RoomPlayerView
@@ -17,7 +18,15 @@ case class RoomPlayerView(
     board: List[BoardCard[CardPlayerView]] = this.board,
     matchInfo: Option[MatchInfo] = this.matchInfo,
     dealerIndex: Option[Int] = this.dealerIndex
-  ): RoomPlayerView = RoomPlayerView(me, seats, deck, board, matchInfo, dealerIndex)
+  ): RoomPlayerView = RoomPlayerView(
+    me = me,
+    seats = seats,
+    deck = deck,
+    board = board,
+    matchInfo = matchInfo,
+    dealerIndex = dealerIndex,
+    players = updatedPlayers(seats)
+  )
 
   override protected def buildCard(card: VisibleCard, direction: Direction): CardPlayerView = CardPlayerView(direction match {
     case Direction.Up => card
