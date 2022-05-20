@@ -4,4 +4,4 @@ jdk:
 scala:
   - 3.0.0
 script:
-  - sbt test
+  - sbt domainJVM/test
