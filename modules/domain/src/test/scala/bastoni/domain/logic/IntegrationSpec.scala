@@ -5,6 +5,7 @@ import bastoni.domain.ai.DumbPlayer
 import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.Continue
+import bastoni.domain.model.Event.GameAborted
 import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.ToPlayer.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
@@ -66,7 +67,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
           .concurrently(activateStream)
           .collect[Event] {
             case Message(_, `roomId`, e: Event.MatchCompleted) => e
-            case Message(_, `roomId`, Event.MatchAborted) => Event.MatchAborted
+            case Message(_, `roomId`, Event.MatchAborted(reason)) => Event.MatchAborted(reason)
           }
           .take(1)
           .interruptAfter(timeout)
@@ -110,6 +111,6 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       4,
       GameType.Tressette,
       realSpeed = true,
-      extraMessages = fs2.Stream.awakeEvery[IO](2.seconds).map(_ => LeaveRoom)
-    ).asserting(_ shouldBe Event.MatchAborted)
+      extraMessages = fs2.Stream(LeaveRoom).delayBy(2.seconds)
+    ).asserting(_ shouldBe Event.MatchAborted(GameAborted.Reason.playerLeftTheRoom))
   }

@@ -2,6 +2,7 @@ package bastoni.domain.logic.briscola
 
 import bastoni.domain.logic.generic.Timer
 import bastoni.domain.model.*
+import bastoni.domain.model.Event.GameAborted
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
@@ -20,12 +21,12 @@ object BriscolaGameState:
   case class   WillComplete(players: List[Player], trump: VisibleCard) extends Active(players.map(_.matchPlayer))
 
   case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[BriscolaGameState, WaitingForPlayer]:
-    override val timedOut: BriscolaGameState = BriscolaGameState.Aborted
+    override val timedOut: BriscolaGameState = BriscolaGameState.Aborted(GameAborted.Reason.playerTimeout)
     override def update(timeout: Timeout.Active, request: Command.Act): WaitingForPlayer = copy(timeout = timeout, request = request)
 
   sealed trait Terminated extends BriscolaGameState
   case class   Completed(players: List[MatchPlayer]) extends Terminated
-  case object  Aborted extends Terminated
+  case class   Aborted(reason: GameAborted.Reason) extends Terminated
 
   given encoder: Encoder[BriscolaGameState] = Encoder.instance {
     case s: Ready             => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
@@ -38,7 +39,7 @@ object BriscolaGameState:
     case s: WaitingForPlayer  => deriveEncoder[WaitingForPlayer].mapJsonObject(_.add("stage", "WaitingForPlayer".asJson))(s)
     case s: WillComplete      => deriveEncoder[WillComplete].mapJsonObject(_.add("stage", "WillComplete".asJson))(s)
     case s: Completed         => deriveEncoder[Completed].mapJsonObject(_.add("stage", "Completed".asJson))(s)
-    case Aborted              => Json.obj("stage" -> "Aborted".asJson)
+    case s: Aborted           => deriveEncoder[Aborted].mapJsonObject(_.add("stage", "Aborted".asJson))(s)
   }
 
   given decoder: Decoder[BriscolaGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
@@ -52,5 +53,5 @@ object BriscolaGameState:
     case "WaitingForPlayer"  => deriveDecoder[WaitingForPlayer](cursor)
     case "WillComplete"      => deriveDecoder[WillComplete](cursor)
     case "Completed"         => deriveDecoder[Completed](cursor)
-    case "Aborted"           => Right(Aborted)
+    case "Aborted"           => deriveDecoder[Aborted](cursor)
   })

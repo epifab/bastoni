@@ -28,7 +28,7 @@ object TressetteGame extends GenericGameLogic:
   override def statusFor(state: TressetteGameState): GameStatus = state match {
     case _: TressetteGameState.Active => GameStatus.InProgress
     case TressetteGameState.Completed(players) => GameStatus.Completed(players)
-    case TressetteGameState.Aborted => GameStatus.Aborted
+    case TressetteGameState.Aborted(reason) => GameStatus.Aborted(reason)
   }
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
@@ -45,7 +45,7 @@ object TressetteGame extends GenericGameLogic:
   val playGameStepPF: PartialFunction[(TressetteGameState, StateMachineInput), (TressetteGameState, List[StateMachineOutput])] = {
 
     case (active: Active, PlayerLeftRoom(player, _)) if active.activePlayers.exists(_.is(player)) =>
-      Aborted -> uneventful
+      Aborted(GameAborted.Reason.playerLeftTheRoom) -> uneventful
 
     case (Ready(players), MatchStarted(_, _)) =>
       Ready(players) -> List(Act(players.last.id, Action.ShuffleDeck, timeout = None))
@@ -60,7 +60,7 @@ object TressetteGame extends GenericGameLogic:
           deck
         ) -> List(DeckShuffled(deck), Continue.afterShufflingDeck)
       }
-      else Aborted -> uneventful
+      else Aborted(GameAborted.Reason.unexpectedNumberOfPlayers) -> uneventful
 
     case (DealRound(player :: Nil, done, 0, deck), Continue) =>
       deck.dealOrDie(5) { (cards, tail) =>

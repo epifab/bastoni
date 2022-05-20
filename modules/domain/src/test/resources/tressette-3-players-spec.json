@@ -26,6 +26,7 @@
   ],
   "output" : [
     {
+      "reason" : "unexpected-number-of-players",
       "type" : "GameAborted",
       "supertype" : "Event"
     },
@@ -35,6 +36,7 @@
       "delay" : "AfterGameOver"
     },
     {
+      "reason" : "unexpected-number-of-players",
       "type" : "MatchAborted",
       "supertype" : "Event"
     }

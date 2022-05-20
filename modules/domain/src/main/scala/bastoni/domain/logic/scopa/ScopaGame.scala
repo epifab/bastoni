@@ -30,7 +30,7 @@ object ScopaGame extends GenericGameLogic:
   override def statusFor(state: ScopaGameState): GameStatus = state match {
     case _: ScopaGameState.Active => GameStatus.InProgress
     case ScopaGameState.Completed(players) => GameStatus.Completed(players)
-    case ScopaGameState.Aborted => GameStatus.Aborted
+    case ScopaGameState.Aborted(reason) => GameStatus.Aborted(reason)
   }
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
@@ -46,7 +46,7 @@ object ScopaGame extends GenericGameLogic:
 
   val playGameStepPF: PartialFunction[(ScopaGameState, StateMachineInput), (ScopaGameState, List[StateMachineOutput])] = {
     case (active: Active, PlayerLeftRoom(player, _)) if active.activePlayers.exists(_.is(player)) =>
-      Aborted -> uneventful
+      Aborted(GameAborted.Reason.playerLeftTheRoom) -> uneventful
 
     case (Ready(players), MatchStarted(_, _)) =>
       Ready(players) -> List(Act(players.last.id, Action.ShuffleDeck, timeout = None))

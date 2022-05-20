@@ -84,8 +84,7 @@ object RegressionSpecGen extends IOApp:
             .through(gameLogic.playStream(users))
             .takeThrough {
               case Command.Act(_, Action.ShuffleDeck, _) => false
-              case Event.MatchAborted => false
-              case _: Event.MatchCompleted => false
+              case _: (Event.MatchAborted | Event.MatchCompleted) => false
               case _ => true
             }
             .evalTap(x => outputRef.update(_ :+ x))

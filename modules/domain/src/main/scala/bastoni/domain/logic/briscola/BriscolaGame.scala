@@ -31,7 +31,7 @@ object BriscolaGame extends GenericGameLogic:
   override def statusFor(state: BriscolaGameState): GameStatus = state match {
     case _: BriscolaGameState.Active => GameStatus.InProgress
     case BriscolaGameState.Completed(players) => GameStatus.Completed(players)
-    case BriscolaGameState.Aborted => GameStatus.Aborted
+    case BriscolaGameState.Aborted(reason) => GameStatus.Aborted(reason)
   }
 
   private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
@@ -47,7 +47,7 @@ object BriscolaGame extends GenericGameLogic:
 
   val playGameStepPF: PartialFunction[(BriscolaGameState, StateMachineInput), (BriscolaGameState, List[StateMachineOutput])] = {
     case (active: Active, PlayerLeftRoom(user, _)) if active.activePlayers.exists(_.is(user)) =>
-      Aborted -> uneventful
+      Aborted(GameAborted.Reason.playerLeftTheRoom) -> uneventful
 
     case (Ready(players), MatchStarted(_, _)) =>
       Ready(players) -> List(Act(players.last.id, Action.ShuffleDeck, timeout = None))
@@ -60,7 +60,7 @@ object BriscolaGame extends GenericGameLogic:
         else if (players.size == 2 || players.size == 4) Some(shuffledDeck)
         else None // 1 or 5+ players not supported
 
-      deck.fold(Aborted -> uneventful) { deck =>
+      deck.fold(Aborted(GameAborted.Reason.unexpectedNumberOfPlayers) -> uneventful) { deck =>
         DealRound(
           players.map(Player(_, Nil, Nil)),
           Nil,

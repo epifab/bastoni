@@ -4,6 +4,7 @@ import bastoni.domain.logic.generic.Timer
 import bastoni.domain.logic.scopa.ScopaGameState
 import bastoni.domain.logic.scopa.ScopaGameState.{Active, PlayRound}
 import bastoni.domain.model.*
+import bastoni.domain.model.Event.GameAborted
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
@@ -21,12 +22,12 @@ object TressetteGameState:
   case class   WillComplete(players: List[Player]) extends Active(players.map(_.matchPlayer))
 
   case class WaitingForPlayer(ref: Int, timeout: Timeout.Active, request: Command.Act, state: PlayRound) extends Active(state.activePlayers) with Timer[TressetteGameState, WaitingForPlayer]:
-    override val timedOut: TressetteGameState = TressetteGameState.Aborted
+    override val timedOut: TressetteGameState = TressetteGameState.Aborted(GameAborted.Reason.playerTimeout)
     override def update(timeout: Timeout.Active, request: Command.Act): WaitingForPlayer = copy(timeout = timeout, request = request)
 
   sealed trait Terminated extends TressetteGameState
   case class   Completed(players: List[MatchPlayer]) extends Terminated
-  case object  Aborted extends Terminated
+  case class   Aborted(reason: GameAborted.Reason) extends Terminated
 
   given encoder: Encoder[TressetteGameState] = Encoder.instance {
     case s: Ready             => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
@@ -38,7 +39,7 @@ object TressetteGameState:
     case s: WillCompleteTrick => deriveEncoder[WillCompleteTrick].mapJsonObject(_.add("stage", "WillCompleteTrick".asJson))(s)
     case s: WillComplete      => deriveEncoder[WillComplete].mapJsonObject(_.add("stage", "WillComplete".asJson))(s)
     case s: Completed         => deriveEncoder[Completed].mapJsonObject(_.add("stage", "Completed".asJson))(s)
-    case Aborted              => Json.obj("stage" -> "Aborted".asJson)
+    case s: Aborted           => deriveEncoder[Aborted].mapJsonObject(_.add("stage", "Aborted".asJson))(s)
   }
 
   given decoder: Decoder[TressetteGameState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
@@ -51,5 +52,5 @@ object TressetteGameState:
     case "WillCompleteTrick" => deriveDecoder[WillCompleteTrick](cursor)
     case "WillComplete"      => deriveDecoder[WillComplete](cursor)
     case "Completed"         => deriveDecoder[Completed](cursor)
-    case "Aborted"           => Right(Aborted)
+    case "Aborted"           => deriveDecoder[Aborted](cursor)
   })

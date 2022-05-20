@@ -62,14 +62,6 @@ class JsonSpec extends AnyFreeSpec with Matchers:
       event.asJson shouldBe expectedJson
       expectedJson.as[ServerEvent] shouldBe Right(event)
     }
-
-    "case object" in {
-      val expectedJson = parse("""{"type": "MatchAborted"}""").getOrElse(fail("Invalid json"))
-      val event: ServerEvent = Event.MatchAborted
-
-      event.asJson shouldBe expectedJson
-      expectedJson.as[ServerEvent] shouldBe Right(event)
-    }
   }
 
   "Commands are encoded / decoded with a discriminant property" - {

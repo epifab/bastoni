@@ -170,9 +170,9 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       CardsDealt(user2.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari), cardOf(Quattro, Spade), cardOf(Sei, Denari)), Direction.Player).toMessage(room2Id),
       Delayed(Continue.toMessage(room2Id), Delay.AfterDealCards),
       PlayerLeftRoom(user1, 2).toMessage(room1Id),
-      GameAborted.toMessage(room1Id),
+      GameAborted(GameAborted.Reason.playerLeftTheRoom).toMessage(room1Id),
       Delayed(Continue.toMessage(room1Id), Delay.AfterGameOver),
-      MatchAborted.toMessage(room1Id),
+      MatchAborted(GameAborted.Reason.playerLeftTheRoom).toMessage(room1Id),
     ))
   }
 

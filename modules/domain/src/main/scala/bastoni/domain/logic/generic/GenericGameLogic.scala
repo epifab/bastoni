@@ -71,7 +71,7 @@ abstract class GenericGameLogic extends GameLogic[MatchState]:
           val playerIds = updatedPlayers.map(_.id)
           WaitingForPlayers(playerIds.toSet, nextState) -> (events ++ playerIds.map(id => Command.Act(id, Action.Confirm, timeout = None)))
 
-        case GameStatus.Aborted => MatchState.GameOver(Event.MatchAborted, MatchState.Terminated) -> (events :+ Event.GameAborted :+ Continue.afterGameOver)
+        case GameStatus.Aborted(reason) => MatchState.GameOver(Event.MatchAborted(reason), MatchState.Terminated) -> (events :+ Event.GameAborted(reason) :+ Continue.afterGameOver)
 
         case GameStatus.InProgress => inProgress.copy(gameState = updatedGameState.asJson) -> events
       }

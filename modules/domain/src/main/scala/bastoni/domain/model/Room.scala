@@ -202,7 +202,7 @@ trait Room[C <: CardView]:
           matchInfo = matchInfo.map(_.copy(matchScore = matchScores, gameScore = Some(scores)))
         )
 
-      case Event.GameAborted =>
+      case Event.GameAborted(_) =>
         updateWith(
           deck = Nil,
           board = Nil,
@@ -224,7 +224,7 @@ trait Room[C <: CardView]:
           matchInfo = None
         )
 
-      case Event.MatchAborted =>
+      case Event.MatchAborted(_) =>
         updateWith(
           dealerIndex = nextDealer.map(_.index),
           matchInfo = None

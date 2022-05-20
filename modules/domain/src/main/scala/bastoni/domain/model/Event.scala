@@ -3,7 +3,7 @@ package bastoni.domain.model
 import bastoni.domain.logic.{briscola, scopa, tressette}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
-import io.circe.{Decoder, DecodingFailure, Encoder, Json}
+import io.circe.*
 
 sealed trait Event
 
@@ -27,8 +27,18 @@ object Event:
 
   case class  GameCompleted(scores: List[GameScore], matchScores: List[MatchScore]) extends PublicEvent
   case class  MatchCompleted(winnerIds: List[UserId]) extends PublicEvent
-  case object GameAborted extends PublicEvent
-  case object MatchAborted extends PublicEvent
+  case class  GameAborted(reason: GameAborted.Reason) extends PublicEvent
+  case class  MatchAborted(reason: GameAborted.Reason) extends PublicEvent
+
+  object GameAborted:
+    opaque type Reason = String
+
+    object Reason:
+      val playerLeftTheRoom: Reason = "player-left-the-room"
+      val playerTimeout: Reason = "player-timeout"
+      val unexpectedNumberOfPlayers: Reason = "unexpected-number-of-players"
+
+      given Codec[Reason] = Codec.from(Decoder.decodeString, Encoder.encodeString)
 
   sealed trait CardsDealt[C <: CardView]:
     def playerId: UserId
@@ -68,8 +78,8 @@ object Event:
 
     case obj: GameCompleted     => deriveEncoder[GameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson))(obj)
     case obj: MatchCompleted    => deriveEncoder[MatchCompleted].mapJsonObject(_.add("type", "MatchCompleted".asJson))(obj)
-    case GameAborted            => Json.obj("type" -> "GameAborted".asJson)
-    case MatchAborted           => Json.obj("type" -> "MatchAborted".asJson)
+    case obj: GameAborted       => deriveEncoder[GameAborted].mapJsonObject(_.add("type", "GameAborted".asJson))(obj)
+    case obj: MatchAborted      => deriveEncoder[MatchAborted].mapJsonObject(_.add("type", "MatchAborted".asJson))(obj)
   }
 
   given serverEventEncoder: Encoder[ServerEvent] = Encoder.instance {
@@ -101,8 +111,8 @@ object Event:
       case "TrickCompleted"   => deriveDecoder[TrickCompleted](obj)
       case "GameCompleted"    => deriveDecoder[GameCompleted](obj)
       case "MatchCompleted"   => deriveDecoder[MatchCompleted](obj)
-      case "GameAborted"      => Right(GameAborted)
-      case "MatchAborted"     => Right(MatchAborted)
+      case "GameAborted"      => deriveDecoder[GameAborted](obj)
+      case "MatchAborted"     => deriveDecoder[MatchAborted](obj)
       case unknown            => Left(DecodingFailure(s"Unrecognised event $unknown", typeCursor.history))
     }
   })
