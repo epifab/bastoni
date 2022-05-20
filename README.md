@@ -1,5 +1,7 @@
 # Bastoni
 
+[![Build Status](https://app.travis-ci.com/epifab/bastoni.svg?token=jwZ8R2sq9gVzq2syFmMJ&branch=main)](https://app.travis-ci.com/epifab/bastoni)
+
 Classic italian card games service,
 including a backend for tressette, briscola and scopa.
 
