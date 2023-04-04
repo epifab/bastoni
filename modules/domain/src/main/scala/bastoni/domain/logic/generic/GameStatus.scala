@@ -6,6 +6,6 @@ import bastoni.domain.model.MatchPlayer
 sealed trait GameStatus
 
 object GameStatus:
-  case object InProgress extends GameStatus
+  case object InProgress                           extends GameStatus
   case class Completed(players: List[MatchPlayer]) extends GameStatus
-  case class Aborted(reason: GameAborted.Reason) extends GameStatus
+  case class Aborted(reason: GameAborted.Reason)   extends GameStatus

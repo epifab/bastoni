@@ -1,9 +1,9 @@
 package bastoni.domain.logic.briscola
 
 import bastoni.domain.model.{GameScore, Score, UserId, VisibleCard}
+import io.circe.{Codec, DecodingFailure}
 import io.circe.generic.semiauto.deriveCodec
 import io.circe.syntax.*
-import io.circe.{Codec, DecodingFailure}
 
 case class BriscolaGameScoreItem(card: VisibleCard, points: Int)
 
@@ -12,7 +12,7 @@ object BriscolaGameScoreItem:
 
 case class BriscolaGameScore(playerIds: List[UserId], items: List[BriscolaGameScoreItem]) extends Score:
   override val points: Int = items.foldRight(0)(_.points + _)
-  def generify: GameScore = GameScore(playerIds, points, items.asJson)
+  def generify: GameScore  = GameScore(playerIds, points, items.asJson)
 
 object BriscolaGameScore:
   def apply(gameScore: GameScore): Either[DecodingFailure, BriscolaGameScore] =

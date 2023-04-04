@@ -11,26 +11,30 @@ import konva.Konva
 import org.scalajs.dom.window
 import reactkonva.{KCircle, KGroup, KLayer, KText}
 
-
 object CardsLayer:
 
-  case class Props(current: List[CardLayout], previous: Map[CardId, CardLayout], selectable: Map[CardId, CardEventHandlers], selected: Set[CardId])
+  case class Props(
+      current: List[CardLayout],
+      previous: Map[CardId, CardLayout],
+      selectable: Map[CardId, CardEventHandlers],
+      selected: Set[CardId]
+  )
 
-  class Backend($: BackendScope[Props, Unit]):
+  class Backend($ : BackendScope[Props, Unit]):
 
-    def render(props: Props): VdomNode = {
+    def render(props: Props): VdomNode =
       val renderedCards: List[VdomElement] =
-        props
-          .current
-          .map(layout => CardComponent(
-            layout = layout,
-            previous = props.previous.get(layout.card.ref),
-            eventHandlers = props.selectable.get(layout.card.ref),
-            selected = props.selected.contains(layout.card.ref)
-          ))
+        props.current
+          .map(layout =>
+            CardComponent(
+              layout = layout,
+              previous = props.previous.get(layout.card.ref),
+              eventHandlers = props.selectable.get(layout.card.ref),
+              selected = props.selected.contains(layout.card.ref)
+            )
+          )
 
       KLayer(renderedCards: _*)
-    }
 
   private val component =
     ScalaComponent
@@ -39,5 +43,11 @@ object CardsLayer:
       .renderBackend[Backend]
       .build
 
-  def apply(current: List[CardLayout], previous: Map[CardId, CardLayout], selectable: Map[CardId, CardEventHandlers], selected: Set[CardId]): VdomNode =
+  def apply(
+      current: List[CardLayout],
+      previous: Map[CardId, CardLayout],
+      selectable: Map[CardId, CardEventHandlers],
+      selected: Set[CardId]
+  ): VdomNode =
     component(Props(current, previous, selectable, selected))
+end CardsLayer

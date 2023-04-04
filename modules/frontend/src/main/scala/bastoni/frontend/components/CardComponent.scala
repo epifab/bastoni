@@ -2,8 +2,8 @@ package bastoni.frontend
 package components
 
 import bastoni.domain.model.*
-import bastoni.frontend.JsObject
 import bastoni.frontend.model.{CardLayout, CardSize, Palette, Shadow, Size}
+import bastoni.frontend.JsObject
 import cats.effect
 import cats.effect.IO
 import japgolly.scalajs.react.*
@@ -19,10 +19,15 @@ import scala.scalajs.js
 
 object CardComponent:
 
-  case class Props(current: CardLayout, previous: Option[CardLayout], eventHandlers: Option[CardEventHandlers], selected: Boolean):
+  case class Props(
+      current: CardLayout,
+      previous: Option[CardLayout],
+      eventHandlers: Option[CardEventHandlers],
+      selected: Boolean
+  ):
     val initial: CardLayout = previous.getOrElse(current)
 
-  private class CardBackend($: BackendScope[Props, Unit]):
+  private class CardBackend($ : BackendScope[Props, Unit]):
     private val animationDuration = .6
 
     def cardSizeAnimation(current: CardLayout): TweenRef => Unit = animation[TweenProps] { p =>
@@ -89,7 +94,7 @@ object CardComponent:
         p.height = props.initial.size.height
       }
 
-    private def addSelectable(props: Props)(p: NodeProps): Unit = {
+    private def addSelectable(props: Props)(p: NodeProps): Unit =
       def setMousePointer(target: NodeRef, style: "default" | "pointer"): Callback =
         Callback(target.getStage().container().style.cursor = style)
 
@@ -99,24 +104,20 @@ object CardComponent:
         p.onClick = ref => (setMousePointer(ref.target, "default") *> handlers.onSelect).runNow()
         p.onTap = ref => handlers.onSelect.runNow()
       }
-    }
 
-    private def addGlowingOrShadow(props: Props)(p: ShapeProps): Unit = {
+    private def addGlowingOrShadow(props: Props)(p: ShapeProps): Unit =
       if (props.selected) {
         p.shadowBlur = 45
         p.shadowColor = Palette.cyan
         p.shadowOffset = Vector2d(0, 0)
         p.shadowOpacity = 1
-      }
-      else {
+      } else
         props.current.shadow.foreach { shadow =>
           p.shadowBlur = shadow.size
           p.shadowColor = shadow.color
           p.shadowOffset = Vector2d(shadow.offset.x, shadow.offset.y)
           p.shadowOpacity = .5
         }
-      }
-    }
 
     private def animation[P <: TweenProps](f: P => Unit): TweenRef => Unit = tween =>
       Option(tween).foreach(_.to(JsObject[P](p => f(p))))
@@ -136,33 +137,36 @@ object CardComponent:
         },
         props.current.card.toOption.map(_.simple).fold(renderCardBack(props))(renderCard(props))
       )
+  end CardBackend
 
   private val component =
     ScalaComponent
       .builder[Props]
       .stateless
       .renderBackend[CardBackend]
-      .shouldComponentUpdate(c => CallbackTo(
-        c.currentProps.current != c.nextProps.current ||
-          c.currentProps.eventHandlers.isDefined != c.nextProps.eventHandlers.isDefined ||
-          c.currentProps.selected != c.nextProps.selected ||
-          c.currentState != c.nextState
-      ))
+      .shouldComponentUpdate(c =>
+        CallbackTo(
+          c.currentProps.current != c.nextProps.current ||
+            c.currentProps.eventHandlers.isDefined != c.nextProps.eventHandlers.isDefined ||
+            c.currentProps.selected != c.nextProps.selected ||
+            c.currentState != c.nextState
+        )
+      )
       .build
 
   def apply(
-    layout: CardLayout,
-    previous: Option[CardLayout],
-    eventHandlers: Option[CardEventHandlers],
-    selected: Boolean = false
+      layout: CardLayout,
+      previous: Option[CardLayout],
+      eventHandlers: Option[CardEventHandlers],
+      selected: Boolean = false
   ): VdomElement =
     component
       .withKey(s"card-${layout.card.ref}")
       .apply(Props(layout, previous, eventHandlers, selected))
-
+end CardComponent
 
 case class CardEventHandlers(
-  onSelect: Callback,
-  onMouseOver: Callback = Callback.empty,
-  onMouseOut: Callback = Callback.empty
+    onSelect: Callback,
+    onMouseOver: Callback = Callback.empty,
+    onMouseOut: Callback = Callback.empty
 )

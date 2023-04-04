@@ -1,18 +1,18 @@
 package bastoni.domain.logic.generic
 
+import bastoni.domain.logic.generic.*
 import bastoni.domain.logic.StateMachineOutput
 import bastoni.domain.logic.StateMachineOutput.{decoder, encoder}
-import bastoni.domain.logic.generic.*
 import bastoni.domain.model.{MatchPlayer, MatchScore, Teams, UserId}
+import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.*
-import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 
 sealed trait MatchType
 
 object MatchType:
   case class FixedRounds(remainingGames: Int) extends MatchType
-  case class PointsBased(pointsToWin: Int) extends MatchType
+  case class PointsBased(pointsToWin: Int)    extends MatchType
 
   given Encoder[MatchType] = Encoder.instance {
     case obj: FixedRounds => deriveEncoder[FixedRounds].mapJsonObject(_.add("type", "FixedRounds".asJson)).apply(obj)
@@ -25,7 +25,7 @@ object MatchType:
     typeCursor.as[String].flatMap {
       case "FixedRounds" => deriveDecoder[FixedRounds].tryDecode(obj)
       case "PointsBased" => deriveDecoder[PointsBased].tryDecode(obj)
-      case unknown => Left(DecodingFailure(s"Unknown match type $unknown", typeCursor.history))
+      case unknown       => Left(DecodingFailure(s"Unknown match type $unknown", typeCursor.history))
     }
   }
 
@@ -37,40 +37,49 @@ object MatchState:
       copy(
         gameState = newState,
         players = newPlayers,
-        matchType = matchType match {
+        matchType = matchType match
           case MatchType.FixedRounds(remainingGames) => MatchType.FixedRounds(remainingGames - 1)
-          case pointsBased: MatchType.PointsBased => pointsBased
-        }
+          case pointsBased: MatchType.PointsBased    => pointsBased
       )
 
   case class WaitingForPlayers(players: Set[UserId], next: MatchState) extends MatchState
-  case class GameOver(output: StateMachineOutput, next: MatchState) extends MatchState
-  case object Terminated extends MatchState
+  case class GameOver(output: StateMachineOutput, next: MatchState)    extends MatchState
+  case object Terminated                                               extends MatchState
 
   import StateMachineOutput.{decoder, encoder}
 
   given Encoder[MatchState] = Encoder.instance {
     case s: InProgress =>
       Json.obj(
-        "stage" -> "InProgress".asJson,
+        "stage"     -> "InProgress".asJson,
         "gameState" -> s.gameState,
-        "players" -> s.players.asJson,
+        "players"   -> s.players.asJson,
         "matchType" -> s.matchType.asJson
       )
 
-    case s: WaitingForPlayers => deriveEncoder[WaitingForPlayers].mapJsonObject(_.add("stage", "WaitingForPlayers".asJson))(s)
-    case s: GameOver          => deriveEncoder[GameOver].mapJsonObject(_.add("stage", "GameOver".asJson))(s)
-    case Terminated           => Json.obj("stage" -> "Terminated".asJson)
+    case s: WaitingForPlayers =>
+      deriveEncoder[WaitingForPlayers].mapJsonObject(_.add("stage", "WaitingForPlayers".asJson))(s)
+    case s: GameOver => deriveEncoder[GameOver].mapJsonObject(_.add("stage", "GameOver".asJson))(s)
+    case Terminated  => Json.obj("stage" -> "Terminated".asJson)
   }
 
-  given Decoder[MatchState] = Decoder.instance(cursor => cursor.downField("stage").as[String].flatMap {
-    case "InProgress" =>
-      for {
-        players <- cursor.downField("players").as[List[MatchPlayer]]
-        gameState <- cursor.downField("gameState").focus.toRight(DecodingFailure("Game state not found", cursor.history))
-        matchType <- cursor.downField("matchType").as[MatchType]
-      } yield InProgress(players, gameState, matchType)
-    case "WaitingForPlayers" => deriveDecoder[WaitingForPlayers](cursor)
-    case "GameOver" => deriveDecoder[GameOver](cursor)
-    case "Terminated" => Right(Terminated)
-  })
+  given Decoder[MatchState] = Decoder.instance(cursor =>
+    cursor
+      .downField("stage")
+      .as[String]
+      .flatMap {
+        case "InProgress" =>
+          for
+            players <- cursor.downField("players").as[List[MatchPlayer]]
+            gameState <- cursor
+              .downField("gameState")
+              .focus
+              .toRight(DecodingFailure("Game state not found", cursor.history))
+            matchType <- cursor.downField("matchType").as[MatchType]
+          yield InProgress(players, gameState, matchType)
+        case "WaitingForPlayers" => deriveDecoder[WaitingForPlayers](cursor)
+        case "GameOver"          => deriveDecoder[GameOver](cursor)
+        case "Terminated"        => Right(Terminated)
+      }
+  )
+end MatchState

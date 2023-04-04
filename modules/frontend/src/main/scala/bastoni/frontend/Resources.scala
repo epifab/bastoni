@@ -6,12 +6,11 @@ import cats.effect.IO
 import org.scalajs.dom.*
 import org.scalajs.dom.html.Image
 
-import java.util.Base64
 import java.util.concurrent.atomic.AtomicInteger
-import scala.concurrent.ExecutionContext.Implicits.global
+import java.util.Base64
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.Thenable.Implicits.*
-
 
 object Image:
   private val domParser = new DOMParser()
@@ -29,13 +28,13 @@ object Image:
     val img = document.createElement("img").asInstanceOf[Image]
 
     fetch(src).flatMap(_.text()).foreach { text =>
-      val result = domParser.parseFromString(text, MIMEType.`text/xml`)
+      val result    = domParser.parseFromString(text, MIMEType.`text/xml`)
       val inlineSvg = result.getElementsByTagName("svg")(0)
       // Firefox needs width and height
       inlineSvg.setAttribute("width", s"${CardSize.full.width}px")
       inlineSvg.setAttribute("height", s"${CardSize.full.height}px")
 
-      val svg64 = window.btoa(new XMLSerializer().serializeToString(inlineSvg))
+      val svg64   = window.btoa(new XMLSerializer().serializeToString(inlineSvg))
       val image64 = s"data:image/svg+xml;base64,$svg64"
 
       img.src = image64
@@ -43,6 +42,7 @@ object Image:
     }
 
     img
+end Image
 
 trait Resources:
   def size: Int
@@ -57,17 +57,25 @@ trait Resources:
     val interval = 50.millis
 
     def check(attempts: Int): IO[Unit] =
-      for {
+      for
         loaded <- IO(loadedCount.get())
         _ <- {
-          if (loaded == size) IO(console.debug(s"$loaded resources loaded successfully within ${(interval * attempts).toSeconds} seconds"))
-          else if (attempts <= 0) IO.raiseError(RuntimeException(s"Timeout: only $loaded out of $size resources loaded within ${timeout.toSeconds} seconds"))
+          if (loaded == size)
+            IO(
+              console.debug(s"$loaded resources loaded successfully within ${(interval * attempts).toSeconds} seconds")
+            )
+          else if (attempts <= 0)
+            IO.raiseError(
+              RuntimeException(
+                s"Timeout: only $loaded out of $size resources loaded within ${timeout.toSeconds} seconds"
+              )
+            )
           else IO.sleep(interval) *> check(attempts - 1)
         }
-      } yield ()
+      yield ()
 
     check((timeout / interval).ceil.toInt)
-
+end Resources
 
 object Resources extends Resources:
   val cardStyle: "napoletane" | "piacentine" = "napoletane"
@@ -76,7 +84,10 @@ object Resources extends Resources:
     Deck.cards.map { card =>
       val suit = card.suit.toString.toLowerCase
       val rank = "%02d".format(card.rank.value)
-      val img = Image.svg(s"/static/carte/napoletane/$suit/$rank.svg", img => loaded(s"/static/carte/napoletane/$suit/$rank.svg"))
+      val img = Image.svg(
+        s"/static/carte/napoletane/$suit/$rank.svg",
+        img => loaded(s"/static/carte/napoletane/$suit/$rank.svg")
+      )
       card -> img
     }.toMap
 
@@ -95,7 +106,8 @@ object Resources extends Resources:
 //      card -> canvas
 //    }.toMap
 
-  val tablePatternImage: Image = Image("/static/table.jpg", img => loaded(img.src))
+  val tablePatternImage: Image      = Image("/static/table.jpg", img => loaded(img.src))
   val backOfCardPatternImage: Image = Image("/static/carte/cube.svg", img => loaded(img.src))
 
   override val size: Int = cardImages.size + List(tablePatternImage, backOfCardPatternImage).length
+end Resources

@@ -1,12 +1,11 @@
 package bastoni.domain.model
 
-import io.circe.{Encoder, Decoder}
-import io.circe.generic.semiauto.{deriveEncoder, deriveDecoder}
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 case class MatchPlayer(basePlayer: User, points: Int) extends User(basePlayer.id, basePlayer.name):
-  def win: MatchPlayer = copy(points = points + 1)
+  def win: MatchPlayer                        = copy(points = points + 1)
   def win(additionalPoints: Int): MatchPlayer = copy(points = points + additionalPoints)
-
 
 object MatchPlayer:
   private case class GamePlayerView(id: UserId, name: String, points: Int)

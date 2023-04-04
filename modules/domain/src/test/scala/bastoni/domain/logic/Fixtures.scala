@@ -12,8 +12,8 @@ extension (message: ServerEvent | Command)
 extension (message: ServerEvent | Command | Delayed[Command])
   def toMessage(roomId: RoomId): Message | Delayed[Message] =
     message match
-      case event: ServerEvent => event.toMessage(roomId)
-      case command: Command => command.toMessage(roomId)
+      case event: ServerEvent               => event.toMessage(roomId)
+      case command: Command                 => command.toMessage(roomId)
       case Delayed(command: Command, delay) => Delayed(command.toMessage(roomId), delay)
 
 object Fixtures:
@@ -81,3 +81,4 @@ object Fixtures:
       .getOrElse(throw new IllegalStateException("Card not found"))
 
   val joinSeed = 4099
+end Fixtures

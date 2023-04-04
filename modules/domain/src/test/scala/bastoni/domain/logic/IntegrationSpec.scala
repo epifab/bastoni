@@ -6,11 +6,11 @@ import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.Continue
 import bastoni.domain.model.Event.GameAborted
+import bastoni.domain.view.{FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.ToPlayer.*
-import bastoni.domain.view.{FromPlayer, ToPlayer}
-import cats.effect.syntax.all.*
 import cats.effect.{IO, Sync}
+import cats.effect.syntax.all.*
 
 import scala.concurrent.duration.DurationInt
 
@@ -19,19 +19,20 @@ class IntegrationSpec extends AsyncIOFreeSpec:
   private val timeout = 30.seconds
 
   extension (player: User)
-    def dumb(sub: GameSubscriber[IO], pub: GamePublisher[IO]): fs2.Stream[IO, Unit] = DumbPlayer(pub, sub).play(player, roomId)
+    def dumb(sub: GameSubscriber[IO], pub: GamePublisher[IO]): fs2.Stream[IO, Unit] =
+      DumbPlayer(pub, sub).play(player, roomId)
 
   val roomId: RoomId = RoomId.newId
 
   def playGame(
-    numberOfPlayers: 2 | 3 | 4,
-    gameType: GameType,
-    realSpeed: Boolean = false,
-    extraMessages: fs2.Stream[IO, FromPlayer] = fs2.Stream.empty
-  ): IO[Event] = {
-    (for {
-      messageBus <- fs2.Stream.eval(MessageBus.inMemory[IO])
-      gameRepo <- fs2.Stream.eval(JsonRepos.gameRepo)
+      numberOfPlayers: 2 | 3 | 4,
+      gameType: GameType,
+      realSpeed: Boolean = false,
+      extraMessages: fs2.Stream[IO, FromPlayer] = fs2.Stream.empty
+  ): IO[Event] =
+    (for
+      messageBus  <- fs2.Stream.eval(MessageBus.inMemory[IO])
+      gameRepo    <- fs2.Stream.eval(JsonRepos.gameRepo)
       messageRepo <- fs2.Stream.eval(JsonRepos.messageRepo)
 
       gamePub = GamePubSub.publisher(messageBus)
@@ -52,27 +53,31 @@ class IntegrationSpec extends AsyncIOFreeSpec:
 
       gameServiceRunner <- fs2.Stream.resource(
         if (realSpeed) GameService.runner(messageBus, gameRepo, messageRepo)
-        else GameService.runner(messageBus, gameRepo, messageRepo, {
-          case Delay.ActionTimeout => 100.millis
-          case _ => 2.millis
-        })
+        else
+          GameService.runner(
+            messageBus,
+            gameRepo,
+            messageRepo,
+            {
+              case Delay.ActionTimeout => 100.millis
+              case _                   => 2.millis
+            }
+          )
       )
 
       lastMessage <-
-        messageBus
-          .subscribe
+        messageBus.subscribe
           .concurrently(messageBus.run)
           .concurrently(gameServiceRunner)
           .concurrently(playStreams)
           .concurrently(activateStream)
           .collect[Event] {
-            case Message(_, `roomId`, e: Event.MatchCompleted) => e
+            case Message(_, `roomId`, e: Event.MatchCompleted)    => e
             case Message(_, `roomId`, Event.MatchAborted(reason)) => Event.MatchAborted(reason)
           }
           .take(1)
           .interruptAfter(timeout)
-    } yield lastMessage).compile.lastOrError
-  }
+    yield lastMessage).compile.lastOrError
 
   "Two players can play an entire briscola game" in {
     playGame(2, GameType.Briscola).asserting(_ shouldBe a[Event.MatchCompleted])
@@ -114,3 +119,4 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       extraMessages = fs2.Stream(LeaveRoom).delayBy(2.seconds)
     ).asserting(_ shouldBe Event.MatchAborted(GameAborted.Reason.playerLeftTheRoom))
   }
+end IntegrationSpec

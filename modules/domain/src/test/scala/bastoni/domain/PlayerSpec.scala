@@ -33,5 +33,7 @@ class PlayerSpec extends AnyFreeSpec with Matchers:
   }
 
   "Player.play" in {
-    player.play(cardOf(Rank.Asso, Suit.Bastoni)) shouldBe Player(matchPlayer, List(cardOf(Rank.Sette, Suit.Denari)), Nil)
+    player
+      .play(cardOf(Rank.Asso, Suit.Bastoni)) shouldBe Player(matchPlayer, List(cardOf(Rank.Sette, Suit.Denari)), Nil)
   }
+end PlayerSpec

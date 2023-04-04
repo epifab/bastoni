@@ -8,9 +8,9 @@ import reactkonva.KGroup
 
 object DealerFlag:
   private val component = ScalaFn[SeatLayout] { layout =>
-    val tinyDeckSize = CardSize.fixedWidth(20)
+    val tinyDeckSize             = CardSize.fixedWidth(20)
     val tinyDeckRelativeRotation = Angle(-45)
-    val tinyDeckRotation = layout.textRotation + 180 - tinyDeckRelativeRotation
+    val tinyDeckRotation         = layout.textRotation + 180 - tinyDeckRelativeRotation
 
     val offset1 = Point(
       tinyDeckRotation.cos * tinyDeckSize.height,
@@ -37,3 +37,4 @@ object DealerFlag:
   }
 
   def apply(layout: SeatLayout): VdomNode = component(layout)
+end DealerFlag

@@ -56,8 +56,12 @@ class JsonSpec extends AnyFreeSpec with Matchers:
 
   "Server events are encoded / decoded with a discriminant property" - {
     "case class" in {
-      val expectedJson = parse("""{"type": "DeckShuffled", "deck": [{"rank": "Asso", "suit": "Denari", "ref": 0},{"rank": "Due", "suit": "Coppe", "ref": 1}]}""").getOrElse(fail("Invalid json"))
-      val event: ServerEvent = Event.DeckShuffled(Deck(Card(Rank.Asso, Suit.Denari, CardId(0)), Card(Rank.Due, Suit.Coppe, CardId(1))))
+      val expectedJson =
+        parse(
+          """{"type": "DeckShuffled", "deck": [{"rank": "Asso", "suit": "Denari", "ref": 0},{"rank": "Due", "suit": "Coppe", "ref": 1}]}"""
+        ).getOrElse(fail("Invalid json"))
+      val event: ServerEvent =
+        Event.DeckShuffled(Deck(Card(Rank.Asso, Suit.Denari, CardId(0)), Card(Rank.Due, Suit.Coppe, CardId(1))))
 
       event.asJson shouldBe expectedJson
       expectedJson.as[ServerEvent] shouldBe Right(event)
@@ -66,7 +70,7 @@ class JsonSpec extends AnyFreeSpec with Matchers:
 
   "Commands are encoded / decoded with a discriminant property" - {
     "case class" in {
-      val expectedJson = parse("""{"type": "ShuffleDeck", "seed": 15}""").getOrElse(fail("Invalid json"))
+      val expectedJson     = parse("""{"type": "ShuffleDeck", "seed": 15}""").getOrElse(fail("Invalid json"))
       val command: Command = Command.ShuffleDeck(15)
 
       command.asJson shouldBe expectedJson
@@ -74,7 +78,7 @@ class JsonSpec extends AnyFreeSpec with Matchers:
     }
 
     "case object" in {
-      val expectedJson = parse("""{"type": "Continue"}""").getOrElse(fail("Invalid json"))
+      val expectedJson     = parse("""{"type": "Continue"}""").getOrElse(fail("Invalid json"))
       val command: Command = Command.Continue
 
       command.asJson shouldBe expectedJson
@@ -85,12 +89,15 @@ class JsonSpec extends AnyFreeSpec with Matchers:
   "Messages are encoded / decoded with a discriminant property" - {
     "command" in {
       val messageId = MessageId.newId
-      val roomId = RoomId.newId
+      val roomId    = RoomId.newId
 
-      val expectedJson = parse(s"""{"id": "$messageId", "roomId": "$roomId", "type": "Command", "data": {"type": "Continue"}}""").getOrElse(fail("Invalid json"))
+      val expectedJson = parse(
+        s"""{"id": "$messageId", "roomId": "$roomId", "type": "Command", "data": {"type": "Continue"}}"""
+      ).getOrElse(fail("Invalid json"))
       val message = Message(messageId, roomId, Command.Continue)
 
       message.asJson shouldBe expectedJson
       expectedJson.as[Message] shouldBe Right(message)
     }
   }
+end JsonSpec

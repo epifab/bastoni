@@ -4,15 +4,14 @@ import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
 enum Delay:
-  case
-  AfterShuffleDeck,
-  AfterDealCards,
-  AfterPlayCard,
-  BeforeTakeCards,
-  AfterTakeCards,
-  BeforeGameOver,
-  AfterGameOver,
-  ActionTimeout
+  case AfterShuffleDeck,
+    AfterDealCards,
+    AfterPlayCard,
+    BeforeTakeCards,
+    AfterTakeCards,
+    BeforeGameOver,
+    AfterGameOver,
+    ActionTimeout
 
 object Delay:
   given Encoder[Delay] = Encoder[String].contramap(_.toString)
@@ -21,15 +20,14 @@ object Delay:
   object syntax:
     extension (command: Command.Continue.type)
       def afterShufflingDeck: Delayed[Command] = Delayed(command, Delay.AfterShuffleDeck)
-      def afterDealingCards: Delayed[Command] = Delayed(command, Delay.AfterDealCards)
-      def afterTakingCards: Delayed[Command] = Delayed(command, Delay.AfterTakeCards)
-      def beforeTakingCards: Delayed[Command] = Delayed(command, Delay.BeforeTakeCards)
-      def afterPlayingCards: Delayed[Command] = Delayed(command, Delay.AfterPlayCard)
-      def beforeGameOver: Delayed[Command] = Delayed(command, Delay.BeforeGameOver)
-      def afterGameOver: Delayed[Command] = Delayed(command, Delay.AfterGameOver)
+      def afterDealingCards: Delayed[Command]  = Delayed(command, Delay.AfterDealCards)
+      def afterTakingCards: Delayed[Command]   = Delayed(command, Delay.AfterTakeCards)
+      def beforeTakingCards: Delayed[Command]  = Delayed(command, Delay.BeforeTakeCards)
+      def afterPlayingCards: Delayed[Command]  = Delayed(command, Delay.AfterPlayCard)
+      def beforeGameOver: Delayed[Command]     = Delayed(command, Delay.BeforeGameOver)
+      def afterGameOver: Delayed[Command]      = Delayed(command, Delay.AfterGameOver)
 
-    extension (command: Command.Tick)
-      def toActionTimeout: Delayed[Command] = Delayed(command, Delay.ActionTimeout)
+    extension (command: Command.Tick) def toActionTimeout: Delayed[Command] = Delayed(command, Delay.ActionTimeout)
 
 case class Delayed[+T](inner: T, delay: Delay):
   def map[U](f: T => U): Delayed[U] = Delayed(f(inner), delay)

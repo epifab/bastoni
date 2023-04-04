@@ -41,3 +41,4 @@ object DeckCountLayer:
   }
 
   def apply(state: GameState, layout: DeckLayout): VdomNode = component(state -> layout)
+end DeckCountLayer

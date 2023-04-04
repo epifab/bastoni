@@ -3,10 +3,10 @@ package bastoni.frontend.components
 import bastoni.domain.model.Timeout
 import bastoni.frontend.model.{Angle, Palette, Point}
 import bastoni.frontend.Utils
-import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.callback.Callback
 import japgolly.scalajs.react.component.Scala.BackendScope
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
+import japgolly.scalajs.react.ScalaComponent
 import org.scalajs.dom.window
 import reactkonva.{KArc, KGroup}
 
@@ -14,30 +14,34 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 object TimeoutBar:
   val stepDuration: FiniteDuration = 3.seconds
-  val steps = 100
+  val steps                        = 100
 
   case class Props(
-    center: Point,
-    timeout: Option[Timeout],
-    angle: Angle,
-    rotation: Angle,
-    innerRadius: Double,
-    size: Double
+      center: Point,
+      timeout: Option[Timeout],
+      angle: Angle,
+      rotation: Angle,
+      innerRadius: Double,
+      size: Double
   )
 
   case class State(factor: Double)
 
-  class TimeoutBarBackend($: BackendScope[Props, State]):
-    val animate: Callback = for {
+  class TimeoutBarBackend($ : BackendScope[Props, State]):
+    val animate: Callback = for
       state <- $.state
       _ <- {
         if (state.factor == 0) Callback.empty
-        else $.setState(State(Math.max(0, state.factor - (1.0 / steps))), Utils.timeoutCallback(animate, stepDuration / steps))
+        else
+          $.setState(
+            State(Math.max(0, state.factor - (1.0 / steps))),
+            Utils.timeoutCallback(animate, stepDuration / steps)
+          )
       }
-    } yield ()
+    yield ()
 
     def render(props: Props, state: State): VdomNode =
-      props.timeout match {
+      props.timeout match
         case Some(timeout) =>
           KGroup(
             KArc { p =>
@@ -54,23 +58,23 @@ object TimeoutBar:
             KArc { p =>
               p.x = props.center.x
               p.y = props.center.y
-              p.angle = ((props.angle.deg.toDouble / Timeout.Max.value) * (timeout.value - (1 - state.factor))).floor.toInt
+              p.angle =
+                ((props.angle.deg.toDouble / Timeout.Max.value) * (timeout.value - (1 - state.factor))).floor.toInt
               p.innerRadius = props.innerRadius
               p.outerRadius = props.innerRadius + props.size
               p.rotation = -props.rotation.deg - ((props.angle.deg - 180) / 2)
-              p.fill = timeout match {
-                case Timeout.Max => Palette.green1
-                case Timeout.T9 => Palette.green2
-                case Timeout.T8 => Palette.green3
-                case Timeout.T7 => Palette.yellow1
-                case Timeout.T6 => Palette.yellow2
-                case Timeout.T5 => Palette.mustard
-                case Timeout.T4 => Palette.orange1
-                case Timeout.T3 => Palette.orange2
-                case Timeout.T2 => Palette.red1
-                case Timeout.T1 => Palette.red2
+              p.fill = timeout match
+                case Timeout.Max      => Palette.green1
+                case Timeout.T9       => Palette.green2
+                case Timeout.T8       => Palette.green3
+                case Timeout.T7       => Palette.yellow1
+                case Timeout.T6       => Palette.yellow2
+                case Timeout.T5       => Palette.mustard
+                case Timeout.T4       => Palette.orange1
+                case Timeout.T3       => Palette.orange2
+                case Timeout.T2       => Palette.red1
+                case Timeout.T1       => Palette.red2
                 case Timeout.TimedOut => Palette.black
-              }
             }
           )
 
@@ -86,7 +90,7 @@ object TimeoutBar:
             p.shadowBlur = props.size
             p.shadowOpacity = 1
           }
-      }
+  end TimeoutBarBackend
 
   private def component =
     ScalaComponent
@@ -97,10 +101,11 @@ object TimeoutBar:
       .build
 
   def apply(
-    center: Point,
-    timeout: Option[Timeout],
-    angle: Angle,
-    rotation: Angle,
-    innerRadius: Double,
-    size: Double
+      center: Point,
+      timeout: Option[Timeout],
+      angle: Angle,
+      rotation: Angle,
+      innerRadius: Double,
+      size: Double
   ): VdomNode = component(Props(center, timeout, angle, rotation, innerRadius, size))
+end TimeoutBar

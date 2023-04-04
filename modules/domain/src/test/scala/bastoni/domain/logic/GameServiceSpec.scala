@@ -1,10 +1,9 @@
 package bastoni.domain.logic
 
-import bastoni.domain.AsyncIOFreeSpec
-import bastoni.domain.logic.Fixtures.*
+import bastoni.domain.logic.{GameContext, GamePubSub}
 import bastoni.domain.logic.briscola.{BriscolaGameScore, BriscolaGameScoreItem}
 import bastoni.domain.logic.generic.{MatchState, MatchType}
-import bastoni.domain.logic.{GameContext, GamePubSub}
+import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
@@ -13,6 +12,7 @@ import bastoni.domain.model.Rank.*
 import bastoni.domain.model.Suit.*
 import bastoni.domain.repos.{GameRepo, MessageRepo}
 import bastoni.domain.view.FromPlayer
+import bastoni.domain.AsyncIOFreeSpec
 import cats.effect.IO
 import io.circe.syntax.EncoderOps
 
@@ -22,46 +22,54 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
   val room1Id: RoomId = RoomId.newId
   val room2Id: RoomId = RoomId.newId
-  val room1Players = List(user1, user2)
-  val room2Players = List(user2, user3)
+  val room1Players    = List(user1, user2)
+  val room2Players    = List(user2, user3)
 
-  def gameService(inputStream: fs2.Stream[IO, Message]): IO[List[Message | Delayed[Message]]] = for {
-    gameRepo <- GameRepo.inMemory[IO]
+  def gameService(inputStream: fs2.Stream[IO, Message]): IO[List[Message | Delayed[Message]]] = for
+    gameRepo    <- GameRepo.inMemory[IO]
     messageRepo <- MessageRepo.inMemory[IO]
-    output <- GameService[IO](IO.pure(messageId), gameRepo, messageRepo)(inputStream).compile.toList
-  } yield output
+    output      <- GameService[IO](IO.pure(messageId), gameRepo, messageRepo)(inputStream).compile.toList
+  yield output
 
   "Rooms can be joined and left" in {
-    val commands = fs2.Stream(
-      JoinRoom(user1, joinSeed),
-      JoinRoom(user2, joinSeed),
-      LeaveRoom(user1),
-      LeaveRoom(user2)
-    ).map(_.toMessage(room1Id))
+    val commands = fs2
+      .Stream(
+        JoinRoom(user1, joinSeed),
+        JoinRoom(user2, joinSeed),
+        LeaveRoom(user1),
+        LeaveRoom(user2)
+      )
+      .map(_.toMessage(room1Id))
 
-    gameService(commands).asserting(_ shouldBe List(
-      PlayerJoinedRoom(user1, 3),
-      PlayerJoinedRoom(user2, 2),
-      PlayerLeftRoom(user1, 3),
-      PlayerLeftRoom(user2, 2)
-    ).map(_.toMessage(room1Id)))
+    gameService(commands).asserting(
+      _ shouldBe List(
+        PlayerJoinedRoom(user1, 3),
+        PlayerJoinedRoom(user2, 2),
+        PlayerLeftRoom(user1, 3),
+        PlayerLeftRoom(user2, 2)
+      ).map(_.toMessage(room1Id))
+    )
   }
 
   "Players cannot join a room that is full" in {
-    val commands = fs2.Stream(
-      JoinRoom(user1, joinSeed),
-      JoinRoom(user2, joinSeed),
-      JoinRoom(user3, joinSeed),
-      JoinRoom(user4, joinSeed),
-      JoinRoom(user5, joinSeed),
-    ).map(_.toMessage(room1Id))
+    val commands = fs2
+      .Stream(
+        JoinRoom(user1, joinSeed),
+        JoinRoom(user2, joinSeed),
+        JoinRoom(user3, joinSeed),
+        JoinRoom(user4, joinSeed),
+        JoinRoom(user5, joinSeed)
+      )
+      .map(_.toMessage(room1Id))
 
-    gameService(commands).asserting(_ shouldBe List(
-      PlayerJoinedRoom(user1, 3),
-      PlayerJoinedRoom(user2, 2),
-      PlayerJoinedRoom(user3, 1),
-      PlayerJoinedRoom(user4, 0)
-    ).map(_.toMessage(room1Id)))
+    gameService(commands).asserting(
+      _ shouldBe List(
+        PlayerJoinedRoom(user1, 3),
+        PlayerJoinedRoom(user2, 2),
+        PlayerJoinedRoom(user3, 1),
+        PlayerJoinedRoom(user4, 0)
+      ).map(_.toMessage(room1Id))
+    )
   }
 
   "Players can join multiple rooms" in {
@@ -70,16 +78,18 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       JoinRoom(user1, joinSeed).toMessage(room2Id)
     )
 
-    gameService(commands).asserting(_ shouldBe List(
-      PlayerJoinedRoom(user1, 3).toMessage(room1Id),
-      PlayerJoinedRoom(user1, 3).toMessage(room2Id)
-    ))
+    gameService(commands).asserting(
+      _ shouldBe List(
+        PlayerJoinedRoom(user1, 3).toMessage(room1Id),
+        PlayerJoinedRoom(user1, 3).toMessage(room2Id)
+      )
+    )
   }
 
   "Messages from different rooms won't interfere" in {
     val commands = fs2.Stream(
       JoinRoom(user1, joinSeed).toMessage(room1Id),
-      LeaveRoom(user1).toMessage(room2Id),  // will be ignored as room2 doesn't exist
+      LeaveRoom(user1).toMessage(room2Id) // will be ignored as room2 doesn't exist
     )
 
     gameService(commands).asserting(_ shouldBe List(PlayerJoinedRoom(user1, 3).toMessage(room1Id)))
@@ -88,7 +98,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
   "Players cannot join the same room twice" in {
     val commands = fs2.Stream(
       JoinRoom(user1, joinSeed).toMessage(room1Id),
-      JoinRoom(user1, joinSeed).toMessage(room1Id),  // will be ignored
+      JoinRoom(user1, joinSeed).toMessage(room1Id) // will be ignored
     )
 
     gameService(commands).asserting(_ shouldBe List(PlayerJoinedRoom(user1, 3).toMessage(room1Id)))
@@ -105,33 +115,41 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
   "A new game" - {
     "cannot start if only one player is in the room" in {
-      val commands = fs2.Stream(
-        JoinRoom(user1, joinSeed),
-        StartMatch(user1.id, GameType.Briscola)
-      ).map(_.toMessage(room1Id))
+      val commands = fs2
+        .Stream(
+          JoinRoom(user1, joinSeed),
+          StartMatch(user1.id, GameType.Briscola)
+        )
+        .map(_.toMessage(room1Id))
 
       gameService(commands).asserting(_ shouldBe List(PlayerJoinedRoom(user1, 3).toMessage(room1Id)))
     }
 
     "can start for 2 players" in {
-      val commands = fs2.Stream(
-        JoinRoom(user1, joinSeed),
-        JoinRoom(user2, joinSeed),
-        StartMatch(user1.id, GameType.Briscola)
-      ).map(_.toMessage(room1Id))
+      val commands = fs2
+        .Stream(
+          JoinRoom(user1, joinSeed),
+          JoinRoom(user2, joinSeed),
+          StartMatch(user1.id, GameType.Briscola)
+        )
+        .map(_.toMessage(room1Id))
 
-      gameService(commands).asserting(_ shouldBe List(
-        PlayerJoinedRoom(user1, 3).toMessage(room1Id),
-        PlayerJoinedRoom(user2, 2).toMessage(room1Id),
-        MatchStarted(GameType.Briscola, List(
-          MatchScore(List(user2.id), 0),
-          MatchScore(List(user1.id), 0)
-        )).toMessage(room1Id)
-      ))
+      gameService(commands).asserting(
+        _ shouldBe List(
+          PlayerJoinedRoom(user1, 3).toMessage(room1Id),
+          PlayerJoinedRoom(user2, 2).toMessage(room1Id),
+          MatchStarted(
+            GameType.Briscola,
+            List(
+              MatchScore(List(user2.id), 0),
+              MatchScore(List(user1.id), 0)
+            )
+          ).toMessage(room1Id)
+        )
+      )
     }
 
   }
-
 
   "Two simultaneous matches can be played" in {
     val inputStream = fs2.Stream(
@@ -139,10 +157,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       JoinRoom(user1, joinSeed).toMessage(room1Id),
       JoinRoom(user3, joinSeed).toMessage(room2Id),
       JoinRoom(user2, joinSeed).toMessage(room2Id),
-
       StartMatch(user2.id, GameType.Briscola).toMessage(room1Id),
       StartMatch(user2.id, GameType.Tressette).toMessage(room2Id),
-
       ShuffleDeck(shuffleSeed).toMessage(room1Id),
       Continue.toMessage(room1Id),
       ShuffleDeck(shuffleSeed).toMessage(room2Id),
@@ -152,46 +168,61 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       Continue.toMessage(room1Id)
     )
 
-    gameService(inputStream).asserting(_ shouldBe List(
-      PlayerJoinedRoom(user2, 3).toMessage(room1Id),
-      PlayerJoinedRoom(user1, 2).toMessage(room1Id),
-      PlayerJoinedRoom(user3, 3).toMessage(room2Id),
-      PlayerJoinedRoom(user2, 2).toMessage(room2Id),
-
-      MatchStarted(GameType.Briscola, List(MatchScore(List(user1.id), 0), MatchScore(List(user2.id), 0))).toMessage(room1Id),
-      MatchStarted(GameType.Tressette, List(MatchScore(List(user2.id), 0), MatchScore(List(user3.id), 0))).toMessage(room2Id),
-
-      DeckShuffled(shuffledDeck).toMessage(room1Id),
-      Delayed(Continue.toMessage(room1Id), Delay.AfterShuffleDeck),
-      CardsDealt(user1.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari)), Direction.Player).toMessage(room1Id),
-      Delayed(Continue.toMessage(room1Id), Delay.AfterDealCards),
-      DeckShuffled(shuffledDeck).toMessage(room2Id),
-      Delayed(Continue.toMessage(room2Id), Delay.AfterShuffleDeck),
-      CardsDealt(user2.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari), cardOf(Quattro, Spade), cardOf(Sei, Denari)), Direction.Player).toMessage(room2Id),
-      Delayed(Continue.toMessage(room2Id), Delay.AfterDealCards),
-      PlayerLeftRoom(user1, 2).toMessage(room1Id),
-      GameAborted(GameAborted.Reason.playerLeftTheRoom).toMessage(room1Id),
-      Delayed(Continue.toMessage(room1Id), Delay.AfterGameOver),
-      MatchAborted(GameAborted.Reason.playerLeftTheRoom).toMessage(room1Id),
-    ))
+    gameService(inputStream).asserting(
+      _ shouldBe List(
+        PlayerJoinedRoom(user2, 3).toMessage(room1Id),
+        PlayerJoinedRoom(user1, 2).toMessage(room1Id),
+        PlayerJoinedRoom(user3, 3).toMessage(room2Id),
+        PlayerJoinedRoom(user2, 2).toMessage(room2Id),
+        MatchStarted(GameType.Briscola, List(MatchScore(List(user1.id), 0), MatchScore(List(user2.id), 0)))
+          .toMessage(room1Id),
+        MatchStarted(GameType.Tressette, List(MatchScore(List(user2.id), 0), MatchScore(List(user3.id), 0)))
+          .toMessage(room2Id),
+        DeckShuffled(shuffledDeck).toMessage(room1Id),
+        Delayed(Continue.toMessage(room1Id), Delay.AfterShuffleDeck),
+        CardsDealt(user1.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari)), Direction.Player)
+          .toMessage(room1Id),
+        Delayed(Continue.toMessage(room1Id), Delay.AfterDealCards),
+        DeckShuffled(shuffledDeck).toMessage(room2Id),
+        Delayed(Continue.toMessage(room2Id), Delay.AfterShuffleDeck),
+        CardsDealt(
+          user2.id,
+          List(
+            cardOf(Due, Bastoni),
+            cardOf(Asso, Spade),
+            cardOf(Sette, Denari),
+            cardOf(Quattro, Spade),
+            cardOf(Sei, Denari)
+          ),
+          Direction.Player
+        )
+          .toMessage(room2Id),
+        Delayed(Continue.toMessage(room2Id), Delay.AfterDealCards),
+        PlayerLeftRoom(user1, 2).toMessage(room1Id),
+        GameAborted(GameAborted.Reason.playerLeftTheRoom).toMessage(room1Id),
+        Delayed(Continue.toMessage(room1Id), Delay.AfterGameOver),
+        MatchAborted(GameAborted.Reason.playerLeftTheRoom).toMessage(room1Id)
+      )
+    )
   }
 
   "Snapshots are accurate" in {
-    val inputStream = fs2.Stream[fs2.Pure, StateMachineInput](
-      JoinRoom(user2, joinSeed),
-      JoinRoom(user1, joinSeed),
-
-      StartMatch(user2.id, GameType.Briscola),
-      ShuffleDeck(shuffleSeed),
-      Continue,
-      Continue,
-      Continue,
-      Continue,
-      Connect,
-      PlayCard(user1.id, cardOf(Due, Bastoni)),
-      Continue,
-      Connect
-    ).map(_.toMessage(room1))
+    val inputStream = fs2
+      .Stream[fs2.Pure, StateMachineInput](
+        JoinRoom(user2, joinSeed),
+        JoinRoom(user1, joinSeed),
+        StartMatch(user2.id, GameType.Briscola),
+        ShuffleDeck(shuffleSeed),
+        Continue,
+        Continue,
+        Continue,
+        Continue,
+        Connect,
+        PlayCard(user1.id, cardOf(Due, Bastoni)),
+        Continue,
+        Connect
+      )
+      .map(_.toMessage(room1))
 
     gameService(inputStream).asserting { events =>
       events.collect { case Message(_, _, s: Snapshot) => s } shouldBe
@@ -226,16 +257,21 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   taken = Nil
                 )
               ),
-              deck = shuffledDeck.asList.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
+              deck = shuffledDeck.asList.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(
+                cardOf(Cinque, Coppe),
+                Direction.Up
+              ),
               board = Nil,
-              matchInfo = Some(MatchInfo(
-                GameType.Briscola,
-                List(
-                  MatchScore(List(user1.id), 0),
-                  MatchScore(List(user2.id), 0),
-                ),
-                None
-              )),
+              matchInfo = Some(
+                MatchInfo(
+                  GameType.Briscola,
+                  List(
+                    MatchScore(List(user1.id), 0),
+                    MatchScore(List(user2.id), 0)
+                  ),
+                  None
+                )
+              ),
               dealerIndex = Some(3),
               players = Map(
                 user1.id -> user1,
@@ -268,16 +304,21 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   taken = Nil
                 )
               ),
-              deck = shuffledDeck.asList.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(cardOf(Cinque, Coppe), Direction.Up),
+              deck = shuffledDeck.asList.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(
+                cardOf(Cinque, Coppe),
+                Direction.Up
+              ),
               board = List(BoardCard(CardServerView(cardOf(Due, Bastoni), Direction.Up), playedBy = Some(user1.id))),
-              matchInfo = Some(MatchInfo(
-                GameType.Briscola,
-                List(
-                  MatchScore(List(user1.id), 0),
-                  MatchScore(List(user2.id), 0),
-                ),
-                None
-              )),
+              matchInfo = Some(
+                MatchInfo(
+                  GameType.Briscola,
+                  List(
+                    MatchScore(List(user1.id), 0),
+                    MatchScore(List(user2.id), 0)
+                  ),
+                  None
+                )
+              ),
               dealerIndex = Some(3),
               players = Map(
                 user1.id -> user1,
@@ -291,11 +332,13 @@ class GameServiceSpec extends AsyncIOFreeSpec:
   }
 
   "First player to join will be the dealer" in {
-    val inputStream = fs2.Stream[fs2.Pure, StateMachineInput](
-      JoinRoom(user2, joinSeed),
-      JoinRoom(user1, joinSeed),
-      Connect
-    ).map(_.toMessage(room1))
+    val inputStream = fs2
+      .Stream[fs2.Pure, StateMachineInput](
+        JoinRoom(user2, joinSeed),
+        JoinRoom(user1, joinSeed),
+        Connect
+      )
+      .map(_.toMessage(room1))
 
     gameService(inputStream).asserting { events =>
       events.collect { case Message(_, _, s: Snapshot) => s } shouldBe
@@ -368,32 +411,36 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           user2.id -> user2
         )
       ),
-      stateMachine = Some(generic.StateMachine(
-        briscola.BriscolaGame,
-        MatchState.InProgress(
-          List(player1, player2),
-          (briscola.BriscolaGameState.PlayRound(
-            List(Player(player1, List(player1Card), player1Collected)),
-            List(Player(player2, Nil, Nil) -> player2Card),
-            Nil.toDeck,
-            player1Card
-          ): briscola.BriscolaGameState).asJson,
-          MatchType.FixedRounds(0)
+      stateMachine = Some(
+        generic.StateMachine(
+          briscola.BriscolaGame,
+          MatchState.InProgress(
+            List(player1, player2),
+            (briscola.BriscolaGameState.PlayRound(
+              List(Player(player1, List(player1Card), player1Collected)),
+              List(Player(player2, Nil, Nil) -> player2Card),
+              Nil.toDeck,
+              player1Card
+            ): briscola.BriscolaGameState).asJson,
+            MatchType.FixedRounds(0)
+          )
         )
-      ))
+      )
     )
 
     val oldMessage = CardPlayed(user2.id, player2Card).toMessage(room1Id)
 
-    val resultIO = for {
-      gameRepo <- JsonRepos.gameRepo
+    val resultIO = for
+      gameRepo    <- JsonRepos.gameRepo
       messageRepo <- JsonRepos.messageRepo
-      _ <- gameRepo.set(room1Id, initialContext)
-      _ <- messageRepo.flying(oldMessage)
-      messageBus <- MessageBus.inMemory[IO]
-      events <- (for {
+      _           <- gameRepo.set(room1Id, initialContext)
+      _           <- messageRepo.flying(oldMessage)
+      messageBus  <- MessageBus.inMemory[IO]
+      events <- (for
         subscription <- fs2.Stream.resource(messageBus.subscribeAwait)
-        gameServiceRunner <- fs2.Stream.resource(GameService.runner[IO](messageBus, gameRepo, messageRepo, _ => 2.millis))
+        gameServiceRunner <- fs2.Stream.resource(
+          GameService.runner[IO](messageBus, gameRepo, messageRepo, _ => 2.millis)
+        )
         pub1 = GamePubSub.publisher(messageBus).publish(user1, room1Id)
         pub2 = GamePubSub.publisher(messageBus).publish(user2, room1Id)
         event <- subscription
@@ -404,10 +451,10 @@ class GameServiceSpec extends AsyncIOFreeSpec:
           .concurrently(fs2.Stream(FromPlayer.Ok).delayBy[IO](300.millis).through(pub2))
           .collect { case Message(_, _, event: Event) => event }
           .interruptAfter(2.seconds)
-      } yield event).compile.toList
+      yield event).compile.toList
       newContext <- gameRepo.get(room1Id)
-      messages <- messageRepo.inFlight.compile.toList
-    } yield (events, newContext, messages)
+      messages   <- messageRepo.inFlight.compile.toList
+    yield (events, newContext, messages)
 
     resultIO.asserting { case (events, newContext, messages) =>
       events shouldBe List(
@@ -443,9 +490,9 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 BriscolaGameScoreItem(cardOf(Fante, Bastoni), 2),
                 BriscolaGameScoreItem(cardOf(Fante, Spade), 2),
                 BriscolaGameScoreItem(cardOf(Fante, Coppe), 2),
-                BriscolaGameScoreItem(cardOf(Fante, Denari), 2),
+                BriscolaGameScoreItem(cardOf(Fante, Denari), 2)
               )
-            ),
+            )
           ).map(_.generify),
           matchScores = List(
             MatchScore(List(user2.id), 1),
@@ -457,33 +504,35 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         MatchCompleted(List(user1.id))
       )
 
-      newContext shouldBe Some(GameContext(
-        room = RoomServerView(
-          seats = List(
-            TakenSeat(
-              0,
-              player = EndOfMatchPlayer(player1.win, winner = true),
-              hand = Nil,
-              taken = Nil
+      newContext shouldBe Some(
+        GameContext(
+          room = RoomServerView(
+            seats = List(
+              TakenSeat(
+                0,
+                player = EndOfMatchPlayer(player1.win, winner = true),
+                hand = Nil,
+                taken = Nil
+              ),
+              TakenSeat(
+                1,
+                player = EndOfMatchPlayer(player2, winner = false),
+                hand = Nil,
+                taken = Nil
+              )
             ),
-            TakenSeat(
-              1,
-              player = EndOfMatchPlayer(player2, winner = false),
-              hand = Nil,
-              taken = Nil
+            deck = Nil,
+            board = Nil,
+            matchInfo = None,
+            dealerIndex = None,
+            players = Map(
+              user1.id -> user1,
+              user2.id -> user2
             )
           ),
-          deck = Nil,
-          board = Nil,
-          matchInfo = None,
-          dealerIndex = None,
-          players = Map(
-            user1.id -> user1,
-            user2.id -> user2
-          )
-        ),
-        stateMachine = None
-      ))
+          stateMachine = None
+        )
+      )
 
       messages shouldBe Nil
     }
@@ -491,33 +540,48 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
   "Future undelivered events will still be sent" in {
 
-    val message1: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Asso, Suit.Coppe))), Delay.BeforeGameOver)
-    val message2: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Due, Suit.Coppe))), Delay.BeforeTakeCards)
-    val message3: Delayed[Message] = Delayed(Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Tre, Suit.Coppe))), Delay.AfterDealCards)
+    val message1: Delayed[Message] = Delayed(
+      Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Asso, Suit.Coppe))),
+      Delay.BeforeGameOver
+    )
+    val message2: Delayed[Message] = Delayed(
+      Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Due, Suit.Coppe))),
+      Delay.BeforeTakeCards
+    )
+    val message3: Delayed[Message] = Delayed(
+      Message(MessageId.newId, room1Id, CardPlayed(user2.id, cardOf(Rank.Tre, Suit.Coppe))),
+      Delay.AfterDealCards
+    )
 
-    val eventsIO = (for {
-      bus <- MessageBus.inMemory[IO]
-      gameRepo <- JsonRepos.gameRepo
+    val eventsIO = (for
+      bus         <- MessageBus.inMemory[IO]
+      gameRepo    <- JsonRepos.gameRepo
       messageRepo <- JsonRepos.messageRepo
-      _ <- messageRepo.flying(message1)
-      _ <- messageRepo.flying(message2)
-      _ <- messageRepo.flying(message3)
-      events <- (for {
+      _           <- messageRepo.flying(message1)
+      _           <- messageRepo.flying(message2)
+      _           <- messageRepo.flying(message3)
+      events <- (for
         gameServiceRunner <- fs2.Stream.resource(
-          GameService.runner[IO](bus, gameRepo, messageRepo, {
-            case Delay.AfterDealCards => 20.millis
-            case Delay.BeforeTakeCards => 30.millis
-            case Delay.BeforeGameOver => 40.millis
-            case _ => 100.millis
-          })
+          GameService.runner[IO](
+            bus,
+            gameRepo,
+            messageRepo,
+            {
+              case Delay.AfterDealCards  => 20.millis
+              case Delay.BeforeTakeCards => 30.millis
+              case Delay.BeforeGameOver  => 40.millis
+              case _                     => 100.millis
+            }
+          )
         )
         subscription <- fs2.Stream.resource(bus.subscribeAwait)
         message <- subscription
           .concurrently(bus.run)
           .concurrently(gameServiceRunner)
           .interruptAfter(2.seconds)
-      } yield message).compile.toList
-    } yield events)
+      yield message).compile.toList
+    yield events)
 
     eventsIO.asserting(_ shouldBe List(message3.inner, message2.inner, message1.inner))
   }
+end GameServiceSpec

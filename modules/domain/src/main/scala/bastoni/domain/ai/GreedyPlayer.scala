@@ -6,11 +6,11 @@ import bastoni.domain.view.FromPlayer
 import bastoni.domain.view.FromPlayer.{Ok, PlayCard, ShuffleDeck}
 
 object GreedyPlayer extends ActStrategy:
-  override def act(context: ActContext, action: Action): FromPlayer = {
-    action match {
+  override def act(context: ActContext, action: Action): FromPlayer =
+    action match
       case Action.PlayCard(PlayContext.Briscola(trump)) =>
         val myHand: List[VisibleCard] = context.mySeat.hand.flatMap(_.card.toOption)
-        val board: List[VisibleCard] = context.room.board.flatMap(_.card.toOption)
+        val board: List[VisibleCard]  = context.room.board.flatMap(_.card.toOption)
 
         // winning and losing cards in hand sorted by their value
         val (win, lose) = myHand
@@ -18,7 +18,7 @@ object GreedyPlayer extends ActStrategy:
           .partition(myCard => BriscolaGame.bestCard(trump, board :+ myCard) == myCard)
 
         val pointsToWin: Int = board.map(BriscolaGameScoreCalculator.pointsFor).sum
-        val pointsToLose = lose.headOption.map(BriscolaGameScoreCalculator.pointsFor).getOrElse(0)
+        val pointsToLose     = lose.headOption.map(BriscolaGameScoreCalculator.pointsFor).getOrElse(0)
 
         val toPlay: VisibleCard =
           (if (context.room.board.isEmpty) win.find(_.suit != trump) else win.findLast(_.suit != trump))
@@ -39,5 +39,4 @@ object GreedyPlayer extends ActStrategy:
       case Action.ShuffleDeck => ShuffleDeck
 
       case Action.Confirm => Ok
-    }
-  }
+end GreedyPlayer

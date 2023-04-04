@@ -1,6 +1,6 @@
 package bastoni.domain.model
 
-import io.circe.{Encoder, Decoder}
+import io.circe.{Decoder, Encoder}
 
 sealed trait Timeout(val value: Int)
 
@@ -9,15 +9,15 @@ object Timeout:
 
   sealed abstract class Active(value: Int, val next: Timeout) extends Timeout(value)
 
-  case object T1 extends Active(1, TimedOut)
-  case object T2 extends Active(2, T1)
-  case object T3 extends Active(3, T2)
-  case object T4 extends Active(4, T3)
-  case object T5 extends Active(5, T4)
-  case object T6 extends Active(6, T5)
-  case object T7 extends Active(7, T6)
-  case object T8 extends Active(8, T7)
-  case object T9 extends Active(9, T8)
+  case object T1  extends Active(1, TimedOut)
+  case object T2  extends Active(2, T1)
+  case object T3  extends Active(3, T2)
+  case object T4  extends Active(4, T3)
+  case object T5  extends Active(5, T4)
+  case object T6  extends Active(6, T5)
+  case object T7  extends Active(7, T6)
+  case object T8  extends Active(8, T7)
+  case object T9  extends Active(9, T8)
   case object Max extends Active(10, T9)
 
   object Active:
@@ -36,3 +36,4 @@ object Timeout:
       case 10 => Right(Max)
       case e  => Left("Invalid timeout")
     }
+end Timeout

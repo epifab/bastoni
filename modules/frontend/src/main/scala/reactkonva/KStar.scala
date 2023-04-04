@@ -13,6 +13,6 @@ import scala.scalajs.js.annotation.JSGlobal
 object KStar extends ExternalComponentWithoutChildren[KStar.Props](ReactKonvaDOM.Star):
   @js.native
   trait Props extends ShapeProps:
-    var numPoints: js.UndefOr[Int] = js.native
+    var numPoints: js.UndefOr[Int]      = js.native
     var innerRadius: js.UndefOr[Double] = js.native
     var outerRadius: js.UndefOr[Double] = js.native

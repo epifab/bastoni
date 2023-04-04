@@ -1,8 +1,8 @@
 package bastoni.domain.logic
 package scopa
 
-import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.logic.scopa.ScopaGameState.*
+import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Delay.syntax.*
@@ -41,69 +41,60 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       Continue,
       Continue,
       Continue,
-      Continue,
+      Continue
     )
 
     ScopaGame.playStream[cats.Id](players)(input).compile.toList shouldBe List[StateMachineOutput](
       DeckShuffled(shuffledDeck),
       Continue.afterShufflingDeck,
-
       CardsDealt(user1.id, List(cardOf(Due, Bastoni), cardOf(Asso, Spade), cardOf(Sette, Denari)), Direction.Player),
       Continue.afterDealingCards,
       CardsDealt(user2.id, List(cardOf(Quattro, Spade), cardOf(Sei, Denari), cardOf(Re, Denari)), Direction.Player),
       Continue.afterDealingCards,
       BoardCardsDealt(List(cardOf(Cinque, Coppe), cardOf(Asso, Bastoni), cardOf(Cinque, Spade), cardOf(Sei, Bastoni))),
       Continue.afterDealingCards,
-
       Act(user1.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(1215977239),
       CardPlayed(user1.id, cardOf(Sette, Denari)),
       Continue.beforeTakingCards,
       CardsTaken(user1.id, List(cardOf(Sette, Denari), cardOf(Asso, Bastoni), cardOf(Sei, Bastoni)), scopa = None),
       Continue.afterTakingCards,
-
       Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(1358241511),
       CardPlayed(user2.id, cardOf(Quattro, Spade)),
       Continue.beforeTakingCards,
       CardsTaken(user2.id, Nil, None),
       Continue.afterTakingCards,
-
       Act(user1.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(-161735769),
       CardPlayed(user1.id, cardOf(Asso, Spade)),
       Continue.beforeTakingCards,
       CardsTaken(user1.id, Nil, None),
       Continue.afterTakingCards,
-
       Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(121586655),
-      CardPlayed(user2.id, cardOf(Sei,Denari)),
+      CardPlayed(user2.id, cardOf(Sei, Denari)),
       Continue.beforeTakingCards,
-      CardsTaken(user2.id, List(cardOf(Sei,Denari), cardOf(Asso,Spade), cardOf(Cinque,Coppe)), None),
+      CardsTaken(user2.id, List(cardOf(Sei, Denari), cardOf(Asso, Spade), cardOf(Cinque, Coppe)), None),
       Continue.afterTakingCards,
-
       Act(user1.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(413378932),
-      CardPlayed(user1.id, cardOf(Due,Bastoni)),
+      CardPlayed(user1.id, cardOf(Due, Bastoni)),
       Continue.beforeTakingCards,
       CardsTaken(user1.id, Nil, None),
       Continue.afterTakingCards,
-
       Act(user2.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
       willTick(1414415910),
-      CardPlayed(user2.id, cardOf(Re,Denari)),
+      CardPlayed(user2.id, cardOf(Re, Denari)),
       Continue.beforeTakingCards,
       CardsTaken(user2.id, Nil, None),
       Continue.afterTakingCards,
-
-      CardsDealt(user1.id, List(cardOf(Tre,Spade), cardOf(Tre,Denari), cardOf(Asso,Coppe)), Direction.Player),
+      CardsDealt(user1.id, List(cardOf(Tre, Spade), cardOf(Tre, Denari), cardOf(Asso, Coppe)), Direction.Player),
       Continue.afterDealingCards,
-      CardsDealt(user2.id, List(cardOf(Fante,Bastoni), cardOf(Due,Denari), cardOf(Fante,Spade)), Direction.Player),
+      CardsDealt(user2.id, List(cardOf(Fante, Bastoni), cardOf(Due, Denari), cardOf(Fante, Spade)), Direction.Player),
       Continue.afterDealingCards,
-
       Act(user1.id, Action.PlayCard(PlayContext.Scopa), Some(Timeout.Max)),
-      willTick(1364654232),
+      willTick(1364654232)
     )
   }
 
@@ -196,11 +187,12 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
         lastTake = None
       )
 
-    val takeCards = TakeCards(user1.id, cardOf(Cavallo, Denari), List(cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)))
+    val takeCards =
+      TakeCards(user1.id, cardOf(Cavallo, Denari), List(cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)))
 
-    val (state1, e1) = ScopaGame.playGameStep(initialState, takeCards)
+    val (state1, e1)                           = ScopaGame.playGameStep(initialState, takeCards)
     val (state2, e2: List[StateMachineOutput]) = ScopaGame.playGameStep(state1, Continue)
-    val (newState, e3) = ScopaGame.playGameStep(state2, Continue)
+    val (newState, e3)                         = ScopaGame.playGameStep(state2, Continue)
 
     newState shouldBe WaitingForPlayer(
       -1046079801,
@@ -209,7 +201,12 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       PlayRound(
         players = List(
           Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0),
-          Player(MatchPlayer(user1, 0), Nil, List(cardOf(Cavallo, Denari), cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)), 0),
+          Player(
+            MatchPlayer(user1, 0),
+            Nil,
+            List(cardOf(Cavallo, Denari), cardOf(Quattro, Coppe), cardOf(Tre, Spade), cardOf(Due, Spade)),
+            0
+          )
         ),
         deck = Nil.toDeck,
         board = List(cardOf(Sei, Bastoni)),
@@ -248,8 +245,8 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
 
     val input = TakeCards(user1.id, cardOf(Sette, Denari), List(cardOf(Tre, Spade), cardOf(Quattro, Coppe)))
 
-    val (state1, e1) = ScopaGame.playGameStep(initialState, input)
-    val (state2, e2) = ScopaGame.playGameStep(state1, Continue)
+    val (state1, e1)     = ScopaGame.playGameStep(initialState, input)
+    val (state2, e2)     = ScopaGame.playGameStep(state1, Continue)
     val (finalState, e3) = ScopaGame.playGameStep(state2, Continue)
 
     finalState shouldBe WaitingForPlayer(
@@ -259,7 +256,7 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
       PlayRound(
         players = List(
           Player(MatchPlayer(user2, 0), List(cardOf(Sette, Spade)), Nil, 0),
-          Player(MatchPlayer(user1, 0), Nil, List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)), 1),
+          Player(MatchPlayer(user1, 0), Nil, List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)), 1)
         ),
         deck = Nil.toDeck,
         board = Nil,
@@ -298,13 +295,13 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
 
     val input = TakeCards(user1.id, cardOf(Sette, Denari), List(cardOf(Tre, Spade), cardOf(Quattro, Coppe)))
 
-    val (newState: ScopaGameState, _) = ScopaGame.playGameStep(initialState, input)
+    val (newState: ScopaGameState, _)                                  = ScopaGame.playGameStep(initialState, input)
     val (newerState: ScopaGameState, events: List[StateMachineOutput]) = ScopaGame.playGameStep(newState, Continue)
 
     newerState shouldBe WillComplete(
       List(
         Player(MatchPlayer(user2, 0), Nil, Nil, 0),
-        Player(MatchPlayer(user1, 0), Nil, List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)), 0),
+        Player(MatchPlayer(user1, 0), Nil, List(cardOf(Sette, Denari), cardOf(Tre, Spade), cardOf(Quattro, Coppe)), 0)
       )
     )
 
@@ -333,13 +330,15 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
 
       val input = TakeCards(user2.id, cardOf(Sei, Spade), Nil)
 
-      val (state1, e1) = ScopaGame.playGameStep(initialState, input)
+      val (state1, e1)   = ScopaGame.playGameStep(initialState, input)
       val (newState, e2) = ScopaGame.playGameStep(state1, Continue)
 
-      newState shouldBe WillComplete(List(
-        Player(MatchPlayer(user1, 0), Nil, List(cardOf(Sei, Spade), cardOf(Tre, Spade))),
-        Player(MatchPlayer(user2, 0), Nil, Nil)
-      ))
+      newState shouldBe WillComplete(
+        List(
+          Player(MatchPlayer(user1, 0), Nil, List(cardOf(Sei, Spade), cardOf(Tre, Spade))),
+          Player(MatchPlayer(user2, 0), Nil, Nil)
+        )
+      )
     }
 
     "are collected by this player if he takes some cards" in {
@@ -356,13 +355,15 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
 
       val input = TakeCards(user2.id, cardOf(Sei, Spade), Nil)
 
-      val (state1, e1) = ScopaGame.playGameStep(initialState, input)
+      val (state1, e1)   = ScopaGame.playGameStep(initialState, input)
       val (newState, e2) = ScopaGame.playGameStep(state1, Continue)
 
-      newState shouldBe WillComplete(List(
-        Player(MatchPlayer(user1, 0), Nil, Nil),
-        Player(MatchPlayer(user2, 0), Nil, List(cardOf(Sei, Spade), cardOf(Tre, Spade)))
-      ))
+      newState shouldBe WillComplete(
+        List(
+          Player(MatchPlayer(user1, 0), Nil, Nil),
+          Player(MatchPlayer(user2, 0), Nil, List(cardOf(Sei, Spade), cardOf(Tre, Spade)))
+        )
+      )
     }
 
     "are not collected if nobody has ever taken any card (probably not a real scenario)" in {
@@ -379,14 +380,16 @@ class Scopa2Spec extends AnyFreeSpec with Matchers:
 
       val input = TakeCards(user2.id, cardOf(Sei, Spade), Nil)
 
-      val (state1, e1) = ScopaGame.playGameStep(initialState, input)
+      val (state1, e1)   = ScopaGame.playGameStep(initialState, input)
       val (newState, e2) = ScopaGame.playGameStep(state1, Continue)
 
-      newState shouldBe WillComplete(List(
-        Player(MatchPlayer(user1, 0), Nil, Nil),
-        Player(MatchPlayer(user2, 0), Nil, Nil)
-      ))
+      newState shouldBe WillComplete(
+        List(
+          Player(MatchPlayer(user1, 0), Nil, Nil),
+          Player(MatchPlayer(user2, 0), Nil, Nil)
+        )
+      )
     }
 
   }
-
+end Scopa2Spec

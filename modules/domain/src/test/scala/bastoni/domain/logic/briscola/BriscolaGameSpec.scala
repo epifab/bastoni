@@ -10,17 +10,32 @@ import org.scalatest.matchers.should.Matchers
 class BriscolaGameSpec extends AnyFreeSpec with Matchers:
   "Best card" - {
     "simple case" in {
-      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Asso, Coppe), Card(Due, Spade))) shouldBe Card(Quattro, Spade)
+      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Asso, Coppe), Card(Due, Spade))) shouldBe Card(
+        Quattro,
+        Spade
+      )
     }
 
     "better (same suit)" in {
-      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Asso, Coppe), Card(Cinque, Spade))) shouldBe Card(Cinque, Spade)
+      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Asso, Coppe), Card(Cinque, Spade))) shouldBe Card(
+        Cinque,
+        Spade
+      )
     }
 
     "better (briscola)" in {
-      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Asso, Coppe), Card(Due, Denari))) shouldBe Card(Due, Denari)
-      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Asso, Spade), Card(Due, Denari))) shouldBe Card(Due, Denari)
-      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Due, Denari), Card(Asso, Spade))) shouldBe Card(Due, Denari)
+      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Asso, Coppe), Card(Due, Denari))) shouldBe Card(
+        Due,
+        Denari
+      )
+      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Asso, Spade), Card(Due, Denari))) shouldBe Card(
+        Due,
+        Denari
+      )
+      BriscolaGame.bestCard(Denari, List(Card(Quattro, Spade), Card(Due, Denari), Card(Asso, Spade))) shouldBe Card(
+        Due,
+        Denari
+      )
     }
 
     "briscola vs briscola" in {
@@ -37,3 +52,4 @@ class BriscolaGameSpec extends AnyFreeSpec with Matchers:
     Card(Tre, Denari) > Card(Cinque, Denari) shouldBe true
     Card(Cinque, Denari) > Card(Tre, Denari) shouldBe false
   }
+end BriscolaGameSpec

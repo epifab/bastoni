@@ -1,11 +1,11 @@
 package bastoni.backend.routes
 
 import cats.effect.IO
-import org.http4s.Method.GET
-import org.http4s.dsl.io.*
-import org.http4s.implicits.*
-import org.http4s.headers.`Content-Type`
 import org.http4s.{EntityEncoder, HttpRoutes, MediaType}
+import org.http4s.dsl.io.*
+import org.http4s.headers.`Content-Type`
+import org.http4s.implicits.*
+import org.http4s.Method.GET
 
 import scala.xml.Elem
 
@@ -19,8 +19,8 @@ object WebHtmlRoute:
       .withContentType(`Content-Type`(MediaType.text.html))
 
   def apply(appVersion: String): HttpRoutes[IO] =
-    HttpRoutes.of[IO] {
-      case req@GET -> Root => Ok(
+    HttpRoutes.of[IO] { case req @ GET -> Root =>
+      Ok(
         Html(
           <html>
             <head>
@@ -39,3 +39,4 @@ object WebHtmlRoute:
         )
       )
     }
+end WebHtmlRoute

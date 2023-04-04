@@ -13,22 +13,21 @@ object PlayerComponent:
 
   private val component =
     ScalaFnComponent[Props] { case Props(playerState: PlayerState, layout: SeatLayout, dealer) =>
-      val textRadius: Double = Math.sqrt(2 * layout.radius * layout.radius)
+      val textRadius: Double      = Math.sqrt(2 * layout.radius * layout.radius)
       val textTopLeftAngle: Angle = Angle(225 - layout.textRotation.deg)
       val textPosition: Point = Point(
         layout.center.x + textTopLeftAngle.sin * textRadius,
         layout.center.y + textTopLeftAngle.cos * textRadius
       )
 
-      val timedOut = playerState match {
+      val timedOut = playerState match
         case PlayerState.ActingPlayer(_, _, Some(Timeout.TimedOut)) => true
-        case _ => false
-      }
+        case _                                                      => false
 
       val timeoutBars: Option[VdomNode] = Some(playerState)
         .collect {
           case PlayerState.ActingPlayer(_, _, Some(timeout: Timeout.Active)) => Some(timeout)
-          case PlayerState.ActingPlayer(_, _, None) => None
+          case PlayerState.ActingPlayer(_, _, None)                          => None
         }
         .map { timeout =>
           TimeoutBar(
@@ -41,9 +40,8 @@ object PlayerComponent:
           )
         }
 
-      val stars: Option[VdomNode] = Some(playerState).collect {
-        case player: PlayerState.SittingIn =>
-          PlayerStars(player, layout)
+      val stars: Option[VdomNode] = Some(playerState).collect { case player: PlayerState.SittingIn =>
+        PlayerStars(player, layout)
       }
 
       val dealerFlag: Option[VdomNode] = Option.when(dealer)(DealerFlag(layout))
@@ -56,7 +54,7 @@ object PlayerComponent:
           circle.y = layout.center.y
           circle.fill = Palette.desaturatedBlue
 
-          playerState match {
+          playerState match
             case PlayerState.SittingOut(_) =>
               circle.opacity = .4
 
@@ -75,9 +73,7 @@ object PlayerComponent:
               circle.shadowOpacity = 1
 
             case _ => ()
-          }
         },
-
         KText { text =>
           text.text = playerState.name
           text.align = "center"
@@ -93,7 +89,6 @@ object PlayerComponent:
           text.height = layout.radius * 2
           text.rotation = layout.textRotation.deg
         },
-
         KGroup(timeoutBars.toList ++ dealerFlag.toList ++ stars.toList: _*)
       )
     }
@@ -102,3 +97,4 @@ object PlayerComponent:
     component
       .withKey(s"player-${state.id}")
       .apply(Props(state, layout, dealer))
+end PlayerComponent

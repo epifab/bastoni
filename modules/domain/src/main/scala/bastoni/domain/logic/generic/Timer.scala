@@ -9,26 +9,24 @@ import io.circe.generic.semiauto.deriveEncoder
 
 trait Timer[State, Self <: Timer[State, Self]]:
   this: State =>
-    def timeout: Timeout.Active
-    def request: Command.Act
-    def ref: Int
+  def timeout: Timeout.Active
+  def request: Command.Act
+  def ref: Int
 
-    def timedOut: State
-    def update(timeout: Timeout.Active, request: Command.Act): Self & State
+  def timedOut: State
+  def update(timeout: Timeout.Active, request: Command.Act): Self & State
 
-    def ticked(tick: Command.Tick): (State, List[StateMachineOutput]) =
-      if (tick.ref != ref) (this -> Nil)
-      else {
-        timeout.next match
-          case Timeout.TimedOut =>
-            timedOut -> List(Event.TimedOut(request.playerId, request.action))
-          case newTimeout: Timeout.Active =>
-            val updated = update(newTimeout, request.copy(timeout = Some(newTimeout)))
-            updated -> List(updated.request, updated.nextTick)
-      }
+  def ticked(tick: Command.Tick): (State, List[StateMachineOutput]) =
+    if (tick.ref != ref) (this -> Nil)
+    else
+      timeout.next match
+        case Timeout.TimedOut =>
+          timedOut -> List(Event.TimedOut(request.playerId, request.action))
+        case newTimeout: Timeout.Active =>
+          val updated = update(newTimeout, request.copy(timeout = Some(newTimeout)))
+          updated -> List(updated.request, updated.nextTick)
 
-    def nextTick: Delayed[Command] = Delayed(Command.Tick(ref), Delay.ActionTimeout)
-
+  def nextTick: Delayed[Command] = Delayed(Command.Tick(ref), Delay.ActionTimeout)
 
 object Timer:
   def ref[A](a: A)(using encoder: Encoder[A]): Int =

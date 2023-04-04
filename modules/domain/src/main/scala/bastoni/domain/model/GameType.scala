@@ -1,6 +1,6 @@
 package bastoni.domain.model
 
-import io.circe.{Encoder, Decoder}
+import io.circe.{Decoder, Encoder}
 
 enum GameType:
   case Briscola

@@ -13,7 +13,7 @@ import scala.scalajs.js.annotation.JSGlobal
 object KArc extends ExternalComponentWithoutChildren[KArc.Props](ReactKonvaDOM.Arc):
   @js.native
   trait Props extends ShapeProps:
-    var angle: js.UndefOr[Double] = js.native
+    var angle: js.UndefOr[Double]       = js.native
     var innerRadius: js.UndefOr[Double] = js.native
     var outerRadius: js.UndefOr[Double] = js.native
-    var clockwise: js.UndefOr[Boolean] = js.native
+    var clockwise: js.UndefOr[Boolean]  = js.native

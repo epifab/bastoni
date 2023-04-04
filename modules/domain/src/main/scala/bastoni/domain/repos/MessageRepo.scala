@@ -10,18 +10,19 @@ trait MessageRepo[F[_]]:
   def inFlight: fs2.Stream[F, Message | Delayed[Message]]
 
 object MessageRepo:
-  private class InMemoryMessageRepo[F[_]](data: Ref[F, Map[MessageId, Message | Delayed[Message]]]) extends MessageRepo[F]:
+  private class InMemoryMessageRepo[F[_]](data: Ref[F, Map[MessageId, Message | Delayed[Message]]])
+      extends MessageRepo[F]:
     override def flying(message: Message | Delayed[Message]): F[Unit] =
-      data.update(_ + (message match {
-        case m@ Message(id, _, _)             => id -> m
-        case d@ Delayed(Message(id, _, _), _) => id -> d
-      }))
+      data.update(_ + (message match
+        case m @ Message(id, _, _)             => id -> m
+        case d @ Delayed(Message(id, _, _), _) => id -> d
+      ))
 
     override def inFlight: fs2.Stream[F, Message | Delayed[Message]] =
-      for {
-        map <- fs2.Stream.eval(data.get)
+      for
+        map     <- fs2.Stream.eval(data.get)
         message <- fs2.Stream.iterable(map.values)
-      } yield message
+      yield message
 
     override def landed(messageId: MessageId): F[Unit] = data.update(_ - messageId)
 

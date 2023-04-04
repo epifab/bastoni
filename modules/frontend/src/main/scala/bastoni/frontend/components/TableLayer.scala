@@ -1,8 +1,8 @@
 package bastoni.frontend.components
 
 import bastoni.domain.model.*
-import bastoni.frontend.Resources
 import bastoni.frontend.model.TableLayout
+import bastoni.frontend.Resources
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.VdomElement
 import konva.Konva

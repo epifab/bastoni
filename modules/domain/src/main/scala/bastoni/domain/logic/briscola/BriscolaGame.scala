@@ -4,11 +4,11 @@ package briscola
 import bastoni.domain.logic.briscola.BriscolaGameState.*
 import bastoni.domain.logic.generic.*
 import bastoni.domain.model.*
+import bastoni.domain.model.Command.*
 import bastoni.domain.model.Delay.syntax.*
 import bastoni.domain.model.Event.*
-import bastoni.domain.model.Command.*
 import cats.Applicative
-import io.circe.{Encoder, Decoder}
+import io.circe.{Decoder, Encoder}
 import io.circe.syntax.EncoderOps
 
 import scala.annotation.tailrec
@@ -28,14 +28,18 @@ object BriscolaGame extends GenericGameLogic:
   override def newGame(players: List[MatchPlayer]): BriscolaGameState =
     BriscolaGameState.Ready(players)
 
-  override def statusFor(state: BriscolaGameState): GameStatus = state match {
-    case _: BriscolaGameState.Active => GameStatus.InProgress
+  override def statusFor(state: BriscolaGameState): GameStatus = state match
+    case _: BriscolaGameState.Active          => GameStatus.InProgress
     case BriscolaGameState.Completed(players) => GameStatus.Completed(players)
-    case BriscolaGameState.Aborted(reason) => GameStatus.Aborted(reason)
-  }
+    case BriscolaGameState.Aborted(reason)    => GameStatus.Aborted(reason)
 
-  private def withTimeout(state: PlayRound, player: UserId, action: Action, before: List[StateMachineOutput] = Nil): (Active, List[StateMachineOutput]) =
-    val request = Act(player, action, Some(Timeout.Max))
+  private def withTimeout(
+      state: PlayRound,
+      player: UserId,
+      action: Action,
+      before: List[StateMachineOutput] = Nil
+  ): (Active, List[StateMachineOutput]) =
+    val request  = Act(player, action, Some(Timeout.Max))
     val newState = WaitingForPlayer(Timer.ref[BriscolaGameState](state), Timeout.Max, request, state)
     newState -> (before ++ List(request, newState.nextTick))
 
@@ -43,9 +47,10 @@ object BriscolaGame extends GenericGameLogic:
     (state, event) =>
       playGameStepPF match
         case partialFunction if partialFunction.isDefinedAt(state -> event) => partialFunction(state -> event)
-        case _ => state -> uneventful
+        case _                                                              => state -> uneventful
 
-  val playGameStepPF: PartialFunction[(BriscolaGameState, StateMachineInput), (BriscolaGameState, List[StateMachineOutput])] = {
+  val playGameStepPF
+      : PartialFunction[(BriscolaGameState, StateMachineInput), (BriscolaGameState, List[StateMachineOutput])] = {
     case (active: Active, PlayerLeftRoom(user, _)) if active.activePlayers.exists(_.is(user)) =>
       Aborted(GameAborted.Reason.playerLeftTheRoom) -> uneventful
 
@@ -111,13 +116,15 @@ object BriscolaGame extends GenericGameLogic:
 
     case (wait: WaitingForPlayer, tick: Tick) => wait.ticked(tick)
 
-    case (wait: WaitingForPlayer, event) if playGameStepPF.isDefinedAt(wait.state -> event) => playGameStepPF(wait.state -> event)
+    case (wait: WaitingForPlayer, event) if playGameStepPF.isDefinedAt(wait.state -> event) =>
+      playGameStepPF(wait.state -> event)
 
     case (PlayRound(player :: Nil, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
       WillCompleteTrick(done :+ (player.play(card), card), deck, trump) ->
         List(CardPlayed(player.id, card), Continue.beforeTakingCards)
 
-    case (PlayRound(player :: next :: players, done, deck, trump), PlayCard(p, card)) if player.is(p) && player.has(card) =>
+    case (PlayRound(player :: next :: players, done, deck, trump), PlayCard(p, card))
+        if player.is(p) && player.has(card) =>
       WillPlay(PlayRound(next :: players, done :+ (player.play(card), card), deck, trump)) -> List(
         CardPlayed(player.id, card),
         Continue.afterPlayingCards
@@ -125,55 +132,53 @@ object BriscolaGame extends GenericGameLogic:
 
     case (WillCompleteTrick(players, deck, trump), Continue) =>
       val updatedPlayers = completeTrick(players, trump)
-      val winner = updatedPlayers.head
+      val winner         = updatedPlayers.head
 
       val (state, continue) =
         if (deck.isEmpty && winner.hand.isEmpty) WillComplete(updatedPlayers, trump) -> Continue.beforeGameOver
         else if (deck.nonEmpty) DrawRound(updatedPlayers, Nil, deck, trump) -> Continue.afterTakingCards
-        else WillPlay(PlayRound(updatedPlayers, Nil, deck, trump)) -> Continue.afterPlayingCards
+        else WillPlay(PlayRound(updatedPlayers, Nil, deck, trump))          -> Continue.afterPlayingCards
 
       state -> List(TrickCompleted(winner.id), continue)
 
     case (WillComplete(players, trump), Continue) =>
       val gameScores: List[BriscolaGameScore] = Teams(players).map(players => BriscolaGameScoreCalculator(players))
-      val gameWinners: List[UserId] = gameScores.bestTeam
+      val gameWinners: List[UserId]           = gameScores.bestTeam
 
       val updatedPlayers: List[MatchPlayer] = players.map {
         case winner if gameWinners.exists(winner.is) => winner.matchPlayer.win
-        case loser => loser.matchPlayer
+        case loser                                   => loser.matchPlayer
       }
 
       val updatedTeams: List[List[MatchPlayer]] = Teams(updatedPlayers)
-      val matchScores: List[MatchScore] = MatchScore.forTeams(updatedTeams)
+      val matchScores: List[MatchScore]         = MatchScore.forTeams(updatedTeams)
 
       Completed(updatedPlayers) -> List(GameCompleted(gameScores.map(_.generify), matchScores))
   }
 
   given order: Ordering[Card] with
-    def compare(a: Card, b: Card): Int = {
-      val points = BriscolaGameScoreCalculator.pointsFor(a)
+    def compare(a: Card, b: Card): Int =
+      val points      = BriscolaGameScoreCalculator.pointsFor(a)
       val otherPoints = BriscolaGameScoreCalculator.pointsFor(b)
       (points - otherPoints) match
         case 0 => a.rank.value - b.rank.value
         case x => x
-    }
 
-  extension(card: Card)
-    def >(other: Card): Boolean = order.compare(card, other) > 0
+  extension (card: Card) def >(other: Card): Boolean = order.compare(card, other) > 0
 
   def bestCard[C <: Card](trump: Suit, round: List[C]): C =
     @tailrec
-    def bestRec(l: List[C], c: Option[C]): C = (l, c) match {
-      case (Nil, Some(best)) => best
-      case (Nil, None) => throw new IllegalArgumentException("Empty list of cards")
+    def bestRec(l: List[C], c: Option[C]): C = (l, c) match
+      case (Nil, Some(best))    => best
+      case (Nil, None)          => throw new IllegalArgumentException("Empty list of cards")
       case (head :: tail, None) => bestRec(tail, Some(head))
-      case (head :: tail, Some(best)) if head.suit == best.suit && head > best => bestRec(tail, Some(head))
+      case (head :: tail, Some(best)) if head.suit == best.suit && head > best        => bestRec(tail, Some(head))
       case (head :: tail, Some(best)) if head.suit != best.suit && head.suit == trump => bestRec(tail, Some(head))
-      case (head :: tail, better) => bestRec(tail, better)
-    }
+      case (head :: tail, better)                                                     => bestRec(tail, better)
     bestRec(round, None)
 
   private def completeTrick(players: List[(Player, VisibleCard)], trump: VisibleCard): List[Player] =
     val best: VisibleCard = bestCard(trump.suit, players.map(_._2))
-    val winner: Player = players.collectFirst { case (player, card) if best == card => player }.get
+    val winner: Player    = players.collectFirst { case (player, card) if best == card => player }.get
     winner.take(players.map(_(1))) :: players.map(_(0)).slideUntil(_.is(winner)).tail
+end BriscolaGame

@@ -15,18 +15,18 @@ object Konva extends js.Object:
   @js.native
   class Group(props: js.Object) extends js.Object:
     def toCanvas(): HTMLCanvasElement = js.native
-    def add(image: Image): Unit = js.native
+    def add(image: Image): Unit       = js.native
 
   @js.native
   object Util extends js.Object:
-    def getRandomColor(): String = js.native
-    def getRGB(color: String): RGB = js.native
+    def getRandomColor(): String                        = js.native
+    def getRGB(color: String): RGB                      = js.native
     def haveIntersection(r1: IRect, r2: IRect): Boolean = js.native
 
   @js.native
   class Animation(func: js.Function1[IFrame, Unit], layers: Seq[ShapeRef]) extends js.Object:
-    def start(): Unit = js.native
-    def stop(): Unit = js.native
+    def start(): Unit        = js.native
+    def stop(): Unit         = js.native
     def isRunning(): Boolean = js.native
 
   @js.native
@@ -34,7 +34,7 @@ object Konva extends js.Object:
     def time: Double
     def timeDiff: Double
     def lastTime: Double
-    def frameRate : Double
+    def frameRate: Double
 
   @js.native
   trait Vector2d extends js.Object:
@@ -65,3 +65,4 @@ object Konva extends js.Object:
     def currentTarget: NodeRef
     def cancelBubble: Boolean
     def child: js.UndefOr[NodeRef]
+end Konva

@@ -1,26 +1,26 @@
 package bastoni.frontend.model
 
-import bastoni.domain.model.{VisibleCard, CardInstance}
+import bastoni.domain.model.{CardInstance, VisibleCard}
 
-case class SeatLayout private(
-  center: Point,
-  radius: Double,
-  textRotation: Angle,
-  rotation: Angle,
-  renderHand: CardsRenderer,
-  renderPile: CardsRenderer
+case class SeatLayout private (
+    center: Point,
+    radius: Double,
+    textRotation: Angle,
+    rotation: Angle,
+    renderHand: CardsRenderer,
+    renderPile: CardsRenderer
 )
 
 object SeatLayout:
   def apply(
-    handRenderer: CardsRenderer,
-    seatRadius: Int,
-    handSize: CardSize,
-    pileSize: CardSize,
-    pileOffset: Double,
-    center: Point,
-    rotation: Angle
-  ): SeatLayout = {
+      handRenderer: CardsRenderer,
+      seatRadius: Int,
+      handSize: CardSize,
+      pileSize: CardSize,
+      pileOffset: Double,
+      center: Point,
+      rotation: Angle
+  ): SeatLayout =
 
     val py1 = pileSize.height - seatRadius
 
@@ -30,36 +30,38 @@ object SeatLayout:
     new SeatLayout(
       center,
       seatRadius,
-      textRotation = rotation.normalised match {
+      textRotation = rotation.normalised match
         case a if a > 90 && a <= 270 => Angle(180 - a)
-        case a => rotation
-      },
+        case a                       => rotation
+      ,
       rotation = rotation,
       renderHand = handRenderer,
-      renderPile = (pile: List[CardInstance]) => CardLayout.group(
-        pile,
-        pileSize,
-        position = center +
-          Point(yangle.cos * 15, yangle.sin * 15) +
-          Point(yangle.sin * pileOffset, -yangle.cos * pileOffset),
-        rotation = -rotation,
-        hMargin = Margin.PerCard(.6),
-        vAlign = Align.Vertical.Bottom
-      )
+      renderPile = (pile: List[CardInstance]) =>
+        CardLayout.group(
+          pile,
+          pileSize,
+          position = center +
+            Point(yangle.cos * 15, yangle.sin * 15) +
+            Point(yangle.sin * pileOffset, -yangle.cos * pileOffset),
+          rotation = -rotation,
+          hMargin = Margin.PerCard(.6),
+          vAlign = Align.Vertical.Bottom
+        )
     )
-  }
-
+  end apply
+end SeatLayout
 
 object MainPlayerHandRenderer:
 
   val horizontalOverlapFactor = 0.8
-  val verticalOverlapFactor = 0.7
+  val verticalOverlapFactor   = 0.7
 
   def apply(cardSize: CardSize, canvasSize: Size): CardsRenderer = (hand: List[CardInstance]) =>
 
     val verticalOverlap: Double = cardSize.height * verticalOverlapFactor
 
-    val cardsPerRow: Int = ((canvasSize.width - cardSize.width) / (cardSize.width * horizontalOverlapFactor)).floor.toInt + 1
+    val cardsPerRow: Int =
+      ((canvasSize.width - cardSize.width) / (cardSize.width * horizontalOverlapFactor)).floor.toInt + 1
 
     CardLayout.group(
       hand,

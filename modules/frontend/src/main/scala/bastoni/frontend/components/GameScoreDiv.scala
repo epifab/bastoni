@@ -2,9 +2,8 @@ package bastoni.frontend.components
 
 import bastoni.domain.model.{RoomPlayerView, User}
 import bastoni.domain.view.FromPlayer
-import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.vdom.html_<^.*
-
+import japgolly.scalajs.react.ScalaComponent
 
 object GameScoreDiv:
   case class State(mouseOver: Boolean)
@@ -14,18 +13,17 @@ object GameScoreDiv:
     .stateless
     .noBackend
     .render_P { case GameState(room, _, sendMessage) =>
-      val playersScore: Option[List[(String, Int)]] = for {
-        matchInfo <- room.matchInfo
+      val playersScore: Option[List[(String, Int)]] = for
+        matchInfo  <- room.matchInfo
         gameScores <- matchInfo.gameScore
         scores = gameScores.map { score =>
-          val playerNames = score
-            .playerIds
+          val playerNames = score.playerIds
             .flatMap(playerId => room.players.get(playerId))
             .map(_.name)
             .mkString(", ")
           playerNames -> score.points
         }
-      } yield scores
+      yield scores
 
       <.div(
         playersScore.whenDefined { scores =>
@@ -47,3 +45,4 @@ object GameScoreDiv:
     .build
 
   def apply(state: GameState): VdomNode = component(state)
+end GameScoreDiv

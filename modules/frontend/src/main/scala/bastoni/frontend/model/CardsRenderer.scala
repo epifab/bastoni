@@ -9,8 +9,8 @@ type BoardRenderer = List[(Option[RoomPlayer], CardInstance)] => List[CardLayout
 object CardsRenderer:
   def collapseFaceDownCards(cx: List[CardInstance], collapsed: List[HiddenCard]): List[VisibleCard | List[HiddenCard]] =
     cx match
-      case (hidden: HiddenCard) :: tail => collapseFaceDownCards(tail, collapsed :+ hidden)
+      case (hidden: HiddenCard) :: tail                         => collapseFaceDownCards(tail, collapsed :+ hidden)
       case (instance: VisibleCard) :: tail if collapsed.isEmpty => instance :: collapseFaceDownCards(tail, Nil)
       case (instance: VisibleCard) :: tail => collapsed :: instance :: collapseFaceDownCards(tail, Nil)
-      case Nil if collapsed.isEmpty => Nil
-      case Nil => collapsed :: Nil
+      case Nil if collapsed.isEmpty        => Nil
+      case Nil                             => collapsed :: Nil

@@ -11,9 +11,9 @@ trait KeyValueRepo[F[_], K, V]:
 
 object KeyValueRepo:
   private class InMemoryKeyValueRepo[F[_]: Concurrent, K, V](data: Ref[F, Map[K, V]]) extends KeyValueRepo[F, K, V]:
-    override def get(key: K): F[Option[V]] = data.get.map(_.get(key))
+    override def get(key: K): F[Option[V]]      = data.get.map(_.get(key))
     override def set(key: K, value: V): F[Unit] = data.update(_ + (key -> value))
-    override def remove(key: K): F[Unit] = data.update(_ - key)
+    override def remove(key: K): F[Unit]        = data.update(_ - key)
 
   def inMemory[F[_]: Concurrent, K, V]: F[KeyValueRepo[F, K, V]] =
     Ref.of[F, Map[K, V]](Map.empty).map(new InMemoryKeyValueRepo(_))

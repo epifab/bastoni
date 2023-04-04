@@ -8,7 +8,8 @@ object DeckLayout:
   def apply(size: CardSize, canvas: Size): DeckLayout =
     val rotation = Angle(45)
     val renderer: List[CardInstance] => List[CardLayout] = (cards: List[CardInstance]) =>
-      CardsRenderer.collapseFaceDownCards(cards, Nil)
+      CardsRenderer
+        .collapseFaceDownCards(cards, Nil)
         .reverse
         .flatMap {
           case hidden: List[HiddenCard] =>
@@ -22,16 +23,18 @@ object DeckLayout:
             )
 
           case card: VisibleCard =>
-            List(CardLayout(
-              card,
-              size,
-              Point(
-                Point(rotation.cos * size.height / 2, -rotation.sin * size.height / 2).x + rotation.cos * size.width,
-                Point(rotation.cos * size.height / 2, -rotation.sin * size.height / 2).y + rotation.sin * size.width
-              ),
-              rotation = rotation,
-              shadow = Some(Shadow(3, Point(0, 0)))
-            ))
+            List(
+              CardLayout(
+                card,
+                size,
+                Point(
+                  Point(rotation.cos * size.height / 2, -rotation.sin * size.height / 2).x + rotation.cos * size.width,
+                  Point(rotation.cos * size.height / 2, -rotation.sin * size.height / 2).y + rotation.sin * size.width
+                ),
+                rotation = rotation,
+                shadow = Some(Shadow(3, Point(0, 0)))
+              )
+            )
         }
 
     val controlSize = CardSize.scaleTo(canvas.width / 2, canvas.height / 2)
@@ -51,3 +54,5 @@ object DeckLayout:
         None
       )
     )
+  end apply
+end DeckLayout
