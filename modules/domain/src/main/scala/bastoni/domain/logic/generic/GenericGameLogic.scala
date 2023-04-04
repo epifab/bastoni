@@ -27,7 +27,7 @@ abstract class GenericGameLogic extends GameLogic[MatchState]:
   override def initialState(players: List[MatchPlayer]): MatchState = newMatch(players)
   override def isFinal(state: MatchState): Boolean = state == MatchState.Terminated
 
-  override val playStep: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
+  override val play: (MatchState, StateMachineInput) => (MatchState, List[StateMachineOutput]) = {
 
     case (inProgress: MatchState.InProgress, message) =>
 
@@ -91,7 +91,7 @@ abstract class GenericGameLogic extends GameLogic[MatchState]:
     input match {
       case Nil => state -> previousEvents
       case head :: tail =>
-        val (intermediateState, events) = playStep(state, head)
+        val (intermediateState, events) = play(state, head)
         playSteps(intermediateState, tail, previousEvents ++ events)
     }
 

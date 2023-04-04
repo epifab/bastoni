@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 
 trait GameLogic[State]:
   def gameType: GameType
-  def playStep: (State, StateMachineInput) => (State, List[StateMachineOutput])
+  def play: (State, StateMachineInput) => (State, List[StateMachineOutput])
 
   def initialState(players: List[MatchPlayer]): State
   def isFinal(state: State): Boolean
@@ -19,6 +19,6 @@ trait GameLogic[State]:
 
   def playStream[F[_]](initialState: State)(input: fs2.Stream[F, StateMachineInput]): fs2.Stream[F, StateMachineOutput] =
     input
-      .scan[(State, List[StateMachineOutput])](initialState -> Nil) { case ((state, _), message) => playStep(state, message) }
+      .scan[(State, List[StateMachineOutput])](initialState -> Nil) { case ((state, _), message) => play(state, message) }
       .takeThrough { case (state, _) => !isFinal(state) }
       .flatMap { case (_, output) => fs2.Stream.iterable(output) }

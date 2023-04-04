@@ -8,14 +8,14 @@ import org.http4s.server.{Router, Server, ServerBuilder}
 
 object App extends IOApp:
 
-  val router = Router(
+  val router = Router[IO](
     "/assets" -> StaticResourceRoute("assets"),
     "/static" -> StaticResourceRoute("static"),
     "/" -> WebHtmlRoute("LOCAL")
   )
 
   val webServer: ServerBuilder[IO] = {
-    BlazeServerBuilder[IO]
+    BlazeServerBuilder.apply[IO]
       .withHttpApp(GZip(router).orNotFound)
       .bindHttp(9090, "0.0.0.0")
   }
