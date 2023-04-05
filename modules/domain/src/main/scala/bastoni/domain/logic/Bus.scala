@@ -15,7 +15,7 @@ trait Bus[F[_], A]:
   def subscribeAwait: Resource[F, fs2.Stream[F, A]]
   def run: fs2.Stream[F, Unit]
 
-class Fs2Bus[F[_], A] private (
+class InMemoryBus[F[_], A] private(
     topic: Topic[F, A],
     queue: Queue[F, A],
     override val run: fs2.Stream[F, Unit]
@@ -25,15 +25,15 @@ class Fs2Bus[F[_], A] private (
   val subscribe: fs2.Stream[F, A]                              = topic.subscribe(128)
   val subscribeAwait: Resource[F, fs2.Stream[F, A]]            = topic.subscribeAwait(128)
 
-object Fs2Bus:
+object InMemoryBus:
   def apply[F[_]: Concurrent, A]: F[Bus[F, A]] =
     for
       topic <- Topic[F, A]
       queue <- Queue.bounded[F, A](128)
       run = topic.publish(fs2.Stream.fromQueueUnterminated(queue))
-    yield new Fs2Bus[F, A](topic, queue, run)
+    yield new InMemoryBus[F, A](topic, queue, run)
 
 type MessageBus[F[_]] = Bus[F, Message]
 
 object MessageBus:
-  def inMemory[F[_]: Concurrent]: F[MessageBus[F]] = Fs2Bus.apply
+  def inMemory[F[_]: Concurrent]: F[MessageBus[F]] = InMemoryBus.apply

@@ -6,6 +6,7 @@ import bastoni.domain.logic.scopa.ScopaGameState.{Active, PlayRound}
 import bastoni.domain.model.*
 import bastoni.domain.model.Event.GameAborted
 import io.circe.{Decoder, Encoder, Json}
+import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 
@@ -36,36 +37,5 @@ object TressetteGameState:
   case class Completed(players: List[MatchPlayer]) extends Terminated
   case class Aborted(reason: GameAborted.Reason)   extends Terminated
 
-  given encoder: Encoder[TressetteGameState] = Encoder.instance {
-    case s: Ready     => deriveEncoder[Ready].mapJsonObject(_.add("stage", "Ready".asJson))(s)
-    case s: DealRound => deriveEncoder[DealRound].mapJsonObject(_.add("stage", "DealRound".asJson))(s)
-    case s: DrawRound => deriveEncoder[DrawRound].mapJsonObject(_.add("stage", "DrawRound".asJson))(s)
-    case s: PlayRound => deriveEncoder[PlayRound].mapJsonObject(_.add("stage", "PlayRound".asJson))(s)
-    case s: WaitingForPlayer =>
-      deriveEncoder[WaitingForPlayer].mapJsonObject(_.add("stage", "WaitingForPlayer".asJson))(s)
-    case s: WillPlay => deriveEncoder[WillPlay].mapJsonObject(_.add("stage", "WillPlay".asJson))(s)
-    case s: WillCompleteTrick =>
-      deriveEncoder[WillCompleteTrick].mapJsonObject(_.add("stage", "WillCompleteTrick".asJson))(s)
-    case s: WillComplete => deriveEncoder[WillComplete].mapJsonObject(_.add("stage", "WillComplete".asJson))(s)
-    case s: Completed    => deriveEncoder[Completed].mapJsonObject(_.add("stage", "Completed".asJson))(s)
-    case s: Aborted      => deriveEncoder[Aborted].mapJsonObject(_.add("stage", "Aborted".asJson))(s)
-  }
-
-  given decoder: Decoder[TressetteGameState] = Decoder.instance(cursor =>
-    cursor
-      .downField("stage")
-      .as[String]
-      .flatMap {
-        case "Ready"             => deriveDecoder[Ready](cursor)
-        case "DealRound"         => deriveDecoder[DealRound](cursor)
-        case "DrawRound"         => deriveDecoder[DrawRound](cursor)
-        case "PlayRound"         => deriveDecoder[PlayRound](cursor)
-        case "WaitingForPlayer"  => deriveDecoder[WaitingForPlayer](cursor)
-        case "WillPlay"          => deriveDecoder[WillPlay](cursor)
-        case "WillCompleteTrick" => deriveDecoder[WillCompleteTrick](cursor)
-        case "WillComplete"      => deriveDecoder[WillComplete](cursor)
-        case "Completed"         => deriveDecoder[Completed](cursor)
-        case "Aborted"           => deriveDecoder[Aborted](cursor)
-      }
-  )
-end TressetteGameState
+  given encoder: Encoder[TressetteGameState] = ConfiguredEncoder.derive(discriminator = Some("stage"))
+  given decoder: Decoder[TressetteGameState] = ConfiguredDecoder.derive(discriminator = Some("stage"))

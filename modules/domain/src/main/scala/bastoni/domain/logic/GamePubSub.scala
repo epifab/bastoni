@@ -29,7 +29,7 @@ object GamePubSub:
           case CardsDealtServerView(playerId, cards) =>
             ToPlayer.GameEvent(CardsDealtPlayerView(playerId, cards.map(_.toPlayerView(me.id, Some(playerId)))))
           case DeckShuffledServerView(deck) => ToPlayer.GameEvent(DeckShuffledPlayerView(deck.size))
-          case Snapshot(room)               => ToPlayer.Snapshot(room.toPlayerView(me.id))
+          case PlayerConnected(room)        => ToPlayer.Snapshot(room.toPlayerView(me.id))
         }
 
   def publisher[F[_]](

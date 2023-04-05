@@ -12,7 +12,7 @@ val http4sVersion            = "0.23.13"
 val log4catsVersion          = "2.5.0"
 val redis4catsVersion        = "1.3.0"
 val fs2Version               = "3.2.2"
-val circeVersion             = "0.14.3"
+val circeVersion             = "0.14.5"
 val secureRandomVersion      = "1.0.0"
 val scalaXmlVersion          = "2.1.0"
 val scalaTestVersion         = "3.2.14"
@@ -46,9 +46,9 @@ lazy val frontend = (project in file("modules/frontend"))
     scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage),
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
     libraryDependencies ++= Seq(
-      ("org.scala-js"                     %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
-      "org.scala-js"                      %%% "scalajs-dom"               % scalaJsDomVersion,
-      "com.github.japgolly.scalajs-react" %%% "core"                      % scalaJsReactVersion
+      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
+      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
+      "com.github.japgolly.scalajs-react" %%% "core" % scalaJsReactVersion
     ),
     Compile / npmDependencies ++= Seq(
       "react"       -> reactVersion,

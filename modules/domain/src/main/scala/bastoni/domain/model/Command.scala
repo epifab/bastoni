@@ -1,9 +1,8 @@
 package bastoni.domain.model
 
 import bastoni.domain.model.Command.PlayCard
-import io.circe.{Decoder, DecodingFailure, Encoder, Json}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.syntax.*
+import io.circe.{Decoder, Encoder}
+import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 
 sealed trait Command
 
@@ -21,36 +20,5 @@ object Command:
   case class Act(playerId: UserId, action: Action, timeout: Option[Timeout.Active])     extends Command
   case class Tick(ref: Int)                                                             extends Command
 
-  given Encoder[Command] = Encoder.instance {
-    case obj: JoinRoom    => deriveEncoder[JoinRoom].mapJsonObject(_.add("type", "JoinRoom".asJson))(obj)
-    case obj: LeaveRoom   => deriveEncoder[LeaveRoom].mapJsonObject(_.add("type", "LeaveRoom".asJson))(obj)
-    case obj: StartMatch  => deriveEncoder[StartMatch].mapJsonObject(_.add("type", "StartMatch".asJson))(obj)
-    case obj: ShuffleDeck => deriveEncoder[ShuffleDeck].mapJsonObject(_.add("type", "ShuffleDeck".asJson))(obj)
-    case obj: PlayCard    => deriveEncoder[PlayCard].mapJsonObject(_.add("type", "PlayCard".asJson))(obj)
-    case obj: TakeCards   => deriveEncoder[TakeCards].mapJsonObject(_.add("type", "TakeCards".asJson))(obj)
-    case obj: Ok          => deriveEncoder[Ok].mapJsonObject(_.add("type", "Ok".asJson))(obj)
-    case obj: Tick        => deriveEncoder[Tick].mapJsonObject(_.add("type", "Tick".asJson))(obj)
-    case obj: Act         => deriveEncoder[Act].mapJsonObject(_.add("type", "Act".asJson))(obj)
-    case Connect          => Json.obj("type" -> "Connect".asJson)
-    case Continue         => Json.obj("type" -> "Continue".asJson)
-  }
-
-  given Decoder[Command] = Decoder.instance(obj =>
-    val typeCursor = obj.downField("type")
-
-    typeCursor.as[String].flatMap {
-      case "JoinRoom"    => deriveDecoder[JoinRoom](obj)
-      case "LeaveRoom"   => deriveDecoder[LeaveRoom](obj)
-      case "StartMatch"  => deriveDecoder[StartMatch](obj)
-      case "ShuffleDeck" => deriveDecoder[ShuffleDeck](obj)
-      case "PlayCard"    => deriveDecoder[PlayCard](obj)
-      case "TakeCards"   => deriveDecoder[TakeCards](obj)
-      case "Ok"          => deriveDecoder[Ok](obj)
-      case "Tick"        => deriveDecoder[Tick](obj)
-      case "Act"         => deriveDecoder[Act](obj)
-      case "Connect"     => Right(Connect)
-      case "Continue"    => Right(Continue)
-      case unknown       => Left(DecodingFailure(s"Unrecognised command $unknown", typeCursor.history))
-    }
-  )
-end Command
+  given Encoder[Command] = ConfiguredEncoder.derive(discriminator = Some("type"))
+  given Decoder[Command] = ConfiguredDecoder.derive(discriminator = Some("type"))

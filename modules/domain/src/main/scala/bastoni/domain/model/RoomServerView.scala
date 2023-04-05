@@ -43,7 +43,7 @@ case class RoomServerView(
 
     case event: Event.CardsDealtServerView => cardsDealtUpdate(event)
 
-    case Event.Snapshot(room) => room
+    case Event.PlayerConnected(room) => room
 
     case event: PublicEvent => publicEventUpdate(event)
 

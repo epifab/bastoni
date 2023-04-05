@@ -2,13 +2,21 @@ package bastoni.domain.model
 
 import bastoni.domain.logic.{briscola, scopa, tressette}
 import io.circe.*
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 import io.circe.syntax.*
 
 sealed trait Event
 
+// ServerEvent are meant to be consumed by the server only
+// those might include information that is not safe to share with the clients
 sealed trait ServerEvent extends Event
+
+// PlayerEvent are meant to be consumed by the client only
+// those might include incomplete information and refer to a specific player view of a game
 sealed trait PlayerEvent extends Event
+
+// Public events are the intersection between server and player events
+// as such, they can be shared safely with any client and can be consumed by the server
 sealed trait PublicEvent extends ServerEvent, PlayerEvent
 
 object Event:
@@ -23,11 +31,10 @@ object Event:
   case class PlayerConfirmed(playerId: UserId)                                                  extends PublicEvent
   case class TimedOut(playerId: UserId, action: Action)                                         extends PublicEvent
   case class TrickCompleted(winnerId: UserId)                                                   extends PublicEvent
-
-  case class GameCompleted(scores: List[GameScore], matchScores: List[MatchScore]) extends PublicEvent
-  case class MatchCompleted(winnerIds: List[UserId])                               extends PublicEvent
-  case class GameAborted(reason: GameAborted.Reason)                               extends PublicEvent
-  case class MatchAborted(reason: GameAborted.Reason)                              extends PublicEvent
+  case class GameCompleted(scores: List[GameScore], matchScores: List[MatchScore])              extends PublicEvent
+  case class MatchCompleted(winnerIds: List[UserId])                                            extends PublicEvent
+  case class GameAborted(reason: GameAborted.Reason)                                            extends PublicEvent
+  case class MatchAborted(reason: GameAborted.Reason)                                           extends PublicEvent
 
   object GameAborted:
     opaque type Reason = String
@@ -46,6 +53,7 @@ object Event:
   case class CardsDealtServerView(playerId: UserId, cards: List[CardServerView])
       extends CardsDealt[CardServerView]
       with ServerEvent
+
   case class CardsDealtPlayerView(playerId: UserId, cards: List[CardPlayerView])
       extends CardsDealt[CardPlayerView]
       with PlayerEvent
@@ -65,82 +73,24 @@ object Event:
     def apply(deck: Deck): DeckShuffledServerView         = DeckShuffledServerView(deck)
     def apply(numberOfCards: Int): DeckShuffledPlayerView = DeckShuffledPlayerView(numberOfCards)
 
-  case class Snapshot(room: RoomServerView) extends ServerEvent
+  case class PlayerConnected(room: RoomServerView) extends ServerEvent
 
-  given publicEventEncoder: Encoder[PublicEvent] = Encoder.instance {
-    case obj: PlayerJoinedRoom =>
-      deriveEncoder[PlayerJoinedRoom].mapJsonObject(_.add("type", "PlayerJoinedRoom".asJson))(obj)
-    case obj: PlayerLeftRoom => deriveEncoder[PlayerLeftRoom].mapJsonObject(_.add("type", "PlayerLeftRoom".asJson))(obj)
-    case obj: MatchStarted   => deriveEncoder[MatchStarted].mapJsonObject(_.add("type", "MatchStarted".asJson))(obj)
-    case obj: TimedOut       => deriveEncoder[TimedOut].mapJsonObject(_.add("type", "TimedOut".asJson))(obj)
-    case obj: TrumpRevealed  => deriveEncoder[TrumpRevealed].mapJsonObject(_.add("type", "TrumpRevealed".asJson))(obj)
-    case obj: BoardCardsDealt =>
-      deriveEncoder[BoardCardsDealt].mapJsonObject(_.add("type", "BoardCardsDealt".asJson))(obj)
-    case obj: CardPlayed => deriveEncoder[CardPlayed].mapJsonObject(_.add("type", "CardPlayed".asJson))(obj)
-    case obj: CardsTaken => deriveEncoder[CardsTaken].mapJsonObject(_.add("type", "CardsTaken".asJson))(obj)
-    case obj: PlayerConfirmed =>
-      deriveEncoder[PlayerConfirmed].mapJsonObject(_.add("type", "PlayerConfirmed".asJson))(obj)
-    case obj: TrickCompleted => deriveEncoder[TrickCompleted].mapJsonObject(_.add("type", "TrickCompleted".asJson))(obj)
+  given publicEventEncoder: Encoder[PublicEvent] =
+    ConfiguredEncoder.derive(discriminator = Some("type"))
 
-    case obj: GameCompleted  => deriveEncoder[GameCompleted].mapJsonObject(_.add("type", "GameCompleted".asJson))(obj)
-    case obj: MatchCompleted => deriveEncoder[MatchCompleted].mapJsonObject(_.add("type", "MatchCompleted".asJson))(obj)
-    case obj: GameAborted    => deriveEncoder[GameAborted].mapJsonObject(_.add("type", "GameAborted".asJson))(obj)
-    case obj: MatchAborted   => deriveEncoder[MatchAborted].mapJsonObject(_.add("type", "MatchAborted".asJson))(obj)
-  }
+  given publicEventDecoder: Decoder[PublicEvent] =
+    ConfiguredDecoder.derive(discriminator = Some("type"))
 
-  given serverEventEncoder: Encoder[ServerEvent] = Encoder.instance {
-    case obj: DeckShuffledServerView =>
-      deriveEncoder[DeckShuffledServerView].mapJsonObject(_.add("type", "DeckShuffled".asJson))(obj)
-    case obj: CardsDealtServerView =>
-      deriveEncoder[CardsDealtServerView].mapJsonObject(_.add("type", "CardsDealt".asJson))(obj)
-    case obj: Snapshot    => deriveEncoder[Snapshot].mapJsonObject(_.add("type", "Snapshot".asJson))(obj)
-    case obj: PublicEvent => publicEventEncoder(obj)
-  }
+  given serverEventEncoder: Encoder[ServerEvent] =
+    ConfiguredEncoder.derive(discriminator = Some("type"))
 
-  given playerEventEncoder: Encoder[PlayerEvent] = Encoder.instance {
-    case obj: DeckShuffledPlayerView =>
-      deriveEncoder[DeckShuffledPlayerView].mapJsonObject(_.add("type", "DeckShuffled".asJson))(obj)
-    case obj: CardsDealtPlayerView =>
-      deriveEncoder[CardsDealtPlayerView].mapJsonObject(_.add("type", "CardsDealt".asJson))(obj)
-    case obj: PublicEvent => publicEventEncoder(obj)
-  }
+  given serverEventDecoder: Decoder[ServerEvent] =
+    ConfiguredDecoder.derive(discriminator = Some("type"))
 
-  given publicEventDecoder: Decoder[PublicEvent] = Decoder.instance(obj =>
-    val typeCursor = obj.downField("type")
+  given playerEventEncoder: Encoder[PlayerEvent] =
+    ConfiguredEncoder.derive(discriminator = Some("type"))
 
-    typeCursor.as[String].flatMap {
-      case "PlayerJoinedRoom" => deriveDecoder[PlayerJoinedRoom](obj)
-      case "PlayerLeftRoom"   => deriveDecoder[PlayerLeftRoom](obj)
-      case "MatchStarted"     => deriveDecoder[MatchStarted](obj)
-      case "TimedOut"         => deriveDecoder[TimedOut](obj)
-      case "TrumpRevealed"    => deriveDecoder[TrumpRevealed](obj)
-      case "BoardCardsDealt"  => deriveDecoder[BoardCardsDealt](obj)
-      case "CardPlayed"       => deriveDecoder[CardPlayed](obj)
-      case "CardsTaken"       => deriveDecoder[CardsTaken](obj)
-      case "PlayerConfirmed"  => deriveDecoder[PlayerConfirmed](obj)
-      case "TrickCompleted"   => deriveDecoder[TrickCompleted](obj)
-      case "GameCompleted"    => deriveDecoder[GameCompleted](obj)
-      case "MatchCompleted"   => deriveDecoder[MatchCompleted](obj)
-      case "GameAborted"      => deriveDecoder[GameAborted](obj)
-      case "MatchAborted"     => deriveDecoder[MatchAborted](obj)
-      case unknown            => Left(DecodingFailure(s"Unrecognised event $unknown", typeCursor.history))
-    }
-  )
+  given playerEventDecoder: Decoder[PlayerEvent] =
+    ConfiguredDecoder.derive(discriminator = Some("type"))
 
-  given serverEventDecoder: Decoder[ServerEvent] = Decoder.instance(obj =>
-    obj.downField("type").as[String].flatMap {
-      case "DeckShuffled" => deriveDecoder[DeckShuffledServerView](obj)
-      case "CardsDealt"   => deriveDecoder[CardsDealtServerView](obj)
-      case "Snapshot"     => deriveDecoder[Snapshot](obj)
-      case somethingElse  => publicEventDecoder(obj)
-    }
-  )
-
-  given playerEventDecoder: Decoder[PlayerEvent] = Decoder.instance(obj =>
-    obj.downField("type").as[String].flatMap {
-      case "DeckShuffled" => deriveDecoder[DeckShuffledPlayerView](obj)
-      case "CardsDealt"   => deriveDecoder[CardsDealtPlayerView](obj)
-      case somethingElse  => publicEventDecoder(obj)
-    }
-  )
 end Event

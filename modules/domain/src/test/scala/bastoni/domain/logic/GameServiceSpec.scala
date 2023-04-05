@@ -225,9 +225,9 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       .map(_.toMessage(room1))
 
     gameService(inputStream).asserting { events =>
-      events.collect { case Message(_, _, s: Snapshot) => s } shouldBe
+      events.collect { case Message(_, _, s: PlayerConnected) => s } shouldBe
         List(
-          Snapshot(
+          PlayerConnected(
             RoomServerView(
               List(
                 EmptySeat(0, Nil, Nil),
@@ -279,7 +279,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
               )
             )
           ),
-          Snapshot(
+          PlayerConnected(
             RoomServerView(
               List(
                 EmptySeat(0, Nil, Nil),
@@ -341,9 +341,9 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       .map(_.toMessage(room1))
 
     gameService(inputStream).asserting { events =>
-      events.collect { case Message(_, _, s: Snapshot) => s } shouldBe
+      events.collect { case Message(_, _, s: PlayerConnected) => s } shouldBe
         List(
-          Snapshot(
+          PlayerConnected(
             RoomServerView(
               List(
                 EmptySeat(0, Nil, Nil),

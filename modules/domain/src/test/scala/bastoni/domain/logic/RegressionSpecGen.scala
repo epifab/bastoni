@@ -39,8 +39,8 @@ object RegressionSpecGen extends IOApp:
       inputRef  <- Ref.of[IO, List[StateMachineInput]](Nil)
       outputRef <- Ref.of[IO, List[StateMachineOutput]](Nil)
       _ <- (for
-        inputBus  <- fs2.Stream.eval(Fs2Bus[IO, StateMachineInput])
-        outputBus <- fs2.Stream.eval(Fs2Bus[IO, StateMachineOutput])
+        inputBus  <- fs2.Stream.eval(InMemoryBus[IO, StateMachineInput])
+        outputBus <- fs2.Stream.eval(InMemoryBus[IO, StateMachineOutput])
 
         initialRoom = RoomServerView(
           seats =
