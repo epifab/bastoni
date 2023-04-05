@@ -17,7 +17,7 @@ trait GameSubscriber[F[_]]:
 trait GamePublisher[F[_]]:
   def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
 
-object GamePubSub:
+object GameController:
 
   def subscriber[F[_]](messageBus: MessageSubscriber[F]): GameSubscriber[F] =
     (me: User, roomId: RoomId) =>
@@ -62,4 +62,4 @@ object GamePubSub:
       case (FromPlayer.Ok, _)                     => Ok(me.id)
       case (FromPlayer.PlayCard(card), _)         => PlayCard(me.id, card)
       case (FromPlayer.TakeCards(card, taken), _) => TakeCards(me.id, card, taken)
-end GamePubSub
+end GameController

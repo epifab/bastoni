@@ -36,8 +36,8 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       gameRepo     <- fs2.Stream.eval(JsonRepos.gameRepo)
       messageRepo  <- fs2.Stream.eval(JsonRepos.messageRepo)
 
-      gamePub = GamePubSub.publisher(messageBus)
-      gameSub = GamePubSub.subscriber(messageQueue)
+      gamePub = GameController.publisher(messageBus)
+      gameSub = GameController.subscriber(messageQueue)
 
       dumbPlayer1 = user1.dumb(gameSub, gamePub)
       dumbPlayer2 = user2.dumb(gameSub, gamePub)

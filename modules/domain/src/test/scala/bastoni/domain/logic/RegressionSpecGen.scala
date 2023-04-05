@@ -74,7 +74,7 @@ object RegressionSpecGen extends IOApp:
                     val playerRoom = room.toPlayerView(playerId)
                     val seat = playerRoom.seatFor(playerId).getOrElse(throw IllegalStateException("Player not there"))
                     val user: User = users.find(_.is(playerId)).getOrElse(throw IllegalStateException("Unknown player"))
-                    GamePubSub.buildCommand(user)(DumbPlayer.act(playerRoom, seat, action) -> 0)
+                    GameController.buildCommand(user)(DumbPlayer.act(playerRoom, seat, action) -> 0)
                 }
                 .through(inputBus.publish)
             )

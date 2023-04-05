@@ -33,24 +33,29 @@ This project is based on ideas described by the following articles:
 
 The architecture is fully event-driven and designed to specifically address resilience and scalability.
 
-Remote players publish and consume commands and events to and from a message bus.  
+Remote players connect and communicate to the service exclusively through a Game controller.
+The Game controller is in charge of forwarding remote players' messages to a message bus
+and also consuming, transforming and forwarding messages from that same bus back to the remote player.
+
 The game service (responsible for handling games logic) publishes to the same bus,
-but consumes messages from a queue, allowing multiple instances to run simultaneously.
+but consumes messages from a queue, allowing multiple instances to run simultaneously for scalability.
 
 ```mermaid
 flowchart TD
+    frontend1[Player]
+    frontend2[Player]
+    frontend3[Player]
+    controller[Game controller]
     bus{{Message bus}}
     queue{{Message queue}}
     service1[Game service]
     service2[Game service]
     db[(Game repository)]
-    frontend1[Player]
-    frontend2[Player]
-    frontend3[Player]
 
-    frontend1---bus
-    frontend2---bus
-    frontend3---bus
+    frontend1---controller
+    frontend2---controller
+    frontend3---controller
+    controller---bus
     bus-->queue
     service1-->bus
     service2-->bus
@@ -72,7 +77,9 @@ All side effects are performed by the game service, including:
 - consuming messages from the queue
 - publishing messages to the bus
 
-The following diagram illustrates how players connect and join a room:
+The following diagram illustrates how players connect and join a room.
+Please note that the Game controller and the message queue are omitted
+for the sake of simplicity:
 
 ```mermaid
 sequenceDiagram
@@ -85,7 +92,7 @@ sequenceDiagram
     Message bus->>+Service: Connect command
     Service->>-Message bus: PlayerConnected event
     Message bus->>Player: PlayerConnected event
-    Player->>+Message bus: JoinRoom command
+    Player->>Message bus: JoinRoom command
     Message bus->>+Service: JoinRoom command
     Repository->>Service: fetch state
     Service->>Service: validate request
@@ -94,7 +101,8 @@ sequenceDiagram
     Message bus->>Player: PlayerJoinedRoom event
 ```
 
-Here is how two players (in the same room) can start playing together:
+The following diagram illustrates how two players (in the same room) can start playing together.  
+Again, some components have been omitted for simplicity:
 
 ```mermaid
 sequenceDiagram
@@ -113,37 +121,55 @@ sequenceDiagram
     Service->>Repository: update state
     Service->>-Message bus: MatchStarted
     
-    Message bus->>+Service: MatchStarted
+    par
+        Message bus->>Player1: MatchStarted
+    and 
+        Message bus->>Player2: MatchStarted
+    and 
+        Message bus->>+Service: MatchStarted
+    end
+        
     Repository->>Service: fetch state
     Service->>+Game: play(state, MatchStarted)
-    Game->>-Service: (new state, Act)
+    Game->>-Service: (new state, [Act])
     Service->>Repository: update state
     Service->>-Message bus: Act
-    Message bus->>Player1: Act
-    Message bus->>Player2: Act
+
+    par
+        Message bus->>Player1: Act
+    and
+        Message bus->>Player2: Act
+    end
 
     Player2->>Message bus: ShuffleDeck
     Message bus->>+Service: ShuffleDeck
     Repository->>Service: fetch state
     Service->>+Game: play(state, ShuffleDeck)
-    Game->>-Service: (state, DeckShuffled, Delayed(Continue))
+    Game->>-Service: (state, [DeckShuffled, Delayed(Continue)])
     Service->>Repository: update state
-    Service->>-Message bus: DeckShuffled
-    Message bus->>Player1: DeckShuffled
-    Message bus->>Player2: DeckShuffled
-
-    Service->>Message bus: Continue (delayed)
+    Service->>Message bus: DeckShuffled
+    Service--)-Message bus: Continue (delayed)
+    
+    par
+        Message bus->>Player1: DeckShuffled
+    and
+        Message bus->>Player2: DeckShuffled
+    and
+        Message bus->>+Service: DeckShuffled
+    end
+    Repository->>Service: fetch state
+    Service->>+Game: play(state, DeckShuffled)
+    Game->>-Service: (new state, [])
+    Service->>Repository: update state
+    deactivate Service
 
     Message bus->>+Service: Continue
     Repository->>Service: fetch state
     Service->>+Game: play(state, Continue)
     Game->>-Service: (new state, BoardCardsDealt, Delayed(Continue))
     Service->>Repository: update state
-    Service->>-Message bus: BoardCardsDealt
-    Message bus->>Player1: BoardCardsDealt
-    Message bus->>Player2: BoardCardsDealt
-
-    Service->>Message bus: Continue (delayed)
+    Service->>Message bus: BoardCardsDealt
+    Service--)-Message bus: Continue (delayed)
 ```
 
 ### More in details

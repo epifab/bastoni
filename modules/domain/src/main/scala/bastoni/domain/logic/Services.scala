@@ -14,8 +14,8 @@ object Services:
     for
       gameService1 <- GameService.runner("vegas01", messageQueue, messageBus, gameRepo, messageRepo)
       gameService2 <- GameService.runner("vegas02", messageQueue, messageBus, gameRepo, messageRepo)
-      pub = GamePubSub.publisher(messageBus)
-      sub = GamePubSub.subscriber(messageBus)
+      pub = GameController.publisher(messageBus)
+      sub = GameController.subscriber(messageBus)
 
       servicesRunner = messageBus.run
         .concurrently(messageQueue.run)

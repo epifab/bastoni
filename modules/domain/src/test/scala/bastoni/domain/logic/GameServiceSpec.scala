@@ -1,6 +1,6 @@
 package bastoni.domain.logic
 
-import bastoni.domain.logic.{GameContext, GamePubSub}
+import bastoni.domain.logic.{GameContext, GameController}
 import bastoni.domain.logic.briscola.{BriscolaGameScore, BriscolaGameScoreItem}
 import bastoni.domain.logic.generic.{MatchState, MatchType}
 import bastoni.domain.logic.Fixtures.*
@@ -449,8 +449,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
             _ => 2.millis
           )
         )
-        pub1 = GamePubSub.publisher(messageBus).publish(user1, room1Id)
-        pub2 = GamePubSub.publisher(messageBus).publish(user2, room1Id)
+        pub1 = GameController.publisher(messageBus).publish(user1, room1Id)
+        pub2 = GameController.publisher(messageBus).publish(user2, room1Id)
         event <- subscription
           .concurrently(messageBus.run)
           .concurrently(messageQueue.run)
