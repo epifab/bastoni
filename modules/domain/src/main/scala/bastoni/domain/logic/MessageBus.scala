@@ -23,7 +23,6 @@ object InMemoryBus:
 
     def publish(messages: fs2.Stream[F, A]): fs2.Stream[F, Unit] = messages.evalMap(publish1)
 
-    val consume: fs2.Stream[F, A]                = topic.subscribe(128)
     val subscribe: Resource[F, fs2.Stream[F, A]] = topic.subscribeAwait(128)
 
   def apply[F[_]: Concurrent, A]: F[Bus[F, A]] =

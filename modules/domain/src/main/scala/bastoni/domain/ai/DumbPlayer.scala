@@ -1,6 +1,6 @@
 package bastoni.domain.ai
 
-import bastoni.domain.logic.{GamePublisher, GameSubscriber}
+import bastoni.domain.logic.{GameController, GamePublisher, GameSubscriber}
 import bastoni.domain.logic.scopa.ScopaGame
 import bastoni.domain.model.*
 import bastoni.domain.model.PlayerState.*
@@ -14,11 +14,10 @@ import scala.util.chaining.*
 
 object DumbPlayer extends ActStrategy:
   def apply[F[_]: Sync: Temporal](
-      publisher: GamePublisher[F],
-      subscriber: GameSubscriber[F],
+      controller: GameController[F],
       pause: FiniteDuration = 0.millis
   ): VirtualPlayer[F] =
-    VirtualPlayer(publisher, subscriber, DumbPlayer, pause)
+    VirtualPlayer(controller, DumbPlayer, pause)
 
   def act(context: ActContext, action: Action): FromPlayer =
     act(context.room, context.mySeat, action)

@@ -6,25 +6,35 @@ import cats.effect.{Async, Resource}
 object Services:
 
   def apply[F[_]: Async](
+      instances: Int,
       messageQueue: MessageQueue[F],
       messageBus: MessageBus[F],
       gameRepo: GameRepo[F],
       messageRepo: MessageRepo[F]
-  ): (GamePublisher[F], GameSubscriber[F], fs2.Stream[F, Unit]) =
-    val gameService1 = GameService.runner("vegas01", messageQueue, messageBus, gameRepo, messageRepo)
-    val gameService2 = GameService.runner("vegas02", messageQueue, messageBus, gameRepo, messageRepo)
-    val pub          = GameController.publisher(messageBus)
-    val sub          = GameController.subscriber(messageBus)
+  ): (GameController[F], fs2.Stream[F, Unit]) =
+    val runners =
+      (1 to instances)
+        .map(n =>
+          GameService.runner(
+            s"game-service-$n",
+            messageQueue,
+            messageBus,
+            gameRepo,
+            messageRepo
+          )
+        )
+        .reduce(_ concurrently _)
+    val gameController = GameController(messageBus)
     val servicesRunner = messageBus.run
       .concurrently(messageQueue.run)
-      .concurrently(gameService1)
-      .concurrently(gameService2)
-    (pub, sub, servicesRunner)
+      .concurrently(runners)
+    (gameController, servicesRunner)
 
-  def inMemory[F[_]: Async]: Resource[F, (GamePublisher[F], GameSubscriber[F], fs2.Stream[F, Unit])] =
+  def inMemory[F[_]: Async]: Resource[F, (GameController[F], fs2.Stream[F, Unit])] =
     for
       messageBus   <- Resource.eval(MessageBus.inMemory)
       messageQueue <- MessageQueue.inMemory(messageBus)
       gameRepo     <- Resource.eval(GameRepo.inMemory)
       messageRepo  <- Resource.eval(MessageRepo.inMemory)
-    yield Services(messageQueue, messageBus, gameRepo, messageRepo)
+    yield Services(1, messageQueue, messageBus, gameRepo, messageRepo)
+end Services

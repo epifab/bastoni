@@ -174,12 +174,9 @@ sequenceDiagram
 
 ### More in details
 
-This project is **not** (and might never become) production ready.
+This project is _not_ (and might never become) production-ready.
 It is indeed purely experimental, so feel free to draw inspiration from it, and use it at your own risk.
 
 Please note that due to the experimental nature of this service,
 all pieces of infrastructure (repository, message bus and message queue) have in-memory implementations only,
 relying on cats effect and fs2.
-
-This is also the reason why the application only runs within a browser at the moment, 
-and some degree of work is required for supporting remote players.

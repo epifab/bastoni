@@ -10,6 +10,7 @@ opaque type RoomId = UUID
 
 object RoomId:
   def newId: RoomId                       = UUID.randomUUID()
+  def apply(id: UUID): RoomId             = id
   def tryParse(s: String): Option[RoomId] = Try(unsafeParse(s)).toOption
   def unsafeParse(s: String): RoomId      = UUID.fromString(s)
 

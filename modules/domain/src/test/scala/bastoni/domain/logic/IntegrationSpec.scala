@@ -19,8 +19,8 @@ class IntegrationSpec extends AsyncIOFreeSpec:
   private val timeout = 30.seconds
 
   extension (player: User)
-    def dumb(sub: GameSubscriber[IO], pub: GamePublisher[IO]): fs2.Stream[IO, Unit] =
-      DumbPlayer(pub, sub).play(player, roomId)
+    def dumb(controller: GameController[IO]): fs2.Stream[IO, Unit] =
+      DumbPlayer(controller).play(player, roomId)
 
   val roomId: RoomId = RoomId.newId
 
@@ -36,13 +36,12 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       gameRepo     <- fs2.Stream.eval(JsonRepos.gameRepo)
       messageRepo  <- fs2.Stream.eval(JsonRepos.messageRepo)
 
-      gamePub = GameController.publisher(messageBus)
-      gameSub = GameController.subscriber(messageBus)
+      controller = GameController(messageBus)
 
-      dumbPlayer1 = user1.dumb(gameSub, gamePub)
-      dumbPlayer2 = user2.dumb(gameSub, gamePub)
-      dumbPlayer3 = user3.dumb(gameSub, gamePub)
-      dumbPlayer4 = user4.dumb(gameSub, gamePub)
+      dumbPlayer1 = user1.dumb(controller)
+      dumbPlayer2 = user2.dumb(controller)
+      dumbPlayer3 = user3.dumb(controller)
+      dumbPlayer4 = user4.dumb(controller)
 
       playStreams = numberOfPlayers match
         case 2 => dumbPlayer1.concurrently(dumbPlayer2)
@@ -50,7 +49,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
         case 4 => dumbPlayer1.concurrently(dumbPlayer2).concurrently(dumbPlayer3).concurrently(dumbPlayer4)
 
       activateStream = (fs2.Stream(StartMatch(gameType)).delayBy[IO](500.millis) ++ extraMessages)
-        .through(gamePub.publish(user1, roomId))
+        .through(controller.publish(user1, roomId))
 
       gameServiceRunner = GameService.runner(
         name = "test",

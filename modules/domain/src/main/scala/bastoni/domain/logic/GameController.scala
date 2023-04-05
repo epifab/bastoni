@@ -17,7 +17,19 @@ trait GameSubscriber[F[_]]:
 trait GamePublisher[F[_]]:
   def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
 
+type GameController[F[_]] = GameSubscriber[F] with GamePublisher[F]
+
 object GameController:
+
+  def apply[F[_]: Sync](messageBus: MessageBus[F]): GameController[F] =
+    val pub = publisher(messageBus)
+    val sub = subscriber(messageBus)
+    new GameSubscriber[F] with GamePublisher[F]:
+      override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
+        pub.publish(me, roomId)(input)
+
+      override def subscribe(me: User, roomId: RoomId): fs2.Stream[F, ToPlayer] =
+        sub.subscribe(me, roomId)
 
   def subscriber[F[_]: Sync](messageBus: MessageBus[F]): GameSubscriber[F] =
     (me: User, roomId: RoomId) =>
@@ -41,6 +53,13 @@ object GameController:
             }
         )
 
+  def publisher[F[_]: Sync](messageBus: MessagePublisher[F]): GamePublisher[F] =
+    publisher(
+      messageBus,
+      fs2.Stream.repeatEval(Sync[F].delay(Random.nextInt())),
+      fs2.Stream.repeatEval(Sync[F].delay(MessageId.newId))
+    )
+
   def publisher[F[_]](
       messageBus: MessagePublisher[F],
       seeds: fs2.Stream[F, Int],
@@ -53,13 +72,6 @@ object GameController:
         .zip(messageIds)
         .map { case (message, id) => Message(id, roomId, message) }
         .through(messageBus.publish)
-
-  def publisher[F[_]: Sync](messageBus: MessagePublisher[F]): GamePublisher[F] =
-    publisher(
-      messageBus,
-      fs2.Stream.repeatEval(Sync[F].delay(Random.nextInt())),
-      fs2.Stream.repeatEval(Sync[F].delay(MessageId.newId))
-    )
 
   def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Command =
     eventAndSeed match

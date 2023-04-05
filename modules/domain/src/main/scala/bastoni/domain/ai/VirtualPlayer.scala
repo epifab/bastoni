@@ -1,6 +1,6 @@
 package bastoni.domain.ai
 
-import bastoni.domain.logic.{GamePublisher, GameSubscriber}
+import bastoni.domain.logic.{GameController, GamePublisher, GameSubscriber}
 import bastoni.domain.model.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.{Connect, JoinRoom}
@@ -20,18 +20,18 @@ trait ActStrategy:
   def act(context: ActContext, action: Action): FromPlayer
 
 class VirtualPlayer[F[_]: Sync: Temporal](
-    publisher: GamePublisher[F],
-    subscriber: GameSubscriber[F],
+    controller: GameController[F],
     strategy: ActStrategy,
     pause: FiniteDuration = 0.millis
 ):
   def play(me: User, roomId: RoomId): fs2.Stream[F, Unit] =
-    val actions = fs2.Stream(Connect, JoinRoom) ++ subscriber
+    val actions = fs2.Stream(Connect, JoinRoom) ++ controller
       .subscribe(me, roomId)
       .zipWithScan1(Option.empty[RoomPlayerView]) {
         case (_, ToPlayer.Snapshot(room))      => Some(room)
         case (room, ToPlayer.Request(request)) => room.map(_.withRequest(request))
         case (room, ToPlayer.GameEvent(event)) => room.map(_.update(event))
+        case (room, ToPlayer.Ping)             => room
       }
       .map { case (message, maybeRoom) =>
         for
@@ -46,4 +46,4 @@ class VirtualPlayer[F[_]: Sync: Temporal](
       }
       .evalMap(command => Sync[F].pure(command).delayBy(pause))
 
-    actions.through(publisher.publish(me, roomId))
+    actions.through(controller.publish(me, roomId))

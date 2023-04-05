@@ -110,21 +110,22 @@ object GameComponent:
 
     private def program(gameType: GameType): IO[Unit] = (for
       backend <- fs2.Stream.resource(Services.inMemory[IO])
-      (pub, sub, runner) = backend
-      roomId             = RoomId.newId
+      (controller, runner) = backend
+      roomId               = RoomId.newId
 
-      virtualPlayer = VirtualPlayer(pub, sub, GreedyPlayer, pause = 1.second)
+      virtualPlayer = VirtualPlayer(controller, GreedyPlayer, pause = 1.second)
       me            = User(UserId.newId, "ME")
       p1            = virtualPlayer.play(User(UserId.newId, "Tizio"), roomId)
       p2            = virtualPlayer.play(User(UserId.newId, "Caio"), roomId)
       p3            = virtualPlayer.play(User(UserId.newId, "Sempronio"), roomId)
 
-      rooms <- sub
+      rooms <- controller
         .subscribe(me, roomId)
         .scan[Option[RoomPlayerView]](None) {
           case (_, ToPlayer.Snapshot(room))       => Some(room)
           case (props, ToPlayer.Request(command)) => props.map(_.withRequest(command))
           case (props, ToPlayer.GameEvent(event)) => props.map(_.update(event))
+          case (props, ToPlayer.Ping)             => props
         }
         .zipWithPrevious
         .collect {
@@ -132,14 +133,14 @@ object GameComponent:
             GameState(
               current,
               prev.flatten,
-              msg => pub.publish(me, roomId)(fs2.Stream(msg)).compile.drain.toCallback
+              msg => controller.publish(me, roomId)(fs2.Stream(msg)).compile.drain.toCallback
             )
         }
         .evalMap(gameState => $.modState(_.update(gameState)).toIO)
         .concurrently(runner)
         .concurrently(p1) // .concurrently(p2).concurrently(p3)
         .concurrently(
-          pub.publish(me, roomId)(
+          controller.publish(me, roomId)(
             fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinRoom).delayBy(1.second) ++
               fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartMatch(gameType))
           )
