@@ -19,7 +19,7 @@ trait GamePublisher[F[_]]:
 
 object GamePubSub:
 
-  def subscriber[F[_]](messageBus: MessageBus[F]): GameSubscriber[F] =
+  def subscriber[F[_]](messageBus: MessageSubscriber[F]): GameSubscriber[F] =
     (me: User, roomId: RoomId) =>
       messageBus.subscribe
         .collect { case Message(_, `roomId`, event: (Event | Command)) => event }
@@ -33,7 +33,7 @@ object GamePubSub:
         }
 
   def publisher[F[_]](
-      messageBus: MessageBus[F],
+      messageBus: MessagePublisher[F],
       seeds: fs2.Stream[F, Int],
       messageIds: fs2.Stream[F, MessageId]
   ): GamePublisher[F] = new GamePublisher[F]:
@@ -45,7 +45,7 @@ object GamePubSub:
         .map { case (message, id) => Message(id, roomId, message) }
         .through(messageBus.publish)
 
-  def publisher[F[_]: Sync](messageBus: MessageBus[F]): GamePublisher[F] =
+  def publisher[F[_]: Sync](messageBus: MessagePublisher[F]): GamePublisher[F] =
     publisher(
       messageBus,
       fs2.Stream.repeatEval(Sync[F].delay(Random.nextInt())),

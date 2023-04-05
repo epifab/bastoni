@@ -60,7 +60,7 @@ flowchart TD
     service2---db
 ```
 
-Internally, the game service implements games as state machines.
+Internally, the game service implements games as state machines.  
 Each game is defined as a pure, [side-effect-free function](./modules/domain/src/main/scala/bastoni/domain/logic/GameLogic.scala):
 
 ```scala
@@ -83,8 +83,8 @@ sequenceDiagram
     
     Player->>Message bus: Connect command
     Message bus->>+Service: Connect command
-    Service->>-Message bus: Snapshot
-    Message bus->>Player: Snapshot
+    Service->>-Message bus: PlayerConnected event
+    Message bus->>Player: PlayerConnected event
     Player->>+Message bus: JoinRoom command
     Message bus->>+Service: JoinRoom command
     Repository->>Service: fetch state
@@ -94,7 +94,7 @@ sequenceDiagram
     Message bus->>Player: PlayerJoinedRoom event
 ```
 
-Here is how two players (who joined the same room) can start playing together:
+Here is how two players (in the same room) can start playing together:
 
 ```mermaid
 sequenceDiagram

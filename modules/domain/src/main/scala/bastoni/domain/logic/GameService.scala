@@ -43,7 +43,9 @@ object GameService:
       .flatMap(fs2.Stream.iterable)
 
   def runner[F[_]: Async](
-      messageBus: MessageBus[F],
+      name: String,
+      messageQueue: MessageSubscriber[F],
+      messageBus: MessagePublisher[F],
       gameRepo: GameRepo[F],
       messageRepo: MessageRepo[F],
       delayDuration: Delay => FiniteDuration = {
@@ -57,13 +59,19 @@ object GameService:
         case Delay.ActionTimeout    => 3.seconds // players get 10 * 3 = 30 seconds to act
       }
   ): ServiceRunner[F] =
-    messageBus.subscribeAwait.map { subscription =>
-      val oldMessages = messageRepo.inFlight
-      val newMessages = subscription.through(GameService(Async[F].delay(MessageId.newId), gameRepo, messageRepo))
+    Resource.pure {
+      val oldMessages: fs2.Stream[F, Message | Delayed[Message]] = messageRepo.inFlight
+      val newMessages: fs2.Stream[F, Message | Delayed[Message]] = messageQueue.subscribe
+        .through(GameService(Async[F].delay(MessageId.newId), gameRepo, messageRepo))
 
-      (oldMessages ++ newMessages).evalMap {
-        case Delayed(message, delay) => messageBus.publish1(message).delayBy(delayDuration(delay)).start.void
-        case message: Message        => messageBus.publish1(message)
-      }
+      (oldMessages ++ newMessages)
+        .evalMap {
+          case Delayed(message, delay) =>
+            Async[F].delay(println(s"Server $name handling ${message.id}")) *>
+              messageBus.publish1(message).delayBy(delayDuration(delay)).start.void
+          case message: Message =>
+            Async[F].delay(println(s"Server $name handling ${message.id}")) *>
+              messageBus.publish1(message)
+        }
     }
 end GameService

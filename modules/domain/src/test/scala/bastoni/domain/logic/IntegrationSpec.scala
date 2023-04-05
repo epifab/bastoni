@@ -31,12 +31,13 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       extraMessages: fs2.Stream[IO, FromPlayer] = fs2.Stream.empty
   ): IO[Event] =
     (for
-      messageBus  <- fs2.Stream.eval(MessageBus.inMemory[IO])
-      gameRepo    <- fs2.Stream.eval(JsonRepos.gameRepo)
-      messageRepo <- fs2.Stream.eval(JsonRepos.messageRepo)
+      messageBus   <- fs2.Stream.eval(MessageBus.inMemory[IO])
+      messageQueue <- fs2.Stream.resource(MessageQueue.inMemory(messageBus))
+      gameRepo     <- fs2.Stream.eval(JsonRepos.gameRepo)
+      messageRepo  <- fs2.Stream.eval(JsonRepos.messageRepo)
 
       gamePub = GamePubSub.publisher(messageBus)
-      gameSub = GamePubSub.subscriber(messageBus)
+      gameSub = GamePubSub.subscriber(messageQueue)
 
       dumbPlayer1 = user1.dumb(gameSub, gamePub)
       dumbPlayer2 = user2.dumb(gameSub, gamePub)
@@ -52,9 +53,18 @@ class IntegrationSpec extends AsyncIOFreeSpec:
         .through(gamePub.publish(user1, roomId))
 
       gameServiceRunner <- fs2.Stream.resource(
-        if (realSpeed) GameService.runner(messageBus, gameRepo, messageRepo)
+        if (realSpeed)
+          GameService.runner(
+            "test(realSpead)",
+            messageQueue,
+            messageBus,
+            gameRepo,
+            messageRepo
+          )
         else
           GameService.runner(
+            "test(accelerated)",
+            messageQueue,
             messageBus,
             gameRepo,
             messageRepo,

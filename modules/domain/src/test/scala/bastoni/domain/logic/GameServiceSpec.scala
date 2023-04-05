@@ -438,13 +438,22 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       messageBus  <- MessageBus.inMemory[IO]
       events <- (for
         subscription <- fs2.Stream.resource(messageBus.subscribeAwait)
+        messageQueue <- fs2.Stream.resource(MessageQueue.inMemory(messageBus))
         gameServiceRunner <- fs2.Stream.resource(
-          GameService.runner[IO](messageBus, gameRepo, messageRepo, _ => 2.millis)
+          GameService.runner[IO](
+            "test",
+            messageQueue,
+            messageBus,
+            gameRepo,
+            messageRepo,
+            _ => 2.millis
+          )
         )
         pub1 = GamePubSub.publisher(messageBus).publish(user1, room1Id)
         pub2 = GamePubSub.publisher(messageBus).publish(user2, room1Id)
         event <- subscription
           .concurrently(messageBus.run)
+          .concurrently(messageQueue.run)
           .concurrently(gameServiceRunner)
           .concurrently(fs2.Stream(FromPlayer.PlayCard(player1Card)).delayBy[IO](100.millis).through(pub1))
           .concurrently(fs2.Stream(FromPlayer.Ok).delayBy[IO](200.millis).through(pub1))
@@ -561,8 +570,11 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       _           <- messageRepo.flying(message2)
       _           <- messageRepo.flying(message3)
       events <- (for
+        queue <- fs2.Stream.resource(MessageQueue.inMemory(bus))
         gameServiceRunner <- fs2.Stream.resource(
           GameService.runner[IO](
+            "test",
+            queue,
             bus,
             gameRepo,
             messageRepo,
@@ -577,6 +589,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         subscription <- fs2.Stream.resource(bus.subscribeAwait)
         message <- subscription
           .concurrently(bus.run)
+          .concurrently(queue.run)
           .concurrently(gameServiceRunner)
           .interruptAfter(2.seconds)
       yield message).compile.toList
