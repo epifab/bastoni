@@ -38,10 +38,10 @@ case class RoomServerView(
   override protected def faceDown(card: CardServerView): CardServerView = card.copy(facing = Direction.Down)
 
   def update(event: ServerEvent): RoomServerView = event match
-    case Event.DeckShuffledServerView(deck) =>
+    case Event.ServerOnlyEvent.DeckShuffled(deck) =>
       deckShuffledUpdate(deck.map(card => CardServerView(card, Direction.Down)))
 
-    case event: Event.CardsDealtServerView => cardsDealtUpdate(event)
+    case event: Event.ServerOnlyEvent.CardsDealt => cardsDealtUpdate(event)
 
     case Event.PlayerConnected(room) => room
 

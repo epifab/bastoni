@@ -37,13 +37,13 @@ case class RoomPlayerView(
   override protected def faceDown(card: CardPlayerView): CardPlayerView = card.copy(card = card.card.hide)
 
   def update(event: PlayerEvent): RoomPlayerView = event match
-    case Event.DeckShuffledPlayerView(numberOfCards) =>
+    case Event.PlayerOnlyEvent.DeckShuffled(numberOfCards) =>
       deckShuffledUpdate(
         (0 until numberOfCards).toList
           .map(position => CardPlayerView(HiddenCard(CardId(position))))
       )
 
-    case event: Event.CardsDealtPlayerView => cardsDealtUpdate(event)
+    case event: Event.PlayerOnlyEvent.CardsDealt => cardsDealtUpdate(event)
 
     case event: PublicEvent => publicEventUpdate(event)
 

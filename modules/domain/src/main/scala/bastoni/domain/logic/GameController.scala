@@ -19,18 +19,27 @@ trait GamePublisher[F[_]]:
 
 object GameController:
 
-  def subscriber[F[_]](messageBus: MessageSubscriber[F]): GameSubscriber[F] =
+  def subscriber[F[_]: Sync](messageBus: MessageBus[F]): GameSubscriber[F] =
     (me: User, roomId: RoomId) =>
-      messageBus.subscribe
-        .collect { case Message(_, `roomId`, event: (Event | Command)) => event }
-        .collect {
-          case command: Command.Act => ToPlayer.Request(command)
-          case event: PublicEvent   => ToPlayer.GameEvent(event)
-          case CardsDealtServerView(playerId, cards) =>
-            ToPlayer.GameEvent(CardsDealtPlayerView(playerId, cards.map(_.toPlayerView(me.id, Some(playerId)))))
-          case DeckShuffledServerView(deck) => ToPlayer.GameEvent(DeckShuffledPlayerView(deck.size))
-          case PlayerConnected(room)        => ToPlayer.Snapshot(room.toPlayerView(me.id))
-        }
+      fs2.Stream
+        .resource(messageBus.subscribe)
+        .flatMap(stream =>
+          stream
+            .collect { case Message(_, `roomId`, event: (Event | Command)) => event }
+            .collect {
+              case command: Command.Act => ToPlayer.Request(command)
+              case event: PublicEvent   => ToPlayer.GameEvent(event)
+              case ServerOnlyEvent.CardsDealt(playerId, cards) =>
+                ToPlayer.GameEvent(
+                  PlayerOnlyEvent.CardsDealt(
+                    playerId,
+                    cards.map(_.toPlayerView(me.id, Some(playerId)))
+                  )
+                )
+              case ServerOnlyEvent.DeckShuffled(deck) => ToPlayer.GameEvent(PlayerOnlyEvent.DeckShuffled(deck.size))
+              case PlayerConnected(room)              => ToPlayer.Snapshot(room.toPlayerView(me.id))
+            }
+        )
 
   def publisher[F[_]](
       messageBus: MessagePublisher[F],

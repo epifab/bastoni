@@ -10,18 +10,16 @@ object Services:
       messageBus: MessageBus[F],
       gameRepo: GameRepo[F],
       messageRepo: MessageRepo[F]
-  ): Resource[F, (GamePublisher[F], GameSubscriber[F], fs2.Stream[F, Unit])] =
-    for
-      gameService1 <- GameService.runner("vegas01", messageQueue, messageBus, gameRepo, messageRepo)
-      gameService2 <- GameService.runner("vegas02", messageQueue, messageBus, gameRepo, messageRepo)
-      pub = GameController.publisher(messageBus)
-      sub = GameController.subscriber(messageBus)
-
-      servicesRunner = messageBus.run
-        .concurrently(messageQueue.run)
-        .concurrently(gameService1)
-        .concurrently(gameService2)
-    yield (pub, sub, servicesRunner)
+  ): (GamePublisher[F], GameSubscriber[F], fs2.Stream[F, Unit]) =
+    val gameService1 = GameService.runner("vegas01", messageQueue, messageBus, gameRepo, messageRepo)
+    val gameService2 = GameService.runner("vegas02", messageQueue, messageBus, gameRepo, messageRepo)
+    val pub          = GameController.publisher(messageBus)
+    val sub          = GameController.subscriber(messageBus)
+    val servicesRunner = messageBus.run
+      .concurrently(messageQueue.run)
+      .concurrently(gameService1)
+      .concurrently(gameService2)
+    (pub, sub, servicesRunner)
 
   def inMemory[F[_]: Async]: Resource[F, (GamePublisher[F], GameSubscriber[F], fs2.Stream[F, Unit])] =
     for
@@ -29,5 +27,4 @@ object Services:
       messageQueue <- MessageQueue.inMemory(messageBus)
       gameRepo     <- Resource.eval(GameRepo.inMemory)
       messageRepo  <- Resource.eval(MessageRepo.inMemory)
-      services     <- Services(messageQueue, messageBus, gameRepo, messageRepo)
-    yield services
+    yield Services(messageQueue, messageBus, gameRepo, messageRepo)

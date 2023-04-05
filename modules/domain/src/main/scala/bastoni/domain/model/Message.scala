@@ -13,8 +13,9 @@ object MessageId:
   def newId: MessageId                       = UUID.randomUUID()
   def tryParse(s: String): Option[MessageId] = Try(unsafeParse(s)).toOption
   def unsafeParse(s: String): MessageId      = UUID.fromString(s)
-  given Encoder[MessageId]                   = Encoder[String].contramap(_.toString)
-  given Decoder[MessageId]                   = Decoder[String].emap(tryParse(_).toRight("Not a valid ID"))
+
+  given Encoder[MessageId] = Encoder.encodeUUID
+  given Decoder[MessageId] = Decoder.decodeUUID
 
 case class Message(id: MessageId, roomId: RoomId, data: ServerEvent | Command)
 

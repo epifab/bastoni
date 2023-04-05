@@ -54,7 +54,7 @@ object RegressionSpecGen extends IOApp:
 
         inputPublisher <-
           fs2.Stream
-            .resource(outputBus.subscribeAwait)
+            .resource(outputBus.subscribe)
             .map(
               _
                 // .evalTap(x => IO(println(x.getClass.getSimpleName)))
@@ -81,7 +81,7 @@ object RegressionSpecGen extends IOApp:
 
         outputPublisher <-
           fs2.Stream
-            .resource(inputBus.subscribeAwait)
+            .resource(inputBus.subscribe)
             .map(
               _
                 // .evalTap(x => IO(println(x.getClass.getSimpleName)))
@@ -129,7 +129,7 @@ object RegressionSpecGen extends IOApp:
       val writerIO = IO(new PrintWriter(new File(fileName)))
       val resource = Resource.make(writerIO)(writer => IO(writer.close()))
 
-      IO(println(s"Generating $fileName")) *> resource.use { writer => IO(writer.write(body)) }
+      IO.println(s"Generating $fileName") *> resource.use { writer => IO(writer.write(body)) }
     }
 
   override def run(args: List[String]): IO[ExitCode] =

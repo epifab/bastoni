@@ -37,7 +37,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       messageRepo  <- fs2.Stream.eval(JsonRepos.messageRepo)
 
       gamePub = GameController.publisher(messageBus)
-      gameSub = GameController.subscriber(messageQueue)
+      gameSub = GameController.subscriber(messageBus)
 
       dumbPlayer1 = user1.dumb(gameSub, gamePub)
       dumbPlayer2 = user2.dumb(gameSub, gamePub)
@@ -52,41 +52,37 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       activateStream = (fs2.Stream(StartMatch(gameType)).delayBy[IO](500.millis) ++ extraMessages)
         .through(gamePub.publish(user1, roomId))
 
-      gameServiceRunner <- fs2.Stream.resource(
-        if (realSpeed)
-          GameService.runner(
-            "test(realSpead)",
-            messageQueue,
-            messageBus,
-            gameRepo,
-            messageRepo
-          )
-        else
-          GameService.runner(
-            "test(accelerated)",
-            messageQueue,
-            messageBus,
-            gameRepo,
-            messageRepo,
-            {
-              case Delay.ActionTimeout => 100.millis
-              case _                   => 2.millis
-            }
-          )
+      gameServiceRunner = GameService.runner(
+        name = "test",
+        messageQueue = messageQueue,
+        messageBus = messageBus,
+        gameRepo = gameRepo,
+        messageRepo = messageRepo,
+        delayDuration =
+          if realSpeed then Delay.default
+          else {
+            case Delay.ActionTimeout => 100.millis
+            case _                   => 2.millis
+          }
       )
 
       lastMessage <-
-        messageBus.subscribe
-          .concurrently(messageBus.run)
-          .concurrently(gameServiceRunner)
-          .concurrently(playStreams)
-          .concurrently(activateStream)
-          .collect[Event] {
-            case Message(_, `roomId`, e: Event.MatchCompleted)    => e
-            case Message(_, `roomId`, Event.MatchAborted(reason)) => Event.MatchAborted(reason)
-          }
-          .take(1)
-          .interruptAfter(timeout)
+        fs2.Stream
+          .resource(messageBus.subscribe)
+          .flatMap(stream =>
+            stream
+              .concurrently(messageBus.run)
+              .concurrently(messageQueue.run)
+              .concurrently(gameServiceRunner)
+              .concurrently(playStreams)
+              .concurrently(activateStream)
+              .collect[Event] {
+                case Message(_, `roomId`, e: Event.MatchCompleted)    => e
+                case Message(_, `roomId`, Event.MatchAborted(reason)) => Event.MatchAborted(reason)
+              }
+              .take(1)
+              .interruptAfter(timeout)
+          )
     yield lastMessage).compile.lastOrError
 
   "Two players can play an entire briscola game" in {

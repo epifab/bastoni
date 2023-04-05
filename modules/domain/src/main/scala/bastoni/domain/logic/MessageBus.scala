@@ -10,7 +10,7 @@ import fs2.concurrent.Topic
 
 trait Bus[F[_], A] extends Subscriber[F, A], Publisher[F, A]:
   def run: fs2.Stream[F, Unit]
-  def subscribeAwait: Resource[F, fs2.Stream[F, A]]
+  def subscribe: Resource[F, fs2.Stream[F, A]]
 
 object InMemoryBus:
 
@@ -23,8 +23,8 @@ object InMemoryBus:
 
     def publish(messages: fs2.Stream[F, A]): fs2.Stream[F, Unit] = messages.evalMap(publish1)
 
-    val subscribe: fs2.Stream[F, A]                   = topic.subscribe(128)
-    val subscribeAwait: Resource[F, fs2.Stream[F, A]] = topic.subscribeAwait(128)
+    val consume: fs2.Stream[F, A]                = topic.subscribe(128)
+    val subscribe: Resource[F, fs2.Stream[F, A]] = topic.subscribeAwait(128)
 
   def apply[F[_]: Concurrent, A]: F[Bus[F, A]] =
     for

@@ -3,6 +3,9 @@ package bastoni.domain.model
 import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.FiniteDuration
+
 enum Delay:
   case AfterShuffleDeck,
     AfterDealCards,
@@ -28,6 +31,17 @@ object Delay:
       def afterGameOver: Delayed[Command]      = Delayed(command, Delay.AfterGameOver)
 
     extension (command: Command.Tick) def toActionTimeout: Delayed[Command] = Delayed(command, Delay.ActionTimeout)
+
+  val default: Delay => FiniteDuration = {
+    case Delay.AfterShuffleDeck => 1.second
+    case Delay.AfterDealCards   => 500.millis
+    case Delay.BeforeTakeCards  => 2.seconds
+    case Delay.AfterTakeCards   => 1.second
+    case Delay.AfterPlayCard    => 50.millis
+    case Delay.BeforeGameOver   => 3.seconds
+    case Delay.AfterGameOver    => 3.seconds
+    case Delay.ActionTimeout    => 3.seconds // players get 10 * 3 = 30 seconds to act
+  }
 
 case class Delayed[+T](inner: T, delay: Delay):
   def map[U](f: T => U): Delayed[U] = Delayed(f(inner), delay)

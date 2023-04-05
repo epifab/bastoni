@@ -50,28 +50,38 @@ object Event:
     def playerId: UserId
     def cards: List[C]
 
-  case class CardsDealtServerView(playerId: UserId, cards: List[CardServerView])
-      extends CardsDealt[CardServerView]
-      with ServerEvent
-
-  case class CardsDealtPlayerView(playerId: UserId, cards: List[CardPlayerView])
-      extends CardsDealt[CardPlayerView]
-      with PlayerEvent
-
   object CardsDealt:
-    def apply(playerId: UserId, cards: List[VisibleCard], facing: Direction): CardsDealtServerView =
-      CardsDealtServerView(playerId, cards.map(card => CardServerView(card, facing)))
+    def apply(playerId: UserId, cards: List[VisibleCard], facing: Direction): ServerOnlyEvent.CardsDealt =
+      ServerOnlyEvent.CardsDealt(playerId, cards.map(card => CardServerView(card, facing)))
 
-    def apply(playerId: UserId, cards: List[CardInstance]): CardsDealtPlayerView =
-      CardsDealtPlayerView(playerId, cards.map(CardPlayerView(_)))
+    def apply(playerId: UserId, cards: List[CardInstance]): PlayerOnlyEvent.CardsDealt =
+      PlayerOnlyEvent.CardsDealt(playerId, cards.map(CardPlayerView(_)))
 
   sealed trait DeckShuffled
-  case class DeckShuffledServerView(deck: Deck)         extends DeckShuffled with ServerEvent
-  case class DeckShuffledPlayerView(numberOfCards: Int) extends DeckShuffled with PlayerEvent
 
   object DeckShuffled:
-    def apply(deck: Deck): DeckShuffledServerView         = DeckShuffledServerView(deck)
-    def apply(numberOfCards: Int): DeckShuffledPlayerView = DeckShuffledPlayerView(numberOfCards)
+    def apply(deck: Deck): ServerOnlyEvent.DeckShuffled = ServerOnlyEvent.DeckShuffled(deck)
+
+    def apply(numberOfCards: Int): PlayerOnlyEvent.DeckShuffled = PlayerOnlyEvent.DeckShuffled(numberOfCards)
+
+  /** ServerView includes all events that contain sensitive information and are not safe to be shared between all
+    * players
+    */
+  object ServerOnlyEvent:
+    case class CardsDealt(playerId: UserId, cards: List[CardServerView])
+        extends Event.CardsDealt[CardServerView]
+        with ServerEvent
+
+    case class DeckShuffled(deck: Deck) extends Event.DeckShuffled with ServerEvent
+
+  /** PlayerView includes all events that a player would see for the corresponding server side event.
+    */
+  object PlayerOnlyEvent:
+    case class CardsDealt(playerId: UserId, cards: List[CardPlayerView])
+        extends Event.CardsDealt[CardPlayerView]
+        with PlayerEvent
+
+    case class DeckShuffled(numberOfCards: Int) extends Event.DeckShuffled with PlayerEvent
 
   case class PlayerConnected(room: RoomServerView) extends ServerEvent
 

@@ -437,17 +437,15 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       _           <- messageRepo.flying(oldMessage)
       messageBus  <- MessageBus.inMemory[IO]
       events <- (for
-        subscription <- fs2.Stream.resource(messageBus.subscribeAwait)
+        subscription <- fs2.Stream.resource(messageBus.subscribe)
         messageQueue <- fs2.Stream.resource(MessageQueue.inMemory(messageBus))
-        gameServiceRunner <- fs2.Stream.resource(
-          GameService.runner[IO](
-            "test",
-            messageQueue,
-            messageBus,
-            gameRepo,
-            messageRepo,
-            _ => 2.millis
-          )
+        gameServiceRunner = GameService.runner[IO](
+          "test",
+          messageQueue,
+          messageBus,
+          gameRepo,
+          messageRepo,
+          _ => 2.millis
         )
         pub1 = GameController.publisher(messageBus).publish(user1, room1Id)
         pub2 = GameController.publisher(messageBus).publish(user2, room1Id)
@@ -571,22 +569,20 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       _           <- messageRepo.flying(message3)
       events <- (for
         queue <- fs2.Stream.resource(MessageQueue.inMemory(bus))
-        gameServiceRunner <- fs2.Stream.resource(
-          GameService.runner[IO](
-            "test",
-            queue,
-            bus,
-            gameRepo,
-            messageRepo,
-            {
-              case Delay.AfterDealCards  => 20.millis
-              case Delay.BeforeTakeCards => 30.millis
-              case Delay.BeforeGameOver  => 40.millis
-              case _                     => 100.millis
-            }
-          )
+        gameServiceRunner = GameService.runner[IO](
+          "test",
+          queue,
+          bus,
+          gameRepo,
+          messageRepo,
+          {
+            case Delay.AfterDealCards  => 20.millis
+            case Delay.BeforeTakeCards => 30.millis
+            case Delay.BeforeGameOver  => 40.millis
+            case _                     => 100.millis
+          }
         )
-        subscription <- fs2.Stream.resource(bus.subscribeAwait)
+        subscription <- fs2.Stream.resource(bus.subscribe)
         message <- subscription
           .concurrently(bus.run)
           .concurrently(queue.run)
