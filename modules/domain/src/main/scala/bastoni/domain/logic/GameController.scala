@@ -49,7 +49,7 @@ object GameController:
                   )
                 )
               case ServerOnlyEvent.DeckShuffled(deck) => ToPlayer.GameEvent(PlayerOnlyEvent.DeckShuffled(deck.size))
-              case PlayerConnected(room)              => ToPlayer.Snapshot(room.toPlayerView(me.id))
+              case PlayerConnected(room)              => ToPlayer.RoomSnapshot(room.toPlayerView(me.id))
             }
         )
 
