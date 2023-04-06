@@ -82,31 +82,31 @@ Please note that the message queue is omitted for the sake of simplicity:
 
 ```mermaid
 sequenceDiagram
-    actor Player
-    participant Game controller
-    participant Message bus
-    participant Game service
-    participant Repository
+    actor p AS Player
+    participant controller AS Game controller
+    participant bus AS Message bus
+    participant service AS Game service
+    participant repo AS Repository
 
-    note over Player, Repository: The Player submits a Connect command to the controller
-    Player-)+Game controller: Connect
-    Game controller->>-Message bus: Connect
-    Message bus->>+Game service: Connect
-    Repository->>Game service: fetch state
-    Game service->>-Message bus: PlayerConnected
-    Message bus->>+Game controller: PlayerConnected
-    Game controller->>-Player: RoomSnapshot
-    note over Player, Repository: The frontend will display the current view of the room<br/>The player submits a JoinRoom command to the controller
-    Player-)+Game controller: JoinRoom
-    Game controller->>-Message bus: JoinRoom
-    Message bus->>+Game service: JoinRoom
-    Repository->>Game service: fetch state
-    Game service->>Game service: validate request
-    Game service->>Repository: update state
-    Game service->>-Message bus: PlayerJoinedRoom
-    Message bus->>+Game controller: PlayerJoinedRoom
-    Game controller->>-Player: GameEvent(PlayerJoinedRoom)
-    note over Player, Repository: The frontend will display the current player in the room
+    note over p, repo: The Player submits a Connect command to the controller
+    p-)+controller: Connect
+    controller->>-bus: Connect
+    bus->>+service: Connect
+    repo->>service: fetch state
+    service->>-bus: PlayerConnected
+    bus->>+controller: PlayerConnected
+    controller->>-p: RoomSnapshot
+    note over p, repo: The frontend will display the current view of the room<br/>The player submits a JoinRoom command to the controller
+    p-)+controller: JoinRoom
+    controller->>-bus: JoinRoom
+    bus->>+service: JoinRoom
+    repo->>service: fetch state
+    service->>service: validate request
+    service->>repo: update state
+    service->>-bus: PlayerJoinedRoom
+    bus->>+controller: PlayerJoinedRoom
+    controller->>-p: GameEvent(PlayerJoinedRoom)
+    note over p, repo: The frontend will display the current player in the room
 ```
 
 The following diagram illustrates how two players (in the same room) can start playing together.  
@@ -114,78 +114,77 @@ Again, some components have been omitted for simplicity:
 
 ```mermaid
 sequenceDiagram
-    actor Player1
-    actor Player2
-    participant Message bus
-    participant Game service
-    participant Repository
-    participant Game
+    actor p1 AS Player1
+    actor p2 AS Player2
+    participant bus AS Message bus
+    participant service AS Game service
+    participant repo AS Repository
+    participant machine AS State machine
     
-    note over Player1, Game: Player1 submits a StartMatch command to the controller
-    Player1-)Message bus: StartMatch
-    Message bus->>+Game service: StartMatch
-    Repository->>Game service: fetch state
-    Game service->>+Game: play(state, StartMatch)
-    Game->>-Game service: (new state, MatchStarted)
-    Game service->>Repository: update state
-    Game service->>-Message bus: MatchStarted
+    note over p1, machine: Player1 submits a StartMatch command to the controller
+    p1-)bus: StartMatch
+    bus->>+service: StartMatch
+    repo->>service: fetch state
+    service->>+machine: play(state, StartMatch)
+    machine->>-service: (new state, MatchStarted)
+    service->>repo: update state
+    service->>-bus: MatchStarted
 
-    note over Player1, Game: A MatchStarted event is broadcast to all players connected to the room as well as the Game service
+    note over p1, machine: A MatchStarted event is broadcast to all players connected to the room as well as the Game service
     par
-        Message bus->>Player1: MatchStarted
+        bus->>p1: MatchStarted
     and 
-        Message bus->>Player2: MatchStarted
+        bus->>p2: MatchStarted
     and 
-        Message bus->>+Game service: MatchStarted
+        bus->>+service: MatchStarted
     end
         
-    Repository->>Game service: fetch state
-    Game service->>+Game: play(state, MatchStarted)
-    Game->>-Game service: (new state, [Act])
-    Game service->>Repository: update state
-    Game service->>-Message bus: Act
+    repo->>service: fetch state
+    service->>+machine: play(state, MatchStarted)
+    machine->>-service: (new state, [Act])
+    service->>repo: update state
+    service->>-bus: Act
 
-    note over Player1, Game: An Act command (including the target player and the requested action)<br/> is issued by the Game service and broadcast to all players
+    note over p1, machine: An Act command (including the target player and the requested action)<br/> is issued by the Game service and broadcast to all players
     par
-        Message bus->>Player1: Act
+        bus->>p1: Act
     and
-        Message bus->>Player2: Act
+        bus->>p2: Act
     end
 
-    note over Player1, Game: Player2 submits a ShuffleDeck command to the controller
-    Player2->>Message bus: ShuffleDeck
-    Message bus->>+Game service: ShuffleDeck
-    Repository->>Game service: fetch state
-    Game service->>+Game: play(state, ShuffleDeck)
-    Game->>-Game service: (state, [DeckShuffled, Delayed(Continue)])
-    Game service->>Repository: update state
-    Game service->>Message bus: DeckShuffled
-    Game service->>-Game service: schedule delayed submission of a Continue command
+    note over p1, machine: Player2 submits a ShuffleDeck command to the controller
+    p2->>bus: ShuffleDeck
+    bus->>+service: ShuffleDeck
+    repo->>service: fetch state
+    service->>+machine: play(state, ShuffleDeck)
+    machine->>-service: (state, [DeckShuffled, Delayed(Continue)])
+    service->>repo: update state
+    service->>bus: DeckShuffled
+    service->>-service: schedule delayed submission of a Continue command
 
-    note over Player1, Game: A DeckShuffled event is broadcast
+    note over p1, machine: A DeckShuffled event is broadcast
     par
-        Message bus->>Player1: DeckShuffled
+        bus->>p1: DeckShuffled
     and
-        Message bus->>Player2: DeckShuffled
+        bus->>p2: DeckShuffled
     and
-        Message bus->>+Game service: DeckShuffled
+        bus->>+service: DeckShuffled
     end
-    Repository->>Game service: fetch state
-    Game service->>+Game: play(state, DeckShuffled)
-    Game->>-Game service: (new state, [])
-    Game service->>Repository: update state
-    deactivate Game service
+    repo->>service: fetch state
+    service->>+machine: play(state, DeckShuffled)
+    machine->>-service: (new state, [])
+    service->>-repo: update state
 
-    note over Player1, Game: A Continue command that was previously scheduled is now issued
-    Game service-)Message bus: Continue (received)
-    Message bus->>+Game service: Continue
-    Repository->>Game service: fetch state
-    Game service->>+Game: play(state, Continue)
-    Game->>-Game service: (new state, BoardCardsDealt, Delayed(Continue))
-    Game service->>Repository: update state
-    Game service->>Message bus: BoardCardsDealt
-    note over Player1, Game: A BoardCardsDealt event is issued and will be received by the various frontend to display the cards
-    Game service->>-Game service: schedule delayed submission of a Continue command
+    note over p1, machine: A Continue command that was previously scheduled is now issued
+    service-)bus: Continue (received)
+    bus->>+service: Continue
+    repo->>service: fetch state
+    service->>+machine: play(state, Continue)
+    machine->>-service: (new state, BoardCardsDealt, Delayed(Continue))
+    service->>repo: update state
+    service->>bus: BoardCardsDealt
+    note over p1, machine: A BoardCardsDealt event is issued and will be received by the various frontend to display the cards
+    service->>-service: schedule delayed submission of a Continue command
 ```
 
 ### More in details
