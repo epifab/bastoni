@@ -73,7 +73,7 @@ lazy val backend = (project in file("modules/backend"))
     ),
     scalaJSProjects := Seq(frontend),
     exportJars      := true,
-    resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo),
+    resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
     resolvers += Resolver.bintrayRepo("hseeberger", "maven"),
     Assets / pipelineStages        := Seq(scalaJSPipeline),
     Assets / WebKeys.packagePrefix := "assets/",

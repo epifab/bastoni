@@ -56,13 +56,11 @@ object RegressionSpecGen extends IOApp:
           fs2.Stream
             .resource(outputBus.subscribe)
             .map(
-              _
-                // .evalTap(x => IO(println(x.getClass.getSimpleName)))
-                .zipWithScan[RoomServerView](initialRoom) {
-                  case (room, event: ServerEvent)   => room.update(event)
-                  case (room, command: Command.Act) => room.withRequest(command)
-                  case (room, _)                    => room
-                }
+              _.zipWithScan[RoomServerView](initialRoom) {
+                case (room, event: ServerEvent)   => room.update(event)
+                case (room, command: Command.Act) => room.withRequest(command)
+                case (room, _)                    => room
+              }
                 .collect {
                   case (Command.Continue, _) =>
                     Command.Continue
@@ -74,7 +72,7 @@ object RegressionSpecGen extends IOApp:
                     val playerRoom = room.toPlayerView(playerId)
                     val seat = playerRoom.seatFor(playerId).getOrElse(throw IllegalStateException("Player not there"))
                     val user: User = users.find(_.is(playerId)).getOrElse(throw IllegalStateException("Unknown player"))
-                    GameController.buildCommand(user)(DumbPlayer.act(playerRoom, seat, action) -> 0)
+                    GameController.buildCommand(user)(DumbPlayer.act(playerRoom, seat, action) -> 0).get
                 }
                 .through(inputBus.publish)
             )

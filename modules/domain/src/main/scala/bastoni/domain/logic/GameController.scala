@@ -69,12 +69,13 @@ object GameController:
       input
         .zip(seeds)
         .map(buildCommand(me))
+        .collect { case Some(command) => command }
         .zip(messageIds)
         .map { case (message, id) => Message(id, roomId, message) }
         .through(messageBus.publish)
 
-  def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Command =
-    eventAndSeed match
+  def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Option[Command] =
+    Some(eventAndSeed).collect {
       case (FromPlayer.Connect, _)                => Connect
       case (FromPlayer.JoinRoom, seed)            => JoinRoom(me, seed)
       case (FromPlayer.LeaveRoom, _)              => LeaveRoom(me)
@@ -83,4 +84,5 @@ object GameController:
       case (FromPlayer.Ok, _)                     => Ok(me.id)
       case (FromPlayer.PlayCard(card), _)         => PlayCard(me.id, card)
       case (FromPlayer.TakeCards(card, taken), _) => TakeCards(me.id, card, taken)
+    }
 end GameController
