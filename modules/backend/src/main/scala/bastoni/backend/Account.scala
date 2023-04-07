@@ -13,8 +13,8 @@ object Account:
   def middleware: AuthMiddleware[IO, Account] = AuthMiddleware(
     Kleisli(request =>
       for
-        names <- OptionT.fromOption(request.headers.get(CIString("x-name")))
-        ids   <- OptionT.fromOption(request.headers.get(CIString("x-id")))
+        names <- OptionT.fromOption(request.headers.get(CIString("x-user-name")))
+        ids   <- OptionT.fromOption(request.headers.get(CIString("x-user-id")))
         id    <- OptionT.fromOption(UserId.tryParse(ids.head.value))
       yield Account(User(id, names.head.value))
     )

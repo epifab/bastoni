@@ -12,10 +12,13 @@ object UserId:
   def newId: UserId                       = UUID.randomUUID()
   def tryParse(s: String): Option[UserId] = Try(unsafeParse(s)).toOption
   def unsafeParse(s: String): UserId      = UUID.fromString(s)
-  given Encoder[UserId]                   = Encoder[String].contramap(_.toString)
-  given Decoder[UserId]                   = Decoder[String].emap(tryParse(_).toRight("Not a valid ID"))
-  given KeyEncoder[UserId]                = KeyEncoder.encodeKeyUUID
-  given KeyDecoder[UserId]                = KeyDecoder.decodeKeyUUID
+
+  given Encoder[UserId]    = Encoder[String].contramap(_.toString)
+  given Decoder[UserId]    = Decoder[String].emap(tryParse(_).toRight("Not a valid ID"))
+  given KeyEncoder[UserId] = KeyEncoder.encodeKeyUUID
+  given KeyDecoder[UserId] = KeyDecoder.decodeKeyUUID
+  
+  extension (userId: UserId) def value: String = userId.toString
 
 trait User(val id: UserId, val name: String):
   def is(other: User): Boolean   = other.id == id

@@ -17,14 +17,14 @@ trait GameSubscriber[F[_]]:
 trait GamePublisher[F[_]]:
   def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
 
-type GameController[F[_]] = GameSubscriber[F] with GamePublisher[F]
+trait GameController[F[_]] extends GameSubscriber[F] with GamePublisher[F]
 
 object GameController:
 
   def apply[F[_]: Sync](messageBus: MessageBus[F]): GameController[F] =
     val pub = publisher(messageBus)
     val sub = subscriber(messageBus)
-    new GameSubscriber[F] with GamePublisher[F]:
+    new GameController[F]:
       override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
         pub.publish(me, roomId)(input)
 

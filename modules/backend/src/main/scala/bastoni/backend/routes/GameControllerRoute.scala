@@ -19,6 +19,7 @@ import org.http4s.Method.GET
 import scala.concurrent.duration.DurationInt
 
 object GameControllerRoute:
+
   def apply(gameController: GameController[IO], wsBuilder: WebSocketBuilder2[IO]): AuthedRoutes[Account, IO] =
     def send(user: User, roomId: RoomId): fs2.Stream[IO, WebSocketFrame] =
       gameController
@@ -36,7 +37,7 @@ object GameControllerRoute:
               .collect { case Right(message) => message }
           )
 
-    AuthedRoutes.of[Account, IO] { case GET -> Root / UUIDVar(targetRoom) / "play" as account =>
+    AuthedRoutes.of[Account, IO] { case GET -> Root / UUIDVar(targetRoom) as account =>
       wsBuilder.build(
         send = send(account.user, RoomId(targetRoom)),
         receive = receive(account.user, RoomId(targetRoom))

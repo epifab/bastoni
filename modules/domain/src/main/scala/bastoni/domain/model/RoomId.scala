@@ -14,5 +14,7 @@ object RoomId:
   def tryParse(s: String): Option[RoomId] = Try(unsafeParse(s)).toOption
   def unsafeParse(s: String): RoomId      = UUID.fromString(s)
 
+  extension (roomId: RoomId) def value: String = roomId.toString
+
   given Encoder[RoomId] = Encoder.encodeUUID
   given Decoder[RoomId] = Decoder.decodeUUID
