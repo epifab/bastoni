@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { VisibleCard } from './model/card';
+import {HiddenCard, VisibleCard} from './model/card';
 
 const card: VisibleCard = {
     rank: 'Asso',
