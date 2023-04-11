@@ -1,4 +1,11 @@
 import Konva from 'konva';
+import { VisibleCard } from './model/card';
+
+const card: VisibleCard = {
+    rank: 'Asso',
+    suit: 'Denari',
+    ref: 1
+}
 
 const width = window.innerWidth;
 const height = window.innerHeight;
