@@ -1,17 +1,17 @@
 import Konva from 'konva';
 
-var width = window.innerWidth;
-var height = window.innerHeight;
+const width = window.innerWidth;
+const height = window.innerHeight;
 
-var stage = new Konva.Stage({
+const stage = new Konva.Stage({
     container: 'container',
     width: width,
     height: height,
 });
 
-var layer = new Konva.Layer();
+const layer = new Konva.Layer();
 
-var rect1 = new Konva.Rect({
+const rect1 = new Konva.Rect({
     x: 20,
     y: 20,
     width: 100,
@@ -23,7 +23,7 @@ var rect1 = new Konva.Rect({
 // add the shape to the layer
 layer.add(rect1);
 
-var rect2 = new Konva.Rect({
+const rect2 = new Konva.Rect({
     x: 150,
     y: 40,
     width: 100,
@@ -34,7 +34,7 @@ var rect2 = new Konva.Rect({
 });
 layer.add(rect2);
 
-var rect3 = new Konva.Rect({
+const rect3 = new Konva.Rect({
     x: 50,
     y: 120,
     width: 100,
