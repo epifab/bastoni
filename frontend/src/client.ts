@@ -11,6 +11,39 @@ import {
     TrumpRevealed
 } from "./model/event";
 
+import messageInTi from "./model/messageIn-ti";
+import eventTi from "./model/event-ti";
+import {Checker, createCheckers} from "ts-interface-checker";
+
+const {
+    GameEventMessage,
+    Connected
+} = createCheckers(messageInTi)
+
+const {
+    PlayerJoinRoom,
+    PlayerLeftRoom,
+    MatchStarted,
+    TrumpRevealed,
+    BoardCardsDealt,
+    CardPlayed,
+    CardsTaken,
+    PlayerConfirmed,
+    TimedOut,
+    TrickCompleted,
+    GameCompleted,
+    MatchCompleted,
+    GameAborted,
+    MatchAborted,
+    CardsDealt,
+    DeckShuffled,
+} = createCheckers(eventTi)
+
+function parseJson<T>(checker: Checker, message: any): T {
+    checker.check(message)
+    return message as T
+}
+
 export class Client {
     private default: ((event: any) => void) = (event) => console.log(event)
 
@@ -103,59 +136,42 @@ export class Client {
     inbox: (message: MessageIn) => void = (message) => {
         switch (message.messageType) {
             case 'Connected':
-                this.notifyConnected((message as Connected).room)
-                break;
+                return this.notifyConnected(parseJson<Connected>(Connected, message).room)
             case 'GameEvent':
-                const event: GameEvent = (message as GameEventMessage).event;
+                const event: GameEvent = parseJson<GameEvent>(createCheckers(messageInTi).GameEvent, message);
                 switch (event.eventType) {
                     case 'PlayerJoinedRoom':
-                        this.notifyPlayerJoinRoom(event as PlayerJoinedRoom)
-                        break;
+                        return this.notifyPlayerJoinRoom(parseJson<PlayerJoinedRoom>(PlayerJoinRoom, event));
                     case 'PlayerLeftRoom':
-                        this.notifyPlayerLeftRoom(event as PlayerLeftRoom)
-                        break;
+                        return this.notifyPlayerLeftRoom(parseJson<PlayerLeftRoom>(PlayerLeftRoom, event));
                     case 'MatchStarted':
-                        this.notifyMatchStarted(event as MatchStarted)
-                        break;
+                        return this.notifyMatchStarted(parseJson<MatchStarted>(MatchStarted, event));
                     case 'TrumpRevealed':
-                        this.notifyTrumpRevealed(event as TrumpRevealed)
-                        break;
+                        return this.notifyTrumpRevealed(parseJson<TrumpRevealed>(TrumpRevealed, event));
                     case 'BoardCardsDealt':
-                        this.notifyBoardCardsDealt(event as BoardCardsDealt)
-                        break;
+                        return this.notifyBoardCardsDealt(parseJson<BoardCardsDealt>(BoardCardsDealt, event));
                     case 'CardPlayed':
-                        this.notifyCardPlayed(event as CardPlayed)
-                        break;
+                        return this.notifyCardPlayed(parseJson<CardPlayed>(CardPlayed, event));
                     case 'CardsTaken':
-                        this.notifyCardsTaken(event as CardsTaken)
-                        break;
+                        return this.notifyCardsTaken(parseJson<CardsTaken>(CardsTaken, event));
                     case 'PlayerConfirmed':
-                        this.notifyPlayerConfirmed(event as PlayerConfirmed)
-                        break;
+                        return this.notifyPlayerConfirmed(parseJson<PlayerConfirmed>(PlayerConfirmed, event));
                     case 'TimedOut':
-                        this.notifyTimedOut(event as TimedOut)
-                        break;
+                        return this.notifyTimedOut(parseJson<TimedOut>(TimedOut, event));
                     case 'TrickCompleted':
-                        this.notifyTrickCompleted(event as TrickCompleted)
-                        break;
+                        return this.notifyTrickCompleted(parseJson<TrickCompleted>(TrickCompleted, event));
                     case 'GameCompleted':
-                        this.notifyGameCompleted(event as GameCompleted)
-                        break;
+                        return this.notifyGameCompleted(parseJson<GameCompleted>(GameCompleted, event));
                     case 'MatchCompleted':
-                        this.notifyMatchCompleted(event as MatchCompleted)
-                        break;
+                        return this.notifyMatchCompleted(parseJson<MatchCompleted>(MatchCompleted, event));
                     case 'GameAborted':
-                        this.notifyGameAborted(event as GameAborted)
-                        break;
+                        return this.notifyGameAborted(parseJson<GameAborted>(GameAborted, event));
                     case 'MatchAborted':
-                        this.notifyMatchAborted(event as MatchAborted)
-                        break;
+                        return this.notifyMatchAborted(parseJson<MatchAborted>(MatchAborted, event));
                     case 'CardsDealt':
-                        this.notifyCardsDealt(event as CardsDealt)
-                        break;
+                        return this.notifyCardsDealt(parseJson<CardsDealt>(CardsDealt, event));
                     case 'DeckShuffled':
-                        this.notifyDeckShuffled(event as DeckShuffled)
-                        break;
+                        return this.notifyDeckShuffled(parseJson<DeckShuffled>(DeckShuffled, event));
                 }
                 break;
         }
