@@ -17,7 +17,7 @@ trait Timer[State, Self <: Timer[State, Self]]:
   def update(timeout: Timeout.Active, request: Command.Act): Self & State
 
   def ticked(tick: Command.Tick): (State, List[StateMachineOutput]) =
-    if (tick.ref != ref) (this -> Nil)
+    if (tick.ref != ref) this -> Nil
     else
       timeout.next match
         case Timeout.TimedOut =>

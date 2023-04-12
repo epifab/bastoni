@@ -21,7 +21,7 @@ object DeckShufflingLayer:
         room.seats
           .map(_.playerOption)
           .collectFirst {
-            case Some(PlayerState.ActingPlayer(me, Action.ShuffleDeck, _)) if me.is(room.me) =>
+            case Some(PlayerState.Acting(me, Action.ShuffleDeck, _)) if me.is(room.me) =>
               CardComponent(
                 layout = layout.deck.controlLayout,
                 previous = None,
@@ -35,7 +35,7 @@ object DeckShufflingLayer:
                 selected = mouseOver
               )
 
-            case Some(PlayerState.ActingPlayer(dealer, Action.ShuffleDeck, _)) =>
+            case Some(PlayerState.Acting(dealer, Action.ShuffleDeck, _)) =>
               KGroup(
                 _.opacity = .5,
                 CardComponent(

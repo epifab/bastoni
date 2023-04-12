@@ -53,27 +53,36 @@ sealed trait CardInstance extends CardRef:
   def isHidden: Boolean                   = toOption.isEmpty
   def contains(card: SimpleCard): Boolean = toOption.map(_.simple).contains(card)
 
+object CardInstance:
+  given encoder: Encoder[CardInstance] = Encoder.instance {
+    case visible: VisibleCard => VisibleCard.encoder(visible)
+    case hidden: HiddenCard   => HiddenCard.encoder(hidden)
+  }
+
+  given decoder: Decoder[CardInstance] = Decoder.instance(cursor =>
+    VisibleCard.decoder
+      .tryDecode(cursor)
+      .orElse(HiddenCard.decoder.tryDecode(cursor))
+  )
+
 case class VisibleCard(rank: Rank, suit: Suit, ref: CardId) extends CardInstance with Card:
   def simple: SimpleCard                     = SimpleCard(rank, suit)
   override def toOption: Option[VisibleCard] = Some(this)
   override def hide: HiddenCard              = HiddenCard(ref, Some(simple))
 
 object VisibleCard:
-  given Encoder[VisibleCard] = deriveEncoder
-  given Decoder[VisibleCard] = deriveDecoder
+  given encoder: Encoder[VisibleCard] = deriveEncoder
+  given decoder: Decoder[VisibleCard] = deriveDecoder
 
 case class HiddenCard(ref: CardId, card: Option[Card] = None) extends CardInstance:
   override def toOption: Option[VisibleCard] = None
   override def hide: HiddenCard              = this
 
 object HiddenCard:
-  given Encoder[HiddenCard] = deriveEncoder
-  given Decoder[HiddenCard] = deriveDecoder
+  given encoder: Encoder[HiddenCard] = deriveEncoder
+  given decoder: Decoder[HiddenCard] = deriveDecoder
 
 object Card:
   def apply(rank: Rank, suit: Suit): SimpleCard               = SimpleCard(rank, suit)
   def apply(rank: Rank, suit: Suit, ref: CardId): VisibleCard = VisibleCard(rank, suit, ref)
   def apply(ref: CardId): HiddenCard                          = HiddenCard(ref)
-
-  given Encoder[CardInstance] = deriveEncoder
-  given Decoder[CardInstance] = deriveDecoder

@@ -42,7 +42,7 @@ object GameLayout:
     val mainPlayerHandSize: CardSize = room
       .flatMap(_.mainPlayer.flatMap { seat =>
         Some(seat.player).collect {
-          case actor: PlayerState.ActingPlayer if actor.playing =>
+          case actor: PlayerState.Acting if actor.playing =>
             CardSize.scaleTo(
               maxWidth = canvasSize.width / (1 + (Math
                 .min(4, seat.hand.size - 1) * MainPlayerHandRenderer.horizontalOverlapFactor)).floor,

@@ -21,13 +21,13 @@ object PlayerComponent:
       )
 
       val timedOut = playerState match
-        case PlayerState.ActingPlayer(_, _, Some(Timeout.TimedOut)) => true
-        case _                                                      => false
+        case PlayerState.Acting(_, _, Some(Timeout.TimedOut)) => true
+        case _                                                => false
 
       val timeoutBars: Option[VdomNode] = Some(playerState)
         .collect {
-          case PlayerState.ActingPlayer(_, _, Some(timeout: Timeout.Active)) => Some(timeout)
-          case PlayerState.ActingPlayer(_, _, None)                          => None
+          case PlayerState.Acting(_, _, Some(timeout: Timeout.Active)) => Some(timeout)
+          case PlayerState.Acting(_, _, None)                          => None
         }
         .map { timeout =>
           TimeoutBar(
@@ -58,14 +58,14 @@ object PlayerComponent:
             case PlayerState.SittingOut(_) =>
               circle.opacity = .4
 
-            case PlayerState.EndOfMatchPlayer(_, true) =>
+            case PlayerState.EndOfMatch(_, true) =>
               circle.stroke = Palette.yellow1
               circle.strokeWidth = 10
               circle.shadowColor = Palette.blue
               circle.shadowBlur = 30
               circle.shadowOpacity = 1
 
-            case PlayerState.EndOfGamePlayer(_, _, true) =>
+            case PlayerState.EndOfGame(_, _, true) =>
               circle.stroke = Palette.yellow1
               circle.strokeWidth = circleStrokeSize
               circle.shadowColor = Palette.blue

@@ -1,6 +1,7 @@
 package bastoni.domain.model
 
 import io.circe.{Decoder, Encoder, Json}
+import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 import io.circe.generic.semiauto.deriveDecoder
 import io.circe.syntax.*
 
@@ -31,16 +32,5 @@ enum Action:
   case Confirm
 
 object Action:
-  given Encoder[Action] = Encoder.instance {
-    case PlayCard(context) => Json.obj("type" -> "PlayCard".asJson, "context" -> context.asJson)
-    case ShuffleDeck       => Json.obj("type" -> "ShuffleDeck".asJson)
-    case Confirm           => Json.obj("type" -> "Confirm".asJson)
-  }
-
-  given Decoder[Action] = Decoder.instance(obj =>
-    obj.downField("type").as[String].flatMap {
-      case "PlayCard"    => obj.downField("context").as[PlayContext].map(PlayCard(_))
-      case "ShuffleDeck" => Right(ShuffleDeck)
-      case "Confirm"     => Right(Confirm)
-    }
-  )
+  given Encoder[Action] = ConfiguredEncoder.derive(discriminator = Some("type"))
+  given Decoder[Action] = ConfiguredDecoder.derive(discriminator = Some("type"))

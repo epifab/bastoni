@@ -68,14 +68,14 @@ object CardsLayerWrapper:
       game.currentRoom.mainPlayer.fold(Map.empty)(seat =>
         seat.player match
           case PlayerState
-                .ActingPlayer(_, Action.PlayCard(PlayContext.Briscola(_) | PlayContext.Tressette(None)), timeout)
+                .Acting(_, Action.PlayCard(PlayContext.Briscola(_) | PlayContext.Tressette(None)), timeout)
               if !timeout.contains(Timeout.TimedOut) =>
             seat.hand
               .flatMap(_.card.toOption)
               .map { (card: VisibleCard) => card.ref -> game.sendMessage(FromPlayer.PlayCard(card)) }
               .toMap
 
-          case PlayerState.ActingPlayer(_, Action.PlayCard(PlayContext.Tressette(Some(suit))), timeout)
+          case PlayerState.Acting(_, Action.PlayCard(PlayContext.Tressette(Some(suit))), timeout)
               if !timeout.contains(Timeout.TimedOut) =>
             val hand: List[VisibleCard] = seat.hand.flatMap(_.card.toOption)
             val anyCard: Boolean        = hand.forall(_.suit != suit)
@@ -84,7 +84,7 @@ object CardsLayerWrapper:
                 card.ref -> game.sendMessage(FromPlayer.PlayCard(card))
             }.toMap
 
-          case PlayerState.ActingPlayer(_, Action.PlayCard(PlayContext.Scopa), timeout)
+          case PlayerState.Acting(_, Action.PlayCard(PlayContext.Scopa), timeout)
               if !timeout.contains(Timeout.TimedOut) =>
             state.takingCards match
               case None =>

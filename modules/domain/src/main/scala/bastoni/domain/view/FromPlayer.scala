@@ -1,6 +1,6 @@
 package bastoni.domain.view
 
-import bastoni.domain.model.{GameType, VisibleCard}
+import bastoni.domain.model.{GameType, User, VisibleCard}
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 

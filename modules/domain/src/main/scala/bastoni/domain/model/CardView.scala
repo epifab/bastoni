@@ -1,5 +1,6 @@
 package bastoni.domain.model
 
+import bastoni.domain.model
 import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
@@ -18,7 +19,9 @@ case class CardServerView(card: VisibleCard, facing: Direction) extends CardView
     case _              => CardPlayerView(if (context.contains(me)) card else card.hide)
 
 object CardPlayerView:
-  given Codec[CardPlayerView] = deriveCodec
+  given Encoder[CardPlayerView] = CardInstance.encoder.contramap(_.card)
+  given Decoder[CardPlayerView] = CardInstance.decoder.map(card => CardPlayerView(card))
 
 object CardServerView:
-  given Codec[CardServerView] = deriveCodec
+  given Encoder[CardServerView] = deriveEncoder
+  given Decoder[CardServerView] = deriveDecoder

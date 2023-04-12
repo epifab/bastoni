@@ -21,19 +21,32 @@ object Timeout:
   case object Max extends Active(10, T9)
 
   object Active:
-    given Encoder[Active] = Encoder[Int].contramap(_.value)
+    def apply(value: Int): Option[Active] =
+      value match
+        case 1  => Some(T1)
+        case 2  => Some(T2)
+        case 3  => Some(T3)
+        case 4  => Some(T4)
+        case 5  => Some(T5)
+        case 6  => Some(T6)
+        case 7  => Some(T7)
+        case 8  => Some(T8)
+        case 9  => Some(T9)
+        case 10 => Some(Max)
+        case _  => None
 
-    given Decoder[Active] = Decoder[Int].emap {
-      case 1  => Right(T1)
-      case 2  => Right(T2)
-      case 3  => Right(T3)
-      case 4  => Right(T4)
-      case 5  => Right(T5)
-      case 6  => Right(T6)
-      case 7  => Right(T7)
-      case 8  => Right(T8)
-      case 9  => Right(T9)
-      case 10 => Right(Max)
-      case e  => Left("Invalid timeout")
+    given encoder: Encoder[Active] = Encoder[Int].contramap(_.value)
+    given decoder: Decoder[Active] = Decoder[Int].emap(value => apply(value).toRight(s"Invalid timeout $value"))
+
+  given Encoder[Timeout] =
+    Encoder.instance {
+      case active: Active => Active.encoder(active)
+      case TimedOut       => Encoder.encodeInt(0)
+    }
+
+  given Decoder[Timeout] =
+    Decoder.decodeInt.emap {
+      case 0 => Right(TimedOut)
+      case n => Active(n).toRight(s"Invalid timeout $n")
     }
 end Timeout

@@ -10,7 +10,8 @@ import scala.util.Random
 case class BoardCard[C <: CardView](card: C, playedBy: Option[UserId])
 
 object BoardCard:
-  given codec[C <: CardView: Codec]: Codec[BoardCard[C]] = deriveCodec
+  given encoder[C <: CardView: Encoder]: Encoder[BoardCard[C]] = deriveEncoder
+  given decoder[C <: CardView: Decoder]: Decoder[BoardCard[C]] = deriveDecoder
 
 trait Room[C <: CardView]:
   type RoomView
@@ -78,7 +79,7 @@ trait Room[C <: CardView]:
         seats = mapTakenSeats {
           case player: SittingIn if player.is(command.playerId) =>
             _.copy(player = player.act(Action.ShuffleDeck, command.timeout))
-          case player: SittingIn => _.copy(player = WaitingPlayer(player.player))
+          case player: SittingIn => _.copy(player = Waiting(player.player))
         },
         matchInfo = matchInfo.map(_.copy(gameScore = None)),
         dealerIndex = seats.collectFirst { case seat if seat.playerOption.exists(_.is(command.playerId)) => seat.index }
@@ -134,7 +135,7 @@ trait Room[C <: CardView]:
       case Event.CardPlayed(playerId, card) =>
         updateWith(
           seats = mapTakenSeats {
-            case acting: ActingPlayer if acting.is(playerId) =>
+            case acting: Acting if acting.is(playerId) =>
               seat =>
                 seat.copy(
                   player = acting.done,
@@ -165,7 +166,7 @@ trait Room[C <: CardView]:
       case Event.PlayerConfirmed(playerId) =>
         updateWith(
           seats = mapTakenSeats {
-            case player: ActingPlayer if player.is(playerId) => _.copy(player = player.done)
+            case player: Acting if player.is(playerId) => _.copy(player = player.done)
           }
         )
 
@@ -192,7 +193,7 @@ trait Room[C <: CardView]:
               seat.copy(
                 player = seat.player match
                   case active: SittingIn =>
-                    EndOfGamePlayer(
+                    EndOfGame(
                       player = active.player
                         .copy(points = matchScores.pointsFor(active.player).getOrElse(active.player.points)),
                       points = scores.pointsFor(active.player).getOrElse(0),
@@ -226,7 +227,7 @@ trait Room[C <: CardView]:
       case Event.MatchCompleted(winnerIds) =>
         updateWith(
           seats = mapTakenSeats { case active: SittingIn =>
-            _.copy(player = EndOfMatchPlayer(active.player, winner = winnerIds.contains(active.player.id)))
+            _.copy(player = EndOfMatch(active.player, winner = winnerIds.contains(active.player.id)))
           },
           dealerIndex = nextDealer.map(_.index),
           matchInfo = None
@@ -241,7 +242,7 @@ trait Room[C <: CardView]:
       case Event.TimedOut(playerId, _) =>
         updateWith(
           seats = mapTakenSeats {
-            case player: ActingPlayer if player.is(playerId) =>
+            case player: Acting if player.is(playerId) =>
               _.copy(player = player.copy(timeout = Some(Timeout.TimedOut)))
           }
         )
@@ -257,7 +258,7 @@ trait Room[C <: CardView]:
 
   protected def deckShuffledUpdate(newDeck: List[C]): RoomView =
     updateWith(
-      seats = mapTakenSeats { case acting @ ActingPlayer(targetPlayer, Action.ShuffleDeck, _) =>
+      seats = mapTakenSeats { case acting @ Acting(targetPlayer, Action.ShuffleDeck, _) =>
         _.copy(player = acting.done)
       },
       deck = newDeck

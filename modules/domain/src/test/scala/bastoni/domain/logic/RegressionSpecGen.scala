@@ -44,7 +44,7 @@ object RegressionSpecGen extends IOApp:
 
         initialRoom = RoomServerView(
           seats =
-            users.zipWithIndex.map { case (u, index) => TakenSeat(index, WaitingPlayer(MatchPlayer(u, 0)), Nil, Nil) },
+            users.zipWithIndex.map { case (u, index) => TakenSeat(index, Waiting(MatchPlayer(u, 0)), Nil, Nil) },
           deck = Nil,
           board = Nil,
           matchInfo = None,
