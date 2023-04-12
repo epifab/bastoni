@@ -83,7 +83,7 @@ object Event:
 
     case class DeckShuffled(numberOfCards: Int) extends Event.DeckShuffled with PlayerEvent
 
-  case class PlayerConnected(room: RoomServerView) extends ServerEvent
+  case class PlayerConnected(user: User, room: RoomServerView) extends ServerEvent
 
   given publicEventEncoder: Encoder[PublicEvent] =
     ConfiguredEncoder.derive(discriminator = Some("type"))

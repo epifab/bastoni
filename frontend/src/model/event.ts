@@ -1,44 +1,64 @@
-import {User, UserId} from "./user";
-import {Game} from "./game";
+import {User, UserId} from "./player";
+import {GameType} from "./gameType";
 import {GameScore, MatchScore} from "./score";
 import {Card, VisibleCard} from "./card";
 import {Action} from "./action";
 
-export interface PlayerJoinedRoom {
+export interface GameEvent {
+    eventType:
+        'PlayerJoinedRoom'
+        | 'PlayerLeftRoom'
+        | 'MatchStarted'
+        | 'TrumpRevealed'
+        | 'BoardCardsDealt'
+        | 'CardPlayed'
+        | 'CardsTaken'
+        | 'PlayerConfirmed'
+        | 'TimedOut'
+        | 'TrickCompleted'
+        | 'GameCompleted'
+        | 'MatchCompleted'
+        | 'GameAborted'
+        | 'MatchAborted'
+        | 'CardsDealt'
+        | 'DeckShuffled'
+}
+
+export interface PlayerJoinedRoom extends GameEvent {
     eventType: 'PlayerJoinedRoom',
     user: User,
     seat: number
 }
 
-export interface PlayerLeftRoom {
+export interface PlayerLeftRoom extends GameEvent {
     eventType: 'PlayerLeftRoom',
     user: User,
     seat: number
 }
 
-export interface MatchStarted {
+export interface MatchStarted extends GameEvent {
     eventType: 'MatchStarted',
-    gameType: Game,
+    gameType: GameType,
     matchScores: MatchScore[]
 }
 
-export interface TrumpRevealed {
+export interface TrumpRevealed extends GameEvent {
     eventType: 'TrumpRevealed',
     card: VisibleCard
 }
 
-export interface BoardCardsDealt {
+export interface BoardCardsDealt extends GameEvent{
     eventType: 'BoardCardsDealt',
     cards: VisibleCard[]
 }
 
-export interface CardPlayed {
+export interface CardPlayed extends GameEvent {
     eventType: 'CardPlayed',
     playerId: UserId,
     card: VisibleCard
 }
 
-export interface CardsTaken {
+export interface CardsTaken extends GameEvent {
     eventType: 'CardsTaken',
     playerId: UserId,
     card: VisibleCard,
@@ -46,67 +66,49 @@ export interface CardsTaken {
     scopa?: VisibleCard
 }
 
-export interface PlayerConfirmed {
+export interface PlayerConfirmed extends GameEvent {
     eventType: 'PlayerConfirmed',
     playerId: UserId
 }
 
-export interface TimedOut {
+export interface TimedOut extends GameEvent {
     eventType: 'TimedOut',
     playerId: UserId,
     action: Action
 }
 
-export interface TrickCompleted {
+export interface TrickCompleted extends GameEvent {
     eventType: 'TrickCompleted',
     winnerId: UserId
 }
 
-export interface GameCompleted {
+export interface GameCompleted extends GameEvent {
     eventType: 'GameCompleted',
     scores: GameScore[],
     matchScores: MatchScore[]
 }
 
-export interface MatchCompleted {
+export interface MatchCompleted extends GameEvent {
     eventType: 'MatchCompleted',
     winnerIds: UserId[]
 }
 
-export interface GameAborted {
+export interface GameAborted extends GameEvent {
     eventType: 'GameAborted',
     reason: string
 }
 
-export interface MatchAborted {
+export interface MatchAborted extends GameEvent {
     eventType: 'MatchAborted',
     reason: string
 }
 
-export interface CardsDealt {
+export interface CardsDealt extends GameEvent {
     eventType: 'CardsDealt',
     cards: Card[]
 }
 
-export interface DeckShuffled {
+export interface DeckShuffled extends GameEvent {
     eventType: 'DeckShuffled',
     numberOfCards: number
 }
-
-export type GameEvent =
-    PlayerJoinedRoom
-    | PlayerLeftRoom
-    | MatchStarted
-    | TrumpRevealed
-    | BoardCardsDealt
-    | CardPlayed
-    | CardsTaken
-    | PlayerConfirmed
-    | TimedOut
-    | TrickCompleted
-    | GameCompleted
-    | MatchCompleted
-    | GameAborted
-    | MatchAborted
-    | CardsDealt
-    | DeckShuffled

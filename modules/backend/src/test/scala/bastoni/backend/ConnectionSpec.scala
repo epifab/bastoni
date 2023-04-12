@@ -40,7 +40,8 @@ class ConnectionSpec extends AsyncIOFreeSpec:
         response3 <- client.receive1
 
         _ <- IO(
-          response1 shouldBe ToPlayer.RoomSnapshot(
+          response1 shouldBe ToPlayer.Connected(
+            user,
             RoomPlayerView(
               me = user.id,
               seats = List(
@@ -65,7 +66,7 @@ class ConnectionSpec extends AsyncIOFreeSpec:
         )
         done <-
           response3 match
-            case ToPlayer.RoomSnapshot(snapshot) =>
+            case ToPlayer.Connected(_, snapshot) =>
               IO(snapshot.players.get(user.id) shouldBe Some(user)) *>
                 IO(assert(snapshot.seats.exists(_.playerOption.exists(_.is(user)))))
             case unexpected =>

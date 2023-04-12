@@ -1,5 +1,5 @@
 import {VisibleCard} from './card';
-import {Game} from './game';
+import {GameType} from './gameType';
 
 export interface ConnectMessage {
     messageType: 'Connect'
@@ -27,10 +27,10 @@ export const leaveRoomMessage: LeaveRoomMessage = {
 
 export interface StartMatchMessage {
     messageType: 'StartMatch',
-    gameType: Game
+    gameType: GameType
 }
 
-export function startMatchMessage(gameType: Game): StartMatchMessage {
+export function startMatchMessage(gameType: GameType): StartMatchMessage {
     return {
         messageType: 'StartMatch',
         gameType

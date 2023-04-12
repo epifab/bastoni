@@ -1,32 +1,37 @@
 import {CardSuit} from "./card";
+import {GameType} from "./gameType";
 
-export interface BriscolaPlayContext {
-    type: 'Briscola',
+export interface PlayContext {
+    gameType: GameType
+}
+
+export interface BriscolaPlayContext extends PlayContext {
+    gameType: 'Briscola',
     trump: CardSuit
 }
 
-export interface TressettePlayContext {
-    type: 'Tressette',
+export interface TressettePlayContext extends PlayContext {
+    gameType: 'Tressette',
     trump?: CardSuit
 }
 
-export interface ScopaPlayContext {
-    type: 'Scopa'
+export interface ScopaPlayContext extends PlayContext {
+    gameType: 'Scopa'
 }
 
-type PlayContext = BriscolaPlayContext | TressettePlayContext | ScopaPlayContext
+export interface Action {
+    type: 'PlayCard' | 'ShuffleDeck' | 'Confirm'
+}
 
-export interface PlayCardAction {
+export interface PlayCardAction extends Action {
     type: 'PlayCard',
     context: PlayContext
 }
 
-export interface ShuffleDeckAction {
+export interface ShuffleDeckAction extends Action {
     type: 'ShuffleDeck'
 }
 
-export interface ConfirmAction {
+export interface ConfirmAction extends Action {
     type: 'Confirm'
 }
-
-export type Action = PlayCardAction | ShuffleDeckAction | ConfirmAction

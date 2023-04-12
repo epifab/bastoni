@@ -1,4 +1,4 @@
-import {UserId} from "./user";
+import {UserId} from "./player";
 import {VisibleCard} from "./card";
 
 export interface MatchScore {

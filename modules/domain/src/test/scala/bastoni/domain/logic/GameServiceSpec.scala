@@ -217,10 +217,10 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         Continue,
         Continue,
         Continue,
-        Connect,
+        Connect(user1),
         PlayCard(user1.id, cardOf(Due, Bastoni)),
         Continue,
-        Connect
+        Connect(user2)
       )
       .map(_.toMessage(room1))
 
@@ -228,6 +228,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       events.collect { case Message(_, _, s: PlayerConnected) => s } shouldBe
         List(
           PlayerConnected(
+            user1,
             RoomServerView(
               List(
                 EmptySeat(0, Nil, Nil),
@@ -280,6 +281,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
             )
           ),
           PlayerConnected(
+            user2,
             RoomServerView(
               List(
                 EmptySeat(0, Nil, Nil),
@@ -336,7 +338,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       .Stream[fs2.Pure, StateMachineInput](
         JoinRoom(user2, joinSeed),
         JoinRoom(user1, joinSeed),
-        Connect
+        Connect(user3)
       )
       .map(_.toMessage(room1))
 
@@ -344,6 +346,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       events.collect { case Message(_, _, s: PlayerConnected) => s } shouldBe
         List(
           PlayerConnected(
+            user3,
             RoomServerView(
               List(
                 EmptySeat(0, Nil, Nil),

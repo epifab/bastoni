@@ -8,7 +8,7 @@ sealed trait Command
 
 object Command:
 
-  case object Connect                                                                   extends Command
+  case class Connect(user: User)                                                        extends Command
   case class JoinRoom(user: User, seed: Int)                                            extends Command
   case class LeaveRoom(user: User)                                                      extends Command
   case class StartMatch(playerId: UserId, gameType: GameType)                           extends Command

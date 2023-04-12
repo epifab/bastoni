@@ -1158,7 +1158,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1192,7 +1192,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1226,7 +1226,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1260,7 +1260,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1384,7 +1384,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1418,7 +1418,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1452,7 +1452,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1486,7 +1486,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1610,7 +1610,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1644,7 +1644,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1678,7 +1678,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1712,7 +1712,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1836,7 +1836,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1870,7 +1870,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1904,7 +1904,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -1938,7 +1938,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2062,7 +2062,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2096,7 +2096,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2130,7 +2130,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2164,7 +2164,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2288,7 +2288,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2322,7 +2322,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2356,7 +2356,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2390,7 +2390,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2514,7 +2514,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2548,7 +2548,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2582,7 +2582,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2616,7 +2616,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2740,7 +2740,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2774,7 +2774,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2808,7 +2808,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2842,7 +2842,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2886,7 +2886,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2920,7 +2920,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2954,7 +2954,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -2988,7 +2988,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -3032,7 +3032,7 @@
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -3066,7 +3066,7 @@
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -3100,7 +3100,7 @@
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"
@@ -3134,7 +3134,7 @@
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
       "action" : {
         "context" : {
-          "type" : "Briscola",
+          "gameType" : "Briscola",
           "trump" : "Coppe"
         },
         "type" : "PlayCard"

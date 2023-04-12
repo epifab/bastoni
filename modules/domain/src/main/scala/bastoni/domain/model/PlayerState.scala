@@ -9,8 +9,8 @@ sealed trait PlayerState extends User:
   def sitOut: PlayerState.SittingOut
 
 object PlayerState:
-  case class SittingOut(user: User) extends PlayerState with User(user.id, user.name):
-    def sitIn: Waiting     = Waiting(MatchPlayer(user, points = 0))
+  case class SittingOut(player: User) extends PlayerState with User(player.id, player.name):
+    def sitIn: Waiting     = Waiting(MatchPlayer(player, points = 0))
     def sitOut: SittingOut = this
 
   sealed abstract class SittingIn(val player: MatchPlayer) extends PlayerState with User(player.id, player.name):

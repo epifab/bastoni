@@ -28,7 +28,7 @@ class VirtualPlayer[F[_]: Sync: Temporal](
     val actions = fs2.Stream(Connect, JoinRoom) ++ controller
       .subscribe(me, roomId)
       .zipWithScan1(Option.empty[RoomPlayerView]) {
-        case (_, ToPlayer.RoomSnapshot(room))      => Some(room)
+        case (_, ToPlayer.Connected(_, room))  => Some(room)
         case (room, ToPlayer.Request(request)) => room.map(_.withRequest(request))
         case (room, ToPlayer.GameEvent(event)) => room.map(_.update(event))
         case (room, ToPlayer.Ping)             => room

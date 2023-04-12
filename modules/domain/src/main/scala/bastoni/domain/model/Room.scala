@@ -28,7 +28,7 @@ trait Room[C <: CardView]:
   def mapTakenSeats(f: PartialFunction[PlayerState, TakenSeat[C] => TakenSeat[C]]): List[Seat[C]] =
     seats.map {
       case seat: TakenSeat[C] if f.isDefinedAt(seat.player) => f(seat.player)(seat)
-      case seat                                             => seat
+      case seat                                              => seat
     }
 
   def seatFor(userId: UserId): Option[TakenSeat[C]] =

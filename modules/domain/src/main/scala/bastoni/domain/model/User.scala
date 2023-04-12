@@ -17,7 +17,7 @@ object UserId:
   given Decoder[UserId]    = Decoder[String].emap(tryParse(_).toRight("Not a valid ID"))
   given KeyEncoder[UserId] = KeyEncoder.encodeKeyUUID
   given KeyDecoder[UserId] = KeyDecoder.decodeKeyUUID
-  
+
   extension (userId: UserId) def value: String = userId.toString
 
 trait User(val id: UserId, val name: String):

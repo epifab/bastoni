@@ -49,7 +49,7 @@ object GameController:
                   )
                 )
               case ServerOnlyEvent.DeckShuffled(deck) => ToPlayer.GameEvent(PlayerOnlyEvent.DeckShuffled(deck.size))
-              case PlayerConnected(room)              => ToPlayer.RoomSnapshot(room.toPlayerView(me.id))
+              case PlayerConnected(user, room) if user.is(me) => ToPlayer.Connected(user, room.toPlayerView(me.id))
             }
         )
 
@@ -76,7 +76,7 @@ object GameController:
 
   def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Option[Command] =
     Some(eventAndSeed).collect {
-      case (FromPlayer.Connect, _)                => Connect
+      case (FromPlayer.Connect, _)                => Connect(me)
       case (FromPlayer.JoinRoom, seed)            => JoinRoom(me, seed)
       case (FromPlayer.LeaveRoom, _)              => LeaveRoom(me)
       case (FromPlayer.StartMatch(gameType), _)   => StartMatch(me.id, gameType)

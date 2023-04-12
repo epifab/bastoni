@@ -13,13 +13,13 @@ object PlayContext:
   case object Scopa                         extends PlayContext(GameType.Scopa)
 
   given Encoder[PlayContext] = Encoder.instance {
-    case c @ Briscola(trump)  => Json.obj("type" -> c.gameType.asJson, "trump" -> trump.asJson)
-    case c @ Tressette(trump) => Json.obj("type" -> c.gameType.asJson, "trump" -> trump.asJson)
-    case c @ Scopa            => Json.obj("type" -> c.gameType.asJson)
+    case c @ Briscola(trump)  => Json.obj("gameType" -> c.gameType.asJson, "trump" -> trump.asJson)
+    case c @ Tressette(trump) => Json.obj("gameType" -> c.gameType.asJson, "trump" -> trump.asJson)
+    case c @ Scopa            => Json.obj("gameType" -> c.gameType.asJson)
   }
 
   given Decoder[PlayContext] = Decoder.instance(cursor =>
-    cursor.downField("type").as[GameType].flatMap {
+    cursor.downField("gameType").as[GameType].flatMap {
       case GameType.Briscola  => cursor.as[Briscola](using deriveDecoder)
       case GameType.Tressette => cursor.as[Tressette](using deriveDecoder)
       case GameType.Scopa     => Right(Scopa)

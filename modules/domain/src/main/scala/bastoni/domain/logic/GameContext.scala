@@ -12,8 +12,8 @@ case class GameContext(room: RoomServerView, stateMachine: Option[GameStateMachi
   ): (Option[GameContext], List[ServerEvent | Command | Delayed[Command]]) =
 
     val (updatedRoom, roomEvents) = message match
-      case Command.Connect =>
-        room -> List(PlayerConnected(room))
+      case Command.Connect(user) =>
+        room -> List(PlayerConnected(user, room))
 
       case Command.JoinRoom(user, seed) =>
         room.join(user, seed) match
