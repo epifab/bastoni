@@ -1,6 +1,6 @@
 package bastoni.backend
 
-import bastoni.backend.routes.{GameControllerRoute, StaticResourceRoute, WebHtmlRoute}
+import bastoni.backend.routes.{AuthControllerRoutes, GameControllerRoute, StaticResourceRoute, WebHtmlRoute}
 import bastoni.domain.logic.{GameController, MessageBus, Services}
 import bastoni.domain.model.User
 import cats.effect.{ExitCode, IO, IOApp, Ref, Resource}
@@ -20,7 +20,8 @@ object BackendApp extends IOApp:
             "/assets" -> StaticResourceRoute("assets"),
             "/static" -> StaticResourceRoute("static"),
             "/"       -> WebHtmlRoute("LOCAL"),
-            "/play"   -> Account.middleware(GameControllerRoute(gameController, webSocket))
+            "/auth"   -> AuthControllerRoutes.routes,
+            "/play"   -> Account.insecureMiddleware(GameControllerRoute(gameController, webSocket))
           )
         ).orNotFound
       )

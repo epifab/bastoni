@@ -7,9 +7,10 @@ import cats.effect.kernel.{Async, Resource, Sync}
 import cats.syntax.all.*
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
-import org.http4s.{Header, Headers, Method, Uri}
+import org.http4s.{Header, Headers, Method, RequestCookie, Uri}
 import org.http4s.client.websocket.{WSClient, WSFrame, WSRequest}
 import org.http4s.client.Client
+import org.http4s.headers.Cookie
 import org.http4s.jdkhttpclient.JdkWSClient
 import org.typelevel.ci.CIString
 
@@ -27,10 +28,7 @@ class GameControllerClientBuilder[F[_]: Sync](client: WSClient[F], baseUri: Uri)
       .connect(
         WSRequest(
           baseUri / "play" / roomId.value,
-          Headers(
-            Header.Raw(CIString("x-user-id"), user.id.value),
-            Header.Raw(CIString("x-user-name"), user.name)
-          ),
+          Headers(Cookie(RequestCookie("auth", s"""{"id": "${user.id.value}", "name": "${user.name}"}"""))),
           Method.GET
         )
       )
@@ -50,7 +48,6 @@ class GameControllerClientBuilder[F[_]: Sync](client: WSClient[F], baseUri: Uri)
           override def receive1: F[ToPlayer] =
             receive.head.compile.lastOrError
       )
-end GameControllerClientBuilder
 
 object GameControllerClientBuilder:
   def apply[F[_]: Async](baseUri: Uri): Resource[F, GameControllerClientBuilder[F]] =
