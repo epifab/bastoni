@@ -988,7 +988,7 @@
           "ref" : 39
         }
       ],
-      "type" : "DeckShuffled",
+      "eventType" : "DeckShuffled",
       "supertype" : "Event"
     },
     {
@@ -1024,7 +1024,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1060,7 +1060,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1096,7 +1096,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1132,7 +1132,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1146,7 +1146,7 @@
         "suit" : "Coppe",
         "ref" : 12
       },
-      "type" : "TrumpRevealed",
+      "eventType" : "TrumpRevealed",
       "supertype" : "Event"
     },
     {
@@ -1180,7 +1180,7 @@
         "suit" : "Bastoni",
         "ref" : 0
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1214,7 +1214,7 @@
         "suit" : "Spade",
         "ref" : 3
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1248,7 +1248,7 @@
         "suit" : "Coppe",
         "ref" : 6
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1282,7 +1282,7 @@
         "suit" : "Bastoni",
         "ref" : 9
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1292,7 +1292,7 @@
     },
     {
       "winnerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -1312,7 +1312,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1332,7 +1332,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1352,7 +1352,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1372,7 +1372,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1406,7 +1406,7 @@
         "suit" : "Bastoni",
         "ref" : 13
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1440,7 +1440,7 @@
         "suit" : "Denari",
         "ref" : 14
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1474,7 +1474,7 @@
         "suit" : "Spade",
         "ref" : 15
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1508,7 +1508,7 @@
         "suit" : "Bastoni",
         "ref" : 16
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1518,7 +1518,7 @@
     },
     {
       "winnerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -1538,7 +1538,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1558,7 +1558,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1578,7 +1578,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1598,7 +1598,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1632,7 +1632,7 @@
         "suit" : "Bastoni",
         "ref" : 17
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1666,7 +1666,7 @@
         "suit" : "Coppe",
         "ref" : 18
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1700,7 +1700,7 @@
         "suit" : "Coppe",
         "ref" : 19
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1734,7 +1734,7 @@
         "suit" : "Bastoni",
         "ref" : 20
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1744,7 +1744,7 @@
     },
     {
       "winnerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -1764,7 +1764,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1784,7 +1784,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1804,7 +1804,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1824,7 +1824,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -1858,7 +1858,7 @@
         "suit" : "Coppe",
         "ref" : 21
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1892,7 +1892,7 @@
         "suit" : "Denari",
         "ref" : 22
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1926,7 +1926,7 @@
         "suit" : "Bastoni",
         "ref" : 23
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1960,7 +1960,7 @@
         "suit" : "Coppe",
         "ref" : 24
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -1970,7 +1970,7 @@
     },
     {
       "winnerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -1990,7 +1990,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2010,7 +2010,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2030,7 +2030,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2050,7 +2050,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2084,7 +2084,7 @@
         "suit" : "Denari",
         "ref" : 25
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2118,7 +2118,7 @@
         "suit" : "Spade",
         "ref" : 26
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2152,7 +2152,7 @@
         "suit" : "Bastoni",
         "ref" : 27
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2186,7 +2186,7 @@
         "suit" : "Coppe",
         "ref" : 28
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2196,7 +2196,7 @@
     },
     {
       "winnerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -2216,7 +2216,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2236,7 +2236,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2256,7 +2256,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2276,7 +2276,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2310,7 +2310,7 @@
         "suit" : "Coppe",
         "ref" : 29
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2344,7 +2344,7 @@
         "suit" : "Denari",
         "ref" : 30
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2378,7 +2378,7 @@
         "suit" : "Spade",
         "ref" : 31
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2412,7 +2412,7 @@
         "suit" : "Denari",
         "ref" : 32
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2422,7 +2422,7 @@
     },
     {
       "winnerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -2442,7 +2442,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2462,7 +2462,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2482,7 +2482,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2502,7 +2502,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2536,7 +2536,7 @@
         "suit" : "Coppe",
         "ref" : 33
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2570,7 +2570,7 @@
         "suit" : "Spade",
         "ref" : 34
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2604,7 +2604,7 @@
         "suit" : "Spade",
         "ref" : 35
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2638,7 +2638,7 @@
         "suit" : "Denari",
         "ref" : 36
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2648,7 +2648,7 @@
     },
     {
       "winnerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -2668,7 +2668,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2688,7 +2688,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2708,7 +2708,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2728,7 +2728,7 @@
           "facing" : "Player"
         }
       ],
-      "type" : "CardsDealt",
+      "eventType" : "CardsDealt",
       "supertype" : "Event"
     },
     {
@@ -2762,7 +2762,7 @@
         "suit" : "Bastoni",
         "ref" : 37
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2796,7 +2796,7 @@
         "suit" : "Spade",
         "ref" : 38
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2830,7 +2830,7 @@
         "suit" : "Coppe",
         "ref" : 39
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2864,7 +2864,7 @@
         "suit" : "Coppe",
         "ref" : 12
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2874,7 +2874,7 @@
     },
     {
       "winnerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -2908,7 +2908,7 @@
         "suit" : "Spade",
         "ref" : 1
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2942,7 +2942,7 @@
         "suit" : "Denari",
         "ref" : 4
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -2976,7 +2976,7 @@
         "suit" : "Bastoni",
         "ref" : 7
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -3010,7 +3010,7 @@
         "suit" : "Spade",
         "ref" : 10
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -3020,7 +3020,7 @@
     },
     {
       "winnerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -3054,7 +3054,7 @@
         "suit" : "Denari",
         "ref" : 2
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -3088,7 +3088,7 @@
         "suit" : "Denari",
         "ref" : 5
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -3122,7 +3122,7 @@
         "suit" : "Spade",
         "ref" : 8
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -3156,7 +3156,7 @@
         "suit" : "Denari",
         "ref" : 11
       },
-      "type" : "CardPlayed",
+      "eventType" : "CardPlayed",
       "supertype" : "Event"
     },
     {
@@ -3166,7 +3166,7 @@
     },
     {
       "winnerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "type" : "TrickCompleted",
+      "eventType" : "TrickCompleted",
       "supertype" : "Event"
     },
     {
@@ -3371,7 +3371,7 @@
           "points" : 1
         }
       ],
-      "type" : "GameCompleted",
+      "eventType" : "GameCompleted",
       "supertype" : "Event"
     },
     {
@@ -3412,22 +3412,22 @@
     },
     {
       "playerId" : "6517fc2f-6fed-4169-8c77-17d21492d450",
-      "type" : "PlayerConfirmed",
+      "eventType" : "PlayerConfirmed",
       "supertype" : "Event"
     },
     {
       "playerId" : "dc5d9b78-e403-4431-b6f2-92c31d397db9",
-      "type" : "PlayerConfirmed",
+      "eventType" : "PlayerConfirmed",
       "supertype" : "Event"
     },
     {
       "playerId" : "ffdbb2b6-c66c-49b6-9c2a-b0db61fcd1a3",
-      "type" : "PlayerConfirmed",
+      "eventType" : "PlayerConfirmed",
       "supertype" : "Event"
     },
     {
       "playerId" : "1ab05667-7571-40d4-9108-a2c211e308a6",
-      "type" : "PlayerConfirmed",
+      "eventType" : "PlayerConfirmed",
       "supertype" : "Event"
     },
     {

@@ -19,7 +19,7 @@ object AuthControllerRoutes:
                 ResponseCookie(
                   "auth",
                   User(UserId.newId, headers.head.value).asJson.noSpaces,
-                  domain = Some("/"),
+                  path = Some("/"),
                   httpOnly = true
                 )
               )

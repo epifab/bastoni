@@ -7,7 +7,7 @@ import cats.effect.{ExitCode, IO, IOApp, Ref, Resource}
 import fs2.concurrent.Signal
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server, ServerBuilder}
-import org.http4s.server.middleware.GZip
+import org.http4s.server.middleware.{CORS, CORSConfig, GZip}
 import org.http4s.server.websocket.WebSocketBuilder2
 
 object BackendApp extends IOApp:
@@ -15,15 +15,18 @@ object BackendApp extends IOApp:
   private def webServer(gameController: GameController[IO]): Resource[IO, Server] =
     BlazeServerBuilder[IO]
       .withHttpWebSocketApp((webSocket: WebSocketBuilder2[IO]) =>
-        GZip(
-          Router[IO](
-            "/assets" -> StaticResourceRoute("assets"),
-            "/static" -> StaticResourceRoute("static"),
-            "/"       -> WebHtmlRoute("LOCAL"),
-            "/auth"   -> AuthControllerRoutes.routes,
-            "/play"   -> Account.insecureMiddleware(GameControllerRoute(gameController, webSocket))
-          )
-        ).orNotFound
+        CORS(
+          GZip(
+            Router[IO](
+              "/assets" -> StaticResourceRoute("assets"),
+              "/static" -> StaticResourceRoute("static"),
+              "/"       -> WebHtmlRoute("LOCAL"),
+              "/auth"   -> AuthControllerRoutes.routes,
+              "/play"   -> Account.insecureMiddleware(GameControllerRoute(gameController, webSocket))
+            )
+          ).orNotFound
+//          , CORSConfig.default.withAnyOrigin(false)
+        )
       )
       .bindHttp(9090)
       .resource

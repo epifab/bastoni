@@ -86,21 +86,21 @@ object Event:
   case class PlayerConnected(user: User, room: RoomServerView) extends ServerEvent
 
   given publicEventEncoder: Encoder[PublicEvent] =
-    ConfiguredEncoder.derive(discriminator = Some("type"))
+    ConfiguredEncoder.derive(discriminator = Some("eventType"))
 
   given publicEventDecoder: Decoder[PublicEvent] =
-    ConfiguredDecoder.derive(discriminator = Some("type"))
+    ConfiguredDecoder.derive(discriminator = Some("eventType"))
 
   given serverEventEncoder: Encoder[ServerEvent] =
-    ConfiguredEncoder.derive(discriminator = Some("type"))
+    ConfiguredEncoder.derive(discriminator = Some("eventType"))
 
   given serverEventDecoder: Decoder[ServerEvent] =
-    ConfiguredDecoder.derive(discriminator = Some("type"))
+    ConfiguredDecoder.derive(discriminator = Some("eventType"))
 
   given playerEventEncoder: Encoder[PlayerEvent] =
-    ConfiguredEncoder.derive(discriminator = Some("type"))
+    ConfiguredEncoder.derive(discriminator = Some("eventType"))
 
   given playerEventDecoder: Decoder[PlayerEvent] =
-    ConfiguredDecoder.derive(discriminator = Some("type"))
+    ConfiguredDecoder.derive(discriminator = Some("eventType"))
 
 end Event

@@ -27,7 +27,7 @@
   "output" : [
     {
       "reason" : "unexpected-number-of-players",
-      "type" : "GameAborted",
+      "eventType" : "GameAborted",
       "supertype" : "Event"
     },
     {
@@ -37,7 +37,7 @@
     },
     {
       "reason" : "unexpected-number-of-players",
-      "type" : "MatchAborted",
+      "eventType" : "MatchAborted",
       "supertype" : "Event"
     }
   ]
