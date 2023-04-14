@@ -1,11 +1,23 @@
 import Konva from 'konva';
-import {HiddenCard, VisibleCard} from './model/card';
+import {GameClient, connect} from "./gameClient";
+import {connectMessage, joinRoomMessage} from "./model/messageOut";
+import {AuthClient} from './authClient'
+import {v4 as uuidv4} from 'uuid'
 
-const card: VisibleCard = {
-    rank: 'Asso',
-    suit: 'Denari',
-    ref: 1
-}
+const me = 'John Doe'
+const room = uuidv4()
+
+new AuthClient()
+    .connect(me)
+    .then(() =>
+        connect(room, (client: GameClient) => {
+                client
+                    .send(connectMessage)
+                    .send(joinRoomMessage)
+            }
+        )
+    );
+
 
 const width = window.innerWidth;
 const height = window.innerHeight;

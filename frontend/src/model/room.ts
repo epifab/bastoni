@@ -21,12 +21,14 @@ interface MatchInfo {
     gameScore?: GameScore[]
 }
 
-export interface RoomSnapshot {
+export type RoomId = string
+
+export interface Room {
     me: UserId,
     seats: Seat[],
     deck: Card[],
     board: BoardCard[],
-    matchInfo: MatchInfo,
-    dealerIndex?: number,
+    matchInfo: MatchInfo | null | undefined,
+    dealerIndex: number | null | undefined,
     players: { [id: UserId]: PlayerState }
 }

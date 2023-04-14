@@ -18,9 +18,11 @@
   "homepage": "https://github.com/epifab/bastoni#readme",
   "dependencies": {
     "konva": "^8.4.3",
-    "ts-interface-checker": "^1.0.2"
+    "ts-interface-checker": "^1.0.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.1",
     "ts-interface-builder": "^0.3.3",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",

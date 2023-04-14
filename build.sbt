@@ -12,6 +12,7 @@ val http4sVersion            = "0.23.18"
 val http4sBlazeVersion       = "0.23.14"
 val http4sJdkClientVersion   = "0.9.0"
 val log4catsVersion          = "2.5.0"
+val logbackClassicVersion    = "1.4.6"
 val redis4catsVersion        = "1.4.0"
 val fs2Version               = "3.2.2"
 val circeVersion             = "0.14.5"
@@ -41,24 +42,24 @@ lazy val domain = crossProject(JVMPlatform, JSPlatform)
     )
   )
 
-lazy val frontend = (project in file("modules/frontend"))
-  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
-  .dependsOn(domain.js)
-  .settings(
-    scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage),
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-    libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
-      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
-      "com.github.japgolly.scalajs-react" %%% "core" % scalaJsReactVersion
-    ),
-    Compile / npmDependencies ++= Seq(
-      "react"       -> reactVersion,
-      "react-dom"   -> reactVersion,
-      "react-konva" -> reactKonvaVersion
-    ),
-    scalaJSUseMainModuleInitializer := true
-  )
+//lazy val frontend = (project in file("modules/frontend"))
+//  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
+//  .dependsOn(domain.js)
+//  .settings(
+//    scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage),
+//    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+//    libraryDependencies ++= Seq(
+//      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
+//      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
+//      "com.github.japgolly.scalajs-react" %%% "core" % scalaJsReactVersion
+//    ),
+//    Compile / npmDependencies ++= Seq(
+//      "react"       -> reactVersion,
+//      "react-dom"   -> reactVersion,
+//      "react-konva" -> reactKonvaVersion
+//    ),
+//    scalaJSUseMainModuleInitializer := true
+//  )
 
 lazy val backend = (project in file("modules/backend"))
   .enablePlugins(SbtWeb, WebScalaJSBundlerPlugin, JavaAppPackaging)
@@ -72,9 +73,10 @@ lazy val backend = (project in file("modules/backend"))
       "org.scala-lang.modules" %% "scala-xml"              % scalaXmlVersion,
       "dev.profunktor"         %% "redis4cats-effects"     % redis4catsVersion,
       "org.typelevel"          %% "log4cats-slf4j"         % log4catsVersion,
+      "ch.qos.logback"          % "logback-classic"        % logbackClassicVersion,
       "org.scalatest"          %% "scalatest"              % scalaTestVersion % Test
     ),
-    scalaJSProjects := Seq(frontend),
+    scalaJSProjects := Seq(), // frontend),
     exportJars      := true,
     resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
     resolvers += Resolver.bintrayRepo("hseeberger", "maven"),

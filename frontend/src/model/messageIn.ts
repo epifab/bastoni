@@ -1,9 +1,9 @@
 import {GameEvent} from "./event";
-import {RoomSnapshot} from "./room";
+import {Room} from "./room";
 import {User} from "./player";
 
 export interface MessageIn {
-    messageType: 'GameEvent' | 'Connected'
+    messageType: 'GameEvent' | 'Connected' | 'Ping'
 }
 
 export interface GameEventMessage extends MessageIn {
@@ -14,6 +14,9 @@ export interface GameEventMessage extends MessageIn {
 export interface Connected extends MessageIn {
     messageType: 'Connected',
     user: User
-    room: RoomSnapshot
+    room: Room
 }
 
+export interface Ping extends MessageIn {
+    messageType: 'Ping'
+}
