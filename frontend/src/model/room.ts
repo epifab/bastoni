@@ -1,4 +1,4 @@
-import {PlayerState, UserId} from "./player";
+import {PlayerState, User, UserId} from "./player";
 import {Card} from "./card";
 import {GameType} from "./gameType";
 import {GameScore, MatchScore} from "./score";
@@ -30,5 +30,5 @@ export interface Room {
     board: BoardCard[],
     matchInfo: MatchInfo | null | undefined,
     dealerIndex: number | null | undefined,
-    players: { [id: UserId]: PlayerState }
+    players: { [id: UserId]: User }
 }

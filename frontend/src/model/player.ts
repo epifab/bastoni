@@ -12,7 +12,7 @@ export interface Player extends User {
 }
 
 export interface PlayerState {
-    state: 'SittingOut' | 'SittingIn' | 'Waiting' | 'Acting' | 'EndOfGame' | 'EndOfMatch'
+    state: 'SittingOut' | 'Playing' | 'Waiting' | 'Acting' | 'EndOfGame' | 'EndOfMatch'
     player: User
 }
 
@@ -21,8 +21,8 @@ export interface SittingOutPlayer extends PlayerState {
     player: User
 }
 
-export interface SittingInPlayer extends PlayerState {
-    state: 'SittingIn',
+export interface PlayingPlayer extends PlayerState {
+    state: 'Playing',
     player: Player
 }
 
