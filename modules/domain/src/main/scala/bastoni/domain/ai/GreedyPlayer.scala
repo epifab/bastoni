@@ -3,10 +3,10 @@ package bastoni.domain.ai
 import bastoni.domain.logic.briscola.{BriscolaGame, BriscolaGameScore, BriscolaGameScoreCalculator}
 import bastoni.domain.model.*
 import bastoni.domain.view.FromPlayer
-import bastoni.domain.view.FromPlayer.{Ok, PlayCard, ShuffleDeck}
+import bastoni.domain.view.FromPlayer.{GameCommand, Ok, PlayCard, ShuffleDeck}
 
 object GreedyPlayer extends ActStrategy:
-  override def act(context: ActContext, action: Action): FromPlayer =
+  override def act(context: ActContext, action: Action): GameCommand =
     action match
       case Action.PlayCard(PlayContext.Briscola(trump)) =>
         val myHand: List[VisibleCard] = context.mySeat.hand.flatMap(_.card.toOption)
@@ -22,8 +22,12 @@ object GreedyPlayer extends ActStrategy:
 
         val toPlay: VisibleCard =
           (if (context.room.board.isEmpty) win.find(_.suit != trump) else win.findLast(_.suit != trump))
-            .orElse { if (lose.isEmpty || pointsToWin > 4 || pointsToLose > 4) win.headOption else None }
-            .orElse { lose.headOption }
+            .orElse {
+              if (lose.isEmpty || pointsToWin > 4 || pointsToLose > 4) win.headOption else None
+            }
+            .orElse {
+              lose.headOption
+            }
             .getOrElse(throw new IllegalStateException("No cards in hand"))
 
         PlayCard(toPlay)

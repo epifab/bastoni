@@ -28,7 +28,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       numberOfPlayers: 2 | 3 | 4,
       gameType: GameType,
       realSpeed: Boolean = false,
-      extraMessages: fs2.Stream[IO, FromPlayer] = fs2.Stream.empty
+      extraMessages: fs2.Stream[IO, GameCommand] = fs2.Stream.empty
   ): IO[Event] =
     (for
       messageBus   <- fs2.Stream.eval(MessageBus.inMemory[IO])

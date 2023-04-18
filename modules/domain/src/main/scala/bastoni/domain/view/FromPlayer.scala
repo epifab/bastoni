@@ -7,16 +7,20 @@ import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 sealed trait FromPlayer
 
 object FromPlayer:
-  case class Authenticate(authToken: String)                       extends FromPlayer
-  case object Connect                                              extends FromPlayer
-  case object JoinTable                                            extends FromPlayer
-  case object LeaveTable                                           extends FromPlayer
-  case class StartMatch(gameType: GameType)                        extends FromPlayer
-  case object ShuffleDeck                                          extends FromPlayer
-  case object Ok                                                   extends FromPlayer
-  case class PlayCard(card: VisibleCard)                           extends FromPlayer
-  case class TakeCards(card: VisibleCard, take: List[VisibleCard]) extends FromPlayer
-  case object Pong                                                 extends FromPlayer
+  sealed trait AuthCommand                   extends FromPlayer
+  case class Authenticate(authToken: String) extends AuthCommand
+
+  sealed trait GameCommand                                         extends FromPlayer
+  case object Connect                                              extends GameCommand
+  case object JoinTable                                            extends GameCommand
+  case object LeaveTable                                           extends GameCommand
+  case class StartMatch(gameType: GameType)                        extends GameCommand
+  case object ShuffleDeck                                          extends GameCommand
+  case object Ok                                                   extends GameCommand
+  case class PlayCard(card: VisibleCard)                           extends GameCommand
+  case class TakeCards(card: VisibleCard, take: List[VisibleCard]) extends GameCommand
+
+  case object Pong extends FromPlayer
 
   given Encoder[FromPlayer] = ConfiguredEncoder.derive(discriminator = Some("messageType"))
   given Decoder[FromPlayer] = ConfiguredDecoder.derive(discriminator = Some("messageType"))

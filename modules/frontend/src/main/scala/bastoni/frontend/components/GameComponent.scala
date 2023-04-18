@@ -6,6 +6,7 @@ import bastoni.domain.ai.{GreedyPlayer, VirtualPlayer}
 import bastoni.domain.logic.Services
 import bastoni.domain.model.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
+import bastoni.domain.view.FromPlayer.GameCommand
 import bastoni.frontend.model.{GameLayout, Size}
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
@@ -143,7 +144,7 @@ object GameComponent:
         .concurrently(p1) // .concurrently(p2).concurrently(p3)
         .concurrently(
           controller.publish(me, roomId)(
-            fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinTable).delayBy(1.second) ++
+            fs2.Stream[IO, GameCommand](FromPlayer.Connect, FromPlayer.JoinTable).delayBy(1.second) ++
               fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartMatch(gameType))
           )
         )

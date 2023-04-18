@@ -4,6 +4,7 @@ import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
+import bastoni.domain.view.FromPlayer.GameCommand
 import cats.effect.{Resource, Sync}
 import cats.effect.syntax.all.*
 import cats.syntax.all.*
@@ -15,8 +16,8 @@ trait GameSubscriber[F[_]]:
   def subscribe(me: User, roomId: RoomId): fs2.Stream[F, ToPlayer]
 
 trait GamePublisher[F[_]]:
-  def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
-  def publish1(me: User, roomId: RoomId)(input: FromPlayer): F[Unit]
+  def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, GameCommand]): fs2.Stream[F, Unit]
+  def publish1(me: User, roomId: RoomId)(input: GameCommand): F[Unit]
 
 trait GameController[F[_]] extends GameSubscriber[F] with GamePublisher[F]
 
@@ -26,10 +27,10 @@ object GameController:
     val pub = publisher(messageBus)
     val sub = subscriber(messageBus)
     new GameController[F]:
-      override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
+      override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, GameCommand]): fs2.Stream[F, Unit] =
         pub.publish(me, roomId)(input)
 
-      override def publish1(me: User, roomId: RoomId)(input: FromPlayer): F[Unit] =
+      override def publish1(me: User, roomId: RoomId)(input: GameCommand): F[Unit] =
         pub.publish1(me, roomId)(input)
 
       override def subscribe(me: User, roomId: RoomId): fs2.Stream[F, ToPlayer] =
@@ -69,10 +70,10 @@ object GameController:
       seed: F[Int],
       messageId: F[MessageId]
   ): GamePublisher[F] = new GamePublisher[F]:
-    override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
+    override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, GameCommand]): fs2.Stream[F, Unit] =
       input.evalMap(publish1(me, roomId))
 
-    override def publish1(me: User, roomId: RoomId)(input: FromPlayer): F[Unit] =
+    override def publish1(me: User, roomId: RoomId)(input: GameCommand): F[Unit] =
       seed
         .map(seed => buildCommand(me)(input -> seed))
         .flatMap {
@@ -85,8 +86,8 @@ object GameController:
   def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Option[Command] =
     Some(eventAndSeed).collect {
       case (FromPlayer.Connect, _)                => Connect(me)
-      case (FromPlayer.JoinTable, seed)            => JoinTable(me, seed)
-      case (FromPlayer.LeaveTable, _)              => LeaveTable(me)
+      case (FromPlayer.JoinTable, seed)           => JoinTable(me, seed)
+      case (FromPlayer.LeaveTable, _)             => LeaveTable(me)
       case (FromPlayer.StartMatch(gameType), _)   => StartMatch(me.id, gameType)
       case (FromPlayer.ShuffleDeck, seed)         => ShuffleDeck(seed)
       case (FromPlayer.Ok, _)                     => Ok(me.id)

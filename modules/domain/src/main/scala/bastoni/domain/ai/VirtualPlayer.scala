@@ -17,7 +17,7 @@ case class ActContext(
 )
 
 trait ActStrategy:
-  def act(context: ActContext, action: Action): FromPlayer
+  def act(context: ActContext, action: Action): FromPlayer.GameCommand
 
 class VirtualPlayer[F[_]: Sync: Temporal](
     controller: GameController[F],

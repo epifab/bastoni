@@ -19,10 +19,10 @@ object DumbPlayer extends ActStrategy:
   ): VirtualPlayer[F] =
     VirtualPlayer(controller, DumbPlayer, pause)
 
-  def act(context: ActContext, action: Action): FromPlayer =
+  def act(context: ActContext, action: Action): GameCommand =
     act(context.room, context.mySeat, action)
 
-  def act(room: Room[CardPlayerView], seat: TakenSeat[CardPlayerView], action: Action): FromPlayer =
+  def act(room: Room[CardPlayerView], seat: TakenSeat[CardPlayerView], action: Action): GameCommand =
     val hand: List[VisibleCard] = seat.hand.flatMap(_.card.toOption)
 
     action match
