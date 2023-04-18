@@ -122,9 +122,11 @@ object GameComponent:
       rooms <- controller
         .subscribe(me, roomId)
         .scan[Option[RoomPlayerView]](None) {
-          case (_, ToPlayer.Connected(_, room))   => Some(room)
+          case (_, ToPlayer.Connected(room))      => Some(room)
+          case (_, ToPlayer.Disconnected(_))      => None
           case (props, ToPlayer.Request(command)) => props.map(_.withRequest(command))
           case (props, ToPlayer.GameEvent(event)) => props.map(_.update(event))
+          case (props, ToPlayer.Authenticated(_)) => props
           case (props, ToPlayer.Ping)             => props
         }
         .zipWithPrevious

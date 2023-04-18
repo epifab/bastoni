@@ -54,7 +54,6 @@ object GameService:
     val oldMessages: fs2.Stream[F, Message | Delayed[Message]] = messageRepo.inFlight
 
     val newMessages: fs2.Stream[F, Message | Delayed[Message]] = messageQueue.consume
-      .evalTap(message => Async[F].delay(println(s"$name handling ${message.id}: ${message.data}")))
       .through(GameService(Async[F].delay(MessageId.newId), gameRepo, messageRepo))
 
     (oldMessages ++ newMessages)

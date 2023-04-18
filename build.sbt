@@ -7,7 +7,7 @@ Global / jsEnv        := new NodeJSEnv(NodeJSEnv.Config().withArgs(List("--dns-r
 
 val catsCoreVersion          = "2.9.0"
 val catsEffectVersion        = "3.3.0"
-val catsEffectTestingVersion = "1.4.0"
+val catsEffectTestingVersion = "1.5.0"
 val http4sVersion            = "0.23.18"
 val http4sBlazeVersion       = "0.23.14"
 val http4sJdkClientVersion   = "0.9.0"
@@ -32,49 +32,50 @@ lazy val domain = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-core"                     % catsCoreVersion,
       "org.typelevel" %%% "cats-effect"                   % catsEffectVersion,
-      "org.typelevel" %%% "cats-effect-testing-scalatest" % catsEffectTestingVersion,
       "co.fs2"        %%% "fs2-core"                      % fs2Version,
       "co.fs2"        %%% "fs2-io"                        % fs2Version,
       "io.circe"      %%% "circe-core"                    % circeVersion,
       "io.circe"      %%% "circe-generic"                 % circeVersion,
       "io.circe"      %%% "circe-parser"                  % circeVersion,
-      "org.scalatest" %%% "scalatest"                     % scalaTestVersion % Test
+      "org.typelevel" %%% "cats-effect-testing-scalatest" % catsEffectTestingVersion % Test,
+      "org.scalatest" %%% "scalatest"                     % scalaTestVersion         % Test
     )
   )
 
-//lazy val frontend = (project in file("modules/frontend"))
-//  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
-//  .dependsOn(domain.js)
-//  .settings(
-//    scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage),
-//    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-//    libraryDependencies ++= Seq(
-//      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
-//      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
-//      "com.github.japgolly.scalajs-react" %%% "core" % scalaJsReactVersion
-//    ),
-//    Compile / npmDependencies ++= Seq(
-//      "react"       -> reactVersion,
-//      "react-dom"   -> reactVersion,
-//      "react-konva" -> reactKonvaVersion
-//    ),
-//    scalaJSUseMainModuleInitializer := true
-//  )
+lazy val frontend = (project in file("modules/frontend"))
+  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
+  .dependsOn(domain.js)
+  .settings(
+    scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage),
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    libraryDependencies ++= Seq(
+      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
+      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
+      "com.github.japgolly.scalajs-react" %%% "core" % scalaJsReactVersion
+    ),
+    Compile / npmDependencies ++= Seq(
+      "react"       -> reactVersion,
+      "react-dom"   -> reactVersion,
+      "react-konva" -> reactKonvaVersion
+    ),
+    scalaJSUseMainModuleInitializer := true
+  )
 
 lazy val backend = (project in file("modules/backend"))
   .enablePlugins(SbtWeb, WebScalaJSBundlerPlugin, JavaAppPackaging)
   .dependsOn(domain.jvm)
   .settings(
     libraryDependencies ++= Seq(
-      "org.http4s"             %% "http4s-dsl"             % http4sVersion,
-      "org.http4s"             %% "http4s-circe"           % http4sVersion,
-      "org.http4s"             %% "http4s-blaze-server"    % http4sBlazeVersion,
-      "org.http4s"             %% "http4s-jdk-http-client" % http4sJdkClientVersion,
-      "org.scala-lang.modules" %% "scala-xml"              % scalaXmlVersion,
-      "dev.profunktor"         %% "redis4cats-effects"     % redis4catsVersion,
-      "org.typelevel"          %% "log4cats-slf4j"         % log4catsVersion,
-      "ch.qos.logback"          % "logback-classic"        % logbackClassicVersion,
-      "org.scalatest"          %% "scalatest"              % scalaTestVersion % Test
+      "org.http4s"             %% "http4s-dsl"                    % http4sVersion,
+      "org.http4s"             %% "http4s-circe"                  % http4sVersion,
+      "org.http4s"             %% "http4s-blaze-server"           % http4sBlazeVersion,
+      "org.http4s"             %% "http4s-jdk-http-client"        % http4sJdkClientVersion,
+      "org.scala-lang.modules" %% "scala-xml"                     % scalaXmlVersion,
+      "dev.profunktor"         %% "redis4cats-effects"            % redis4catsVersion,
+      "org.typelevel"          %% "log4cats-slf4j"                % log4catsVersion,
+      "ch.qos.logback"          % "logback-classic"               % logbackClassicVersion,
+      "org.scalatest"          %% "scalatest"                     % scalaTestVersion         % Test,
+      "org.typelevel"          %% "cats-effect-testing-scalatest" % catsEffectTestingVersion % Test
     ),
     scalaJSProjects := Seq(), // frontend),
     exportJars      := true,

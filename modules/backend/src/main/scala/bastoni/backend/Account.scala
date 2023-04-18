@@ -1,21 +1,25 @@
 package bastoni.backend
 
 import bastoni.domain.model.{User, UserId}
-import cats.data.{Kleisli, OptionT}
+import bastoni.domain.view.ConnectionError
 import cats.effect.IO
 import cats.syntax.all.*
 import io.circe.parser.decode
-import org.http4s.server.AuthMiddleware
-import org.typelevel.ci.CIString
+import io.circe.syntax.EncoderOps
 
 case class Account(user: User)
 
-object Account:
-  def insecureMiddleware: AuthMiddleware[IO, Account] = AuthMiddleware(
-    Kleisli(request =>
-      for
-        auth <- OptionT.fromOption(request.cookies.find(_.name == "auth"))
-        user <- OptionT.fromOption(decode[User](auth.content).toOption)
-      yield Account(user)
+trait AuthController[F[_]]:
+  def authenticate(token: String): F[Either[ConnectionError, Account]]
+  def tokenize(user: Account): F[String]
+
+object InsecureAuthController extends AuthController[IO]:
+  override def authenticate(token: String): IO[Either[ConnectionError, Account]] =
+    IO.pure(decode[User](token) match
+      case Left(_)     => Left(ConnectionError.InvalidToken)
+      case Right(user) => Right(Account(user))
     )
-  )
+
+  override def tokenize(account: Account): IO[String] =
+    IO.pure(account.user.asJson.noSpaces)
+

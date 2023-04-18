@@ -8,4 +8,4 @@ import scala.concurrent.ExecutionContext
 
 abstract class AsyncIOFreeSpec extends AsyncFreeSpecLike with AsyncIOSpec with Matchers:
   // This overrides the serial EC defined in ScalaTest, which doesn't seem to work well on ScalaJS
-  implicit override val executionContext: ExecutionContext = ExecutionContext.global
+  override given executionContext: ExecutionContext = ExecutionContext.global

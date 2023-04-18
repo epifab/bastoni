@@ -6,32 +6,38 @@ export interface PlayContext {
 }
 
 export interface BriscolaPlayContext extends PlayContext {
-    gameType: 'Briscola',
+    gameType: GameType.Briscola,
     trump: CardSuit
 }
 
 export interface TressettePlayContext extends PlayContext {
-    gameType: 'Tressette',
+    gameType: GameType.Tressette,
     trump?: CardSuit
 }
 
 export interface ScopaPlayContext extends PlayContext {
-    gameType: 'Scopa'
+    gameType: GameType.Scopa
+}
+
+export enum ActionType {
+    PlayCard = 'PlayCard',
+    ShuffleDeck = 'ShuffleDeck',
+    Confirm = 'Confirm'
 }
 
 export interface Action {
-    type: 'PlayCard' | 'ShuffleDeck' | 'Confirm'
+    type: ActionType
 }
 
 export interface PlayCardAction extends Action {
-    type: 'PlayCard',
+    type: ActionType.PlayCard,
     context: PlayContext
 }
 
 export interface ShuffleDeckAction extends Action {
-    type: 'ShuffleDeck'
+    type: ActionType.ShuffleDeck
 }
 
 export interface ConfirmAction extends Action {
-    type: 'Confirm'
+    type: ActionType.Confirm
 }

@@ -7,6 +7,7 @@ import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 sealed trait FromPlayer
 
 object FromPlayer:
+  case class Authenticate(authToken: String)                       extends FromPlayer
   case object Connect                                              extends FromPlayer
   case object JoinRoom                                             extends FromPlayer
   case object LeaveRoom                                            extends FromPlayer

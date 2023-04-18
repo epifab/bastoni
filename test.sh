@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sbt domainJVM/test
+sbt domainJVM/test backend/test

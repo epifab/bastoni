@@ -16,6 +16,7 @@ trait GameSubscriber[F[_]]:
 
 trait GamePublisher[F[_]]:
   def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
+  def publish1(me: User, roomId: RoomId)(input: FromPlayer): F[Unit]
 
 trait GameController[F[_]] extends GameSubscriber[F] with GamePublisher[F]
 
@@ -27,6 +28,9 @@ object GameController:
     new GameController[F]:
       override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
         pub.publish(me, roomId)(input)
+
+      override def publish1(me: User, roomId: RoomId)(input: FromPlayer): F[Unit] =
+        pub.publish1(me, roomId)(input)
 
       override def subscribe(me: User, roomId: RoomId): fs2.Stream[F, ToPlayer] =
         sub.subscribe(me, roomId)
@@ -49,30 +53,34 @@ object GameController:
                   )
                 )
               case ServerOnlyEvent.DeckShuffled(deck) => ToPlayer.GameEvent(PlayerOnlyEvent.DeckShuffled(deck.size))
-              case PlayerConnected(user, room) if user.is(me) => ToPlayer.Connected(user, room.toPlayerView(me.id))
+              case PlayerConnected(user, room) if user.is(me) => ToPlayer.Connected(room.toPlayerView(me.id))
             }
         )
 
   def publisher[F[_]: Sync](messageBus: MessagePublisher[F]): GamePublisher[F] =
     publisher(
       messageBus,
-      fs2.Stream.repeatEval(Sync[F].delay(Random.nextInt())),
-      fs2.Stream.repeatEval(Sync[F].delay(MessageId.newId))
+      Sync[F].delay(Random.nextInt()),
+      Sync[F].delay(MessageId.newId)
     )
 
-  def publisher[F[_]](
+  def publisher[F[_]: Monad](
       messageBus: MessagePublisher[F],
-      seeds: fs2.Stream[F, Int],
-      messageIds: fs2.Stream[F, MessageId]
+      seed: F[Int],
+      messageId: F[MessageId]
   ): GamePublisher[F] = new GamePublisher[F]:
     override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
-      input
-        .zip(seeds)
-        .map(buildCommand(me))
-        .collect { case Some(command) => command }
-        .zip(messageIds)
-        .map { case (message, id) => Message(id, roomId, message) }
-        .through(messageBus.publish)
+      input.evalMap(publish1(me, roomId))
+
+    override def publish1(me: User, roomId: RoomId)(input: FromPlayer): F[Unit] =
+      seed
+        .map(seed => buildCommand(me)(input -> seed))
+        .flatMap {
+          case Some(command) =>
+            messageId.flatMap(id => messageBus.publish1(Message(id, roomId, command)))
+          case None =>
+            Monad[F].unit
+        }
 
   def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Option[Command] =
     Some(eventAndSeed).collect {

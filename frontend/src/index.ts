@@ -1,22 +1,21 @@
 import Konva from 'konva';
-import {GameClient, connect} from "./gameClient";
-import {connectMessage, joinRoomMessage} from "./model/messageOut";
+import {gameClient} from "./gameClient";
+import {authenticateMessage, connectMessage, joinRoomMessage} from "./model/outboxMessage";
 import {AuthClient} from './authClient'
 import {v4 as uuidv4} from 'uuid'
 
 const me = 'John Doe'
 const room = uuidv4()
 
-new AuthClient()
-    .connect(me)
-    .then(() =>
-        connect(room, (client: GameClient) => {
-                client
-                    .send(connectMessage)
-                    .send(joinRoomMessage)
-            }
-        )
-    );
+new AuthClient().connect(me).then((token) =>
+    const client = gameClient(room);
+    client
+        .onReady(() => client.send(authenticateMessage(token)))
+        .onAuthenticated((user) => client.send(connectMessage))
+        .onConnected((room) => client.send(joinRoomMessage))
+        .onPlayerJoinedRoom((event) => console.log(`${event.user.name} joined the room`))
+        .onPlayerLeftRoom((event) => console.log(`${event.user.name} left the room`))
+)
 
 
 const width = window.innerWidth;

@@ -4,17 +4,21 @@ import bastoni.domain.model.{RoomId, RoomPlayerView, User, UserId}
 import bastoni.domain.model.EmptySeat
 import bastoni.domain.model.Event.PlayerJoinedRoom
 import bastoni.domain.view.{FromPlayer, ToPlayer}
-import bastoni.domain.AsyncIOFreeSpec
 import cats.effect.{IO, Resource}
 import cats.effect.testing.scalatest.AsyncIOSpec
+import cats.effect.unsafe.IORuntime
 import fs2.concurrent.SignallingRef
+import io.circe.syntax.EncoderOps
 import org.http4s.syntax.all.uri
 import org.http4s.Uri
 import org.scalatest.{stats, Assertion}
+import org.scalatest.freespec.AsyncFreeSpecLike
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext
 
-class ConnectionSpec extends AsyncIOFreeSpec:
+class ConnectionSpec extends AsyncFreeSpecLike with AsyncIOSpec with Matchers:
+  override given ioRuntime: IORuntime = cats.effect.unsafe.IORuntime.global
 
   val user: User     = User(UserId.newId, "John Doe")
   val roomId: RoomId = RoomId.newId
@@ -25,23 +29,24 @@ class ConnectionSpec extends AsyncIOFreeSpec:
       client <- fs2.Stream
         .resource(GameControllerClientBuilder[IO](uri"ws://localhost:9090"))
         .concurrently(runner)
-      connected <- fs2.Stream.resource(client.connect(user, roomId))
+      connected <- fs2.Stream.resource(client.connect(roomId))
       result    <- fs2.Stream.eval(f(connected))
     yield result).compile.lastOrError
 
   "A player can connect" in {
     runTest(client =>
       for
-        _         <- client.send1(FromPlayer.Connect)
-        response1 <- client.receive1
-        _         <- client.send1(FromPlayer.JoinRoom)
-        response2 <- client.receive1
-        _         <- client.send1(FromPlayer.Connect)
-        response3 <- client.receive1
+        authToken              <- InsecureAuthController.tokenize(Account(user))
+        authResponse           <- client.askTo(FromPlayer.Authenticate(authToken))
+        connectResponse        <- client.askTo(FromPlayer.Connect)
+        joinRoomResponse       <- client.askTo(FromPlayer.JoinRoom)
+        updatedConnectResponse <- client.askTo(FromPlayer.Connect)
 
         _ <- IO(
-          response1 shouldBe ToPlayer.Connected(
-            user,
+          authResponse shouldBe ToPlayer.Authenticated(user)
+        )
+        _ <- IO(
+          connectResponse shouldBe ToPlayer.Connected(
             RoomPlayerView(
               me = user.id,
               seats = List(
@@ -58,15 +63,15 @@ class ConnectionSpec extends AsyncIOFreeSpec:
             )
           )
         )
-        _ <- IO(response2 match
+        _ <- IO(joinRoomResponse match
           case ToPlayer.GameEvent(event: PlayerJoinedRoom) =>
             event.user shouldBe user
           case somethingElse =>
             fail(s"Unexpected event $somethingElse")
         )
         done <-
-          response3 match
-            case ToPlayer.Connected(_, snapshot) =>
+          updatedConnectResponse match
+            case ToPlayer.Connected(snapshot) =>
               IO(snapshot.players.get(user.id) shouldBe Some(user)) *>
                 IO(assert(snapshot.seats.exists(_.playerOption.exists(_.is(user)))))
             case unexpected =>

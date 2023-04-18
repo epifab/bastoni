@@ -1,6 +1,6 @@
 package bastoni.backend
 
-import bastoni.backend.routes.{AuthControllerRoutes, GameControllerRoute, StaticResourceRoute, WebHtmlRoute}
+import bastoni.backend.routes.{AuthControllerRoutes, GameControllerRoutes, StaticResourceRoute, WebHtmlRoute}
 import bastoni.domain.logic.{GameController, MessageBus, Services}
 import bastoni.domain.model.User
 import cats.effect.{ExitCode, IO, IOApp, Ref, Resource}
@@ -21,11 +21,11 @@ object BackendApp extends IOApp:
               "/assets" -> StaticResourceRoute("assets"),
               "/static" -> StaticResourceRoute("static"),
               "/"       -> WebHtmlRoute("LOCAL"),
-              "/auth"   -> AuthControllerRoutes.routes,
-              "/play"   -> Account.insecureMiddleware(GameControllerRoute(gameController, webSocket))
+              "/auth"   -> AuthControllerRoutes.routes(InsecureAuthController),
+              "/play"   -> GameControllerRoutes.routes(InsecureAuthController, gameController, webSocket)
             )
-          ).orNotFound
-//          , CORSConfig.default.withAnyOrigin(false)
+          ).orNotFound,
+          CORSConfig.default.withAllowCredentials(false)
         )
       )
       .bindHttp(9090)

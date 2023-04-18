@@ -5,10 +5,12 @@ export class AuthClient {
         this.baseUrl = `${secure ? 'https' : 'http'}://${host}/auth`
     }
 
-    connect(userName: string): Promise<Response> {
+    connect(userName: string): Promise<string> {
         const headers = new Headers();
         headers.set('x-user-name', userName);
 
-        return fetch(this.baseUrl, {method: 'POST', headers});
+        return fetch(this.baseUrl, {method: 'POST', headers})
+            .then(response => response.json())
+            .then(json => json.authToken);
     }
 }

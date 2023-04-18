@@ -82,7 +82,10 @@ class IntegrationSpec extends AsyncIOFreeSpec:
               .take(1)
               .interruptAfter(timeout)
           )
-    yield lastMessage).compile.lastOrError
+    yield lastMessage).compile.last.flatMap {
+      case Some(message) => IO.pure(message)
+      case None          => IO.raiseError(fail(s"This game did not terminate within $timeout"))
+    }
 
   "Two players can play an entire briscola game" in {
     playGame(2, GameType.Briscola).asserting(_ shouldBe a[Event.MatchCompleted])

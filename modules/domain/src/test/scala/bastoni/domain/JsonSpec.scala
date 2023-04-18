@@ -58,7 +58,7 @@ class JsonSpec extends AnyFreeSpec with Matchers:
     "case class" in {
       val expectedJson =
         parse(
-          """{"type": "DeckShuffled", "deck": [{"rank": "Asso", "suit": "Denari", "ref": 0},{"rank": "Due", "suit": "Coppe", "ref": 1}]}"""
+          """{"eventType": "DeckShuffled", "deck": [{"rank": "Asso", "suit": "Denari", "ref": 0},{"rank": "Due", "suit": "Coppe", "ref": 1}]}"""
         ).getOrElse(fail("Invalid json"))
       val event: ServerEvent =
         Event.DeckShuffled(Deck(Card(Rank.Asso, Suit.Denari, CardId(0)), Card(Rank.Due, Suit.Coppe, CardId(1))))

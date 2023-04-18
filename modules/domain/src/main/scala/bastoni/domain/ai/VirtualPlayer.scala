@@ -28,9 +28,11 @@ class VirtualPlayer[F[_]: Sync: Temporal](
     val actions = fs2.Stream(Connect, JoinRoom) ++ controller
       .subscribe(me, roomId)
       .zipWithScan1(Option.empty[RoomPlayerView]) {
-        case (_, ToPlayer.Connected(_, room))  => Some(room)
+        case (_, ToPlayer.Connected(room))     => Some(room)
+        case (_, ToPlayer.Disconnected(_))     => None
         case (room, ToPlayer.Request(request)) => room.map(_.withRequest(request))
         case (room, ToPlayer.GameEvent(event)) => room.map(_.update(event))
+        case (room, ToPlayer.Authenticated(_)) => room
         case (room, ToPlayer.Ping)             => room
       }
       .map { case (message, maybeRoom) =>
@@ -47,3 +49,4 @@ class VirtualPlayer[F[_]: Sync: Temporal](
       .evalMap(command => Sync[F].pure(command).delayBy(pause))
 
     actions.through(controller.publish(me, roomId))
+end VirtualPlayer

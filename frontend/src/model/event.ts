@@ -4,62 +4,65 @@ import {GameScore, MatchScore} from "./score";
 import {Card, VisibleCard} from "./card";
 import {Action} from "./action";
 
+export enum GameEventType {
+    PlayerJoinedRoom = 'PlayerJoinedRoom',
+    PlayerLeftRoom = 'PlayerLeftRoom',
+    MatchStarted = 'MatchStarted',
+    TrumpRevealed = 'TrumpRevealed',
+    BoardCardsDealt = 'BoardCardsDealt',
+    CardPlayed = 'CardPlayed',
+    CardsTaken = 'CardsTaken',
+    PlayerConfirmed = 'PlayerConfirmed',
+    TimedOut = 'TimedOut',
+    TrickCompleted = 'TrickCompleted',
+    GameCompleted = 'GameCompleted',
+    MatchCompleted = 'MatchCompleted',
+    GameAborted = 'GameAborted',
+    MatchAborted = 'MatchAborted',
+    CardsDealt = 'CardsDealt',
+    DeckShuffled = 'DeckShuffled',
+}
+
 export interface GameEvent {
-    eventType:
-        'PlayerJoinedRoom'
-        | 'PlayerLeftRoom'
-        | 'MatchStarted'
-        | 'TrumpRevealed'
-        | 'BoardCardsDealt'
-        | 'CardPlayed'
-        | 'CardsTaken'
-        | 'PlayerConfirmed'
-        | 'TimedOut'
-        | 'TrickCompleted'
-        | 'GameCompleted'
-        | 'MatchCompleted'
-        | 'GameAborted'
-        | 'MatchAborted'
-        | 'CardsDealt'
-        | 'DeckShuffled'
+    eventType: GameEventType
 }
 
 export interface PlayerJoinedRoom extends GameEvent {
-    eventType: 'PlayerJoinedRoom',
+    eventType: GameEventType.PlayerJoinedRoom,
     user: User,
     seat: number
 }
 
 export interface PlayerLeftRoom extends GameEvent {
-    eventType: 'PlayerLeftRoom',
+    eventType: GameEventType.PlayerLeftRoom,
     user: User,
     seat: number
 }
 
 export interface MatchStarted extends GameEvent {
-    eventType: 'MatchStarted',
+    eventType: GameEventType.MatchStarted,
     gameType: GameType,
     matchScores: MatchScore[]
 }
 
 export interface TrumpRevealed extends GameEvent {
-    eventType: 'TrumpRevealed',
+    eventType: GameEventType.TrumpRevealed,
     card: VisibleCard
 }
 
 export interface BoardCardsDealt extends GameEvent{
-    eventType: 'BoardCardsDealt',
+    eventType: GameEventType.BoardCardsDealt,
     cards: VisibleCard[]
 }
 
 export interface CardPlayed extends GameEvent {
-    eventType: 'CardPlayed',
+    eventType: GameEventType.CardPlayed,
     playerId: UserId,
     card: VisibleCard
 }
 
 export interface CardsTaken extends GameEvent {
-    eventType: 'CardsTaken',
+    eventType: GameEventType.CardsTaken,
     playerId: UserId,
     card: VisibleCard,
     taken: VisibleCard[],
@@ -67,48 +70,48 @@ export interface CardsTaken extends GameEvent {
 }
 
 export interface PlayerConfirmed extends GameEvent {
-    eventType: 'PlayerConfirmed',
+    eventType: GameEventType.PlayerConfirmed,
     playerId: UserId
 }
 
 export interface TimedOut extends GameEvent {
-    eventType: 'TimedOut',
+    eventType: GameEventType.TimedOut,
     playerId: UserId,
     action: Action
 }
 
 export interface TrickCompleted extends GameEvent {
-    eventType: 'TrickCompleted',
+    eventType: GameEventType.TrickCompleted,
     winnerId: UserId
 }
 
 export interface GameCompleted extends GameEvent {
-    eventType: 'GameCompleted',
+    eventType: GameEventType.GameCompleted,
     scores: GameScore[],
     matchScores: MatchScore[]
 }
 
 export interface MatchCompleted extends GameEvent {
-    eventType: 'MatchCompleted',
+    eventType: GameEventType.MatchCompleted,
     winnerIds: UserId[]
 }
 
 export interface GameAborted extends GameEvent {
-    eventType: 'GameAborted',
+    eventType: GameEventType.GameAborted,
     reason: string
 }
 
 export interface MatchAborted extends GameEvent {
-    eventType: 'MatchAborted',
+    eventType: GameEventType.MatchAborted,
     reason: string
 }
 
 export interface CardsDealt extends GameEvent {
-    eventType: 'CardsDealt',
+    eventType: GameEventType.CardsDealt,
     cards: Card[]
 }
 
 export interface DeckShuffled extends GameEvent {
-    eventType: 'DeckShuffled',
+    eventType: GameEventType.DeckShuffled,
     numberOfCards: number
 }

@@ -95,7 +95,7 @@ sequenceDiagram
     repo->>service: fetch state
     service->>-bus: PlayerConnected
     bus->>+controller: PlayerConnected
-    controller->>-p: RoomSnapshot
+    controller->>-p: Connected(room)
     note over p, repo: The frontend will display the current view of the room<br/>The player submits a JoinRoom command to the controller
     p-)+controller: JoinRoom
     controller->>-bus: JoinRoom

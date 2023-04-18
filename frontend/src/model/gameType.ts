@@ -1,1 +1,5 @@
-export type GameType = 'Briscola' | 'Tressette' | 'Scopa'
+export enum GameType {
+    Briscola = 'Briscola',
+    Tressette = 'Tressette',
+    Scopa = 'Scopa'
+}

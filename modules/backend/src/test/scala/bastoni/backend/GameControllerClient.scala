@@ -20,18 +20,13 @@ trait GameControllerClient[F[_]]:
 
   def send1(message: FromPlayer): F[Unit]
   def receive1: F[ToPlayer]
+  def askTo(message: FromPlayer): F[ToPlayer]
 
 class GameControllerClientBuilder[F[_]: Sync](client: WSClient[F], baseUri: Uri):
 
-  def connect(user: User, roomId: RoomId): Resource[F, GameControllerClient[F]] =
+  def connect(roomId: RoomId): Resource[F, GameControllerClient[F]] =
     client
-      .connect(
-        WSRequest(
-          baseUri / "play" / roomId.value,
-          Headers(Cookie(RequestCookie("auth", s"""{"id": "${user.id.value}", "name": "${user.name}"}"""))),
-          Method.GET
-        )
-      )
+      .connect(WSRequest(baseUri / "play" / roomId.value))
       .map(connection =>
         new GameControllerClient[F]:
           override def send(messages: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
@@ -47,6 +42,9 @@ class GameControllerClientBuilder[F[_]: Sync](client: WSClient[F], baseUri: Uri)
 
           override def receive1: F[ToPlayer] =
             receive.head.compile.lastOrError
+
+          override def askTo(message: FromPlayer): F[ToPlayer] =
+            send1(message) *> receive1
       )
 
 object GameControllerClientBuilder:
