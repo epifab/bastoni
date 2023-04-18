@@ -85,8 +85,8 @@ object GameController:
   def buildCommand(me: User)(eventAndSeed: (FromPlayer, Int)): Option[Command] =
     Some(eventAndSeed).collect {
       case (FromPlayer.Connect, _)                => Connect(me)
-      case (FromPlayer.JoinRoom, seed)            => JoinRoom(me, seed)
-      case (FromPlayer.LeaveRoom, _)              => LeaveRoom(me)
+      case (FromPlayer.JoinTable, seed)            => JoinTable(me, seed)
+      case (FromPlayer.LeaveTable, _)              => LeaveTable(me)
       case (FromPlayer.StartMatch(gameType), _)   => StartMatch(me.id, gameType)
       case (FromPlayer.ShuffleDeck, seed)         => ShuffleDeck(seed)
       case (FromPlayer.Ok, _)                     => Ok(me.id)

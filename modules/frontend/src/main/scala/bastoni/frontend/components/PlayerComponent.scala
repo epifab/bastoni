@@ -40,7 +40,7 @@ object PlayerComponent:
           )
         }
 
-      val stars: Option[VdomNode] = Some(playerState).collect { case player: PlayerState.SittingIn =>
+      val stars: Option[VdomNode] = Some(playerState).collect { case player: PlayerState.Playing =>
         PlayerStars(player, layout)
       }
 

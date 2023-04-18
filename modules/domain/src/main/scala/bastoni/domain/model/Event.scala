@@ -21,8 +21,8 @@ sealed trait PublicEvent extends ServerEvent, PlayerEvent
 
 object Event:
   // Public events
-  case class PlayerJoinedRoom(user: User, seat: Int)                                            extends PublicEvent
-  case class PlayerLeftRoom(user: User, seat: Int)                                              extends PublicEvent
+  case class PlayerJoinedTable(user: User, seat: Int)                                            extends PublicEvent
+  case class PlayerLeftTable(user: User, seat: Int)                                              extends PublicEvent
   case class MatchStarted(gameType: GameType, matchScores: List[MatchScore])                    extends PublicEvent
   case class TrumpRevealed(card: VisibleCard)                                                   extends PublicEvent
   case class BoardCardsDealt(cards: List[VisibleCard])                                          extends PublicEvent

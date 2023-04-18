@@ -22,8 +22,8 @@ import {
     MatchCompleted,
     MatchStarted,
     PlayerConfirmed,
-    PlayerJoinedRoom,
-    PlayerLeftRoom,
+    PlayerJoinedTable,
+    PlayerLeftTable,
     TimedOut,
     TrickCompleted,
     TrumpRevealed
@@ -36,8 +36,8 @@ interface ClientEventListeners {
     onAuthenticated: ((user: User) => void),
     onConnected: ((snapshot: Room) => void),
     onDisconnected: ((reason: string) => void),
-    onPlayerJoinedRoom: ((event: PlayerJoinedRoom) => void),
-    onPlayerLeftRoom: ((event: PlayerLeftRoom) => void),
+    onPlayerJoinedTable: ((event: PlayerJoinedTable) => void),
+    onPlayerLeftTable: ((event: PlayerLeftTable) => void),
     onMatchStarted: ((event: MatchStarted) => void),
     onTrumpRevealed: ((event: TrumpRevealed) => void),
     onBoardCardsDealt: ((event: BoardCardsDealt) => void),
@@ -63,8 +63,8 @@ const defaultListeners: ClientEventListeners = {
     onAuthenticated: defaultHandler,
     onConnected: defaultHandler,
     onDisconnected: defaultHandler,
-    onPlayerJoinedRoom: defaultHandler,
-    onPlayerLeftRoom: defaultHandler,
+    onPlayerJoinedTable: defaultHandler,
+    onPlayerLeftTable: defaultHandler,
     onMatchStarted: defaultHandler,
     onTrumpRevealed: defaultHandler,
     onBoardCardsDealt: defaultHandler,
@@ -137,13 +137,13 @@ export class GameClient {
         return this;
     }
 
-    onPlayerJoinedRoom(callback: ((event: PlayerJoinedRoom) => void)): GameClient {
-        this.listeners.onPlayerJoinedRoom = callback;
+    onPlayerJoinedTable(callback: ((event: PlayerJoinedTable) => void)): GameClient {
+        this.listeners.onPlayerJoinedTable = callback;
         return this;
     }
 
-    onPlayerLeftRoom(callback: ((event: PlayerLeftRoom) => void)): GameClient {
-        this.listeners.onPlayerLeftRoom = callback;
+    onPlayerLeftTable(callback: ((event: PlayerLeftTable) => void)): GameClient {
+        this.listeners.onPlayerLeftTable = callback;
         return this;
     }
 
@@ -230,10 +230,10 @@ export class GameClient {
             case InboxMessageType.GameEvent:
                 const event: GameEvent = decodeJson<GameEventMessage>('GameEventMessage', message).event;
                 switch (event.eventType) {
-                    case GameEventType.PlayerJoinedRoom:
-                        return this.listeners.onPlayerJoinedRoom(decodeJson<PlayerJoinedRoom>('PlayerJoinedRoom', event));
-                    case GameEventType.PlayerLeftRoom:
-                        return this.listeners.onPlayerLeftRoom(decodeJson<PlayerLeftRoom>('PlayerLeftRoom', event));
+                    case GameEventType.PlayerJoinedTable:
+                        return this.listeners.onPlayerJoinedTable(decodeJson<PlayerJoinedTable>('PlayerJoinedTable', event));
+                    case GameEventType.PlayerLeftTable:
+                        return this.listeners.onPlayerLeftTable(decodeJson<PlayerLeftTable>('PlayerLeftTable', event));
                     case GameEventType.MatchStarted:
                         return this.listeners.onMatchStarted(decodeJson<MatchStarted>('MatchStarted', event));
                     case GameEventType.TrumpRevealed:

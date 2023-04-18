@@ -4,8 +4,8 @@ import {GameType} from './gameType';
 export enum OutboxMessageType {
     Authenticate = 'Authenticate',
     Connect = 'Connect',
-    JoinRoom = 'JoinRoom',
-    LeaveRoom = 'LeaveRoom',
+    JoinTable = 'JoinTable',
+    LeaveTable = 'LeaveTable',
     StartMatch = 'StartMatch',
     ShuffleDeck = 'ShuffleDeck',
     Ok = 'Ok',
@@ -38,20 +38,20 @@ export const connectMessage: ConnectMessage = {
     messageType: OutboxMessageType.Connect
 }
 
-export interface JoinRoomMessage extends OutboxMessage {
-    messageType: OutboxMessageType.JoinRoom
+export interface JoinTableMessage extends OutboxMessage {
+    messageType: OutboxMessageType.JoinTable
 }
 
-export const joinRoomMessage: JoinRoomMessage = {
-    messageType: OutboxMessageType.JoinRoom
+export const joinRoomMessage: JoinTableMessage = {
+    messageType: OutboxMessageType.JoinTable
 }
 
-export interface LeaveRoomMessage extends OutboxMessage {
-    messageType: OutboxMessageType.LeaveRoom
+export interface LeaveTableMessage extends OutboxMessage {
+    messageType: OutboxMessageType.LeaveTable
 }
 
-export const leaveRoomMessage: LeaveRoomMessage = {
-    messageType: OutboxMessageType.LeaveRoom
+export const leaveRoomMessage: LeaveTableMessage = {
+    messageType: OutboxMessageType.LeaveTable
 }
 
 export interface StartMatchMessage extends OutboxMessage {

@@ -2,7 +2,7 @@ package bastoni.backend
 
 import bastoni.domain.model.{RoomId, RoomPlayerView, User, UserId}
 import bastoni.domain.model.EmptySeat
-import bastoni.domain.model.Event.PlayerJoinedRoom
+import bastoni.domain.model.Event.PlayerJoinedTable
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import cats.effect.{IO, Resource}
 import cats.effect.testing.scalatest.AsyncIOSpec
@@ -39,7 +39,7 @@ class ConnectionSpec extends AsyncFreeSpecLike with AsyncIOSpec with Matchers:
         authToken              <- InsecureAuthController.tokenize(Account(user))
         authResponse           <- client.askTo(FromPlayer.Authenticate(authToken))
         connectResponse        <- client.askTo(FromPlayer.Connect)
-        joinRoomResponse       <- client.askTo(FromPlayer.JoinRoom)
+        joinRoomResponse       <- client.askTo(FromPlayer.JoinTable)
         updatedConnectResponse <- client.askTo(FromPlayer.Connect)
 
         _ <- IO(
@@ -64,7 +64,7 @@ class ConnectionSpec extends AsyncFreeSpecLike with AsyncIOSpec with Matchers:
           )
         )
         _ <- IO(joinRoomResponse match
-          case ToPlayer.GameEvent(event: PlayerJoinedRoom) =>
+          case ToPlayer.GameEvent(event: PlayerJoinedTable) =>
             event.user shouldBe user
           case somethingElse =>
             fail(s"Unexpected event $somethingElse")

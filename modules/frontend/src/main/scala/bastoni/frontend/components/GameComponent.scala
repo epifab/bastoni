@@ -143,7 +143,7 @@ object GameComponent:
         .concurrently(p1) // .concurrently(p2).concurrently(p3)
         .concurrently(
           controller.publish(me, roomId)(
-            fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinRoom).delayBy(1.second) ++
+            fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinTable).delayBy(1.second) ++
               fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartMatch(gameType))
           )
         )

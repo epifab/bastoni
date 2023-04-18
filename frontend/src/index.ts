@@ -7,15 +7,15 @@ import {v4 as uuidv4} from 'uuid'
 const me = 'John Doe'
 const room = uuidv4()
 
-new AuthClient().connect(me).then((token) =>
+new AuthClient().connect(me).then((token) => {
     const client = gameClient(room);
     client
         .onReady(() => client.send(authenticateMessage(token)))
         .onAuthenticated((user) => client.send(connectMessage))
         .onConnected((room) => client.send(joinRoomMessage))
-        .onPlayerJoinedRoom((event) => console.log(`${event.user.name} joined the room`))
-        .onPlayerLeftRoom((event) => console.log(`${event.user.name} left the room`))
-)
+        .onPlayerJoinedTable((event) => console.log(`${event.user.name} joined the room`))
+        .onPlayerLeftTable((event) => console.log(`${event.user.name} left the room`))
+})
 
 
 const width = window.innerWidth;

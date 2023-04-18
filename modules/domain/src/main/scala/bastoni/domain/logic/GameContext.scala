@@ -15,14 +15,14 @@ case class GameContext(room: RoomServerView, stateMachine: Option[GameStateMachi
       case Command.Connect(user) =>
         room -> List(PlayerConnected(user, room))
 
-      case Command.JoinRoom(user, seed) =>
+      case Command.JoinTable(user, seed) =>
         room.join(user, seed) match
-          case Right((newRoom, seat)) => newRoom -> List(PlayerJoinedRoom(user, seat))
+          case Right((newRoom, seat)) => newRoom -> List(PlayerJoinedTable(user, seat))
           case Left(error)            => room    -> Nil
 
-      case Command.LeaveRoom(user) =>
+      case Command.LeaveTable(user) =>
         room.leave(user) match
-          case Right((newRoom, seat)) => newRoom -> List(PlayerLeftRoom(user, seat))
+          case Right((newRoom, seat)) => newRoom -> List(PlayerLeftTable(user, seat))
           case Left(error)            => room    -> Nil
 
       case _ => room -> Nil

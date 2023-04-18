@@ -3,7 +3,7 @@ package bastoni.domain.ai
 import bastoni.domain.logic.{GameController, GamePublisher, GameSubscriber}
 import bastoni.domain.model.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
-import bastoni.domain.view.FromPlayer.{Connect, JoinRoom}
+import bastoni.domain.view.FromPlayer.{Connect, JoinTable}
 import cats.effect.{Sync, Temporal}
 import cats.effect.syntax.temporal.*
 
@@ -25,7 +25,7 @@ class VirtualPlayer[F[_]: Sync: Temporal](
     pause: FiniteDuration = 0.millis
 ):
   def play(me: User, roomId: RoomId): fs2.Stream[F, Unit] =
-    val actions = fs2.Stream(Connect, JoinRoom) ++ controller
+    val actions = fs2.Stream(Connect, JoinTable) ++ controller
       .subscribe(me, roomId)
       .zipWithScan1(Option.empty[RoomPlayerView]) {
         case (_, ToPlayer.Connected(room))     => Some(room)

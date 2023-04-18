@@ -124,7 +124,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
       4,
       GameType.Tressette,
       realSpeed = true,
-      extraMessages = fs2.Stream(LeaveRoom).delayBy(2.seconds)
+      extraMessages = fs2.Stream(LeaveTable).delayBy(2.seconds)
     ).asserting(_ shouldBe Event.MatchAborted(GameAborted.Reason.playerLeftTheRoom))
   }
 end IntegrationSpec

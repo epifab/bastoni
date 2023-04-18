@@ -5,8 +5,8 @@ import {Card, VisibleCard} from "./card";
 import {Action} from "./action";
 
 export enum GameEventType {
-    PlayerJoinedRoom = 'PlayerJoinedRoom',
-    PlayerLeftRoom = 'PlayerLeftRoom',
+    PlayerJoinedTable = 'PlayerJoinedTable',
+    PlayerLeftTable = 'PlayerLeftTable',
     MatchStarted = 'MatchStarted',
     TrumpRevealed = 'TrumpRevealed',
     BoardCardsDealt = 'BoardCardsDealt',
@@ -27,14 +27,14 @@ export interface GameEvent {
     eventType: GameEventType
 }
 
-export interface PlayerJoinedRoom extends GameEvent {
-    eventType: GameEventType.PlayerJoinedRoom,
+export interface PlayerJoinedTable extends GameEvent {
+    eventType: GameEventType.PlayerJoinedTable,
     user: User,
     seat: number
 }
 
-export interface PlayerLeftRoom extends GameEvent {
-    eventType: GameEventType.PlayerLeftRoom,
+export interface PlayerLeftTable extends GameEvent {
+    eventType: GameEventType.PlayerLeftTable,
     user: User,
     seat: number
 }

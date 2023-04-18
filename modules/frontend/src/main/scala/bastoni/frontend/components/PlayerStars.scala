@@ -7,7 +7,7 @@ import japgolly.scalajs.react.vdom.VdomNode
 import reactkonva.{KGroup, KStar}
 
 object PlayerStars:
-  private val component = ScalaFn[(PlayerState.SittingIn, SeatLayout)] { case (player, layout) =>
+  private val component = ScalaFn[(PlayerState.Playing, SeatLayout)] { case (player, layout) =>
     val points      = player.player.points
     val innerRadius = 7
     val outerRadius = 10
@@ -32,4 +32,4 @@ object PlayerStars:
     )
   }
 
-  def apply(player: PlayerState.SittingIn, layout: SeatLayout): VdomNode = component(player -> layout)
+  def apply(player: PlayerState.Playing, layout: SeatLayout): VdomNode = component(player -> layout)

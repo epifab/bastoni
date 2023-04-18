@@ -77,9 +77,9 @@ trait Room[C <: CardView]:
     case Action.ShuffleDeck =>
       updateWith(
         seats = mapTakenSeats {
-          case player: SittingIn if player.is(command.playerId) =>
+          case player: Playing if player.is(command.playerId) =>
             _.copy(player = player.act(Action.ShuffleDeck, command.timeout))
-          case player: SittingIn => _.copy(player = Waiting(player.player))
+          case player: Playing => _.copy(player = Waiting(player.player))
         },
         matchInfo = matchInfo.map(_.copy(gameScore = None)),
         dealerIndex = seats.collectFirst { case seat if seat.playerOption.exists(_.is(command.playerId)) => seat.index }
@@ -88,14 +88,14 @@ trait Room[C <: CardView]:
     case action =>
       updateWith(
         seats = mapTakenSeats {
-          case player: SittingIn if player.is(command.playerId) =>
+          case player: Playing if player.is(command.playerId) =>
             _.copy(player = player.act(action, command.timeout))
         }
       )
 
   protected def publicEventUpdate(message: PublicEvent): RoomView =
     message match
-      case Event.PlayerJoinedRoom(player, targetIndex) =>
+      case Event.PlayerJoinedTable(player, targetIndex) =>
         updateWith(
           seats = seats.map {
             case seat if seat.index == targetIndex => seat.occupiedBy(SittingOut(player))
@@ -104,7 +104,7 @@ trait Room[C <: CardView]:
           dealerIndex = dealerIndex.orElse(Some(targetIndex))
         )
 
-      case Event.PlayerLeftRoom(player, targetIndex) =>
+      case Event.PlayerLeftTable(player, targetIndex) =>
         updateWith(
           seats = seats.map {
             case seat if seat.index == targetIndex => seat.vacant
@@ -148,7 +148,7 @@ trait Room[C <: CardView]:
       case Event.CardsTaken(playerId, taken, scopa) =>
         updateWith(
           seats = mapTakenSeats {
-            case player: SittingIn if player.is(playerId) =>
+            case player: Playing if player.is(playerId) =>
               seat =>
                 seat.copy(taken =
                   taken.map(card =>
@@ -192,7 +192,7 @@ trait Room[C <: CardView]:
             case seat: TakenSeat[C] =>
               seat.copy(
                 player = seat.player match
-                  case active: SittingIn =>
+                  case active: Playing =>
                     EndOfGame(
                       player = active.player
                         .copy(points = matchScores.pointsFor(active.player).getOrElse(active.player.points)),
@@ -226,7 +226,7 @@ trait Room[C <: CardView]:
 
       case Event.MatchCompleted(winnerIds) =>
         updateWith(
-          seats = mapTakenSeats { case active: SittingIn =>
+          seats = mapTakenSeats { case active: Playing =>
             _.copy(player = EndOfMatch(active.player, winner = winnerIds.contains(active.player.id)))
           },
           dealerIndex = nextDealer.map(_.index),

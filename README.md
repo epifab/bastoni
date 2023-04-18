@@ -82,7 +82,7 @@ Please note that the message queue is omitted for the sake of simplicity:
 
 ```mermaid
 sequenceDiagram
-    actor p AS Player
+    actor p AS Player 1
     participant controller AS Game controller
     participant bus AS Message bus
     participant service AS Game service
@@ -96,17 +96,17 @@ sequenceDiagram
     service->>-bus: PlayerConnected
     bus->>+controller: PlayerConnected
     controller->>-p: Connected(room)
-    note over p, repo: The frontend will display the current view of the room<br/>The player submits a JoinRoom command to the controller
-    p-)+controller: JoinRoom
-    controller->>-bus: JoinRoom
-    bus->>+service: JoinRoom
+    note over p, repo: The frontend will display the current view of the room<br/>The player submits a JoinTable command to the controller
+    p-)+controller: JoinTable
+    controller->>-bus: JoinTable
+    bus->>+service: JoinTable
     repo->>service: fetch state
     service->>service: validate request
     service->>repo: update state
-    service->>-bus: PlayerJoinedRoom
-    bus->>+controller: PlayerJoinedRoom
-    controller->>-p: GameEvent(PlayerJoinedRoom)
-    note over p, repo: The frontend will display the current player in the room
+    service->>-bus: PlayerJoinedTable
+    bus->>+controller: PlayerJoinedTable
+    controller->>-p: GameEvent(PlayerJoinedTable)
+    note over p, repo: The frontend will display Player 1 at the table
 ```
 
 The following diagram illustrates how two players (in the same room) can start playing together.  

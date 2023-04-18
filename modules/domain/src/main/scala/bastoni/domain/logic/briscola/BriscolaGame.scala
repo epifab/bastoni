@@ -51,7 +51,7 @@ object BriscolaGame extends GenericGameLogic:
 
   val playGameStepPF
       : PartialFunction[(BriscolaGameState, StateMachineInput), (BriscolaGameState, List[StateMachineOutput])] = {
-    case (active: Active, PlayerLeftRoom(user, _)) if active.activePlayers.exists(_.is(user)) =>
+    case (active: Active, PlayerLeftTable(user, _)) if active.activePlayers.exists(_.is(user)) =>
       Aborted(GameAborted.Reason.playerLeftTheRoom) -> uneventful
 
     case (Ready(players), MatchStarted(_, _)) =>

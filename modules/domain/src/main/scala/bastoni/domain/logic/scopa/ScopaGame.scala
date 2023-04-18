@@ -51,7 +51,7 @@ object ScopaGame extends GenericGameLogic:
 
   val playGameStepPF
       : PartialFunction[(ScopaGameState, StateMachineInput), (ScopaGameState, List[StateMachineOutput])] = {
-    case (active: Active, PlayerLeftRoom(player, _)) if active.activePlayers.exists(_.is(player)) =>
+    case (active: Active, PlayerLeftTable(player, _)) if active.activePlayers.exists(_.is(player)) =>
       Aborted(GameAborted.Reason.playerLeftTheRoom) -> uneventful
 
     case (Ready(players), MatchStarted(_, _)) =>
