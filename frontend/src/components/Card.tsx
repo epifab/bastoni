@@ -1,10 +1,10 @@
 import {Sprite} from "@pixi/react";
 import CardLayout from "../view/CardLayout";
 import {isVisible} from "../model/card";
-import napoletane from "../cards/napoletane/resources";
-import piacentine from "../cards/piacentine/resources";
-import back from "../cards/retro.svg";
-import {Assets, Texture} from "pixi.js";
+import napoletane from "../view/cards/napoletane/resources";
+import piacentine from "../view/cards/piacentine/resources";
+import back from "../view/cards/retro.svg";
+import {Assets} from "pixi.js";
 import {CardStyle} from "../view/CardStyle";
 import {useEffect, useState} from "react";
 

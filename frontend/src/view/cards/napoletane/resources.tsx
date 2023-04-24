@@ -38,7 +38,7 @@ import bastoni07 from './bastoni/07.svg'
 import bastoni08 from './bastoni/08.svg'
 import bastoni09 from './bastoni/09.svg'
 import bastoni10 from './bastoni/10.svg'
-import {CardRank, CardSuit} from "../../model/card";
+import {CardRank, CardSuit} from "../../../model/card";
 
 const cardsRecord: Record<CardSuit, Record<CardRank, string>> = {
     [CardSuit.Denari]: {
