@@ -1,3 +1,14 @@
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body {
+  background: black;
+  color: white;
+  font-family: 'Open Sans', sans-serif;
+}
+
 .App {
   text-align: center;
 }

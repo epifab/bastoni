@@ -1,5 +1,23 @@
-export type CardRank = 'Asso' | 'Due' | 'Tre' | 'Quattro' | 'Cinque' | 'Sei' | 'Sette' | 'Fante' | 'Cavallo' | 'Re'
-export type CardSuit = 'Denari' | 'Coppe' | 'Spade' | 'Bastoni'
+export enum CardRank {
+    Asso = 'Asso',
+    Due = 'Due',
+    Tre = 'Tre',
+    Quattro = 'Quattro',
+    Cinque = 'Cinque',
+    Sei = 'Sei',
+    Sette = 'Sette',
+    Fante = 'Fante',
+    Cavallo = 'Cavallo',
+    Re = 'Re',
+}
+
+export enum CardSuit {
+    Denari = 'Denari',
+    Coppe = 'Coppe',
+    Spade = 'Spade',
+    Bastoni = 'Bastoni',
+}
+
 export type CardId = number
 
 export interface VisibleCard {
@@ -13,3 +31,7 @@ export interface HiddenCard {
 }
 
 export type Card = VisibleCard | HiddenCard
+
+export function isVisible(card: Card): card is VisibleCard {
+    return (card as VisibleCard).rank !== undefined;
+}
