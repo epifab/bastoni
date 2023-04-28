@@ -10,7 +10,7 @@ object TressetteGameScoreCalculator:
   def apply(team: List[Player], rete: Boolean): TressetteGameScore =
     TressetteGameScore(
       team.map(_.id),
-      Option.when(rete)(TressetteGameScoreItem.Rete).toList ++ team.flatMap(_.taken).collect {
+      Option.when(rete)(TressetteGameScoreItem.Rete).toList ++ team.flatMap(_.pile).collect {
         case card if card.rank == Asso    => TressetteGameScoreItem.Carta(card, 3)
         case card if card.rank == Tre     => TressetteGameScoreItem.Carta(card, 1)
         case card if card.rank == Due     => TressetteGameScoreItem.Carta(card, 1)

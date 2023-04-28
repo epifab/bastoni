@@ -18,7 +18,7 @@ object BriscolaGameScoreCalculator:
     BriscolaGameScore(
       players.map(_.id),
       players
-        .flatMap(_.taken)
+        .flatMap(_.pile)
         .map(card => card -> pointsFor(card))
         .collect { case (card, points) if points > 0 => BriscolaGameScoreItem(card, points) }
         .sortBy(-_.points)

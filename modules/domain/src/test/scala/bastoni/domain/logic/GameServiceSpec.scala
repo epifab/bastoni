@@ -245,7 +245,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                     CardServerView(cardOf(Asso, Spade), Direction.Player),
                     CardServerView(cardOf(Sette, Denari), Direction.Player)
                   ),
-                  taken = Nil
+                  pile = Nil
                 ),
                 TakenSeat(
                   3,
@@ -255,7 +255,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                     CardServerView(cardOf(Sei, Denari), Direction.Player),
                     CardServerView(cardOf(Re, Denari), Direction.Player)
                   ),
-                  taken = Nil
+                  pile = Nil
                 )
               ),
               deck = shuffledDeck.asList.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(
@@ -293,7 +293,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                     CardServerView(cardOf(Asso, Spade), Direction.Player),
                     CardServerView(cardOf(Sette, Denari), Direction.Player)
                   ),
-                  taken = Nil
+                  pile = Nil
                 ),
                 TakenSeat(
                   3,
@@ -303,7 +303,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                     CardServerView(cardOf(Sei, Denari), Direction.Player),
                     CardServerView(cardOf(Re, Denari), Direction.Player)
                   ),
-                  taken = Nil
+                  pile = Nil
                 )
               ),
               deck = shuffledDeck.asList.drop(7).map(card => CardServerView(card, Direction.Down)) :+ CardServerView(
@@ -355,13 +355,13 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   2,
                   SittingOut(user1),
                   hand = Nil,
-                  taken = Nil
+                  pile = Nil
                 ),
                 TakenSeat(
                   3,
                   SittingOut(user2),
                   hand = Nil,
-                  taken = Nil
+                  pile = Nil
                 )
               ),
               deck = Nil,
@@ -396,13 +396,13 @@ class GameServiceSpec extends AsyncIOFreeSpec:
             0,
             player = Acting(player1, Action.PlayCard(PlayContext.Briscola(Denari)), Some(Timeout.Max)),
             hand = List(CardServerView(player1Card, Direction.Player)),
-            taken = player1Collected.map(card => CardServerView(card, Direction.Down))
+            pile = player1Collected.map(card => CardServerView(card, Direction.Down))
           ),
           TakenSeat(
             1,
             player = Waiting(player2),
             hand = Nil,
-            taken = Nil
+            pile = Nil
           )
         ),
         deck = Nil,
@@ -522,13 +522,13 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                 0,
                 player = EndOfMatch(player1.win, winner = true),
                 hand = Nil,
-                taken = Nil
+                pile = Nil
               ),
               TakenSeat(
                 1,
                 player = EndOfMatch(player2, winner = false),
                 hand = Nil,
-                taken = Nil
+                pile = Nil
               )
             ),
             deck = Nil,

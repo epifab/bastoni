@@ -10,7 +10,7 @@ import io.circe.syntax.*
 object ScopaGameScoreCalculator:
 
   def apply(teams: List[List[Player]]): List[ScopaGameScore] =
-    val teamWithCards: Map[List[Player], List[VisibleCard]] = teams.map(team => team -> team.flatMap(_.taken)).toMap
+    val teamWithCards: Map[List[Player], List[VisibleCard]] = teams.map(team => team -> team.flatMap(_.pile)).toMap
 
     val carte: Option[(List[Player], ScopaGameScoreItem)] =
       teamWithCards.view.mapValues(cards => ScopaGameScoreItem.Carte(cards.size)).toList.bestBy(_._2.count)

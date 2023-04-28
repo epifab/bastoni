@@ -150,10 +150,10 @@ trait Room[C <: CardView]:
           seats = mapTakenSeats {
             case player: Playing if player.is(playerId) =>
               seat =>
-                seat.copy(taken =
+                seat.copy(pile =
                   taken.map(card =>
                     buildCard(card, if (scopa.contains(card)) Direction.Up else Direction.Down)
-                  ) ++ seat.taken
+                  ) ++ seat.pile
                 )
           },
           board = taken
@@ -174,7 +174,7 @@ trait Room[C <: CardView]:
         updateWith(
           seats = mapTakenSeats {
             case player if player.is(winnerId) =>
-              seat => seat.copy(taken = seat.taken ++ board.map(_.card).map(faceDown))
+              seat => seat.copy(pile = seat.pile ++ board.map(_.card).map(faceDown))
           },
           board = Nil
         )
@@ -202,10 +202,10 @@ trait Room[C <: CardView]:
                   case whatever => whatever
                 ,
                 hand = Nil,
-                taken = Nil
+                pile = Nil
               )
 
-            case seat: EmptySeat[C] => seat.copy(hand = Nil, taken = Nil)
+            case seat: EmptySeat[C] => seat.copy(hand = Nil, pile = Nil)
           },
           deck = Nil,
           board = Nil,
@@ -218,9 +218,9 @@ trait Room[C <: CardView]:
           board = Nil,
           seats = seats.map {
             case taken: TakenSeat[C] =>
-              taken.copy(player = taken.player.sitOut, hand = Nil, taken = Nil)
+              taken.copy(player = taken.player.sitOut, hand = Nil, pile = Nil)
             case empty: EmptySeat[C] =>
-              empty.copy(hand = Nil, taken = Nil)
+              empty.copy(hand = Nil, pile = Nil)
           }
         )
 

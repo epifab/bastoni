@@ -29,7 +29,7 @@ class JsonSpec extends AnyFreeSpec with Matchers:
          |    {"rank": "Asso", "suit": "Denari", "ref": 5},
          |    {"rank": "Sette", "suit": "Denari", "ref": 7}
          |  ],
-         |  "taken": [],
+         |  "pile": [],
          |  "extraPoints": 0
          |}""".stripMargin
     ).getOrElse(fail("Invalid json"))

@@ -3,7 +3,7 @@ package bastoni.domain.model
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-case class Player(matchPlayer: MatchPlayer, hand: List[VisibleCard], taken: List[VisibleCard], extraPoints: Int = 0)
+case class Player(matchPlayer: MatchPlayer, hand: List[VisibleCard], pile: List[VisibleCard], extraPoints: Int = 0)
     extends User(matchPlayer.id, matchPlayer.name):
   def has(card: VisibleCard): Boolean        = hand.contains(card)
   def draw(card: VisibleCard): Player        = copy(hand = card :: hand)
@@ -15,8 +15,8 @@ case class Player(matchPlayer: MatchPlayer, hand: List[VisibleCard], taken: List
     copy(hand = hand.filterNot(_ == card))
 
   def take(cards: List[VisibleCard]): Player =
-    assert(!cards.exists(taken.contains), "Players can't take cards that were previously taken")
-    copy(taken = taken ++ cards)
+    assert(!cards.exists(pile.contains), "Players can't take cards that were previously taken")
+    copy(pile = pile ++ cards)
 
 object Player:
   private case class EncodablePlayer(
@@ -24,7 +24,7 @@ object Player:
       name: String,
       points: Int,
       hand: List[VisibleCard],
-      taken: List[VisibleCard],
+      pile: List[VisibleCard],
       extraPoints: Int
   )
 
@@ -34,7 +34,7 @@ object Player:
       player.name,
       player.matchPlayer.points,
       player.hand,
-      player.taken,
+      player.pile,
       player.extraPoints
     )
   )
@@ -46,7 +46,7 @@ object Player:
         player.points
       ),
       player.hand,
-      player.taken,
+      player.pile,
       player.extraPoints
     )
   )

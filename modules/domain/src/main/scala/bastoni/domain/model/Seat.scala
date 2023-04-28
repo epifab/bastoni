@@ -6,15 +6,15 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 sealed trait Seat[C <: CardView]:
   def index: Int
   def hand: List[C]
-  def taken: List[C]
+  def pile: List[C]
   def playerOption: Option[PlayerState]
-  def occupiedBy(player: PlayerState): TakenSeat[C] = TakenSeat(index, player, hand, taken)
-  def vacant: EmptySeat[C]                          = EmptySeat(index, hand, taken)
+  def occupiedBy(player: PlayerState): TakenSeat[C] = TakenSeat(index, player, hand, pile)
+  def vacant: EmptySeat[C]                          = EmptySeat(index, hand, pile)
 
-case class EmptySeat[C <: CardView](index: Int, hand: List[C], taken: List[C]) extends Seat[C]:
+case class EmptySeat[C <: CardView](index: Int, hand: List[C], pile: List[C]) extends Seat[C]:
   override val playerOption: Option[PlayerState] = None
 
-case class TakenSeat[C <: CardView](index: Int, player: PlayerState, hand: List[C], taken: List[C]) extends Seat[C]:
+case class TakenSeat[C <: CardView](index: Int, player: PlayerState, hand: List[C], pile: List[C]) extends Seat[C]:
   override val playerOption: Option[PlayerState] = Some(player)
 
 object Seat:
