@@ -11,42 +11,58 @@ export interface Player extends User {
     points: number
 }
 
-export interface PlayerState {
-    state: 'SittingOut' | 'Playing' | 'Waiting' | 'Acting' | 'EndOfGame' | 'EndOfMatch'
+export enum PlayerState {
+    SittingOut = 'SittingOut',
+    Playing = 'Playing',
+    Waiting = 'Waiting',
+    Acting = 'Acting',
+    EndOfGame = 'EndOfGame',
+    EndOfMatch = 'EndOfMatch'
+}
+
+export interface SittingOutPlayer {
+    state: PlayerState.SittingOut,
     player: User
 }
 
-export interface SittingOutPlayer extends PlayerState {
-    state: 'SittingOut',
-    player: User
-}
-
-export interface PlayingPlayer extends PlayerState {
-    state: 'Playing',
+export interface PlayingPlayer {
+    state: PlayerState.Playing,
     player: Player
 }
 
-export interface WaitingPlayer extends PlayerState {
-    state: 'Waiting',
+export interface WaitingPlayer {
+    state: PlayerState.Waiting,
     player: Player
 }
 
-export interface ActingPlayer extends PlayerState {
-    state: 'Acting',
+export interface ActingPlayer {
+    state: PlayerState.Acting,
     player: Player,
     action: Action,
     timeout: number
 }
 
-export interface EndOfGamePlayer extends PlayerState {
-    state: 'EndOfGame',
+export interface EndOfGamePlayer {
+    state: PlayerState.EndOfGame,
     player: Player,
     points: number,
     winner: boolean
 }
 
-export interface EndOfMatchPlayer extends PlayerState {
-    state: 'EndOfMatch',
+export interface EndOfMatchPlayer {
+    state: PlayerState.EndOfMatch,
     player: Player,
     winner: boolean
+}
+
+export type PlayerContext =
+    SittingOutPlayer
+    | PlayingPlayer
+    | WaitingPlayer
+    | ActingPlayer
+    | EndOfGamePlayer
+    | EndOfMatchPlayer
+
+export function isActing(player: PlayerContext): player is ActingPlayer {
+    return player.state == PlayerState.Acting
 }

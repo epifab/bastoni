@@ -7,6 +7,7 @@ import back from "../view/cards/retro.svg";
 import {Assets} from "pixi.js";
 import {CardStyle} from "../view/CardStyle";
 import {useEffect, useState} from "react";
+import {DropShadowFilter} from '@pixi/filter-drop-shadow';
 
 export default function Card(layout: CardLayout) {
 
@@ -16,7 +17,6 @@ export default function Card(layout: CardLayout) {
     useEffect(() => {
         async function loadCard() {
             const uri = isVisible(layout.card) ? svgs[layout.card.suit][layout.card.rank] : back;
-            console.log(uri);
             setCard(await Assets.load(uri));
         }
 
@@ -28,7 +28,10 @@ export default function Card(layout: CardLayout) {
             texture={card}
             x={layout.topLeft.x}
             y={layout.topLeft.y}
-            scale={layout.width / 420}
+            scale={1}
+            filters={[new DropShadowFilter()]}
+            rotation={layout.rotation ?? 0}
+            anchor={{x: 0, y: 0}}
         />
     )
 }

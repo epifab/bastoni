@@ -42,7 +42,7 @@ export interface JoinTableMessage extends OutboxMessage {
     messageType: OutboxMessageType.JoinTable
 }
 
-export const joinRoomMessage: JoinTableMessage = {
+export const joinTableMessage: JoinTableMessage = {
     messageType: OutboxMessageType.JoinTable
 }
 
@@ -50,7 +50,7 @@ export interface LeaveTableMessage extends OutboxMessage {
     messageType: OutboxMessageType.LeaveTable
 }
 
-export const leaveRoomMessage: LeaveTableMessage = {
+export const leaveTableMessage: LeaveTableMessage = {
     messageType: OutboxMessageType.LeaveTable
 }
 

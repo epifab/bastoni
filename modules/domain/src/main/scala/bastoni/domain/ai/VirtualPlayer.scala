@@ -13,7 +13,7 @@ import scala.concurrent.duration.FiniteDuration
 case class ActContext(
     matchInfo: MatchInfo,
     room: Room[CardPlayerView],
-    mySeat: TakenSeat[CardPlayerView]
+    mySeat: OccupiedSeat[CardPlayerView]
 )
 
 trait ActStrategy:

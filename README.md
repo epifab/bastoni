@@ -1,6 +1,6 @@
 # Bastoni
 
-[![Build Status](https://app.travis-ci.com/epifab/bastoni.svg?token=jwZ8R2sq9gVzq2syFmMJ&branch=main)](https://app.travis-ci.com/epifab/bastoni)
+[![Build and test](https://github.com/epifab/bastoni/actions/workflows/main.yml/badge.svg)](https://github.com/epifab/bastoni/actions/workflows/main.yml)
 
 Gaming platform written in purely functional Scala, supporting italian classic card games: 
 [tressette](https://en.wikipedia.org/wiki/Tressette), 

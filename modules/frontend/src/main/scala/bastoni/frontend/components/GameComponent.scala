@@ -69,28 +69,28 @@ object GameComponent:
               List(
                 gameState.currentRoom.mainPlayer.map(seat =>
                   PlayerComponent(
-                    seat.player,
+                    seat.occupant,
                     state.currentLayout.mainPlayer,
                     gameState.currentRoom.dealerIndex.contains(seat.index)
                   )
                 ),
                 gameState.currentRoom.opponentLeft.map(seat =>
                   PlayerComponent(
-                    seat.player,
+                    seat.occupant,
                     state.currentLayout.player1,
                     gameState.currentRoom.dealerIndex.contains(seat.index)
                   )
                 ),
                 gameState.currentRoom.opponentFront.map(seat =>
                   PlayerComponent(
-                    seat.player,
+                    seat.occupant,
                     state.currentLayout.player2,
                     gameState.currentRoom.dealerIndex.contains(seat.index)
                   )
                 ),
                 gameState.currentRoom.opponentRight.map(seat =>
                   PlayerComponent(
-                    seat.player,
+                    seat.occupant,
                     state.currentLayout.player3,
                     gameState.currentRoom.dealerIndex.contains(seat.index)
                   )

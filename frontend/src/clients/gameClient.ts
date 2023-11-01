@@ -6,7 +6,18 @@ import {
     InboxMessage,
     InboxMessageType
 } from "../model/inboxMessage";
-import {OutboxMessage, pongMessage} from "../model/outboxMessage";
+import {
+    authenticateMessage,
+    connectMessage,
+    joinTableMessage,
+    okMessage,
+    OutboxMessage,
+    playCardMessage,
+    pongMessage,
+    shuffleDeckMessage,
+    startMatchMessage,
+    takeCardsMessage
+} from "../model/outboxMessage";
 import {Room, RoomId} from "../model/room";
 import {
     BoardCardsDealt,
@@ -30,25 +41,62 @@ import {
 } from "../model/event";
 import decodeJson from "../modelDecoder";
 import {User} from "../model/player";
+import {GameType} from "../model/gameType";
+import {VisibleCard} from "../model/card";
 
 function defaultHandler(event: any): void {
     console.log(event);
 }
 
-class GameClient {
+export class GameClient {
     private readonly ws: WebSocket
 
     constructor(ws: WebSocket) {
         this.ws = ws;
     }
 
-    send(message: OutboxMessage): GameClient {
+    private send(message: OutboxMessage): void {
         if (this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify(message));
-            return this;
         } else {
             throw new Error(`Not connected, status is: ${this.ws?.readyState ?? 'unknown'}`)
         }
+    }
+
+    connect(): void {
+        this.send(connectMessage)
+    }
+
+    authenticate(authToken: string): void {
+        this.send(authenticateMessage(authToken))
+    }
+
+    joinTable(): void {
+        this.send(joinTableMessage)
+    }
+
+    startMatch(gameType: GameType): void {
+        this.send(startMatchMessage(gameType))
+    }
+
+    shuffleDeck(): void {
+        this.send(shuffleDeckMessage)
+    }
+
+    ok(): void {
+        this.send(okMessage)
+    }
+
+    playCard(card: VisibleCard): void {
+        this.send(playCardMessage(card))
+    }
+
+    takeCards(card: VisibleCard, take: VisibleCard[]): void {
+        this.send(takeCardsMessage(card, take))
+    }
+
+    pong(): void {
+        this.send(pongMessage)
     }
 }
 

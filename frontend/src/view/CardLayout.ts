@@ -1,11 +1,12 @@
 import {Card} from "../model/card";
 import Point from "./Point";
-import Size from "./Size";
 import {CardStyle} from "./CardStyle";
+import Angle from "./Angle";
 
 export default interface CardLayout {
     card: Card,
-    style?: CardStyle,
     width: number,
-    topLeft: Point
+    topLeft: Point,
+    rotation?: Angle,
+    style?: CardStyle,
 }

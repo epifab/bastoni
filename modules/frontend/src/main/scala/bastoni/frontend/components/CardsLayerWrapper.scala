@@ -21,10 +21,10 @@ object CardsLayerWrapper:
 
     private def pilesLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] =
       val data: List[Option[List[CardInstance]]] = List(
-        room.opponentLeft.map(_.taken.map(_.card)),
-        room.opponentFront.map(_.taken.map(_.card)),
-        room.opponentRight.map(_.taken.map(_.card)),
-        room.mainPlayer.map(_.taken.map(_.card))
+        room.opponentLeft.map(_.pile.map(_.card)),
+        room.opponentFront.map(_.pile.map(_.card)),
+        room.opponentRight.map(_.pile.map(_.card)),
+        room.mainPlayer.map(_.pile.map(_.card))
       )
 
       val renderers: List[CardsRenderer] = List(
@@ -38,10 +38,10 @@ object CardsLayerWrapper:
 
     private def boardLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] =
       val players: Map[UserId, RoomPlayer] =
-        room.mainPlayer.map(_.player.id -> RoomPlayer.MainPlayer).toMap ++
-          room.opponentLeft.map(_.player.id -> RoomPlayer.Player1).toMap ++
-          room.opponentFront.map(_.player.id -> RoomPlayer.Player2).toMap ++
-          room.opponentRight.map(_.player.id -> RoomPlayer.Player3).toMap
+        room.mainPlayer.map(_.occupant.id -> RoomPlayer.MainPlayer).toMap ++
+          room.opponentLeft.map(_.occupant.id -> RoomPlayer.Player1).toMap ++
+          room.opponentFront.map(_.occupant.id -> RoomPlayer.Player2).toMap ++
+          room.opponentRight.map(_.occupant.id -> RoomPlayer.Player3).toMap
 
       layout.renderBoard(room.board.reverse.map { case BoardCard(card, user) =>
         user.flatMap(players.get) -> card.card
@@ -66,7 +66,7 @@ object CardsLayerWrapper:
 
     private def selectable(game: GameState, state: State): Map[CardId, Callback] =
       game.currentRoom.mainPlayer.fold(Map.empty)(seat =>
-        seat.player match
+        seat.occupant match
           case PlayerState
                 .Acting(_, Action.PlayCard(PlayContext.Briscola(_) | PlayContext.Tressette(None)), timeout)
               if !timeout.contains(Timeout.TimedOut) =>

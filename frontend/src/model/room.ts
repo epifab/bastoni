@@ -1,4 +1,4 @@
-import {PlayerState, User, UserId} from "./player";
+import {PlayerContext, User, UserId} from "./player";
 import {Card} from "./card";
 import {GameType} from "./gameType";
 import {GameScore, MatchScore} from "./score";
@@ -6,8 +6,8 @@ import {GameScore, MatchScore} from "./score";
 export interface Seat {
     index: number,
     hand: Card[],
-    taken: Card[],
-    takenBy?: PlayerState
+    pile: Card[],
+    occupant?: PlayerContext
 }
 
 interface BoardCard {

@@ -7,7 +7,7 @@ import io.circe.{ACursor, Decoder, DecodingFailure, Encoder}
 
 class StateMachineFactory(gameLogic: GenericGameLogic) extends GameStateMachineFactory:
   override def apply(room: RoomServerView): (GameStateMachine, List[StateMachineOutput]) =
-    val players: List[MatchPlayer] = room.round.map(_.player).map(MatchPlayer(_, 0))
+    val players: List[MatchPlayer] = room.round.map(_.occupant).map(MatchPlayer(_, 0))
     val state: MatchState          = gameLogic.initialState(players)
     val machine                    = new generic.StateMachine(gameLogic, state)
 

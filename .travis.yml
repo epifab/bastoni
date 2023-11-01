@@ -1,7 +1,0 @@
-language: scala
-jdk:
-  - openjdk16
-scala:
-  - 3.2.0
-script:
-  - sbt domainJVM/test

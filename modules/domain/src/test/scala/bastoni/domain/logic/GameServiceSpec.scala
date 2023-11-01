@@ -233,7 +233,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
               List(
                 EmptySeat(0, Nil, Nil),
                 EmptySeat(1, Nil, Nil),
-                TakenSeat(
+                OccupiedSeat(
                   2,
                   Acting(
                     MatchPlayer(user1, 0),
@@ -247,7 +247,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   ),
                   pile = Nil
                 ),
-                TakenSeat(
+                OccupiedSeat(
                   3,
                   Waiting(MatchPlayer(user2, 0)),
                   hand = List(
@@ -286,7 +286,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
               List(
                 EmptySeat(0, Nil, Nil),
                 EmptySeat(1, Nil, Nil),
-                TakenSeat(
+                OccupiedSeat(
                   2,
                   Waiting(MatchPlayer(user1, 0)),
                   hand = List(
@@ -295,7 +295,7 @@ class GameServiceSpec extends AsyncIOFreeSpec:
                   ),
                   pile = Nil
                 ),
-                TakenSeat(
+                OccupiedSeat(
                   3,
                   Acting(MatchPlayer(user2, 0), Action.PlayCard(PlayContext.Briscola(Coppe)), Some(Timeout.Max)),
                   hand = List(
@@ -351,13 +351,13 @@ class GameServiceSpec extends AsyncIOFreeSpec:
               List(
                 EmptySeat(0, Nil, Nil),
                 EmptySeat(1, Nil, Nil),
-                TakenSeat(
+                OccupiedSeat(
                   2,
                   SittingOut(user1),
                   hand = Nil,
                   pile = Nil
                 ),
-                TakenSeat(
+                OccupiedSeat(
                   3,
                   SittingOut(user2),
                   hand = Nil,
@@ -392,15 +392,15 @@ class GameServiceSpec extends AsyncIOFreeSpec:
     val initialContext = new GameContext(
       room = RoomServerView(
         seats = List(
-          TakenSeat(
+          OccupiedSeat(
             0,
-            player = Acting(player1, Action.PlayCard(PlayContext.Briscola(Denari)), Some(Timeout.Max)),
+            occupant = Acting(player1, Action.PlayCard(PlayContext.Briscola(Denari)), Some(Timeout.Max)),
             hand = List(CardServerView(player1Card, Direction.Player)),
             pile = player1Collected.map(card => CardServerView(card, Direction.Down))
           ),
-          TakenSeat(
+          OccupiedSeat(
             1,
-            player = Waiting(player2),
+            occupant = Waiting(player2),
             hand = Nil,
             pile = Nil
           )
@@ -518,15 +518,15 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         GameContext(
           room = RoomServerView(
             seats = List(
-              TakenSeat(
+              OccupiedSeat(
                 0,
-                player = EndOfMatch(player1.win, winner = true),
+                occupant = EndOfMatch(player1.win, winner = true),
                 hand = Nil,
                 pile = Nil
               ),
-              TakenSeat(
+              OccupiedSeat(
                 1,
-                player = EndOfMatch(player2, winner = false),
+                occupant = EndOfMatch(player2, winner = false),
                 hand = Nil,
                 pile = Nil
               )

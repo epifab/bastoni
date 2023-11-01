@@ -22,7 +22,7 @@ object DumbPlayer extends ActStrategy:
   def act(context: ActContext, action: Action): GameCommand =
     act(context.room, context.mySeat, action)
 
-  def act(room: Room[CardPlayerView], seat: TakenSeat[CardPlayerView], action: Action): GameCommand =
+  def act(room: Room[CardPlayerView], seat: OccupiedSeat[CardPlayerView], action: Action): GameCommand =
     val hand: List[VisibleCard] = seat.hand.flatMap(_.card.toOption)
 
     action match

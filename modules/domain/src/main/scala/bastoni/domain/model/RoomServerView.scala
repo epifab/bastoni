@@ -54,7 +54,7 @@ case class RoomServerView(
         val hand  = seat.hand.map(_.toPlayerView(me, seat.playerOption.map(_.id)))
         val taken = seat.pile.map(_.toPlayerView(me, seat.playerOption.map(_.id)))
         seat match
-          case seat: TakenSeat[CardServerView] => seat.copy(hand = hand, pile = taken)
+          case seat: OccupiedSeat[CardServerView] => seat.copy(hand = hand, pile = taken)
           case seat: EmptySeat[CardServerView] => seat.copy(hand = hand, pile = taken)
       },
       deck = deck.map(_.toPlayerView(me, None)),

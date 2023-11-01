@@ -41,7 +41,7 @@ object GameLayout:
     val boardSize = handSize
     val mainPlayerHandSize: CardSize = room
       .flatMap(_.mainPlayer.flatMap { seat =>
-        Some(seat.player).collect {
+        Some(seat.occupant).collect {
           case actor: PlayerState.Acting if actor.playingCard =>
             CardSize.scaleTo(
               maxWidth = canvasSize.width / (1 + (Math
