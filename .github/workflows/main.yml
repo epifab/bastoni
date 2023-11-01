@@ -18,4 +18,4 @@ jobs:
       - name: Build
         run: sbt compile Test/compile
       - name: Test
-        run: sbt test
+        run: sbt domainJVM/test backend/test  # todo: scalajs testing
