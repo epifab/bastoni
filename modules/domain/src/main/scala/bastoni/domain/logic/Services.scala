@@ -2,10 +2,11 @@ package bastoni.domain.logic
 
 import bastoni.domain.repos.*
 import cats.effect.{Async, Resource}
+import org.typelevel.log4cats.Logger
 
 object Services:
 
-  def apply[F[_]: Async](
+  def apply[F[_]: Async: Logger](
       instances: Int,
       messageQueue: MessageQueue[F],
       messageBus: MessageBus[F],
@@ -30,7 +31,7 @@ object Services:
       .concurrently(runners)
     (gameController, servicesRunner)
 
-  def inMemory[F[_]: Async]: Resource[F, (GameController[F], fs2.Stream[F, Unit])] =
+  def inMemory[F[_]: Async: Logger]: Resource[F, (GameController[F], fs2.Stream[F, Unit])] =
     for
       messageBus   <- Resource.eval(MessageBus.inMemory)
       messageQueue <- MessageQueue.inMemory(messageBus)

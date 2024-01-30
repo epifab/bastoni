@@ -1,6 +1,8 @@
 package bastoni.domain.model
 
 import bastoni.domain.model.PlayerState.*
+import cats.implicits.showInterpolator
+import cats.Show
 
 import scala.util.Random
 
@@ -18,20 +20,21 @@ case class RoomServerView(
 
   override type RoomView = RoomServerView
 
-  override protected def updateWith(
+  override protected def updateView(
       seats: List[Seat[CardServerView]],
       deck: List[CardServerView] = this.deck,
       board: List[BoardCard[CardServerView]] = this.board,
       matchInfo: Option[MatchInfo] = this.matchInfo,
       dealerIndex: Option[Int] = this.dealerIndex
-  ): RoomServerView = RoomServerView(
-    seats = seats,
-    deck = deck,
-    board = board,
-    matchInfo = matchInfo,
-    dealerIndex = dealerIndex,
-    players = updatedPlayers(seats)
-  )
+  ): RoomServerView =
+    RoomServerView(
+      seats = seats,
+      deck = deck,
+      board = board,
+      matchInfo = matchInfo,
+      dealerIndex = dealerIndex,
+      players = updatedPlayers(seats)
+    )
 
   override protected def buildCard(card: VisibleCard, direction: Direction): CardServerView =
     CardServerView(card, direction)
@@ -55,7 +58,7 @@ case class RoomServerView(
         val taken = seat.pile.map(_.toPlayerView(me, seat.playerOption.map(_.id)))
         seat match
           case seat: OccupiedSeat[CardServerView] => seat.copy(hand = hand, pile = taken)
-          case seat: EmptySeat[CardServerView] => seat.copy(hand = hand, pile = taken)
+          case seat: EmptySeat[CardServerView]    => seat.copy(hand = hand, pile = taken)
       },
       deck = deck.map(_.toPlayerView(me, None)),
       board = board.map(boardCard => BoardCard(boardCard.card.toPlayerView(me, None), boardCard.playedBy)),
@@ -79,7 +82,7 @@ case class RoomServerView(
         .collectFirst { case seat if seat.playerOption.isEmpty => seat.index }
         .fold[Either[RoomError, (RoomServerView, Int)]](Left(RoomError.FullRoom)) { targetIndex =>
           Right(
-            updateWith(
+            updateView(
               seats = seats.map {
                 case oldSeat if oldSeat.index == targetIndex => oldSeat.occupiedBy(SittingOut(player))
                 case seat                                    => seat
@@ -103,4 +106,8 @@ case class RoomServerView(
         )
 
       case None => Left(RoomError.PlayerNotFound)
+
 end RoomServerView
+
+object RoomServerView:
+  given Show[RoomServerView] = Show(Room.serverRoomViewCodec.apply(_).spaces2)

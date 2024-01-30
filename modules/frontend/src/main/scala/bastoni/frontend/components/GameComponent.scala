@@ -15,8 +15,10 @@ import japgolly.scalajs.react.component.Scala.BackendScope
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import japgolly.scalajs.react.vdom.html_<^.*
 import org.scalajs.dom
-import org.scalajs.dom.{console, window, Console, HTMLImageElement}
+import org.scalajs.dom.{Console, HTMLImageElement, console, window}
 import org.scalajs.dom.html.Image
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import reactkonva.{KGroup, KLayer, KStage}
 
 import scala.concurrent.duration.DurationInt
@@ -31,6 +33,8 @@ extension [T](io: IO[T])
 extension (callback: Callback) def toIO: IO[Unit] = IO(callback.runNow())
 
 object GameComponent:
+  given Logger[IO] = Slf4jLogger.getLogger
+
   case class State(gameState: Option[GameState], currentLayout: GameLayout, previousLayout: GameLayout):
     def refreshLayout: State =
       copy(currentLayout = GameLayout.fromWindow(gameState.map(_.currentRoom)), previousLayout = currentLayout)

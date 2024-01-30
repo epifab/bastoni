@@ -1,5 +1,7 @@
 package bastoni.domain.model
 
+import cats.implicits.showInterpolator
+import cats.Show
 import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.deriveCodec
 
@@ -18,3 +20,4 @@ object RoomId:
 
   given Encoder[RoomId] = Encoder.encodeUUID
   given Decoder[RoomId] = Decoder.decodeUUID
+  given Show[RoomId]    = Show.show(id => show"Room(${id.value.take(6)}...)")

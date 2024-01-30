@@ -1,5 +1,7 @@
 package bastoni.domain.model
 
+import cats.implicits.showInterpolator
+import cats.Show
 import io.circe.{Codec, Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
@@ -19,6 +21,8 @@ enum Delay:
 object Delay:
   given Encoder[Delay] = Encoder[String].contramap(_.toString)
   given Decoder[Delay] = Decoder[String].map(Delay.valueOf)
+
+  given Show[Delay] = Show(delay => show"Delay(${delay.toString})")
 
   object syntax:
     extension (command: Command.Continue.type)
@@ -47,7 +51,11 @@ case class Delayed[+T](inner: T, delay: Delay):
   def map[U](f: T => U): Delayed[U] = Delayed(f(inner), delay)
 
 object Delayed:
+  
   given [T](using Codec[T]): Codec[Delayed[T]] = deriveCodec
+  
+  given [T: Show]: Show[Delayed[T]] =
+    Show(delayed => show"Delayed(${delayed.inner}, ${delayed.delay})")
 
 type PotentiallyDelayed[T] = T | Delayed[T]
 

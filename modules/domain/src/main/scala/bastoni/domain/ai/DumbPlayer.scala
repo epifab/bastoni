@@ -7,13 +7,15 @@ import bastoni.domain.model.PlayerState.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.*
 import cats.effect.{Sync, Temporal}
+import cats.effect.kernel.Async
 import cats.effect.syntax.temporal.*
+import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util.chaining.*
 
 object DumbPlayer extends ActStrategy:
-  def apply[F[_]: Sync: Temporal](
+  def apply[F[_]: Async: Logger](
       controller: GameController[F],
       pause: FiniteDuration = 0.millis
   ): VirtualPlayer[F] =

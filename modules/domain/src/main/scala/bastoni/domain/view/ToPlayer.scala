@@ -2,6 +2,7 @@ package bastoni.domain.view
 
 import bastoni.domain.model.{PlayerEvent, RoomPlayerView, User}
 import bastoni.domain.model.Command.Act
+import cats.Show
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 
@@ -33,3 +34,5 @@ object ToPlayer:
 
   given Encoder[ToPlayer] = ConfiguredEncoder.derive(discriminator = Some("messageType"))
   given Decoder[ToPlayer] = ConfiguredDecoder.derive(discriminator = Some("messageType"))
+
+  given Show[ToPlayer] = Show(Encoder[ToPlayer].apply(_).spaces2)

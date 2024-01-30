@@ -9,8 +9,12 @@ import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server, ServerBuilder}
 import org.http4s.server.middleware.{CORS, CORSConfig, GZip}
 import org.http4s.server.websocket.WebSocketBuilder2
+import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
 
 object BackendApp extends IOApp:
+
+  given Logger[IO] = Slf4jLogger.getLogger
 
   private def webServer(gameController: GameController[IO]): Resource[IO, Server] =
     BlazeServerBuilder[IO]
@@ -38,3 +42,4 @@ object BackendApp extends IOApp:
 
   override def run(args: List[String]): IO[ExitCode] =
     resource.use(_.compile.drain.as(ExitCode.Success))
+end BackendApp

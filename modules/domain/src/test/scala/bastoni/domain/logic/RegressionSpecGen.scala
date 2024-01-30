@@ -2,17 +2,18 @@ package bastoni.domain.logic
 
 import bastoni.domain.ai.DumbPlayer
 import bastoni.domain.logic.Fixtures.*
+import bastoni.domain.logic.StateMachineInput.given
+import bastoni.domain.logic.StateMachineOutput.given
 import bastoni.domain.model.*
 import bastoni.domain.model.PlayerState.*
 import cats.effect.*
-import cats.effect.std.Queue
-import fs2.concurrent.Topic
 import io.circe.{Codec, Decoder, Encoder, Printer}
 import io.circe.generic.semiauto.deriveCodec
 import io.circe.syntax.*
+import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
 
 import java.io.{File, PrintWriter}
-import scala.concurrent.duration.DurationInt
 
 case class RegressionSpecContent(
     users: List[User],
@@ -26,6 +27,8 @@ object RegressionSpecContent:
   given Codec[RegressionSpecContent] = deriveCodec
 
 object RegressionSpecGen extends IOApp:
+  given Logger[IO] = Slf4jLogger.getLogger
+
   def users(number: 2 | 3 | 4): List[User] = number match
     case 2 => List(user1, user2)
     case 3 => List(user1, user2, user3)
@@ -43,7 +46,10 @@ object RegressionSpecGen extends IOApp:
         outputBus <- fs2.Stream.eval(InMemoryBus[IO, StateMachineOutput])
 
         initialRoom = RoomServerView(
-          seats = users.zipWithIndex.map { case (u, index) => OccupiedSeat(index, Waiting(MatchPlayer(u, 0)), Nil, Nil) },
+          seats =
+            users
+              .zipWithIndex
+              .map { case (u, index) => OccupiedSeat(index, Waiting(MatchPlayer(u, 0)), Nil, Nil) },
           deck = Nil,
           board = Nil,
           matchInfo = None,
@@ -100,7 +106,7 @@ object RegressionSpecGen extends IOApp:
           .concurrently(shufflingDeck)
           .concurrently(inputBus.run)
           .concurrently(outputBus.run)
-      yield ()).compile.drain
+      yield done).compile.drain
 
       input  <- inputRef.get
       output <- outputRef.get

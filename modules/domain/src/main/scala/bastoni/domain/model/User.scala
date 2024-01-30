@@ -1,5 +1,7 @@
 package bastoni.domain.model
 
+import cats.implicits.showInterpolator
+import cats.Show
 import io.circe.{Codec, Decoder, Encoder, KeyDecoder, KeyEncoder}
 import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
 
@@ -20,6 +22,8 @@ object UserId:
 
   extension (userId: UserId) def value: String = userId.toString
 
+  given Show[UserId] = Show(u => show"${u.value.take(6)}...")
+
 trait User(val id: UserId, val name: String):
   def is(other: User): Boolean   = other.id == id
   def is(other: UserId): Boolean = other == id
@@ -30,3 +34,4 @@ object User:
   def apply(id: UserId, name: String): User = BaseUser(id, name)
   given Encoder[User] = deriveEncoder[BaseUser].contramap[User](user => BaseUser(user.id, user.name))
   given Decoder[User] = deriveDecoder[BaseUser].map[User](identity)
+  given Show[User]    = Show(u => show"User(${u.name}, ${u.id.value.take(6)}...)")

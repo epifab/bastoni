@@ -15,6 +15,7 @@ import bastoni.domain.view.FromPlayer
 import bastoni.domain.AsyncIOFreeSpec
 import cats.effect.IO
 import io.circe.syntax.EncoderOps
+import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.DurationInt
 
@@ -67,7 +68,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         PlayerJoinedTable(user1, 3),
         PlayerJoinedTable(user2, 2),
         PlayerJoinedTable(user3, 1),
-        PlayerJoinedTable(user4, 0)
+        PlayerJoinedTable(user4, 0),
+        ClientError("Failed to join the table: FullRoom")
       ).map(_.toMessage(room1Id))
     )
   }
@@ -92,7 +94,12 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       LeaveTable(user1).toMessage(room2Id) // will be ignored as room2 doesn't exist
     )
 
-    gameService(commands).asserting(_ shouldBe List(PlayerJoinedTable(user1, 3).toMessage(room1Id)))
+    gameService(commands).asserting(
+      _ shouldBe List(
+        PlayerJoinedTable(user1, 3).toMessage(room1Id),
+        ClientError("Failed to leave the table: PlayerNotFound").toMessage(room2Id)
+      )
+    )
   }
 
   "Players cannot join the same room twice" in {
@@ -101,7 +108,12 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       JoinTable(user1, joinSeed).toMessage(room1Id) // will be ignored
     )
 
-    gameService(commands).asserting(_ shouldBe List(PlayerJoinedTable(user1, 3).toMessage(room1Id)))
+    gameService(commands).asserting(
+      _ shouldBe List(
+        PlayerJoinedTable(user1, 3),
+        ClientError("Failed to join the table: DuplicatePlayer")
+      ).map(_.toMessage(room1Id))
+    )
   }
 
   "Random messages will be ignored" in {
@@ -122,7 +134,12 @@ class GameServiceSpec extends AsyncIOFreeSpec:
         )
         .map(_.toMessage(room1Id))
 
-      gameService(commands).asserting(_ shouldBe List(PlayerJoinedTable(user1, 3).toMessage(room1Id)))
+      gameService(commands).asserting(
+        _ shouldBe List(
+          PlayerJoinedTable(user1, 3),
+          ClientError("Cannot start a match in an empty room")
+        ).map(_.toMessage(room1Id))
+      )
     }
 
     "can start for 2 players" in {
@@ -434,8 +451,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
     val oldMessage = CardPlayed(user2.id, player2Card).toMessage(room1Id)
 
     val resultIO = for
-      gameRepo    <- JsonRepos.gameRepo
-      messageRepo <- JsonRepos.messageRepo
+      gameRepo    <- GameRepo.inMemory[IO]
+      messageRepo <- MessageRepo.inMemory[IO]
       _           <- gameRepo.set(room1Id, initialContext)
       _           <- messageRepo.flying(oldMessage)
       messageBus  <- MessageBus.inMemory[IO]
@@ -466,84 +483,86 @@ class GameServiceSpec extends AsyncIOFreeSpec:
       messages   <- messageRepo.inFlight.compile.toList
     yield (events, newContext, messages)
 
-    resultIO.asserting { case (events, newContext, messages) =>
-      events shouldBe List(
-        oldMessage.data,
-        CardPlayed(user1.id, player1Card),
-        TrickCompleted(user2.id),
-        GameCompleted(
-          scores = List(
-            BriscolaGameScore(
-              List(user2.id),
-              List(
-                BriscolaGameScoreItem(cardOf(Asso, Denari), 11),
-                BriscolaGameScoreItem(cardOf(Tre, Denari), 10)
-              )
-            ),
-            BriscolaGameScore(
-              List(user1.id),
-              List(
-                BriscolaGameScoreItem(cardOf(Asso, Spade), 11),
-                BriscolaGameScoreItem(cardOf(Asso, Bastoni), 11),
-                BriscolaGameScoreItem(cardOf(Asso, Coppe), 11),
-                BriscolaGameScoreItem(cardOf(Tre, Spade), 10),
-                BriscolaGameScoreItem(cardOf(Tre, Coppe), 10),
-                BriscolaGameScoreItem(cardOf(Tre, Bastoni), 10),
-                BriscolaGameScoreItem(cardOf(Re, Denari), 4),
-                BriscolaGameScoreItem(cardOf(Re, Bastoni), 4),
-                BriscolaGameScoreItem(cardOf(Re, Coppe), 4),
-                BriscolaGameScoreItem(cardOf(Re, Spade), 4),
-                BriscolaGameScoreItem(cardOf(Cavallo, Denari), 3),
-                BriscolaGameScoreItem(cardOf(Cavallo, Bastoni), 3),
-                BriscolaGameScoreItem(cardOf(Cavallo, Spade), 3),
-                BriscolaGameScoreItem(cardOf(Cavallo, Coppe), 3),
-                BriscolaGameScoreItem(cardOf(Fante, Bastoni), 2),
-                BriscolaGameScoreItem(cardOf(Fante, Spade), 2),
-                BriscolaGameScoreItem(cardOf(Fante, Coppe), 2),
-                BriscolaGameScoreItem(cardOf(Fante, Denari), 2)
-              )
-            )
-          ).map(_.generify),
-          matchScores = List(
-            MatchScore(List(user2.id), 1),
-            MatchScore(List(user1.id), 3)
-          )
-        ),
-        PlayerConfirmed(user1.id),
-        PlayerConfirmed(user2.id),
-        MatchCompleted(List(user1.id))
-      )
-
-      newContext shouldBe Some(
-        GameContext(
-          room = RoomServerView(
-            seats = List(
-              OccupiedSeat(
-                0,
-                occupant = EndOfMatch(player1.win, winner = true),
-                hand = Nil,
-                pile = Nil
-              ),
-              OccupiedSeat(
-                1,
-                occupant = EndOfMatch(player2, winner = false),
-                hand = Nil,
-                pile = Nil
-              )
-            ),
-            deck = Nil,
-            board = Nil,
-            matchInfo = None,
-            dealerIndex = None,
-            players = Map(
-              user1.id -> user1,
-              user2.id -> user2
+    val expectedEvents = List(
+      oldMessage.data,
+      CardPlayed(user1.id, player1Card),
+      TrickCompleted(user2.id),
+      GameCompleted(
+        scores = List(
+          BriscolaGameScore(
+            List(user2.id),
+            List(
+              BriscolaGameScoreItem(cardOf(Asso, Denari), 11),
+              BriscolaGameScoreItem(cardOf(Tre, Denari), 10)
             )
           ),
-          stateMachine = None
+          BriscolaGameScore(
+            List(user1.id),
+            List(
+              BriscolaGameScoreItem(cardOf(Asso, Spade), 11),
+              BriscolaGameScoreItem(cardOf(Asso, Bastoni), 11),
+              BriscolaGameScoreItem(cardOf(Asso, Coppe), 11),
+              BriscolaGameScoreItem(cardOf(Tre, Spade), 10),
+              BriscolaGameScoreItem(cardOf(Tre, Coppe), 10),
+              BriscolaGameScoreItem(cardOf(Tre, Bastoni), 10),
+              BriscolaGameScoreItem(cardOf(Re, Denari), 4),
+              BriscolaGameScoreItem(cardOf(Re, Bastoni), 4),
+              BriscolaGameScoreItem(cardOf(Re, Coppe), 4),
+              BriscolaGameScoreItem(cardOf(Re, Spade), 4),
+              BriscolaGameScoreItem(cardOf(Cavallo, Denari), 3),
+              BriscolaGameScoreItem(cardOf(Cavallo, Bastoni), 3),
+              BriscolaGameScoreItem(cardOf(Cavallo, Spade), 3),
+              BriscolaGameScoreItem(cardOf(Cavallo, Coppe), 3),
+              BriscolaGameScoreItem(cardOf(Fante, Bastoni), 2),
+              BriscolaGameScoreItem(cardOf(Fante, Spade), 2),
+              BriscolaGameScoreItem(cardOf(Fante, Coppe), 2),
+              BriscolaGameScoreItem(cardOf(Fante, Denari), 2)
+            )
+          )
+        ).map(_.generify),
+        matchScores = List(
+          MatchScore(List(user2.id), 1),
+          MatchScore(List(user1.id), 3)
         )
-      )
+      ),
+      PlayerConfirmed(user1.id),
+      PlayerConfirmed(user2.id),
+      MatchCompleted(List(user1.id))
+    )
 
+    val expectedContext = Some(
+      GameContext(
+        room = RoomServerView(
+          seats = List(
+            OccupiedSeat(
+              0,
+              occupant = EndOfMatch(player1.win, winner = true),
+              hand = Nil,
+              pile = Nil
+            ),
+            OccupiedSeat(
+              1,
+              occupant = EndOfMatch(player2, winner = false),
+              hand = Nil,
+              pile = Nil
+            )
+          ),
+          deck = Nil,
+          board = Nil,
+          matchInfo = None,
+          dealerIndex = None,
+          players = Map(
+            user1.id -> user1,
+            user2.id -> user2
+          )
+        ),
+        stateMachine = None
+      )
+    )
+
+    resultIO.asserting { case (events, newContext, messages) =>
+      events shouldBe expectedEvents
+      newContext shouldBe expectedContext
       messages shouldBe Nil
     }
   }
@@ -565,8 +584,8 @@ class GameServiceSpec extends AsyncIOFreeSpec:
 
     val eventsIO = (for
       bus         <- MessageBus.inMemory[IO]
-      gameRepo    <- JsonRepos.gameRepo
-      messageRepo <- JsonRepos.messageRepo
+      gameRepo    <- GameRepo.inMemory[IO]
+      messageRepo <- MessageRepo.inMemory[IO]
       _           <- messageRepo.flying(message1)
       _           <- messageRepo.flying(message2)
       _           <- messageRepo.flying(message3)

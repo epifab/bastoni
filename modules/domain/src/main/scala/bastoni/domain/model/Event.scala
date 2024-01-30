@@ -1,6 +1,8 @@
 package bastoni.domain.model
 
 import bastoni.domain.logic.{briscola, scopa, tressette}
+import cats.implicits.showInterpolator
+import cats.Show
 import io.circe.*
 import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 import io.circe.syntax.*
@@ -21,8 +23,9 @@ sealed trait PublicEvent extends ServerEvent, PlayerEvent
 
 object Event:
   // Public events
-  case class PlayerJoinedTable(user: User, seat: Int)                                            extends PublicEvent
-  case class PlayerLeftTable(user: User, seat: Int)                                              extends PublicEvent
+  case class ClientError(reason: String)                                                        extends PublicEvent
+  case class PlayerJoinedTable(user: User, seat: Int)                                           extends PublicEvent
+  case class PlayerLeftTable(user: User, seat: Int)                                             extends PublicEvent
   case class MatchStarted(gameType: GameType, matchScores: List[MatchScore])                    extends PublicEvent
   case class TrumpRevealed(card: VisibleCard)                                                   extends PublicEvent
   case class BoardCardsDealt(cards: List[VisibleCard])                                          extends PublicEvent
@@ -88,17 +91,26 @@ object Event:
   given publicEventEncoder: Encoder[PublicEvent] =
     ConfiguredEncoder.derive(discriminator = Some("eventType"))
 
+  given publicEventShow: Show[PublicEvent] =
+    Show(publicEventEncoder.apply(_).spaces2)
+
   given publicEventDecoder: Decoder[PublicEvent] =
     ConfiguredDecoder.derive(discriminator = Some("eventType"))
 
   given serverEventEncoder: Encoder[ServerEvent] =
     ConfiguredEncoder.derive(discriminator = Some("eventType"))
 
+  given serverEventShow: Show[ServerEvent] =
+    Show(serverEventEncoder.apply(_).spaces2)
+
   given serverEventDecoder: Decoder[ServerEvent] =
     ConfiguredDecoder.derive(discriminator = Some("eventType"))
 
   given playerEventEncoder: Encoder[PlayerEvent] =
     ConfiguredEncoder.derive(discriminator = Some("eventType"))
+
+  given playerEventShow: Show[PlayerEvent] =
+    Show(playerEventEncoder.apply(_).spaces2)
 
   given playerEventDecoder: Decoder[PlayerEvent] =
     ConfiguredDecoder.derive(discriminator = Some("eventType"))

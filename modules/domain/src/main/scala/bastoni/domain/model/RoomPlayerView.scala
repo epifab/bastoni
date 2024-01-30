@@ -12,7 +12,7 @@ case class RoomPlayerView(
 
   override type RoomView = RoomPlayerView
 
-  override protected def updateWith(
+  override protected def updateView(
       seats: List[Seat[CardPlayerView]] = this.seats,
       deck: List[CardPlayerView] = this.deck,
       board: List[BoardCard[CardPlayerView]] = this.board,
@@ -51,7 +51,7 @@ case class RoomPlayerView(
     seats
       .slideUntil(_.playerOption.exists(_.is(me)))
       .filterNot(_.playerOption.exists(_.is(me)))
-      .collect { case taken: OccupiedSeat[CardPlayerView] => taken }
+      .collect { case occupied: OccupiedSeat[CardPlayerView] => occupied }
 
   val opponentLeft: Option[OccupiedSeat[CardPlayerView]] = opponents match
     case left :: _ :: _ :: Nil => Some(left)

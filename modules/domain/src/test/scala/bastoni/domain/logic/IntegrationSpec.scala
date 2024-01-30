@@ -6,11 +6,13 @@ import bastoni.domain.logic.Fixtures.*
 import bastoni.domain.model.*
 import bastoni.domain.model.Command.Continue
 import bastoni.domain.model.Event.GameAborted
+import bastoni.domain.repos.{GameRepo, MessageRepo}
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.*
 import bastoni.domain.view.ToPlayer.*
 import cats.effect.{IO, Sync}
 import cats.effect.syntax.all.*
+import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.DurationInt
 
@@ -33,8 +35,8 @@ class IntegrationSpec extends AsyncIOFreeSpec:
     (for
       messageBus   <- fs2.Stream.eval(MessageBus.inMemory[IO])
       messageQueue <- fs2.Stream.resource(MessageQueue.inMemory(messageBus))
-      gameRepo     <- fs2.Stream.eval(JsonRepos.gameRepo)
-      messageRepo  <- fs2.Stream.eval(JsonRepos.messageRepo)
+      gameRepo     <- fs2.Stream.eval(GameRepo.inMemory[IO])
+      messageRepo  <- fs2.Stream.eval(MessageRepo.inMemory[IO])
 
       controller = GameController(messageBus)
 

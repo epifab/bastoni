@@ -1,6 +1,5 @@
 package bastoni.domain
 
-import bastoni.domain.logic.Fixtures.cardOf
 import bastoni.domain.model.*
 import io.circe.parser.parse
 import io.circe.syntax.*

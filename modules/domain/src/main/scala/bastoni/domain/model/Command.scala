@@ -1,6 +1,7 @@
 package bastoni.domain.model
 
 import bastoni.domain.model.Command.PlayCard
+import cats.Show
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 
@@ -22,3 +23,5 @@ object Command:
 
   given Encoder[Command] = ConfiguredEncoder.derive(discriminator = Some("type"))
   given Decoder[Command] = ConfiguredDecoder.derive(discriminator = Some("type"))
+
+  given Show[Command] = Show(Encoder[Command].apply(_).noSpaces)

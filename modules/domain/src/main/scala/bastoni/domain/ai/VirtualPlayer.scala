@@ -5,7 +5,10 @@ import bastoni.domain.model.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.{Connect, JoinTable}
 import cats.effect.{Sync, Temporal}
+import cats.effect.kernel.Async
 import cats.effect.syntax.temporal.*
+import cats.syntax.all.*
+import org.typelevel.log4cats.Logger
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
@@ -19,7 +22,7 @@ case class ActContext(
 trait ActStrategy:
   def act(context: ActContext, action: Action): FromPlayer.GameCommand
 
-class VirtualPlayer[F[_]: Sync: Temporal](
+class VirtualPlayer[F[_]: Async: Logger](
     controller: GameController[F],
     strategy: ActStrategy,
     pause: FiniteDuration = 0.millis
@@ -46,7 +49,10 @@ class VirtualPlayer[F[_]: Sync: Temporal](
         case Some((context, ToPlayer.Request(Command.Act(playerId, action, _)))) if me.is(playerId) =>
           strategy.act(context, action)
       }
-      .evalMap(command => Sync[F].pure(command).delayBy(pause))
+      .evalMap(command =>
+        Logger[F].debug(Console.CYAN + show"VirtualPlayer: $me will play $command" + Console.RESET) *>
+          Sync[F].pure(command).delayBy(pause)
+      )
 
     actions.through(controller.publish(me, roomId))
 end VirtualPlayer

@@ -9,6 +9,7 @@ import cats.effect.{Resource, Sync}
 import cats.effect.syntax.all.*
 import cats.syntax.all.*
 import cats.Monad
+import org.typelevel.log4cats.Logger
 
 import scala.util.Random
 
@@ -23,18 +24,39 @@ trait GameController[F[_]] extends GameSubscriber[F] with GamePublisher[F]
 
 object GameController:
 
-  def apply[F[_]: Sync](messageBus: MessageBus[F]): GameController[F] =
+  def apply[F[_]: Sync: Logger](messageBus: MessageBus[F]): GameController[F] =
     val pub = publisher(messageBus)
     val sub = subscriber(messageBus)
     new GameController[F]:
-      override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, GameCommand]): fs2.Stream[F, Unit] =
-        pub.publish(me, roomId)(input)
+      override def publish(me: User, roomId: RoomId)(stream: fs2.Stream[F, GameCommand]): fs2.Stream[F, Unit] =
+        pub.publish(me, roomId)(
+          stream.evalTap(command =>
+            Logger[F].debug(
+              Console.CYAN +
+                show"GameController: $me publishes $command to $roomId" +
+                Console.RESET
+            )
+          )
+        )
 
-      override def publish1(me: User, roomId: RoomId)(input: GameCommand): F[Unit] =
-        pub.publish1(me, roomId)(input)
+      override def publish1(me: User, roomId: RoomId)(command: GameCommand): F[Unit] =
+        pub.publish1(me, roomId)(command) <* Logger[F].debug(
+          Console.CYAN +
+            show"GameController: $me publishes $command to $roomId" +
+            Console.RESET
+        )
 
       override def subscribe(me: User, roomId: RoomId): fs2.Stream[F, ToPlayer] =
-        sub.subscribe(me, roomId)
+        sub
+          .subscribe(me, roomId)
+          .evalTap(message =>
+            Logger[F].debug(
+              Console.CYAN +
+                show"GameController: $me receives $message from $roomId" +
+                Console.RESET
+            )
+          )
+  end apply
 
   def subscriber[F[_]: Sync](messageBus: MessageBus[F]): GameSubscriber[F] =
     (me: User, roomId: RoomId) =>

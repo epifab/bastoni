@@ -1,8 +1,8 @@
 package bastoni.domain.logic
 
-import bastoni.domain.model.{Command, Delay, Delayed, PotentiallyDelayed, ServerEvent}
+import bastoni.domain.model.*
+import cats.Show
 import io.circe.{Decoder, DecodingFailure, Encoder}
-import io.circe.generic.semiauto.deriveEncoder
 import io.circe.syntax.*
 
 type StateMachineInput  = ServerEvent | Command
@@ -24,6 +24,11 @@ object StateMachineInput:
       case "Command" => Decoder[Command].tryDecode(obj)
       case supertype => Left(DecodingFailure(s"Not an event nor a command: $supertype", typeCursor.history))
     }
+  }
+
+  given Show[StateMachineInput] = Show {
+    case serverEvent: ServerEvent => Show[ServerEvent].show(serverEvent)
+    case command: Command         => Show[Command].show(command)
   }
 
 object StateMachineOutput:
@@ -49,3 +54,11 @@ object StateMachineOutput:
       case supertype => Left(DecodingFailure(s"Not an event nor a command: $supertype", typeCursor.history))
     }
   }
+
+  given Show[StateMachineOutput] = Show {
+    case serverEvent: ServerEvent         => Show[ServerEvent].show(serverEvent)
+    case command: Command                 => Show[Command].show(command)
+    case delayedCommand: Delayed[Command] => Show[Delayed[Command]].show(delayedCommand)
+  }
+
+end StateMachineOutput

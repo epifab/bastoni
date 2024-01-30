@@ -2,6 +2,8 @@ package bastoni.domain.logic
 
 import bastoni.domain.model.*
 import bastoni.domain.model.Event.*
+import cats.implicits.showInterpolator
+import cats.syntax.show
 import io.circe.generic.semiauto.deriveCodec
 import io.circe.Codec
 
@@ -18,20 +20,24 @@ case class GameContext(room: RoomServerView, stateMachine: Option[GameStateMachi
       case Command.JoinTable(user, seed) =>
         room.join(user, seed) match
           case Right((newRoom, seat)) => newRoom -> List(PlayerJoinedTable(user, seat))
-          case Left(error)            => room    -> Nil
+          case Left(error)            => room    -> List(ClientError(s"Failed to join the table: $error"))
 
       case Command.LeaveTable(user) =>
         room.leave(user) match
           case Right((newRoom, seat)) => newRoom -> List(PlayerLeftTable(user, seat))
-          case Left(error)            => room    -> Nil
+          case Left(error)            => room    -> List(ClientError(s"Failed to leave the table: $error"))
 
       case _ => room -> Nil
 
     val (newStateMachine, gameMessages) = (stateMachine, message) match
-      case (None, Command.StartMatch(playerId, gameType))
-          if updatedRoom.contains(playerId) && updatedRoom.round.size > 1 =>
-        val (machine, initialEvents) = GameStateMachineFactory(gameType)(updatedRoom)
-        Some(machine) -> initialEvents
+      case (None, Command.StartMatch(playerId, gameType)) =>
+        if !updatedRoom.contains(playerId)
+        then stateMachine -> (ClientError(show"Player $playerId cannot start a match: not in the room") :: Nil)
+        else if updatedRoom.round.size <= 1
+        then stateMachine -> (ClientError(show"Cannot start a match in an empty room") :: Nil)
+        else
+          GameStateMachineFactory(gameType)(updatedRoom) match
+            case (m, e) => Some(m) -> e
       case (None, _)                     => stateMachine -> Nil
       case (Some(stateMachine), message) => stateMachine(message)
 

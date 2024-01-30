@@ -1,6 +1,7 @@
 package bastoni.domain.view
 
 import bastoni.domain.model.{GameType, User, VisibleCard}
+import cats.Show
 import io.circe.{Decoder, Encoder}
 import io.circe.derivation.{ConfiguredDecoder, ConfiguredEncoder}
 
@@ -24,3 +25,5 @@ object FromPlayer:
 
   given Encoder[FromPlayer] = ConfiguredEncoder.derive(discriminator = Some("messageType"))
   given Decoder[FromPlayer] = ConfiguredDecoder.derive(discriminator = Some("messageType"))
+
+  given Show[GameCommand] = Show(Encoder[FromPlayer].apply(_).spaces2)
