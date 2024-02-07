@@ -21,7 +21,7 @@ object Seat:
   given [C <: CardView: Decoder]: Decoder[Seat[C]] = Decoder.instance { cursor =>
     for
       emptySeat <- deriveDecoder[EmptySeat[C]].tryDecode(cursor)
-      player    <- cursor.downField("player").as[Option[PlayerState]]
+      player    <- cursor.downField("occupant").as[Option[PlayerState]]
     yield player.fold(emptySeat)(emptySeat.occupiedBy)
   }
 
