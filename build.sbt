@@ -81,7 +81,7 @@ lazy val backend = (project in file("modules/backend"))
       "org.scalatest"          %% "scalatest"                     % scalaTestVersion         % Test,
       "org.typelevel"          %% "cats-effect-testing-scalatest" % catsEffectTestingVersion % Test
     ),
-    scalaJSProjects := Seq(), // frontend),
+    scalaJSProjects := Seq(frontend), // frontend),
     exportJars      := true,
     resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
     resolvers += Resolver.bintrayRepo("hseeberger", "maven"),

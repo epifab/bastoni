@@ -130,7 +130,7 @@ object GameComponent:
           )
         )
 
-      case None => <.h1(<.img(^.src := "/static/denari.svg", ^.className := "spinning main-logo"))
+      case None => <.h1(<.img(^.src := "static/denari.svg", ^.className := "spinning main-logo"))
 
     val start: Callback =
       for

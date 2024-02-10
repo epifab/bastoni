@@ -1,11 +1,11 @@
-name: Build and test
+name: Publish to Github pages
 
 on:
   push:
     branches: [main]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,6 +20,32 @@ jobs:
         with:
           node-version: 12
       - name: Build
-        run: sbt compile Test/compile
-      - name: Test
-        run: sbt domainJVM/test frontend/fullLinkJS  # todo: scalajs testing
+        run: sbt frontend/fullLinkJS
+      - name: Prepare artifact
+        run: |
+          mkdir artifact
+          cp modules/frontend/target/scala-3.3.1/frontend-opt/main.js artifact/main.js
+          cp -r modules/backend/src/main/resources/static artifact/static
+          cp modules/backend/src/main/resources/index.html artifact/index.html
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: github-pages
+          path: artifact
+
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

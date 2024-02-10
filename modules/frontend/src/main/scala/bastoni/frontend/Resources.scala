@@ -85,8 +85,8 @@ object Resources extends Resources:
       val suit = card.suit.toString.toLowerCase
       val rank = "%02d".format(card.rank.value)
       val img = Image.svg(
-        s"/static/carte/napoletane/$suit/$rank.svg",
-        img => loaded(s"/static/carte/napoletane/$suit/$rank.svg")
+        s"static/carte/napoletane/$suit/$rank.svg",
+        img => loaded(s"static/carte/napoletane/$suit/$rank.svg")
       )
       card -> img
     }.toMap
@@ -96,7 +96,7 @@ object Resources extends Resources:
 //      val canvas = document.createElement("canvas").asInstanceOf[HTMLCanvasElement]
 //      val suit = card.suit.toString.toLowerCase
 //      val rank = "%02d".format(card.rank.value)
-//      val url = s"/static/carte/$cardStyle/$suit/$rank.svg"
+//      val url = s"static/carte/$cardStyle/$suit/$rank.svg"
 //      canvas.width = CardSize.full.width.floor.toInt
 //      canvas.height = CardSize.full.height.floor.toInt
 //      Canvg
@@ -106,8 +106,8 @@ object Resources extends Resources:
 //      card -> canvas
 //    }.toMap
 
-  val tablePatternImage: Image      = Image("/static/table.jpg", img => loaded(img.src))
-  val backOfCardPatternImage: Image = Image("/static/carte/cube.svg", img => loaded(img.src))
+  val tablePatternImage: Image      = Image("static/table.jpg", img => loaded(img.src))
+  val backOfCardPatternImage: Image = Image("static/carte/cube.svg", img => loaded(img.src))
 
   override val size: Int = cardImages.size + List(tablePatternImage, backOfCardPatternImage).length
 end Resources
