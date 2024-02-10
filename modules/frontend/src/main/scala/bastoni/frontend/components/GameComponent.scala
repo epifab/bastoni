@@ -7,7 +7,7 @@ import bastoni.domain.logic.Services
 import bastoni.domain.model.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.GameCommand
-import bastoni.frontend.model.{GameLayout, Size}
+import bastoni.frontend.model.FourPlayersLayout
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
 import japgolly.scalajs.react.*
@@ -15,14 +15,11 @@ import japgolly.scalajs.react.component.Scala.BackendScope
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import japgolly.scalajs.react.vdom.html_<^.*
 import org.scalajs.dom
-import org.scalajs.dom.{Console, HTMLImageElement, console, window}
-import org.scalajs.dom.html.Image
+import org.scalajs.dom.{console, window}
 import org.typelevel.log4cats.Logger
-import org.typelevel.log4cats.slf4j.Slf4jLogger
-import reactkonva.{KGroup, KLayer, KStage}
+import reactkonva.{KLayer, KStage}
 
 import scala.concurrent.duration.DurationInt
-import scala.scalajs.js
 
 extension [T](io: IO[T])
   def toCallback: Callback = Callback(io.unsafeRunAsync {
@@ -33,16 +30,45 @@ extension [T](io: IO[T])
 extension (callback: Callback) def toIO: IO[Unit] = IO(callback.runNow())
 
 object GameComponent:
-  given Logger[IO] = Slf4jLogger.getLogger
+  given Logger[IO] = new Logger[IO]:
+    override def error(message: => String): IO[Unit] =
+      IO(console.error(message))
 
-  case class State(gameState: Option[GameState], currentLayout: GameLayout, previousLayout: GameLayout):
+    override def warn(message: => String): IO[Unit] =
+      IO(console.warn(message))
+
+    override def info(message: => String): IO[Unit] =
+      IO(console.info(message))
+
+    override def debug(message: => String): IO[Unit] =
+      IO(console.debug(message))
+
+    override def trace(message: => String): IO[Unit] =
+      IO.unit
+
+    override def error(t: Throwable)(message: => String): IO[Unit] =
+      IO(console.error(message, t))
+
+    override def warn(t: Throwable)(message: => String): IO[Unit] =
+      IO(console.warn(message, t))
+
+    override def info(t: Throwable)(message: => String): IO[Unit] =
+      IO(console.info(message, t))
+
+    override def debug(t: Throwable)(message: => String): IO[Unit] =
+      IO(console.debug(message, t))
+
+    override def trace(t: Throwable)(message: => String): IO[Unit] =
+      IO.unit
+
+  case class State(gameState: Option[GameState], currentLayout: FourPlayersLayout, previousLayout: FourPlayersLayout):
     def refreshLayout: State =
-      copy(currentLayout = GameLayout.fromWindow(gameState.map(_.currentRoom)), previousLayout = currentLayout)
+      copy(currentLayout = FourPlayersLayout.fromWindow(gameState.map(_.currentRoom)), previousLayout = currentLayout)
     def update(nextGameState: GameState): State = copy(gameState = Some(nextGameState)).refreshLayout
 
   object State:
     def initial: State =
-      val layout = GameLayout.fromWindow(None)
+      val layout = FourPlayersLayout.fromWindow(None)
       State(None, layout, layout)
 
   private val component =

@@ -6,14 +6,11 @@ import bastoni.domain.model.{RoomId, User}
 import bastoni.domain.view.{ConnectionError, FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.GameCommand
 import cats.effect.{Deferred, IO}
-import cats.effect.std.Queue
-import cats.syntax.traverse.toTraverseOps
 import fs2.Pipe
-import io.circe.parser.{decode, parse}
+import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
-import org.http4s.{AuthedRoutes, CacheDirective, Headers, HttpRoutes, Response, StaticFile}
+import org.http4s.{HttpRoutes, Response}
 import org.http4s.dsl.io.*
-import org.http4s.headers.`Cache-Control`
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
@@ -40,6 +37,10 @@ object GameControllerRoutes:
               .merge(fs2.Stream.awakeEvery[IO](5.seconds).map(_ => ToPlayer.Ping))
           case Left(error) =>
             fs2.Stream(ToPlayer.Disconnected(error))
+        }
+        .takeThrough {
+          case ToPlayer.Disconnected(_) => false
+          case _                        => true
         }
         .map(_.asJson.noSpaces)
         .map(Text(_))

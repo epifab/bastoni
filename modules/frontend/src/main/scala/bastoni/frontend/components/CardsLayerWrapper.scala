@@ -15,11 +15,11 @@ object CardsLayerWrapper:
 
   case class State(takingCards: Option[TakingCardsState], mouseOver: Option[CardId] = None)
 
-  case class Props(game: GameState, currentLayout: GameLayout, previousLayout: GameLayout)
+  case class Props(game: GameState, currentLayout: FourPlayersLayout, previousLayout: FourPlayersLayout)
 
   class Backend($ : BackendScope[Props, State]):
 
-    private def pilesLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] =
+    private def pilesLayout(room: RoomPlayerView, layout: FourPlayersLayout): List[CardLayout] =
       val data: List[Option[List[CardInstance]]] = List(
         room.opponentLeft.map(_.pile.map(_.card)),
         room.opponentFront.map(_.pile.map(_.card)),
@@ -36,7 +36,7 @@ object CardsLayerWrapper:
 
       data.zip(renderers).flatMap { case (d, f) => d.toList.flatMap(f) }
 
-    private def boardLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] =
+    private def boardLayout(room: RoomPlayerView, layout: FourPlayersLayout): List[CardLayout] =
       val players: Map[UserId, RoomPlayer] =
         room.mainPlayer.map(_.occupant.id -> RoomPlayer.MainPlayer).toMap ++
           room.opponentLeft.map(_.occupant.id -> RoomPlayer.Player1).toMap ++
@@ -47,7 +47,7 @@ object CardsLayerWrapper:
         user.flatMap(players.get) -> card.card
       })
 
-    private def handsLayout(room: RoomPlayerView, layout: GameLayout): List[CardLayout] =
+    private def handsLayout(room: RoomPlayerView, layout: FourPlayersLayout): List[CardLayout] =
       val data: List[Option[List[CardInstance]]] = List(
         room.opponentLeft.map(_.hand.map(_.card)),
         room.opponentFront.map(_.hand.map(_.card)),
@@ -145,7 +145,7 @@ object CardsLayerWrapper:
     def render(props: Props, state: State): VdomNode =
       val Props(game, currentLayout, previousLayout) = props
 
-      def cardsFor(room: RoomPlayerView, layout: GameLayout): List[CardLayout] =
+      def cardsFor(room: RoomPlayerView, layout: FourPlayersLayout): List[CardLayout] =
         layout.deck.renderCards(room.deck.map(_.card)) ++
           pilesLayout(room, layout) ++
           boardLayout(room, layout) ++
@@ -197,6 +197,6 @@ object CardsLayerWrapper:
       .renderBackend[Backend]
       .build
 
-  def apply(game: GameState, currentLayout: GameLayout, previousLayout: GameLayout): VdomNode =
+  def apply(game: GameState, currentLayout: FourPlayersLayout, previousLayout: FourPlayersLayout): VdomNode =
     component(Props(game, currentLayout, previousLayout))
 end CardsLayerWrapper

@@ -1,21 +1,17 @@
 package bastoni.backend
 
-import bastoni.domain.model.{RoomId, RoomPlayerView, User, UserId}
-import bastoni.domain.model.EmptySeat
+import bastoni.domain.model.*
 import bastoni.domain.model.Event.PlayerJoinedTable
 import bastoni.domain.view.{FromPlayer, ToPlayer}
-import cats.effect.{IO, Resource}
 import cats.effect.testing.scalatest.AsyncIOSpec
 import cats.effect.unsafe.IORuntime
-import fs2.concurrent.SignallingRef
-import io.circe.syntax.EncoderOps
+import cats.effect.IO
+import cats.implicits.showInterpolator
 import org.http4s.syntax.all.uri
 import org.http4s.Uri
-import org.scalatest.{stats, Assertion}
 import org.scalatest.freespec.AsyncFreeSpecLike
 import org.scalatest.matchers.should.Matchers
-
-import scala.concurrent.ExecutionContext
+import org.scalatest.Assertion
 
 class ConnectionSpec extends AsyncFreeSpecLike with AsyncIOSpec with Matchers:
   override given ioRuntime: IORuntime = cats.effect.unsafe.IORuntime.global

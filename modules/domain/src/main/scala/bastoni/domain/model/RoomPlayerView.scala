@@ -1,5 +1,7 @@
 package bastoni.domain.model
 
+import cats.Show
+
 case class RoomPlayerView(
     me: UserId,
     override val seats: List[Seat[CardPlayerView]],
@@ -67,3 +69,6 @@ case class RoomPlayerView(
     case _                      => None
   val mainPlayer: Option[OccupiedSeat[CardPlayerView]] = seatFor(me)
 end RoomPlayerView
+
+object RoomPlayerView:
+  given Show[RoomPlayerView] = Show(Room.playerRoomViewCodec.apply(_).spaces2)

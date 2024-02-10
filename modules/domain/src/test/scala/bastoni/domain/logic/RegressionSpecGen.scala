@@ -6,11 +6,11 @@ import bastoni.domain.logic.StateMachineInput.given
 import bastoni.domain.logic.StateMachineOutput.given
 import bastoni.domain.model.*
 import bastoni.domain.model.PlayerState.*
+import bastoni.domain.ScalaJsCompatibleLogger
 import cats.effect.*
 import io.circe.{Codec, Decoder, Encoder, Printer}
 import io.circe.generic.semiauto.deriveCodec
 import io.circe.syntax.*
-import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
 
 import java.io.{File, PrintWriter}
@@ -27,7 +27,7 @@ object RegressionSpecContent:
   given Codec[RegressionSpecContent] = deriveCodec
 
 object RegressionSpecGen extends IOApp:
-  given Logger[IO] = Slf4jLogger.getLogger
+  given Logger[IO] = ScalaJsCompatibleLogger
 
   def users(number: 2 | 3 | 4): List[User] = number match
     case 2 => List(user1, user2)
@@ -46,10 +46,8 @@ object RegressionSpecGen extends IOApp:
         outputBus <- fs2.Stream.eval(InMemoryBus[IO, StateMachineOutput])
 
         initialRoom = RoomServerView(
-          seats =
-            users
-              .zipWithIndex
-              .map { case (u, index) => OccupiedSeat(index, Waiting(MatchPlayer(u, 0)), Nil, Nil) },
+          seats = users.zipWithIndex
+            .map { case (u, index) => OccupiedSeat(index, Waiting(MatchPlayer(u, 0)), Nil, Nil) },
           deck = Nil,
           board = Nil,
           matchInfo = None,

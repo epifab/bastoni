@@ -1,18 +1,14 @@
 package bastoni.backend
 
-import bastoni.domain.logic.GameController
-import bastoni.domain.model.{RoomId, User}
+import bastoni.domain.model.RoomId
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import cats.effect.kernel.{Async, Resource, Sync}
 import cats.syntax.all.*
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
-import org.http4s.{Header, Headers, Method, RequestCookie, Uri}
 import org.http4s.client.websocket.{WSClient, WSFrame, WSRequest}
-import org.http4s.client.Client
-import org.http4s.headers.Cookie
 import org.http4s.jdkhttpclient.JdkWSClient
-import org.typelevel.ci.CIString
+import org.http4s.Uri
 
 trait GameControllerClient[F[_]]:
   def send(messages: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]

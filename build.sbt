@@ -20,10 +20,12 @@ val secureRandomVersion      = "1.0.0"
 val scalaXmlVersion          = "2.1.0"
 val scalaTestVersion         = "3.2.15"
 
-val scalaJsDomVersion   = "2.4.0"
+val scalaJsDomVersion   = "2.8.0"
 val scalaJsReactVersion = "2.1.1"
+val konvaVersion        = "9.3.3"
+val canvasVersion       = "2.11.2"
 val reactVersion        = "18.2.0"
-val reactKonvaVersion   = "18.2.5"
+val reactKonvaVersion   = "18.2.10"
 
 lazy val domain = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
@@ -37,6 +39,7 @@ lazy val domain = crossProject(JVMPlatform, JSPlatform)
       "io.circe"      %%% "circe-core"                    % circeVersion,
       "io.circe"      %%% "circe-generic"                 % circeVersion,
       "io.circe"      %%% "circe-parser"                  % circeVersion,
+      "org.typelevel" %%% "log4cats-core"                 % log4catsVersion,
       "org.typelevel"  %% "log4cats-slf4j"                % log4catsVersion,
       "ch.qos.logback"  % "logback-classic"               % logbackClassicVersion,
       "org.typelevel" %%% "cats-effect-testing-scalatest" % catsEffectTestingVersion % Test,
@@ -58,6 +61,7 @@ lazy val frontend = (project in file("modules/frontend"))
     Compile / npmDependencies ++= Seq(
       "react"       -> reactVersion,
       "react-dom"   -> reactVersion,
+      "konva"       -> konvaVersion,
       "react-konva" -> reactKonvaVersion
     ),
     scalaJSUseMainModuleInitializer := true

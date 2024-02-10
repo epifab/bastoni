@@ -10,7 +10,7 @@ import japgolly.scalajs.react.ScalaComponent
 import reactkonva.{KCircle, KGroup, KLayer, KText}
 
 object DeckShufflingLayer:
-  case class Props(room: RoomPlayerView, layout: GameLayout, sendMessage: GameCommand => Callback)
+  case class Props(room: RoomPlayerView, layout: FourPlayersLayout, sendMessage: GameCommand => Callback)
   case class State(mouseOver: Boolean)
 
   private val component = ScalaComponent
@@ -71,6 +71,6 @@ object DeckShufflingLayer:
     }
     .build
 
-  def apply(room: RoomPlayerView, layout: GameLayout, sendMessage: GameCommand => Callback): VdomNode =
+  def apply(room: RoomPlayerView, layout: FourPlayersLayout, sendMessage: GameCommand => Callback): VdomNode =
     component(Props(room, layout, sendMessage))
 end DeckShufflingLayer

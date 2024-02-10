@@ -5,7 +5,7 @@ import org.scalajs.dom.window
 
 import scala.util.Random
 
-case class GameLayout(
+case class FourPlayersLayout(
     canvas: Size,
     mainPlayer: SeatLayout,
     player1: SeatLayout,
@@ -16,12 +16,12 @@ case class GameLayout(
     deck: DeckLayout
 )
 
-object GameLayout:
+object FourPlayersLayout:
   private val textHeight: Int = 10
   private val seatRadius      = 45
 
-  def fromWindow(room: Option[RoomPlayerView]): GameLayout =
-    GameLayout(Size(window.innerWidth, window.innerHeight), room)
+  def fromWindow(room: Option[RoomPlayerView]): FourPlayersLayout =
+    FourPlayersLayout(Size(window.innerWidth, window.innerHeight), room)
 
   def otherSeatLayout(handSize: CardSize, pileSize: CardSize, center: Point, rotation: Angle): SeatLayout =
     SeatLayout(
@@ -34,7 +34,7 @@ object GameLayout:
       rotation = rotation
     )
 
-  def apply(canvasSize: Size, room: Option[RoomPlayerView]): GameLayout =
+  def apply(canvasSize: Size, room: Option[RoomPlayerView]): FourPlayersLayout =
     val pileSize  = CardSize.scaleTo(canvasSize.width / 8, canvasSize.height / 8)
     val deckSize  = pileSize
     val handSize  = CardSize.scaleTo(canvasSize.width / 5, canvasSize.height / 5)
@@ -54,7 +54,7 @@ object GameLayout:
 
     val cardsMargin: Int = (boardSize.width / 4).floor.toInt
 
-    GameLayout(
+    FourPlayersLayout(
       canvas = canvasSize,
       mainPlayer = SeatLayout(
         handRenderer = MainPlayerHandRenderer(mainPlayerHandSize, canvasSize),
@@ -117,4 +117,4 @@ object GameLayout:
       deck = DeckLayout(deckSize, canvasSize)
     )
   end apply
-end GameLayout
+end FourPlayersLayout
