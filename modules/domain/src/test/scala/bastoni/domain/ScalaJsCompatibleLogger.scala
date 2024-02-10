@@ -11,9 +11,9 @@ object ScalaJsCompatibleLogger extends Logger[IO]:
 
   override def info(message: => String): IO[Unit] = IO.println(message)
 
-  override def debug(message: => String): IO[Unit] = IO.println(message)
+  override def debug(message: => String): IO[Unit] = IO.unit
 
-  override def trace(message: => String): IO[Unit] = IO.println(message)
+  override def trace(message: => String): IO[Unit] = IO.unit
 
   override def error(t: Throwable)(message: => String): IO[Unit] = IO.println(message)
 
@@ -21,6 +21,6 @@ object ScalaJsCompatibleLogger extends Logger[IO]:
 
   override def info(t: Throwable)(message: => String): IO[Unit] = IO.println(message)
 
-  override def debug(t: Throwable)(message: => String): IO[Unit] = IO.println(message)
+  override def debug(t: Throwable)(message: => String): IO[Unit] = IO.unit
 
-  override def trace(t: Throwable)(message: => String): IO[Unit] = IO.println(message)
+  override def trace(t: Throwable)(message: => String): IO[Unit] = IO.unit
