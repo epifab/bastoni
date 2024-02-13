@@ -20,11 +20,11 @@ jobs:
         with:
           node-version: 12
       - name: Build
-        run: sbt frontend/fullLinkJS
+        run: sbt frontend/fastOptJS/webpack
       - name: Prepare artifact
         run: |
           mkdir artifact
-          cp modules/frontend/target/scala-3.3.1/frontend-opt/main.js artifact/main.js
+          cp modules/frontend/target/scala-3.3.1/frontend-fastopt/main.js artifact/main.js
           cp -r modules/backend/src/main/resources/static artifact/static
           cp modules/backend/src/main/resources/index.html artifact/index.html
       - name: Upload artifact
