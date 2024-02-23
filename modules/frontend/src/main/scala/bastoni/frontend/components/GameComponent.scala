@@ -1,6 +1,5 @@
 package bastoni.frontend
 package components
-
 import bastoni.domain.ai
 import bastoni.domain.ai.{GreedyPlayer, VirtualPlayer}
 import bastoni.domain.logic.Services
@@ -8,6 +7,7 @@ import bastoni.domain.model.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.GameCommand
 import bastoni.frontend.model.FourPlayersLayout
+import bastoni.sdk.Logger.given
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
 import japgolly.scalajs.react.*
@@ -30,36 +30,6 @@ extension [T](io: IO[T])
 extension (callback: Callback) def toIO: IO[Unit] = IO(callback.runNow())
 
 object GameComponent:
-  given Logger[IO] = new Logger[IO]:
-    override def error(message: => String): IO[Unit] =
-      IO(console.error(message))
-
-    override def warn(message: => String): IO[Unit] =
-      IO(console.warn(message))
-
-    override def info(message: => String): IO[Unit] =
-      IO(console.info(message))
-
-    override def debug(message: => String): IO[Unit] =
-      IO(console.debug(message))
-
-    override def trace(message: => String): IO[Unit] =
-      IO.unit
-
-    override def error(t: Throwable)(message: => String): IO[Unit] =
-      IO(console.error(message, t))
-
-    override def warn(t: Throwable)(message: => String): IO[Unit] =
-      IO(console.warn(message, t))
-
-    override def info(t: Throwable)(message: => String): IO[Unit] =
-      IO(console.info(message, t))
-
-    override def debug(t: Throwable)(message: => String): IO[Unit] =
-      IO(console.debug(message, t))
-
-    override def trace(t: Throwable)(message: => String): IO[Unit] =
-      IO.unit
 
   case class State(gameState: Option[GameState], currentLayout: FourPlayersLayout, previousLayout: FourPlayersLayout):
     def refreshLayout: State =

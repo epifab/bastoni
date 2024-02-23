@@ -47,25 +47,32 @@ lazy val domain = crossProject(JVMPlatform, JSPlatform)
     )
   )
 
-lazy val frontend = (project in file("modules/frontend"))
-  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
+lazy val sdk = (project in file("modules/sdk"))
+  .enablePlugins(ScalaJSPlugin)
   .dependsOn(domain.js)
   .settings(
-    scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage),
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-    libraryDependencies ++= Seq(
-      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
-      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
-      "com.github.japgolly.scalajs-react" %%% "core" % scalaJsReactVersion
-    ),
-    Compile / npmDependencies ++= Seq(
-      "react"       -> reactVersion,
-      "react-dom"   -> reactVersion,
-      "konva"       -> konvaVersion,
-      "react-konva" -> reactKonvaVersion
-    ),
-    scalaJSUseMainModuleInitializer := true
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
   )
+
+//lazy val frontend = (project in file("modules/frontend"))
+//  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
+//  .dependsOn(domain.js)
+//  .settings(
+//    scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage),
+//    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+//    libraryDependencies ++= Seq(
+//      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
+//      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
+//      "com.github.japgolly.scalajs-react" %%% "core" % scalaJsReactVersion
+//    ),
+//    Compile / npmDependencies ++= Seq(
+//      "react"       -> reactVersion,
+//      "react-dom"   -> reactVersion,
+//      "konva"       -> konvaVersion,
+//      "react-konva" -> reactKonvaVersion
+//    ),
+//    scalaJSUseMainModuleInitializer := true
+//  )
 
 lazy val backend = (project in file("modules/backend"))
   .enablePlugins(SbtWeb, WebScalaJSBundlerPlugin, JavaAppPackaging)
@@ -81,7 +88,7 @@ lazy val backend = (project in file("modules/backend"))
       "org.scalatest"          %% "scalatest"                     % scalaTestVersion         % Test,
       "org.typelevel"          %% "cats-effect-testing-scalatest" % catsEffectTestingVersion % Test
     ),
-    scalaJSProjects := Seq(frontend),
+    scalaJSProjects := Seq(), // (frontend),
     exportJars      := true,
     resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
     resolvers += Resolver.bintrayRepo("hseeberger", "maven"),
