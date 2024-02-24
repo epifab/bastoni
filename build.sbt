@@ -51,28 +51,36 @@ lazy val sdk = (project in file("modules/sdk"))
   .enablePlugins(ScalaJSPlugin)
   .dependsOn(domain.js)
   .settings(
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
+    libraryDependencies ++= Seq(
+      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
+      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13)
+    ),
+    scalaJSLinkerConfig ~= {
+      _.withModuleKind(ModuleKind.ESModule)
+      // .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("bastoni.sdk")))
+    }
   )
 
-//lazy val frontend = (project in file("modules/frontend"))
-//  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
-//  .dependsOn(domain.js)
-//  .settings(
-//    scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage),
-//    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-//    libraryDependencies ++= Seq(
-//      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
-//      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
-//      "com.github.japgolly.scalajs-react" %%% "core" % scalaJsReactVersion
-//    ),
-//    Compile / npmDependencies ++= Seq(
-//      "react"       -> reactVersion,
-//      "react-dom"   -> reactVersion,
-//      "konva"       -> konvaVersion,
-//      "react-konva" -> reactKonvaVersion
-//    ),
-//    scalaJSUseMainModuleInitializer := true
-//  )
+lazy val frontend = (project in file("modules/frontend"))
+  .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, ScalaJSWeb)
+  .dependsOn(domain.js)
+  .settings(
+    scalaJSStage := (if (sys.env.get("FULL_OPT_JS").forall(_.toBoolean)) FullOptStage else FastOptStage),
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    libraryDependencies ++= Seq(
+      ("org.scala-js" %%% "scalajs-java-securerandom" % secureRandomVersion).cross(CrossVersion.for3Use2_13),
+      "org.scala-js"  %%% "scalajs-dom"               % scalaJsDomVersion,
+      "com.github.japgolly.scalajs-react" %%% "core" % scalaJsReactVersion
+    ),
+    Compile / npmDependencies ++= Seq(
+      "react"       -> reactVersion,
+      "react-dom"   -> reactVersion,
+      "konva"       -> konvaVersion,
+      "react-konva" -> reactKonvaVersion
+    ),
+    scalaJSUseMainModuleInitializer := true
+  )
 
 lazy val backend = (project in file("modules/backend"))
   .enablePlugins(SbtWeb, WebScalaJSBundlerPlugin, JavaAppPackaging)
