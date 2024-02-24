@@ -1,0 +1,12 @@
+{
+  "name": "bastoni",
+  "description": "Italian card games SDK",
+  "author": "epifab solutions",
+  "keywords": ["scopa", "tressette", "briscola"],
+  "version": "0.1.0",
+  "dependencies": {
+    "typescript": "^4.9.5"
+  },
+  "homepage": "https://epifab.github.io/bastoni/",
+  "repository": "https://github.com/epifab/bastoni.git"
+}

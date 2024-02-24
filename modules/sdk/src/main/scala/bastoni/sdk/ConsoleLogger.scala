@@ -4,7 +4,7 @@ import cats.effect.IO
 import org.scalajs.dom.window.console
 import org.typelevel.log4cats.Logger as CatsLogger
 
-object Logger:
+object ConsoleLogger:
   given CatsLogger[IO] = new CatsLogger[IO]:
     override def error(message: => String): IO[Unit] =
       IO(console.error(message))
@@ -35,4 +35,4 @@ object Logger:
 
     override def trace(t: Throwable)(message: => String): IO[Unit] =
       IO.unit
-end Logger
+end ConsoleLogger
