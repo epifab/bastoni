@@ -32,7 +32,7 @@ export function App() {
   })
 
   useEffect(() => {
-    const cleanup = playAgainstComputer(
+    const cleanup: () => void = playAgainstComputer(
       'Me',
       GameType.Briscola,
       (message: InboxMessage, room: Room) => {
@@ -43,8 +43,8 @@ export function App() {
     )
     console.info("Game loaded")
     return () => {
-      cleanup()
       console.info("Game unloaded")
+      cleanup()
     }
   }, []);
 

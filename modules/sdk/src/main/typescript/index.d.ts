@@ -9,13 +9,3 @@ export function playAgainstComputer(
   onMesage: (message: InboxMessage, room: Room) => void,
   onInt: (sendMessage: (message: OutboxMessage) => void) => void
 ): () => void
-
-export function playRemote(
-  host: string,
-  playerName: string,
-  roomId: RoomId,
-  roomSize: number,
-  gameType: GameType,
-  onMesage: (message: InboxMessage, room: Room) => void,
-  onInt: (sendMessage: (message: OutboxMessage) => void) => void
-): () => void

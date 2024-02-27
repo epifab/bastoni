@@ -50,7 +50,7 @@ object GameSdk:
       onMessage: js.Function2[ToPlayerJs, RoomJs, Unit],
       onInit: js.Function1[js.Function1[FromPlayerJs, Unit], Unit]
   ): js.Function0[Unit] =
-    val cancel: () => Future[Unit] = Services
+    val program: IO[Unit] = Services
       .inMemory[IO]
       .map { case (controller, runner) =>
         val roomId        = RoomId.newId
@@ -91,7 +91,8 @@ object GameSdk:
             .unsafeRunAndForget()
         }) *> stream.compile.drain
       }
-      .unsafeRunCancelable()
+
+    val cancel = program.unsafeRunCancelable()
     () => cancel()
   end playAgainstComputer
 
