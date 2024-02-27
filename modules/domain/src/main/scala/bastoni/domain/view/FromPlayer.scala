@@ -26,4 +26,4 @@ object FromPlayer:
   given Encoder[FromPlayer] = ConfiguredEncoder.derive(discriminator = Some("messageType"))
   given Decoder[FromPlayer] = ConfiguredDecoder.derive(discriminator = Some("messageType"))
 
-  given Show[GameCommand] = Show(Encoder[FromPlayer].apply(_).spaces2)
+  given Show[FromPlayer] = Show(Encoder[FromPlayer].apply(_).spaces2)

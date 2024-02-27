@@ -17,8 +17,8 @@ trait GameSubscriber[F[_]]:
   def subscribe(me: User, roomId: RoomId): fs2.Stream[F, ToPlayer]
 
 trait GamePublisher[F[_]]:
-  def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, GameCommand]): fs2.Stream[F, Unit]
-  def publish1(me: User, roomId: RoomId)(input: GameCommand): F[Unit]
+  def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
+  def publish1(me: User, roomId: RoomId)(input: FromPlayer): F[Unit]
 
 trait GameController[F[_]] extends GameSubscriber[F] with GamePublisher[F]
 
@@ -28,7 +28,7 @@ object GameController:
     val pub = publisher(messageBus)
     val sub = subscriber(messageBus)
     new GameController[F]:
-      override def publish(me: User, roomId: RoomId)(stream: fs2.Stream[F, GameCommand]): fs2.Stream[F, Unit] =
+      override def publish(me: User, roomId: RoomId)(stream: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
         pub.publish(me, roomId)(
           stream.evalTap(command =>
             Logger[F].debug(
@@ -39,7 +39,7 @@ object GameController:
           )
         )
 
-      override def publish1(me: User, roomId: RoomId)(command: GameCommand): F[Unit] =
+      override def publish1(me: User, roomId: RoomId)(command: FromPlayer): F[Unit] =
         pub.publish1(me, roomId)(command) <* Logger[F].debug(
           Console.CYAN +
             show"GameController: $me publishes $command to $roomId" +
@@ -92,10 +92,10 @@ object GameController:
       seed: F[Int],
       messageId: F[MessageId]
   ): GamePublisher[F] = new GamePublisher[F]:
-    override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, GameCommand]): fs2.Stream[F, Unit] =
+    override def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit] =
       input.evalMap(publish1(me, roomId))
 
-    override def publish1(me: User, roomId: RoomId)(input: GameCommand): F[Unit] =
+    override def publish1(me: User, roomId: RoomId)(input: FromPlayer): F[Unit] =
       seed
         .map(seed => buildCommand(me)(input -> seed))
         .flatMap {

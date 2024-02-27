@@ -1,6 +1,6 @@
 import {Sprite} from "@pixi/react";
 import CardLayout from "../view/CardLayout";
-import {isVisible} from "../model/card";
+import {isVisible} from "bastoni/model/card";
 import napoletane from "../view/cards/napoletane/resources";
 import piacentine from "../view/cards/piacentine/resources";
 import back from "../view/cards/retro.svg";
@@ -30,7 +30,7 @@ export default function Card(layout: CardLayout) {
             y={layout.topLeft.y}
             scale={1}
             filters={[new DropShadowFilter()]}
-            rotation={layout.rotation ?? 0}
+            rotation={layout.rotation?.deg ?? 0}
             anchor={{x: 0, y: 0}}
         />
     )

@@ -1,4 +1,4 @@
-export function fetchAuthToken(userName: string, host: string = 'localhost:9090', secure: boolean = false) {
+export function fetchAuthToken(userName: string, host: string, secure: boolean): Promise<string> {
     const baseUrl = `${secure ? 'https' : 'http'}://${host}/auth`;
     const headers = new Headers({"x-user-name": userName});
     return fetch(baseUrl, {method: 'POST', headers})

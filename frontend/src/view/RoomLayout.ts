@@ -1,7 +1,7 @@
-import {Room} from "../model/room";
+import {Room} from "bastoni/model/room";
 import CardLayout from "./CardLayout";
 import {CardStyle} from "./CardStyle";
-import {isActing, PlayerState} from "../model/player";
+import {isActing, PlayerState} from "bastoni/model/player";
 
 export default class RoomLayout {
     deck: CardLayout[]

@@ -5,7 +5,7 @@ import {
     GameEventMessage,
     InboxMessage,
     InboxMessageType
-} from "../model/inboxMessage";
+} from "./model/inboxMessage";
 import {
     authenticateMessage,
     connectMessage,
@@ -17,8 +17,8 @@ import {
     shuffleDeckMessage,
     startMatchMessage,
     takeCardsMessage
-} from "../model/outboxMessage";
-import {Room, RoomId} from "../model/room";
+} from "./model/outboxMessage";
+import {Room, RoomId} from "./model/room";
 import {
     BoardCardsDealt,
     CardPlayed,
@@ -38,11 +38,11 @@ import {
     TimedOut,
     TrickCompleted,
     TrumpRevealed
-} from "../model/event";
-import decodeJson from "../modelDecoder";
-import {User} from "../model/player";
-import {GameType} from "../model/gameType";
-import {VisibleCard} from "../model/card";
+} from "./model/event";
+import decodeJson from "./modelDecoder";
+import {User} from "./model/player";
+import {GameType} from "./model/gameType";
+import {VisibleCard} from "./model/card";
 
 function defaultHandler(event: any): void {
     console.log(event);
@@ -55,7 +55,7 @@ export class GameClient {
         this.ws = ws;
     }
 
-    private send(message: OutboxMessage): void {
+    send(message: OutboxMessage): void {
         if (this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify(message));
         } else {

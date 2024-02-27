@@ -18,15 +18,20 @@ jobs:
       - name: Setup NPM
         uses: actions/setup-node@v4
         with:
-          node-version: 12
+          node-version: 18
       - name: Build
-        run: sbt frontend/fastOptJS/webpack
-      - name: Prepare artifact
         run: |
-          mkdir artifact
-          cp modules/frontend/target/scala-3.3.1/frontend-fastopt/main.js artifact/main.js
-          cp -r modules/backend/src/main/resources/static artifact/static
-          cp modules/backend/src/main/resources/index.html artifact/index.html
+          sbt test sdk/fullLinkJS
+          cp modules/sdk/target/scala-3.3.1/sdk-opt/main.js modules/sdk/src/main/typescript/index.js
+          cd modules/sdk/src/main/typescript
+          npm install
+          find model -name "*-ti.ts" -type f -delete
+          `npm bin`/ts-interface-builder model/*.ts
+          npm link
+          cd ../../../../../frontend
+          npm install
+          npm link bastoni
+          npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

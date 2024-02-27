@@ -7,7 +7,7 @@ import bastoni.domain.model.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
 import bastoni.domain.view.FromPlayer.GameCommand
 import bastoni.frontend.model.FourPlayersLayout
-import bastoni.sdk.Logger.given
+import bastoni.frontend.ConsoleLogger.given
 import cats.effect.unsafe.implicits.global
 import cats.effect.IO
 import japgolly.scalajs.react.*

@@ -1,4 +1,4 @@
-import {Card} from "../model/card";
+import {Card} from "bastoni/model/card";
 import Point from "./Point";
 import {CardStyle} from "./CardStyle";
 import Angle from "./Angle";
