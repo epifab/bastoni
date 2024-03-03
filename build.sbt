@@ -106,4 +106,6 @@ lazy val backend = (project in file("modules/backend"))
     fork := true
   )
 
-lazy val root = (project in file(".")).aggregate(domain.jvm, backend)
+lazy val root = (project in file("."))
+  .aggregate(domain.jvm, backend)
+  .settings(name := "bastoni")

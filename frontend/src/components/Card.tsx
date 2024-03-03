@@ -1,8 +1,9 @@
 import {Sprite} from "@pixi/react";
 import CardLayout from "../view/CardLayout";
 import {isVisible} from "bastoni/model/card";
-import napoletane from "../view/cards/napoletane/resources";
-import piacentine from "../view/cards/piacentine/resources";
+import napoletane from "../view/cards/napoletane";
+import piacentine from "../view/cards/piacentine";
+import retro from "../view/cards/retro.tsx";
 import {CardStyle} from "../view/CardStyle";
 import {useEffect, useState} from "react";
 import {Texture} from "pixi.js";
@@ -10,12 +11,12 @@ import {Texture} from "pixi.js";
 
 export default function Card(layout: CardLayout) {
 
-    const [card, setCard] = useState<Texture>(null);
+    const [card, setCard] = useState<Texture | undefined>(undefined);
     const svgs = layout.style === CardStyle.Piacentine ? piacentine : napoletane;
 
     useEffect(() => {
         async function loadCard() {
-            const uri = isVisible(layout.card) ? svgs[layout.card.suit][layout.card.rank] : './cards/retro.svg';
+            const uri = isVisible(layout.card) ? svgs[layout.card.suit][layout.card.rank] : retro;
             setCard(await Texture.fromURL(uri));
         }
 

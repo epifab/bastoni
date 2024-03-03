@@ -4,9 +4,7 @@ import bastoni.domain.model.*
 import bastoni.domain.model.Command.*
 import bastoni.domain.model.Event.*
 import bastoni.domain.view.{FromPlayer, ToPlayer}
-import bastoni.domain.view.FromPlayer.GameCommand
-import cats.effect.{Resource, Sync}
-import cats.effect.syntax.all.*
+import cats.effect.Sync
 import cats.syntax.all.*
 import cats.Monad
 import org.typelevel.log4cats.Logger
@@ -20,7 +18,21 @@ trait GamePublisher[F[_]]:
   def publish(me: User, roomId: RoomId)(input: fs2.Stream[F, FromPlayer]): fs2.Stream[F, Unit]
   def publish1(me: User, roomId: RoomId)(input: FromPlayer): F[Unit]
 
-trait GameController[F[_]] extends GameSubscriber[F] with GamePublisher[F]
+trait GameController[F[_]] extends GameSubscriber[F] with GamePublisher[F]:
+  def connectPlayer(me: User, roomId: RoomId): fs2.Stream[F, (ToPlayer, Option[RoomPlayerView])] =
+    subscribe(me, roomId)
+      .takeThrough {
+        case ToPlayer.Disconnected(_) => false
+        case _                        => true
+      }
+      .zipWithScan1(Option.empty[RoomPlayerView]) {
+        case (_, ToPlayer.Connected(room))     => Some(room)
+        case (_, ToPlayer.Disconnected(_))     => None
+        case (room, ToPlayer.Request(request)) => room.map(_.withRequest(request))
+        case (room, ToPlayer.GameEvent(event)) => room.map(_.update(event))
+        case (room, ToPlayer.Authenticated(_)) => room
+        case (room, ToPlayer.Ping)             => room
+      }
 
 object GameController:
 

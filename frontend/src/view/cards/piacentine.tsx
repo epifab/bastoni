@@ -38,16 +38,16 @@ const cardsRecord: Record<CardSuit, Record<CardRank, string>> = {
         [CardRank.Re]: './cards/piacentine/spade/10.svg',
     },
     [CardSuit.Bastoni]: {
-        [CardRank.Asso]: './cards/piacentine/bastoni.01.svg',
-        [CardRank.Due]: './cards/piacentine/bastoni.02.svg',
-        [CardRank.Tre]: './cards/piacentine/bastoni.03.svg',
-        [CardRank.Quattro]: './cards/piacentine/bastoni.04.svg',
-        [CardRank.Cinque]: './cards/piacentine/bastoni.05.svg',
-        [CardRank.Sei]: './cards/piacentine/bastoni.06.svg',
-        [CardRank.Sette]: './cards/piacentine/bastoni.07.svg',
-        [CardRank.Fante]: './cards/piacentine/bastoni.08.svg',
-        [CardRank.Cavallo]: './cards/piacentine/bastoni.09.svg',
-        [CardRank.Re]: './cards/piacentine/bastoni.10.svg',
+        [CardRank.Asso]: './cards/piacentine/bastoni/01.svg',
+        [CardRank.Due]: './cards/piacentine/bastoni/02.svg',
+        [CardRank.Tre]: './cards/piacentine/bastoni/03.svg',
+        [CardRank.Quattro]: './cards/piacentine/bastoni/04.svg',
+        [CardRank.Cinque]: './cards/piacentine/bastoni/05.svg',
+        [CardRank.Sei]: './cards/piacentine/bastoni/06.svg',
+        [CardRank.Sette]: './cards/piacentine/bastoni/07.svg',
+        [CardRank.Fante]: './cards/piacentine/bastoni/08.svg',
+        [CardRank.Cavallo]: './cards/piacentine/bastoni/09.svg',
+        [CardRank.Re]: './cards/piacentine/bastoni/10.svg',
     }
 }
 

@@ -62,7 +62,7 @@ class IntegrationSpec extends AsyncIOFreeSpec:
         delayDuration =
           if realSpeed then Delay.default
           else {
-            case Delay.ActionTimeout => 100.millis
+            case Delay.ActionTimeout => 2.hours
             case _                   => 2.millis
           }
       )

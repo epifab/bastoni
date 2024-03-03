@@ -4,35 +4,36 @@ import cats.effect.IO
 import org.scalajs.dom.window.console
 import org.typelevel.log4cats.Logger as CatsLogger
 
-object ConsoleLogger:
-  given CatsLogger[IO] = new CatsLogger[IO]:
-    override def error(message: => String): IO[Unit] =
-      IO(console.error(message))
+object ConsoleLogger extends CatsLogger[IO]:
+  override def error(message: => String): IO[Unit] =
+    IO(console.error(message))
 
-    override def warn(message: => String): IO[Unit] =
-      IO(console.warn(message))
+  override def warn(message: => String): IO[Unit] =
+    IO(console.warn(message))
 
-    override def info(message: => String): IO[Unit] =
-      IO(console.info(message))
+  override def info(message: => String): IO[Unit] =
+    IO(console.info(message))
 
-    override def debug(message: => String): IO[Unit] =
-      IO(console.debug(message))
+  override def debug(message: => String): IO[Unit] =
+    IO(console.debug(message))
 
-    override def trace(message: => String): IO[Unit] =
-      IO.unit
+  override def trace(message: => String): IO[Unit] =
+    IO.unit
 
-    override def error(t: Throwable)(message: => String): IO[Unit] =
-      IO(console.error(message, t))
+  override def error(t: Throwable)(message: => String): IO[Unit] =
+    IO(console.error(message, t))
 
-    override def warn(t: Throwable)(message: => String): IO[Unit] =
-      IO(console.warn(message, t))
+  override def warn(t: Throwable)(message: => String): IO[Unit] =
+    IO(console.warn(message, t))
 
-    override def info(t: Throwable)(message: => String): IO[Unit] =
-      IO(console.info(message, t))
+  override def info(t: Throwable)(message: => String): IO[Unit] =
+    IO(console.info(message, t))
 
-    override def debug(t: Throwable)(message: => String): IO[Unit] =
-      IO(console.debug(message, t))
+  override def debug(t: Throwable)(message: => String): IO[Unit] =
+    IO(console.debug(message, t))
 
-    override def trace(t: Throwable)(message: => String): IO[Unit] =
-      IO.unit
+  override def trace(t: Throwable)(message: => String): IO[Unit] =
+    IO.unit
+
+  given CatsLogger[IO] = ConsoleLogger
 end ConsoleLogger

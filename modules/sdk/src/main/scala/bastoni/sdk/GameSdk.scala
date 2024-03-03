@@ -5,14 +5,13 @@ import bastoni.domain.logic.Services
 import bastoni.domain.model.*
 import bastoni.domain.view.*
 import bastoni.sdk.ConsoleLogger.given
-import cats.effect.unsafe.IORuntime
 import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import io.circe
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportTopLevel
 
@@ -57,29 +56,16 @@ object GameSdk:
         val me            = User(UserId.newId, playerName)
         val virtualPlayer = VirtualPlayer(controller, GreedyPlayer, pause = 1.second)
         val opponent      = virtualPlayer.play(User(UserId.newId, "Tony"), roomId)
+        val connectMe = controller.publish(me, roomId)(
+          fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinTable) ++
+            fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartMatch(GameType.valueOf(gameType)))
+        )
         val bg = controller
-          .subscribe(me, roomId)
-          .takeThrough {
-            case ToPlayer.Disconnected(_) => false
-            case _                        => true
-          }
-          .zipWithScan1(Option.empty[RoomPlayerView]) {
-            case (_, ToPlayer.Connected(room))     => Some(room)
-            case (_, ToPlayer.Disconnected(_))     => None
-            case (room, ToPlayer.Request(request)) => room.map(_.withRequest(request))
-            case (room, ToPlayer.GameEvent(event)) => room.map(_.update(event))
-            case (room, ToPlayer.Authenticated(_)) => room
-            case (room, ToPlayer.Ping)             => room
-          }
+          .connectPlayer(me, roomId)
           .evalMap { (msg, room) => IO(onMessage(ToPlayerJs(msg), RoomJs(room))) }
           .concurrently(runner)
+          .concurrently(connectMe)
           .concurrently(opponent)
-          .concurrently(
-            controller.publish(me, roomId)(
-              fs2.Stream[IO, FromPlayer](FromPlayer.Connect, FromPlayer.JoinTable).delayBy(1.second) ++
-                fs2.Stream.awakeEvery[IO](2.seconds).map(_ => FromPlayer.StartMatch(GameType.valueOf(gameType)))
-            )
-          )
         val control = (message: FromPlayer) => controller.publish1(me, roomId)(message)
         control -> bg
       }

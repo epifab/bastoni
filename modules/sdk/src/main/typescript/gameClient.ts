@@ -276,7 +276,7 @@ export class GameClientBuilder {
             }
         }
 
-        ws.onopen = (event) => {
+        ws.onopen = () => {
             this.ready(client);
         };
         ws.onmessage = (event) => {
@@ -285,7 +285,7 @@ export class GameClientBuilder {
         ws.onerror = (event) => {
             console.error(JSON.stringify(event.type));
         };
-        ws.onclose = (event) => {
+        ws.onclose = () => {
             console.log(`Connection closed`);
         }
 
